@@ -1,0 +1,41 @@
+plugins {
+  id 'template.android-app-conventions'
+}
+
+android {
+  testOptions {
+    unitTests.all {
+      if (name == "testDebugUnitTest") {
+        kover {
+          disabled = false
+          binaryReportFile.set(file("$buildDir/custom/debug-report.bin"))
+          includes = [
+            //todo: change this to your package.
+            'com.github.whyrising.composetemplate.*'
+          ]
+          //todo: change this to exclude things.
+          excludes = ['com.example.subpackage.*']
+        }
+      }
+    }
+  }
+}
+
+dependencies {
+  implementation deps.androidx.core.ktx
+  implementation deps.bundles.compose
+  implementation deps.androidx.appcompat
+  implementation deps.androidx.navigation.compose
+  implementation deps.accompanist.nav.anim
+  implementation deps.accompanist.systemuicontroller
+  implementation deps.androidx.core.splashscreen
+  implementation deps.androidx.datastore.prefrences
+  implementation deps.recompose
+
+  androidTestImplementation deps.androidx.compose.ui.test
+
+  testImplementation deps.bundles.kotest
+
+  debugImplementation deps.androidx.compose.ui.tooling
+  coreLibraryDesugaring deps.android.tools.desugar
+}

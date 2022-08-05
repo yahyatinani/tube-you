@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MyApp" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/purple_700</item>
+    </style>
+
+    <style name="Theme.MyApp.SplashScreen" parent="Theme.MyApp.SplashScreen.Base">
+        <item name="windowSplashScreenBackground">@color/black</item>
+    </style>
+</resources>

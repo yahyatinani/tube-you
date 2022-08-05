@@ -1,0 +1,24 @@
+pluginManagement {
+  repositories {
+    mavenCentral()
+    google()
+    gradlePluginPortal()
+  }
+}
+
+dependencyResolutionManagement {
+  defaultLibrariesExtensionName.set('deps')
+
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    google()
+    mavenCentral()
+    mavenLocal()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  }
+}
+
+// TODO: Change the project name
+rootProject.name = "Jetpack Compose Template"
+
+include ':app'

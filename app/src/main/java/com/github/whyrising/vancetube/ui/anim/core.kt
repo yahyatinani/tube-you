@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate.ui.anim
+package com.github.whyrising.vancetube.ui.anim
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn

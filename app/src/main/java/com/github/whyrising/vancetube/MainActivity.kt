@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate
+package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -13,19 +13,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.github.whyrising.composetemplate.about.about
-import com.github.whyrising.composetemplate.base.base
-import com.github.whyrising.composetemplate.base.regBaseEventHandlers
-import com.github.whyrising.composetemplate.base.regBaseSubs
-import com.github.whyrising.composetemplate.home.home
-import com.github.whyrising.composetemplate.home.regHomeEvents
-import com.github.whyrising.composetemplate.home.regHomeSubs
-import com.github.whyrising.composetemplate.ui.theme.BackArrow
-import com.github.whyrising.composetemplate.ui.theme.TemplateTheme
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
+import com.github.whyrising.vancetube.about.about
+import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.vancetube.base.regBaseEventHandlers
+import com.github.whyrising.vancetube.base.regBaseSubs
+import com.github.whyrising.vancetube.home.home
+import com.github.whyrising.vancetube.home.regHomeEvents
+import com.github.whyrising.vancetube.home.regHomeSubs
+import com.github.whyrising.vancetube.ui.theme.BackArrow
+import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -47,7 +47,7 @@ fun Main() {
     }
   }
 
-  TemplateTheme {
+  VanceTheme {
     Scaffold(
       topBar = {
         TopAppBar(

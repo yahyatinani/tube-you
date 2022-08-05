@@ -1,11 +1,11 @@
-package com.github.whyrising.composetemplate
+package com.github.whyrising.vancetube
 
 import android.app.Application
-import com.github.whyrising.composetemplate.base.base
-import com.github.whyrising.composetemplate.base.base.init_db
-import com.github.whyrising.composetemplate.home.home
 import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.regEventDb
+import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.vancetube.base.base.init_db
+import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.v
 

@@ -1,12 +1,11 @@
-package com.github.whyrising.composetemplate
+package com.github.whyrising.vancetube
 
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Base64
 
 object Build {
-  // TODO: change to your id
-  const val APP_ID = "com.github.whyrising.composetemplate"
+  const val APP_ID = "com.github.whyrising.vancetube"
 
   const val versionMajor = 0
   const val versionMinor = 0

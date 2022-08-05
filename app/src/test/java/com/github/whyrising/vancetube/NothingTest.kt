@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate
+package com.github.whyrising.vancetube
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly

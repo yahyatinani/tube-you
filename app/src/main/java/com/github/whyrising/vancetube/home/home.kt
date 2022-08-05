@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate.home
+package com.github.whyrising.vancetube.home
 
 enum class home {
   home_panel,

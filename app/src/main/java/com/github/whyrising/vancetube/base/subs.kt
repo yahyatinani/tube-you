@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate.base
+package com.github.whyrising.vancetube.base
 
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.y.core.collections.IPersistentMap

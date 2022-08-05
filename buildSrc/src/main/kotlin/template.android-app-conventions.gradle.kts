@@ -1,9 +1,9 @@
-import com.github.whyrising.composetemplate.Build.APP_ID
-import com.github.whyrising.composetemplate.Build.Versions.COMPOSE_COMPILER
-import com.github.whyrising.composetemplate.Build.keyStoreBase64ToStoreFile
-import com.github.whyrising.composetemplate.Build.versionMajor
-import com.github.whyrising.composetemplate.Build.versionMinor
-import com.github.whyrising.composetemplate.Build.versionPatch
+import com.github.whyrising.vancetube.Build.APP_ID
+import com.github.whyrising.vancetube.Build.Versions.COMPOSE_COMPILER
+import com.github.whyrising.vancetube.Build.keyStoreBase64ToStoreFile
+import com.github.whyrising.vancetube.Build.versionMajor
+import com.github.whyrising.vancetube.Build.versionMinor
+import com.github.whyrising.vancetube.Build.versionPatch
 import org.gradle.api.JavaVersion.VERSION_1_8
 
 plugins {

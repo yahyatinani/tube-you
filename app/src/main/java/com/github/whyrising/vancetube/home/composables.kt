@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate.home
+package com.github.whyrising.vancetube.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -13,14 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraphBuilder
-import com.github.whyrising.composetemplate.about.about
-import com.github.whyrising.composetemplate.base.base
-import com.github.whyrising.composetemplate.ui.anim.enterAnimation
-import com.github.whyrising.composetemplate.ui.anim.exitAnimation
-import com.github.whyrising.composetemplate.ui.theme.TemplateTheme
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
+import com.github.whyrising.vancetube.about.about
+import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.vancetube.ui.anim.enterAnimation
+import com.github.whyrising.vancetube.ui.anim.exitAnimation
+import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 
@@ -63,7 +63,7 @@ fun NavGraphBuilder.home(animOffSetX: Int) {
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-  TemplateTheme {
+  VanceTheme {
     Home()
   }
 }
@@ -71,7 +71,7 @@ fun HomePreview() {
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun HomeDarkPreview() {
-  TemplateTheme {
+  VanceTheme {
     Home()
   }
 }

@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate.home
+package com.github.whyrising.vancetube.home
 
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe

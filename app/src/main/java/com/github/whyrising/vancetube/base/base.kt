@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate.base
+package com.github.whyrising.vancetube.base
 
 enum class base {
   init_db,

@@ -1,4 +1,4 @@
-package com.github.whyrising.composetemplate.home
+package com.github.whyrising.vancetube.home
 
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.y.core.collections.IPersistentMap

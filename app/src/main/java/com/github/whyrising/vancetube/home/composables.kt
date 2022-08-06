@@ -18,6 +18,8 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.about.about
 import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.vancetube.base.regBaseSubs
+import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
@@ -63,6 +65,9 @@ fun NavGraphBuilder.home(animOffSetX: Int) {
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
+  initAppDb()
+  regBaseSubs()
+  regHomeSubs()
   VanceTheme {
     Home()
   }

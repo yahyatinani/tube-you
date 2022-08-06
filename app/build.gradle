@@ -29,6 +29,7 @@ dependencies {
   implementation deps.androidx.core.splashscreen
   implementation deps.androidx.datastore.prefrences
   implementation deps.recompose
+  implementation deps.coil
 
   androidTestImplementation deps.androidx.compose.ui.test
 

@@ -20,6 +20,7 @@ mockk = "1.12.0"
 recompose = "0.1.0.21-SNAPSHOT" # todo: release the new recompose version.
 data-store = "1.0.0"
 spotless = "6.9.0"
+coil = "2.1.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -56,6 +57,7 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockkjvm = { module = "io.mockk:mockk-agent-jvm", version.ref = "mockk" }
 androidx-datastore-prefrences = { module = "androidx.datastore:datastore-preferences", version.ref = "data-store" }
+coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 
 [bundles]
 compose = ["androidx-compose-ui-ui", "androidx-compose-ui-tooling", "androidx-compose-material-material"]

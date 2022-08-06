@@ -50,7 +50,7 @@ fun Home(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.home(animOffSetX: Int) {
   composable(
-    route = home.home_panel.name,
+    route = home.panel.name,
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {

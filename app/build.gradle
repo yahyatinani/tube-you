@@ -1,5 +1,5 @@
 plugins {
-  id 'template.android-app-conventions'
+  id 'vancetube.android-app-conventions'
 }
 
 android {

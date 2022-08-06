@@ -28,7 +28,6 @@ android {
 
   signingConfigs {
     create("release") {
-      // TODO: Remember to sing your app before release.
       storeFile = keyStoreBase64ToStoreFile(System.getenv("SIGNING_KEY_BASE64"))
       storePassword = System.getenv("KEYSTORE_PASSWORD")
       keyAlias = System.getenv("KEY_ALIAS")

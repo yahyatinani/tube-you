@@ -8,12 +8,17 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -44,10 +49,10 @@ fun Main(content: @Composable (PaddingValues) -> Unit) {
   VanceTheme {
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = MaterialTheme.colors.isLight
-    val bgColor = MaterialTheme.colors.background
+    val backgroundColor = MaterialTheme.colors.background
     SideEffect {
       systemUiController.setSystemBarsColor(
-        color = bgColor,
+        color = backgroundColor,
         darkIcons = useDarkIcons
       )
     }
@@ -56,7 +61,7 @@ fun Main(content: @Composable (PaddingValues) -> Unit) {
       topBar = {
         TopAppBar(
           elevation = 0.dp,
-          backgroundColor = MaterialTheme.colors.background,
+          backgroundColor = backgroundColor,
           title = {
             IconButton(onClick = { /*TODO*/ }) {
               Icon(
@@ -73,6 +78,39 @@ fun Main(content: @Composable (PaddingValues) -> Unit) {
             else -> null
           }
         )
+      },
+      bottomBar = {
+        BottomNavigation(
+          backgroundColor = backgroundColor,
+          elevation = 0.dp,
+        ) {
+          BottomNavigationItem(
+            selected = true,
+            onClick = { /*TODO*/ },
+            label = {
+              Text(text = "Home")
+            },
+            icon = {
+              Icon(
+                imageVector = Icons.Filled.Home,
+                contentDescription = "Home panel"
+              )
+            }
+          )
+          BottomNavigationItem(
+            selected = false,
+            onClick = { /*TODO*/ },
+            label = {
+              Text(text = "Library")
+            },
+            icon = {
+              Icon(
+                imageVector = Icons.Outlined.PlayArrow,
+                contentDescription = "Library panel"
+              )
+            }
+          )
+        }
       }
     ) { paddingValues ->
       content(paddingValues)

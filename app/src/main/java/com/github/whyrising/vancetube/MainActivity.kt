@@ -5,21 +5,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.github.whyrising.recompose.dispatch
-import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.about.about
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.regBaseEventHandlers
+import com.github.whyrising.vancetube.base.regBaseFx
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.regHomeEvents
@@ -29,31 +32,27 @@ import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun Main() {
-  val navController = rememberAnimatedNavController().apply {
-    addOnDestinationChangedListener { controller, _, _ ->
-      val flag = controller.previousBackStackEntry != null
-      dispatch(v(base.set_backstack_status, flag))
-    }
-  }
-
-  regFx(base.navigate) {
-    when (val route = "$it") {
-      base.go_back.name -> navController.popBackStack()
-      else -> navController.navigate(route)
-    }
-  }
-
+fun Main(content: @Composable (PaddingValues) -> Unit) {
   VanceTheme {
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = MaterialTheme.colors.isLight
+    val bgColor = MaterialTheme.colors.background
+    SideEffect {
+      systemUiController.setSystemBarsColor(
+        color = bgColor,
+        darkIcons = useDarkIcons
+      )
+    }
+
     Scaffold(
       topBar = {
         TopAppBar(
-          title = {
-            Text(text = "Home")
-          },
+          title = { Text(text = "VanceTube") },
+          elevation = 0.dp,
+          backgroundColor = MaterialTheme.colors.background,
           navigationIcon = when {
             subscribe<Boolean>(v(base.is_backstack_available)).w() -> {
               { BackArrow() }
@@ -63,19 +62,13 @@ fun Main() {
         )
       }
     ) { paddingValues ->
-      AnimatedNavHost(
-        modifier = Modifier.padding(paddingValues),
-        navController = navController,
-        startDestination = home.home_panel.name
-      ) {
-        home(animOffSetX = 300)
-        about(animOffSetX = 300)
-      }
+      content(paddingValues)
     }
   }
 }
 
 class MainActivity : ComponentActivity() {
+  @OptIn(ExperimentalAnimationApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen().apply {
       // TODO: remove this.
@@ -87,8 +80,26 @@ class MainActivity : ComponentActivity() {
     regBaseSubs()
     regHomeEvents()
     regHomeSubs()
+
     setContent {
-      Main()
+      val navController = rememberAnimatedNavController().apply {
+        addOnDestinationChangedListener { controller, _, _ ->
+          val flag = controller.previousBackStackEntry != null
+          dispatch(v(base.set_backstack_status, flag))
+        }
+      }
+      regBaseFx(navController)
+
+      Main {
+        AnimatedNavHost(
+          modifier = androidx.compose.ui.Modifier.padding(it),
+          navController = navController,
+          startDestination = home.panel.name
+        ) {
+          home(animOffSetX = 300)
+          about(animOffSetX = 300)
+        }
+      }
     }
   }
 }
@@ -100,11 +111,11 @@ fun MainPreview() {
   initAppDb()
   regBaseEventHandlers()
   regBaseSubs()
-  Main()
+  Main {}
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun MainDarkPreview() {
-  Main()
+  Main {}
 }

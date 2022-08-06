@@ -10,11 +10,9 @@ android {
           disabled = false
           binaryReportFile.set(file("$buildDir/custom/debug-report.bin"))
           includes = [
-            //todo: change this to your package.
             'com.github.whyrising.vancetube.*'
           ]
-          //todo: change this to exclude things.
-          excludes = ['com.example.subpackage.*']
+          // excludes = ['com.example.subpackage.*']
         }
       }
     }

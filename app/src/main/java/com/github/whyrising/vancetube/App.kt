@@ -21,7 +21,6 @@ class App : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    // TODO: init
     initAppDb()
   }
 }

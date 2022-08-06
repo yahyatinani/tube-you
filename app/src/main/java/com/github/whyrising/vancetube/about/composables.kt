@@ -30,7 +30,7 @@ fun About(modifier: Modifier = Modifier) {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center
     ) {
-      Text(text = "Jetpack Compose Template")
+      Text(text = stringResource(id = R.string.app_name))
       Spacer(modifier = Modifier.height(8.dp))
       Text(
         text = "v${stringResource(id = R.string.app_version)}",

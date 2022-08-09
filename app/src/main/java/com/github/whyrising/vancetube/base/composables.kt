@@ -13,6 +13,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
@@ -76,11 +77,24 @@ fun BasePanel(
           selected = false,
           onClick = { /*TODO*/ },
           label = {
-            Text(text = "Library")
+            Text(text = "Subscriptions")
           },
           icon = {
             Icon(
               imageVector = Icons.Outlined.PlayArrow,
+              contentDescription = "Library panel"
+            )
+          }
+        )
+        BottomNavigationItem(
+          selected = false,
+          onClick = { /*TODO*/ },
+          label = {
+            Text(text = "Library")
+          },
+          icon = {
+            Icon(
+              imageVector = Icons.Outlined.List,
               contentDescription = "Library panel"
             )
           }

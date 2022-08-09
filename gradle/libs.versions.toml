@@ -57,7 +57,7 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockkjvm = { module = "io.mockk:mockk-agent-jvm", version.ref = "mockk" }
 androidx-datastore-prefrences = { module = "androidx.datastore:datastore-preferences", version.ref = "data-store" }
-coil = { module = "io.coil-kt:coil", version.ref = "coil" }
+coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 [bundles]
 compose = ["androidx-compose-ui-ui", "androidx-compose-ui-tooling", "androidx-compose-material-material"]

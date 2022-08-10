@@ -24,6 +24,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -47,6 +50,8 @@ import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 data class VideoMetadata(
   val title: String,
@@ -229,26 +234,32 @@ fun VideoItem(
 @Composable
 fun Home(modifier: Modifier = Modifier) {
   Surface {
-    LazyColumn(
-      modifier = modifier
+    val isRefreshing by remember { mutableStateOf(false) }
+    SwipeRefresh(
+      state = rememberSwipeRefreshState(isRefreshing),
+      onRefresh = { /*TODO: refresh home*/ },
     ) {
-      items(homeVideos) { video: VideoMetadata ->
-        val divider = " • "
-        val vidInfo = buildAnnotatedString {
-          append(video.channelName)
-          append(divider)
-          append(video.viewsCount)
-          append(divider)
-          append(video.releaseTime)
+      LazyColumn(
+        modifier = modifier
+      ) {
+        items(homeVideos) { video: VideoMetadata ->
+          val divider = " • "
+          val vidInfo = buildAnnotatedString {
+            append(video.channelName)
+            append(divider)
+            append(video.viewsCount)
+            append(divider)
+            append(video.releaseTime)
+          }
+          VideoItem(
+            constraints = constraints(),
+            vidTitle = video.title,
+            vidThumbnail = video.thumbnail,
+            vidLength = video.length,
+            vidChannelAvatar = video.channelAvatar,
+            vidInfo = vidInfo
+          )
         }
-        VideoItem(
-          constraints = constraints(),
-          vidTitle = video.title,
-          vidThumbnail = video.thumbnail,
-          vidLength = video.length,
-          vidChannelAvatar = video.channelAvatar,
-          vidInfo = vidInfo
-        )
       }
     }
   }

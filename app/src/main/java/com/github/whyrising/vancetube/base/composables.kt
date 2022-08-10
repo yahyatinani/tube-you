@@ -9,7 +9,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -25,6 +24,7 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.theme.BackArrow
+import com.github.whyrising.vancetube.ui.theme.SmallLabelText
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
 
@@ -63,13 +63,11 @@ fun BasePanel(
         BottomNavigationItem(
           selected = true,
           onClick = { /*TODO*/ },
-          label = {
-            Text(text = "Home")
-          },
+          label = { SmallLabelText(text = "Home") },
           icon = {
             Icon(
               imageVector = Icons.Filled.Home,
-              contentDescription = "Home panel"
+              contentDescription = "Home panel",
             )
           }
         )
@@ -77,7 +75,7 @@ fun BasePanel(
           selected = false,
           onClick = { /*TODO*/ },
           label = {
-            Text(text = "Subscriptions")
+            SmallLabelText(text = "Subscriptions")
           },
           icon = {
             Icon(
@@ -89,9 +87,7 @@ fun BasePanel(
         BottomNavigationItem(
           selected = false,
           onClick = { /*TODO*/ },
-          label = {
-            Text(text = "Library")
-          },
+          label = { SmallLabelText(text = "Library") },
           icon = {
             Icon(
               imageVector = Icons.Outlined.List,

@@ -11,6 +11,7 @@ nav-anim = "0.25.0"
 activity-compose = "1.5.1"
 splashscreen = "1.0.0"
 systemuicontroller = "0.25.0"
+swiperefresh = "0.25.0"
 desugar = "1.1.6"
 core-ktx = "1.8.0"
 appcompat = "1.5.0-rc01"
@@ -53,6 +54,7 @@ androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constr
 android-tools-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "systemuicontroller" }
 accompanist-nav-anim = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "nav-anim" }
+accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "nav-anim" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -62,7 +64,7 @@ androidx-datastore-prefrences = { module = "androidx.datastore:datastore-prefere
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 [bundles]
-compose = ["androidx-compose-ui-ui", "androidx-compose-ui-tooling", "androidx-compose-material-material", "androidx-constraintlayout-compose"]
+compose = ["androidx-compose-ui-ui", "androidx-compose-ui-tooling", "androidx-compose-material-material", "androidx-constraintlayout-compose", "accompanist-swiperefresh"]
 kotest = ["kotest-jvm-runner", "kotest-assertions"]
 
 [plugins]

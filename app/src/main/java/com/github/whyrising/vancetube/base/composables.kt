@@ -65,7 +65,7 @@ fun BasePanel(
         source: NestedScrollSource
       ): Offset {
 
-        Log.i("scroll", "${available.y}")
+//        Log.i("scroll", "${available.y}")
         val delta = available.y
         visibleState.targetState = delta > 0
 

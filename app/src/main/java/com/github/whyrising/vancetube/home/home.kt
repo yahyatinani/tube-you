@@ -2,7 +2,8 @@ package com.github.whyrising.vancetube.home
 
 enum class home {
   panel,
-  inc_count,
   count,
-  btn_count_name,
+  popularVids,
+  get_popular_vids,
+  set_popular_vids
 }

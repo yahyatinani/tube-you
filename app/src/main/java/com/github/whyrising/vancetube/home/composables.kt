@@ -24,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,78 +44,21 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.navigation.NavGraphBuilder
 import coil.compose.AsyncImage
+import com.github.whyrising.recompose.dispatch
+import com.github.whyrising.recompose.subscribe
+import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.R
+import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
+import com.github.whyrising.y.core.collections.PersistentVector
+import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-
-data class VideoMetadata(
-  val title: String,
-  val thumbnail: String?,
-  val length: String,
-  val channelName: String,
-  val channelAvatar: String,
-  val viewsCount: String,
-  val releaseTime: String
-)
-
-val homeVideos = listOf(
-  VideoMetadata(
-    title = "3 Hours of Traditional Chinese Music 2021 - The Best Chinese " +
-      "Instrumental Music - Calm, Relax, Enjoy ",
-    thumbnail = "https://i.ytimg.com/vi/EqSWS9u_Y54/hqdefault.jpg?sqp=-oaymwEcCPYBEIoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLACjcNmivwFKb1_E25dJEDvRouCvw",
-    length = "3:03:23",
-    channelName = "Jhon Doe",
-    channelAvatar = "https://yewtu.be/ggpht/nGdY2rDmihvhgROTf3B5H-0YYTe4WuUdj5JUTf6xU9LJ8k7wFd-Djr0OmDRz0oVJQT63fj6G=s900-c-k-c0x00ffffff-no-rj",
-    viewsCount = "33K views",
-    releaseTime = "2 weeks ago"
-  ),
-  VideoMetadata(
-    title = "3 Hours of Traditional Chinese Music 2021 - The Best Chinese " +
-      "Instrumental Music - Calm, Relax, Enjoy ",
-    thumbnail = "https://yewtu.be/vi/XmBji07OtwA/mqdefault.jpg",
-    length = "3:03:23",
-    channelName = "Jhon Doe",
-    channelAvatar = "https://yewtu.be/ggpht/nGdY2rDmihvhgROTf3B5H-0YYTe4WuUdj5JUTf6xU9LJ8k7wFd-Djr0OmDRz0oVJQT63fj6G=s900-c-k-c0x00ffffff-no-rj",
-    viewsCount = "33K views",
-    releaseTime = "2 weeks ago"
-  ),
-  VideoMetadata(
-    title = "3 Hours of Traditional Chinese Music 2021 - The Best Chinese " +
-      "Instrumental Music - Calm, Relax, Enjoy ",
-    thumbnail = "https://yewtu.be/vi/XmBji07OtwA/mqdefault.jpg",
-    length = "3:03:23",
-    channelName = "Jhon Doe",
-    channelAvatar = "https://yewtu.be/ggpht/nGdY2rDmihvhgROTf3B5H-0YYTe4WuUdj5JUTf6xU9LJ8k7wFd-Djr0OmDRz0oVJQT63fj6G=s900-c-k-c0x00ffffff-no-rj",
-    viewsCount = "33K views",
-    releaseTime = "2 weeks ago"
-  ),
-  VideoMetadata(
-    title = "3 Hours of Traditional Chinese Music 2021 - The Best Chinese " +
-      "Instrumental Music - Calm, Relax, Enjoy ",
-    thumbnail = "https://yewtu.be/vi/XmBji07OtwA/mqdefault.jpg",
-    length = "3:03:23",
-    channelName = "Jhon Doe",
-    channelAvatar = "https://yewtu.be/ggpht/nGdY2rDmihvhgROTf3B5H-0YYTe4WuUdj5JUTf6xU9LJ8k7wFd-Djr0OmDRz0oVJQT63fj6G=s900-c-k-c0x00ffffff-no-rj",
-    viewsCount = "33K views",
-    releaseTime = "2 weeks ago"
-  ),
-  VideoMetadata(
-    title = "3 Hours of Traditional Chinese Music 2021 - The Best Chinese " +
-      "Instrumental Music - Calm, Relax, Enjoy ",
-    thumbnail = "https://yewtu.be/vi/XmBji07OtwA/mqdefault.jpg",
-    length = "3:03:23",
-    channelName = "Jhon Doe",
-    channelAvatar = "https://yewtu.be/ggpht/nGdY2rDmihvhgROTf3B5H-0YYTe4WuUdj5JUTf6xU9LJ8k7wFd-Djr0OmDRz0oVJQT63fj6G=s900-c-k-c0x00ffffff-no-rj",
-    viewsCount = "33K views",
-    releaseTime = "2 weeks ago"
-  ),
-)
 
 fun constraints(): ConstraintSet = ConstraintSet {
   val videoThumbnail = createRefFor("videoThumbnail")
@@ -239,24 +183,30 @@ fun Home(modifier: Modifier = Modifier) {
       state = rememberSwipeRefreshState(isRefreshing),
       onRefresh = { /*TODO: refresh home*/ },
     ) {
+      SideEffect {
+        dispatch(v(home.get_popular_vids))
+      }
+      val items =
+        subscribe<PersistentVector<VideoMetadata>>(v(home.popularVids)).w()
       LazyColumn(
         modifier = modifier
       ) {
-        items(homeVideos) { video: VideoMetadata ->
+        items(items) { video: VideoMetadata ->
           val divider = " • "
           val vidInfo = buildAnnotatedString {
-            append(video.channelName)
+            append(video.author)
             append(divider)
-            append(video.viewsCount)
+            append(video.viewCount)
+            append(" views")
             append(divider)
-            append(video.releaseTime)
+            append(video.publishedText)
           }
           VideoItem(
             constraints = constraints(),
             vidTitle = video.title,
-            vidThumbnail = video.thumbnail,
-            vidLength = video.length,
-            vidChannelAvatar = video.channelAvatar,
+            vidThumbnail = video.videoThumbnails[1].url,
+            vidLength = "${video.lengthSeconds}",
+            vidChannelAvatar = "",
             vidInfo = vidInfo
           )
         }

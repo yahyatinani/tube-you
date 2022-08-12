@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.about.about
 import com.github.whyrising.vancetube.base.BasePanel
@@ -21,6 +22,7 @@ import com.github.whyrising.vancetube.base.regBaseFx
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.regHomeEvents
+import com.github.whyrising.vancetube.home.regHomeFx
 import com.github.whyrising.vancetube.home.regHomeSubs
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
@@ -57,6 +59,7 @@ class MainActivity : ComponentActivity() {
     regBaseEventHandlers()
     regBaseSubs()
     regHomeEvents()
+    regHomeFx(lifecycleScope)
     regHomeSubs()
 
     setContent {

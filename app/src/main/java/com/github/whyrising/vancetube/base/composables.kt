@@ -1,6 +1,7 @@
 package com.github.whyrising.vancetube.base
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.expandVertically
@@ -113,14 +114,12 @@ fun BasePanel(
         available: Offset,
         source: NestedScrollSource
       ): Offset {
-
-//        Log.i("scroll", "${available.y}")
         val delta = available.y
-        visibleState.targetState = delta > 0
-
         val newOffset = bottomBarOffsetHeightPx.value + delta
-        bottomBarOffsetHeightPx.value =
-          newOffset.coerceIn(-bottomBarHeightPx, 0f)
+        val x = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+        Log.i("scroll", "$x")
+        bottomBarOffsetHeightPx.value = x
+        visibleState.targetState = x >= -20
 
         return Offset.Zero
       }

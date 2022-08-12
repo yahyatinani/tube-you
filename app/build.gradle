@@ -1,5 +1,6 @@
 plugins {
   id 'vancetube.android-app-conventions'
+  alias deps.plugins.serialization
 }
 
 android {
@@ -30,6 +31,7 @@ dependencies {
   implementation deps.androidx.datastore.prefrences
   implementation deps.recompose
   implementation deps.coil
+  implementation deps.bundles.ktor
 
   androidTestImplementation deps.androidx.compose.ui.test
 

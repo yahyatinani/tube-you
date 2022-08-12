@@ -14,16 +14,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha.medium
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +50,6 @@ import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.R
-import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
@@ -136,9 +137,8 @@ fun VideoItem(
 //        contentDescription = "Channel avatar",
 //        placeholder = painterResource(id = R.drawable.ic_launcher_background),
 //      )
-
 //      Spacer(modifier = Modifier.width(16.dp))
- 
+
       Column(
         modifier = Modifier.weight(1f)
       ) {
@@ -150,14 +150,16 @@ fun VideoItem(
           overflow = TextOverflow.Ellipsis,
           style = MaterialTheme.typography.h6.copy(
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
           )
         )
-
-        Text(
-          text = vidInfo,
-          style = MaterialTheme.typography.caption,
-        )
+        Spacer(modifier = Modifier.height(4.dp))
+        CompositionLocalProvider(LocalContentAlpha provides medium) {
+          Text(
+            text = vidInfo,
+            style = MaterialTheme.typography.body2.copy(fontSize = 12.sp),
+          )
+        }
       }
 
       Spacer(modifier = Modifier.width(24.dp))

@@ -1,14 +1,11 @@
 package com.github.whyrising.vancetube.base
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
@@ -21,6 +18,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
@@ -105,6 +103,14 @@ fun BasePanel(
               { BackArrow() }
             }
             else -> null
+          },
+          actions = {
+            IconButton(onClick = { /*TODO*/ }) {
+              Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "more"
+              )
+            }
           }
         )
       }

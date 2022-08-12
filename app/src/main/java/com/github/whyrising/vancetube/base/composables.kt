@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -44,6 +43,58 @@ import com.github.whyrising.vancetube.ui.theme.BackArrow
 import com.github.whyrising.vancetube.ui.theme.SmallLabelText
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
+
+@Composable
+fun BottomNavigationBar(backgroundColor: Color) {
+  val borderColor = Color.Gray.copy(alpha = .3f)
+  BottomNavigation(
+    modifier = Modifier
+      .drawBehind {
+        drawLine(
+          color = borderColor,
+          start = Offset(0f, 0f),
+          end = Offset(size.width, 0f),
+          strokeWidth = 2f * density
+        )
+      },
+    backgroundColor = backgroundColor,
+    elevation = 0.dp,
+  ) {
+    BottomNavigationItem(
+      selected = true,
+      onClick = { /*TODO*/ },
+      label = { SmallLabelText(text = "Home") },
+      icon = {
+        Icon(
+          imageVector = Icons.Filled.Home,
+          contentDescription = "Home panel",
+        )
+      }
+    )
+    BottomNavigationItem(
+      selected = false,
+      onClick = { /*TODO*/ },
+      label = { SmallLabelText(text = "Subscriptions") },
+      icon = {
+        Icon(
+          imageVector = Icons.Outlined.PlayArrow,
+          contentDescription = "Library panel"
+        )
+      }
+    )
+    BottomNavigationItem(
+      selected = false,
+      onClick = { /*TODO*/ },
+      label = { SmallLabelText(text = "Library") },
+      icon = {
+        Icon(
+          imageVector = Icons.Outlined.List,
+          contentDescription = "Library panel"
+        )
+      }
+    )
+  }
+}
 
 @Composable
 fun BasePanel(
@@ -116,55 +167,7 @@ fun BasePanel(
       }
     },
     bottomBar = {
-      BottomNavigation(
-        modifier = Modifier.drawBehind {
-          val strokeWidth = Stroke.DefaultMiter
-          val y = size.height
-
-          drawLine(
-            color = Color.LightGray,
-            strokeWidth = strokeWidth,
-            start = Offset(0f, y),
-            end = Offset(size.width, y)
-          )
-        },
-        backgroundColor = backgroundColor,
-        elevation = 0.dp,
-      ) {
-        BottomNavigationItem(
-          selected = true,
-          onClick = { /*TODO*/ },
-          label = { SmallLabelText(text = "Home") },
-          icon = {
-            Icon(
-              imageVector = Icons.Filled.Home,
-              contentDescription = "Home panel",
-            )
-          }
-        )
-        BottomNavigationItem(
-          selected = false,
-          onClick = { /*TODO*/ },
-          label = { SmallLabelText(text = "Subscriptions") },
-          icon = {
-            Icon(
-              imageVector = Icons.Outlined.PlayArrow,
-              contentDescription = "Library panel"
-            )
-          }
-        )
-        BottomNavigationItem(
-          selected = false,
-          onClick = { /*TODO*/ },
-          label = { SmallLabelText(text = "Library") },
-          icon = {
-            Icon(
-              imageVector = Icons.Outlined.List,
-              contentDescription = "Library panel"
-            )
-          }
-        )
-      }
+      BottomNavigationBar(backgroundColor)
     }
   ) { paddingValues ->
     content(paddingValues)

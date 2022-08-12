@@ -31,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.painterResource
@@ -109,15 +108,15 @@ fun VideoItem(
 
     Text(
       text = vidLength,
-      style = MaterialTheme.typography.overline.copy(
-        fontWeight = FontWeight.Bold,
-        color = Color.White
-      ),
       modifier = Modifier
         .layoutId("length")
-        .clip(RoundedCornerShape(2.dp))
-        .background(color = Color.Black)
-        .padding(1.dp)
+        .background(color = Color.Black, shape = RoundedCornerShape(2.dp))
+        .padding(horizontal = 3.dp),
+      style = MaterialTheme.typography.overline.copy(
+        color = Color.White,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium
+      ),
     )
 
     Row(

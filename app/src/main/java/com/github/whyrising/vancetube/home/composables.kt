@@ -126,19 +126,19 @@ fun VideoItem(
         .padding(horizontal = 8.dp)
         .padding(bottom = 20.dp)
     ) {
-      AsyncImage(
-        modifier = Modifier
-          .padding(top = 4.dp)
-          .size(48.dp)
-          .clip(CircleShape)
-          .clickable { },
-        model = vidChannelAvatar,
-        contentDescription = "Channel avatar",
-        placeholder = painterResource(id = R.drawable.ic_launcher_background),
-      )
+//      AsyncImage(
+//        modifier = Modifier
+//          .padding(top = 4.dp)
+//          .size(48.dp)
+//          .clip(CircleShape)
+//          .clickable { },
+//        model = vidChannelAvatar,
+//        contentDescription = "Channel avatar",
+//        placeholder = painterResource(id = R.drawable.ic_launcher_background),
+//      )
 
-      Spacer(modifier = Modifier.width(16.dp))
-
+//      Spacer(modifier = Modifier.width(16.dp))
+ 
       Column(
         modifier = Modifier.weight(1f)
       ) {

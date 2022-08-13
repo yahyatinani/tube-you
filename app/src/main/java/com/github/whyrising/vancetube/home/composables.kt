@@ -121,7 +121,7 @@ fun VideoItem(
       modifier = Modifier
         .layoutId("infoRow")
         .fillMaxWidth()
-        .padding(horizontal = 8.dp)
+        .padding(start = 10.dp, end = 4.dp)
         .padding(bottom = 20.dp)
     ) {
       Column(modifier = Modifier.weight(1f)) {
@@ -216,7 +216,19 @@ fun HomePreview() {
   regBaseSubs()
   regHomeSubs()
   VanceTheme {
-    Home()
+    Home(
+      popularVideos = v(
+        VideoMetadata(
+          title = "Title",
+          author = "Jon Deo",
+          authorId = "#JonDeo",
+          lengthSeconds = 2323,
+          publishedText = "2 hours ago",
+          viewCount = "2342342",
+          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
+        )
+      )
+    )
   }
 }
 
@@ -224,6 +236,18 @@ fun HomePreview() {
 @Composable
 fun HomeDarkPreview() {
   VanceTheme {
-    Home()
+    Home(
+      popularVideos = v(
+        VideoMetadata(
+          title = "Title",
+          author = "Jon Deo",
+          authorId = "#JonDeo",
+          lengthSeconds = 2323,
+          publishedText = "2 hours ago",
+          viewCount = "2342342",
+          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
+        )
+      )
+    )
   }
 }

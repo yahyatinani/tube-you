@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -48,12 +48,12 @@ import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
+import com.github.whyrising.y.core.collections.IPersistentVector
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
@@ -88,7 +88,6 @@ fun VideoItem(
   vidThumbnail: String?,
   vidTitle: String,
   vidLength: String,
-  vidChannelAvatar: String,
   vidInfo: AnnotatedString
 ) {
   ConstraintLayout(
@@ -97,7 +96,6 @@ fun VideoItem(
   ) {
     AsyncImage(
       model = vidThumbnail,
-      placeholder = painterResource(R.drawable.ic_launcher_background),
       contentDescription = "thumbnail",
       modifier = Modifier
         .layoutId("videoThumbnail")
@@ -126,21 +124,7 @@ fun VideoItem(
         .padding(horizontal = 8.dp)
         .padding(bottom = 20.dp)
     ) {
-//      AsyncImage(
-//        modifier = Modifier
-//          .padding(top = 4.dp)
-//          .size(48.dp)
-//          .clip(CircleShape)
-//          .clickable { },
-//        model = vidChannelAvatar,
-//        contentDescription = "Channel avatar",
-//        placeholder = painterResource(id = R.drawable.ic_launcher_background),
-//      )
-//      Spacer(modifier = Modifier.width(16.dp))
-
-      Column(
-        modifier = Modifier.weight(1f)
-      ) {
+      Column(modifier = Modifier.weight(1f)) {
         Text(
           text = vidTitle,
           modifier = Modifier.fillMaxWidth(),
@@ -177,22 +161,18 @@ fun VideoItem(
 }
 
 @Composable
-fun Home(modifier: Modifier = Modifier) {
-  Surface {
+fun Home(popularVideos: IPersistentVector<VideoMetadata> = v()) {
+  Surface(modifier = Modifier.fillMaxSize()) {
+    SideEffect {
+      dispatch(v(home.get_popular_vids))
+    }
     val isRefreshing by remember { mutableStateOf(false) }
     SwipeRefresh(
       state = rememberSwipeRefreshState(isRefreshing),
       onRefresh = { /*TODO: refresh home*/ },
     ) {
-      SideEffect {
-        dispatch(v(home.get_popular_vids))
-      }
-      val items =
-        subscribe<PersistentVector<VideoMetadata>>(v(home.popularVids)).w()
-      LazyColumn(
-        modifier = modifier
-      ) {
-        items(items) { video: VideoMetadata ->
+      LazyColumn {
+        items(popularVideos) { video: VideoMetadata ->
           val divider = " • "
           val vidInfo = buildAnnotatedString {
             append(video.author)
@@ -204,10 +184,9 @@ fun Home(modifier: Modifier = Modifier) {
           }
           VideoItem(
             constraints = constraints(),
-            vidTitle = video.title,
             vidThumbnail = video.videoThumbnails[1].url,
+            vidTitle = video.title,
             vidLength = "${video.lengthSeconds}",
-            vidChannelAvatar = "",
             vidInfo = vidInfo
           )
         }
@@ -225,7 +204,7 @@ fun NavGraphBuilder.home(animOffSetX: Int) {
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
-    Home()
+    Home(subscribe<PersistentVector<VideoMetadata>>(v(home.popularVids)).w())
   }
 }
 

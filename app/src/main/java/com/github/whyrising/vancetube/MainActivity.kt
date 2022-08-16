@@ -1,7 +1,9 @@
 package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -12,7 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.github.whyrising.recompose.cofx.Coeffects
+import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.about.about
 import com.github.whyrising.vancetube.base.BasePanel
@@ -48,6 +53,25 @@ fun Main(content: @Composable (PaddingValues) -> Unit) {
 }
 
 class MainActivity : ComponentActivity() {
+  private fun screenWidthPx() = when {
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+      val metrics = windowManager.currentWindowMetrics
+      val insets =
+        metrics.windowInsets.getInsets(WindowInsets.Type.systemBars())
+      metrics.bounds.width() - insets.left - insets.right
+    }
+    else -> {
+      val view = window.decorView
+      val insets =
+        WindowInsetsCompat.toWindowInsetsCompat(view.rootWindowInsets, view)
+          .getInsets(WindowInsetsCompat.Type.systemBars())
+      resources.displayMetrics.widthPixels - insets.left - insets.right
+    }
+  }
+
+  private fun pxToDp(inPx: Int) =
+    (inPx / resources.displayMetrics.density).toInt()
+
   @OptIn(ExperimentalAnimationApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen().apply {
@@ -61,6 +85,11 @@ class MainActivity : ComponentActivity() {
     regHomeEvents()
     regHomeFx(lifecycleScope)
     regHomeSubs()
+
+    regCofx(home.video_item_height) { coeffects: Coeffects ->
+      val heightInPixels = (screenWidthPx() * 720) / 1280
+      coeffects.assoc(home.video_item_height, pxToDp(heightInPixels))
+    }
 
     setContent {
       val navController = rememberAnimatedNavController().apply {

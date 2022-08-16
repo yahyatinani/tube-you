@@ -33,12 +33,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -88,7 +90,8 @@ fun VideoItem(
   vidThumbnail: String?,
   vidTitle: String,
   vidLength: String,
-  vidInfo: AnnotatedString
+  vidInfo: AnnotatedString,
+  height: Dp
 ) {
   ConstraintLayout(
     constraintSet = constraints,
@@ -99,9 +102,9 @@ fun VideoItem(
       contentDescription = "thumbnail",
       modifier = Modifier
         .layoutId("videoThumbnail")
-        .background(Color.Black)
-        .fillMaxWidth()
-        .height(232.dp),
+        .height(height)
+        .background(Color.DarkGray),
+      contentScale = ContentScale.FillWidth
     )
 
     Text(
@@ -165,8 +168,10 @@ fun Home(popularVideos: IPersistentVector<VideoMetadata> = v()) {
   Surface(modifier = Modifier.fillMaxSize()) {
     SideEffect {
       dispatch(v(home.get_popular_vids))
+      dispatch(v(home.video_item_height))
     }
     val isRefreshing by remember { mutableStateOf(false) }
+    val height = subscribe<Int>(v(home.video_item_height)).w().dp
     SwipeRefresh(
       state = rememberSwipeRefreshState(isRefreshing),
       onRefresh = { /*TODO: refresh home*/ },
@@ -187,7 +192,8 @@ fun Home(popularVideos: IPersistentVector<VideoMetadata> = v()) {
             vidThumbnail = video.videoThumbnails[1].url,
             vidTitle = video.title,
             vidLength = "${video.lengthSeconds}",
-            vidInfo = vidInfo
+            vidInfo = vidInfo,
+            height = height
           )
         }
       }
@@ -227,7 +233,7 @@ fun HomePreview() {
           viewCount = "2342342",
           videoThumbnails = v(Thumbnail(""), Thumbnail(""))
         )
-      )
+      ),
     )
   }
 }
@@ -247,7 +253,7 @@ fun HomeDarkPreview() {
           viewCount = "2342342",
           videoThumbnails = v(Thumbnail(""), Thumbnail(""))
         )
-      )
+      ),
     )
   }
 }

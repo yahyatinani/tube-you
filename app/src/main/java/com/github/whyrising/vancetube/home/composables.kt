@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,8 +54,9 @@ import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
-import com.github.whyrising.y.core.collections.IPersistentVector
-import com.github.whyrising.y.core.collections.PersistentVector
+import com.github.whyrising.y.core.collections.IPersistentMap
+import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -164,7 +164,7 @@ fun VideoItem(
 }
 
 @Composable
-fun Home(popularVideos: IPersistentVector<VideoMetadata> = v()) {
+fun Home(popularVideos: List<IPersistentMap<VideoIds, Any>> = v()) {
   Surface(modifier = Modifier.fillMaxSize()) {
     SideEffect {
       dispatch(v(home.get_popular_vids))
@@ -177,23 +177,14 @@ fun Home(popularVideos: IPersistentVector<VideoMetadata> = v()) {
       onRefresh = { /*TODO: refresh home*/ },
     ) {
       LazyColumn {
-        items(popularVideos) { video: VideoMetadata ->
-          val divider = " • "
-          val vidInfo = buildAnnotatedString {
-            append(video.author)
-            append(divider)
-            append(video.viewCount)
-            append(" views")
-            append(divider)
-            append(video.publishedText)
-          }
+        items(popularVideos) { video: IPersistentMap<VideoIds, Any> ->
           VideoItem(
             constraints = constraints(),
-            vidThumbnail = video.videoThumbnails[1].url,
-            vidTitle = video.title,
-            vidLength = "${video.lengthSeconds}",
-            vidInfo = vidInfo,
-            height = height
+            height = height,
+            vidThumbnail = video[VideoIds.thumbnail] as String?,
+            vidTitle = video[VideoIds.title] as String,
+            vidLength = video[VideoIds.length] as String,
+            vidInfo = video[VideoIds.info] as AnnotatedString
           )
         }
       }
@@ -202,7 +193,6 @@ fun Home(popularVideos: IPersistentVector<VideoMetadata> = v()) {
 }
 
 // -- navigation ---------------------------------------------------------------
-
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.home(animOffSetX: Int) {
   composable(
@@ -210,7 +200,11 @@ fun NavGraphBuilder.home(animOffSetX: Int) {
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
-    Home(subscribe<PersistentVector<VideoMetadata>>(v(home.popularVids)).w())
+    Home(
+      popularVideos = subscribe<List<IPersistentMap<VideoIds, Any>>>(
+        v(home.popular_vids_formatted)
+      ).w()
+    )
   }
 }
 
@@ -223,17 +217,17 @@ fun HomePreview() {
   regHomeSubs()
   VanceTheme {
     Home(
-      popularVideos = v(
-        VideoMetadata(
-          title = "Title",
-          author = "Jon Deo",
-          authorId = "#JonDeo",
-          lengthSeconds = 2323,
-          publishedText = "2 hours ago",
-          viewCount = "2342342",
-          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
-        )
-      ),
+//      popularVideos = v(
+//        VideoMetadata(
+//          title = "Title",
+//          author = "Jon Deo",
+//          authorId = "#JonDeo",
+//          lengthSeconds = 2323,
+//          publishedText = "2 hours ago",
+//          viewCount = "2342342",
+//          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
+//        )
+//      ),
     )
   }
 }
@@ -243,17 +237,17 @@ fun HomePreview() {
 fun HomeDarkPreview() {
   VanceTheme {
     Home(
-      popularVideos = v(
-        VideoMetadata(
-          title = "Title",
-          author = "Jon Deo",
-          authorId = "#JonDeo",
-          lengthSeconds = 2323,
-          publishedText = "2 hours ago",
-          viewCount = "2342342",
-          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
-        )
-      ),
+//      popularVideos = v(
+//        VideoMetadata(
+//          title = "Title",
+//          author = "Jon Deo",
+//          authorId = "#JonDeo",
+//          lengthSeconds = 2323,
+//          publishedText = "2 hours ago",
+//          viewCount = "2342342",
+//          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
+//        )
+//      ),
     )
   }
 }

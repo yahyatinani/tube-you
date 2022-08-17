@@ -17,7 +17,7 @@ import com.github.whyrising.y.core.v
 fun regHomeEvents() {
   regEventFx(home.set_popular_vids) { cofx, (_, vids) ->
     val appDb = cofx[db] as IPersistentMap<Any, Any>
-    m(db to assocIn(appDb, l(home.panel, home.popularVids), vids))
+    m(db to assocIn(appDb, l(home.panel, home.popular_vids), vids))
   }
 
   regEventFx(home.get_popular_vids) { cofx, event ->

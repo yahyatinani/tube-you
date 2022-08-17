@@ -24,7 +24,7 @@ fun initAppDb() {
     m(
       base.is_backstack_available to false,
       base.api to API,
-      home.panel to m(home.popularVids to v<VideoMetadata>())
+      home.panel to m(home.popular_vids to v<VideoMetadata>())
     )
   }
   dispatchSync(v(init_db))

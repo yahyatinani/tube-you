@@ -1,16 +1,22 @@
 package com.github.whyrising.vancetube.home
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.recompose.regSub
+import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.m
+import com.github.whyrising.y.core.map
 import com.github.whyrising.y.core.v
 import kotlinx.datetime.LocalTime
 
 fun homePanel(db: AppDb) = (db[home.panel] as AppDb)
 
 fun popularVideos(db: AppDb): PersistentVector<VideoMetadata> =
-  homePanel(db)[home.popularVids] as PersistentVector<VideoMetadata>? ?: v()
+  homePanel(db)[home.popular_vids] as PersistentVector<VideoMetadata>? ?: v()
+
 fun formatSeconds(seconds: Int): String {
   val format = "%02d"
   val localTime = LocalTime.fromSecondOfDay(seconds)
@@ -24,11 +30,54 @@ fun formatSeconds(seconds: Int): String {
   }
 }
 
+const val VIDEO_INFO_DIVIDER = " • "
+
+fun formatVideoInfo(
+  author: String,
+  viewCount: String,
+  publishedText: String
+): AnnotatedString = buildAnnotatedString {
+  append(author)
+  append(VIDEO_INFO_DIVIDER)
+  append(viewCount)
+  append(" views") // TODO: locale this
+  append(VIDEO_INFO_DIVIDER)
+  append(publishedText)
+}
+
+enum class VideoIds {
+  thumbnail,
+  title,
+  length,
+  info
+}
+
 fun regHomeSubs() {
-  regSub<AppDb, Any>(home.popularVids) { db, _ ->
+  regSub<AppDb, Any>(home.popular_vids) { db, _ ->
     popularVideos(db)
   }
   regSub<AppDb, Any>(home.video_item_height) { db, _ ->
     homePanel(db)[home.video_item_height] ?: 180
   }
+  regSub<PersistentVector<VideoMetadata>, Any>(
+    queryId = home.popular_vids_formatted,
+    signalsFn = { subscribe(v(home.popular_vids)) },
+    computationFn = { vids, _ ->
+      map<VideoMetadata, Any>(vids) { videoMetadata ->
+        // TODO: format the views
+        val length = formatSeconds(videoMetadata.lengthSeconds)
+        val info = formatVideoInfo(
+          videoMetadata.author,
+          videoMetadata.viewCount,
+          videoMetadata.publishedText
+        )
+        m(
+          VideoIds.thumbnail to videoMetadata.videoThumbnails[1].url,
+          VideoIds.title to videoMetadata.title,
+          VideoIds.length to length,
+          VideoIds.info to info
+        )
+      }
+    }
+  )
 }

@@ -32,6 +32,7 @@ dependencies {
   implementation deps.recompose
   implementation deps.coil
   implementation deps.bundles.ktor
+  implementation deps.kotlinx.datetime
   androidTestImplementation deps.androidx.compose.ui.test
 
   testImplementation deps.bundles.kotest

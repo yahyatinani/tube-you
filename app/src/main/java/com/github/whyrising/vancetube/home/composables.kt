@@ -217,17 +217,18 @@ fun HomePreview() {
   regHomeSubs()
   VanceTheme {
     Home(
-//      popularVideos = v(
-//        VideoMetadata(
-//          title = "Title",
-//          author = "Jon Deo",
-//          authorId = "#JonDeo",
-//          lengthSeconds = 2323,
-//          publishedText = "2 hours ago",
-//          viewCount = "2342342",
-//          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
-//        )
-//      ),
+      popularVideos = v(
+        m(
+          VideoIds.title to "Title",
+          VideoIds.thumbnail to "",
+          VideoIds.length to "2:23",
+          VideoIds.info to formatVideoInfo(
+            viewCount = "32432",
+            author = "Jon Deo",
+            publishedText = "2 hours ago"
+          )
+        )
+      ),
     )
   }
 }
@@ -237,17 +238,18 @@ fun HomePreview() {
 fun HomeDarkPreview() {
   VanceTheme {
     Home(
-//      popularVideos = v(
-//        VideoMetadata(
-//          title = "Title",
-//          author = "Jon Deo",
-//          authorId = "#JonDeo",
-//          lengthSeconds = 2323,
-//          publishedText = "2 hours ago",
-//          viewCount = "2342342",
-//          videoThumbnails = v(Thumbnail(""), Thumbnail(""))
-//        )
-//      ),
+      popularVideos = v(
+        m(
+          VideoIds.title to "Title",
+          VideoIds.thumbnail to "",
+          VideoIds.length to "2:23",
+          VideoIds.info to formatVideoInfo(
+            viewCount = "32432",
+            author = "Jon Deo",
+            publishedText = "2 hours ago"
+          )
+        )
+      )
     )
   }
 }

@@ -36,7 +36,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -84,6 +87,31 @@ fun constraints(): ConstraintSet = ConstraintSet {
   }
 }
 
+@OptIn(ExperimentalTextApi::class)
+@Composable
+fun VideoLengthText(
+  modifier: Modifier = Modifier,
+  videoLength: String
+) {
+  Text(
+    modifier = modifier
+      .layoutId("length")
+      .background(
+        color = Color.Black.copy(alpha = .8f),
+        shape = RoundedCornerShape(2.dp)
+      )
+      .padding(horizontal = 3.dp),
+    text = videoLength,
+    textAlign = TextAlign.End,
+    style = MaterialTheme.typography.overline.copy(
+      color = Color.White,
+      fontSize = 12.sp,
+      fontWeight = FontWeight.Medium,
+      platformStyle = PlatformTextStyle(includeFontPadding = false),
+    )
+  )
+}
+
 @Composable
 fun VideoItem(
   constraints: ConstraintSet,
@@ -107,18 +135,7 @@ fun VideoItem(
       contentScale = ContentScale.FillWidth
     )
 
-    Text(
-      text = vidLength,
-      modifier = Modifier
-        .layoutId("length")
-        .background(color = Color.Black, shape = RoundedCornerShape(2.dp))
-        .padding(horizontal = 3.dp),
-      style = MaterialTheme.typography.overline.copy(
-        color = Color.White,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium
-      ),
-    )
+    VideoLengthText(videoLength = vidLength)
 
     Row(
       modifier = Modifier
@@ -209,6 +226,14 @@ fun NavGraphBuilder.home(animOffSetX: Int) {
 }
 
 // -- Previews -----------------------------------------------------------------
+@Preview(showBackground = true)
+@Composable
+fun VideoLengthTextPreview() {
+  VanceTheme {
+    VideoLengthText(videoLength = "2:23")
+  }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {

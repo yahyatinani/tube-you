@@ -102,7 +102,7 @@ fun VideoLengthText(
       )
       .padding(horizontal = 3.dp),
     text = videoLength,
-    textAlign = TextAlign.End,
+    textAlign = TextAlign.Center,
     style = MaterialTheme.typography.body1.copy(
       color = Color.White,
       fontSize = 12.sp,

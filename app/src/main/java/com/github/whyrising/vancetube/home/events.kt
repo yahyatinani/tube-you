@@ -3,7 +3,9 @@ package com.github.whyrising.vancetube.home
 import android.util.Log
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.fx.FxIds
+import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
+import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.base.base
@@ -17,13 +19,16 @@ import com.github.whyrising.y.core.v
 fun regHomeEvents() {
   regEventFx(home.set_popular_vids) { cofx, (_, vids) ->
     val appDb = cofx[db] as IPersistentMap<Any, Any>
-    m(db to assocIn(appDb, l(home.panel, home.popular_vids), vids))
+    m(
+      db to assocIn(appDb, l(home.panel, home.popular_vids), vids),
+      fx to v(v(FxIds.dispatch, v(home.is_loading, false)))
+    )
   }
 
   regEventFx(home.get_popular_vids) { cofx, event ->
     val appDb = cofx[db] as IPersistentMap<Any, Any>
     val api = get(appDb, base.api)
-    m(FxIds.fx to v(v(home.get_popular_vids, api)))
+    m(fx to v(v(home.get_popular_vids, api)))
   }
 
   regEventFx(
@@ -34,5 +39,9 @@ fun regHomeEvents() {
     val height = cofx[home.video_item_height] as Int
     Log.w("height", "$height")
     m(db to assocIn(appDb, l(home.panel, home.video_item_height), height))
+  }
+
+  regEventDb<AppDb>(home.is_loading) { db, (_, flag) ->
+    assocIn(db, l(home.panel, home.is_loading), flag)
   }
 }

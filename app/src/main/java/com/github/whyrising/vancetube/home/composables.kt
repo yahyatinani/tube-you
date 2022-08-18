@@ -56,6 +56,7 @@ import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
+import com.github.whyrising.vancetube.ui.theme.PageCircularProgressIndicator
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
@@ -182,30 +183,35 @@ fun VideoItem(
 
 @Composable
 fun Home(popularVideos: List<IPersistentMap<VideoIds, Any>> = v()) {
-  Surface(modifier = Modifier.fillMaxSize()) {
-    SideEffect {
-      dispatch(v(home.get_popular_vids))
-      dispatch(v(home.video_item_height))
-    }
-    val isRefreshing by remember { mutableStateOf(false) }
-    val height = subscribe<Int>(v(home.video_item_height)).w().dp
-    SwipeRefresh(
-      state = rememberSwipeRefreshState(isRefreshing),
-      onRefresh = { /*TODO: refresh home*/ },
-    ) {
-      LazyColumn {
-        items(popularVideos) { video: IPersistentMap<VideoIds, Any> ->
-          VideoItem(
-            constraints = constraints(),
-            height = height,
-            vidThumbnail = video[VideoIds.thumbnail] as String?,
-            vidTitle = video[VideoIds.title] as String,
-            vidLength = video[VideoIds.length] as String,
-            vidInfo = video[VideoIds.info] as AnnotatedString
-          )
+  val isRefreshing by remember { mutableStateOf(false) }
+  val height = subscribe<Int>(v(home.video_item_height)).w().dp
+  SideEffect {
+    dispatch(v(home.get_popular_vids))
+    dispatch(v(home.video_item_height))
+  }
+  Surface(
+    modifier = Modifier.fillMaxSize(),
+  ) {
+    if (subscribe<Boolean>(v(home.is_loading)).w())
+      PageCircularProgressIndicator()
+    else
+      SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing),
+        onRefresh = { /*TODO: refresh home*/ },
+      ) {
+        LazyColumn {
+          items(popularVideos) { video: IPersistentMap<VideoIds, Any> ->
+            VideoItem(
+              constraints = constraints(),
+              height = height,
+              vidThumbnail = video[VideoIds.thumbnail] as String?,
+              vidTitle = video[VideoIds.title] as String,
+              vidLength = video[VideoIds.length] as String,
+              vidInfo = video[VideoIds.info] as AnnotatedString
+            )
+          }
         }
       }
-    }
   }
 }
 

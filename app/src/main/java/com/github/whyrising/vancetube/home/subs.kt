@@ -100,4 +100,7 @@ fun regHomeSubs() {
       }
     }
   )
+  regSub<AppDb, Boolean>(home.is_loading) { db, _ ->
+    homePanel(db)[home.is_loading] as Boolean
+  }
 }

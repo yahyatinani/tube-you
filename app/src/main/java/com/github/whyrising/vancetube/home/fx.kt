@@ -57,6 +57,7 @@ fun regHomeFx(scope: CoroutineScope) {
         when (httpResponse.status.value) {
           403 -> TODO("403 Forbidden")
           429 -> TODO("403 Too many requests")
+          502 -> TODO("502 Bad Gateway")
         }
 
         val popularVideos = httpResponse

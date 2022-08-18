@@ -11,6 +11,8 @@ import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.map
 import com.github.whyrising.y.core.v
 import kotlinx.datetime.LocalTime
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 fun homePanel(db: AppDb) = (db[home.panel] as AppDb)
 
@@ -45,6 +47,25 @@ fun formatVideoInfo(
   append(publishedText)
 }
 
+val OneDigitDecimalFormat = DecimalFormat("#.#").apply {
+  roundingMode = RoundingMode.FLOOR
+}
+const val thousandsSign = "K"
+const val MillionsSign = "M"
+const val BillionsSign = "B"
+
+fun formatViews(viewsCount: Long): String = when {
+  viewsCount < 1000 -> "$viewsCount"
+  viewsCount < 10_000 -> {
+    val x = viewsCount / 1000f
+    "${OneDigitDecimalFormat.format(x)}$thousandsSign".replace(".0", "")
+  }
+  viewsCount < 100_000 -> "${viewsCount / 1000}$thousandsSign"
+  viewsCount < 1_000_000 -> "${viewsCount / 1000}$thousandsSign"
+  viewsCount < 1_000_000_000 -> "${viewsCount / 1_000_000}$MillionsSign"
+  else -> "${viewsCount / 1_000_000_000}$BillionsSign"
+}
+
 enum class VideoIds {
   thumbnail,
   title,
@@ -64,11 +85,10 @@ fun regHomeSubs() {
     signalsFn = { subscribe(v(home.popular_vids)) },
     computationFn = { vids, _ ->
       map<VideoMetadata, Any>(vids) { videoMetadata ->
-        // TODO: format the views
         val length = formatSeconds(videoMetadata.lengthSeconds)
         val info = formatVideoInfo(
           videoMetadata.author,
-          videoMetadata.viewCount,
+          formatViews(videoMetadata.viewCount),
           videoMetadata.publishedText
         )
         m(

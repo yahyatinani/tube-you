@@ -14,6 +14,6 @@ data class VideoMetadata(
   val lengthSeconds: Int,
   val author: String,
   val authorId: String,
-  val viewCount: String,
+  val viewCount: Long,
   val publishedText: String
 )

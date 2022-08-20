@@ -7,7 +7,6 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.map
 import com.github.whyrising.y.core.v
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.LocalTime
@@ -94,20 +93,20 @@ fun regHomeSubs() {
     signalsFn = { subscribe(v(home.popular_vids)) },
     placeholder = v<VideoViewModel>(),
     context = Dispatchers.Default,
-    computationFn = { vids, _ ->
-      map<VideoMetadata, Any>(vids) { videoMetadata ->
-        val length = formatSeconds(videoMetadata.lengthSeconds)
-        val info = formatVideoInfo(
-          videoMetadata.author,
-          formatViews(videoMetadata.viewCount),
-          videoMetadata.publishedText
-        )
-        VideoViewModel(
-          id = videoMetadata.videoId,
-          title = videoMetadata.title,
-          thumbnail = videoMetadata.videoThumbnails[1].url,
-          length = length,
-          info = info
+    computationFn = { videos, _ ->
+      videos.fold(v<VideoViewModel>()) { acc, videoMetadata ->
+        acc.conj(
+          VideoViewModel(
+            id = videoMetadata.videoId,
+            title = videoMetadata.title,
+            thumbnail = videoMetadata.videoThumbnails[1].url,
+            length = formatSeconds(videoMetadata.lengthSeconds),
+            info = formatVideoInfo(
+              videoMetadata.author,
+              formatViews(videoMetadata.viewCount),
+              videoMetadata.publishedText
+            )
+          )
         )
       }
     }

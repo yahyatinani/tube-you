@@ -9,6 +9,7 @@ data class Thumbnail(
 
 @Serializable
 data class VideoMetadata(
+  val videoId: String,
   val title: String,
   val videoThumbnails: List<Thumbnail>,
   val lengthSeconds: Int,

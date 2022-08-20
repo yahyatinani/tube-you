@@ -86,9 +86,9 @@ class MainActivity : ComponentActivity() {
     regHomeFx(lifecycleScope)
     regHomeSubs()
 
-    regCofx(home.video_item_height) { coeffects: Coeffects ->
+    regCofx(home.thumbnail_height) { coeffects: Coeffects ->
       val heightInPixels = (screenWidthPx() * 720) / 1280
-      coeffects.assoc(home.video_item_height, pxToDp(heightInPixels))
+      coeffects.assoc(home.thumbnail_height, pxToDp(heightInPixels))
     }
 
     setContent {

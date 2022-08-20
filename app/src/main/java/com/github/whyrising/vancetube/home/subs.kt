@@ -7,9 +7,9 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.map
 import com.github.whyrising.y.core.v
+import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.LocalTime
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -67,22 +67,33 @@ fun formatViews(viewsCount: Long): String = when {
 }
 
 enum class VideoIds {
+  id,
   thumbnail,
   title,
   length,
   info
 }
 
+data class VideoViewModel(
+  val id: String,
+  val title: String,
+  val thumbnail: String,
+  val length: String,
+  val info: AnnotatedString
+)
+
 fun regHomeSubs() {
   regSub<AppDb, Any>(home.popular_vids) { db, _ ->
     popularVideos(db)
   }
-  regSub<AppDb, Any>(home.video_item_height) { db, _ ->
-    homePanel(db)[home.video_item_height] ?: 180
+  regSub<AppDb, Any>(home.thumbnail_height) { db, _ ->
+    homePanel(db)[home.thumbnail_height] ?: 180
   }
   regSub<PersistentVector<VideoMetadata>, Any>(
     queryId = home.popular_vids_formatted,
     signalsFn = { subscribe(v(home.popular_vids)) },
+    placeholder = v<VideoViewModel>(),
+    context = Dispatchers.Default,
     computationFn = { vids, _ ->
       map<VideoMetadata, Any>(vids) { videoMetadata ->
         val length = formatSeconds(videoMetadata.lengthSeconds)
@@ -91,11 +102,12 @@ fun regHomeSubs() {
           formatViews(videoMetadata.viewCount),
           videoMetadata.publishedText
         )
-        m(
-          VideoIds.thumbnail to videoMetadata.videoThumbnails[1].url,
-          VideoIds.title to videoMetadata.title,
-          VideoIds.length to length,
-          VideoIds.info to info
+        VideoViewModel(
+          id = videoMetadata.videoId,
+          title = videoMetadata.title,
+          thumbnail = videoMetadata.videoThumbnails[1].url,
+          length = length,
+          info = info
         )
       }
     }

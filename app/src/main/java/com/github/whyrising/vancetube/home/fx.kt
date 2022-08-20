@@ -18,6 +18,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.net.UnknownHostException
@@ -45,11 +46,10 @@ val client = HttpClient(Android) {
 
 fun regHomeFx(scope: CoroutineScope) {
   regFx(home.get_popular_vids) { api ->
-    val endpoint = "$api/popular?fields=videoId,title,videoThumbnails," +
-      "lengthSeconds,viewCount,author,publishedText,authorId"
-    Log.i("API", endpoint)
-
-    scope.launch {
+    scope.launch(Dispatchers.IO) {
+      val endpoint = "$api/popular?fields=videoId,title,videoThumbnails," +
+        "lengthSeconds,viewCount,author,publishedText,authorId"
+      Log.i("API", endpoint)
       try {
         val httpResponse = client.get(endpoint)
         Log.i("httpResponse", "call ended!")
@@ -59,7 +59,6 @@ fun regHomeFx(scope: CoroutineScope) {
           429 -> TODO("403 Too many requests")
           502 -> TODO("502 Bad Gateway")
         }
-
         val popularVideos = httpResponse
           .body<PersistentVector<VideoMetadata>>()
 

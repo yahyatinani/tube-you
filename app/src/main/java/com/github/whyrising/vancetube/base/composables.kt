@@ -2,12 +2,6 @@ package com.github.whyrising.vancetube.base
 
 import android.content.res.Configuration
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomNavigation
@@ -23,17 +17,17 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -106,7 +100,7 @@ fun BasePanel(
   val bottomBarHeightPx =
     with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
   val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
-  val visibleState = MutableTransitionState(true)
+  var visibleState by remember { mutableStateOf(true) }
 
   val nestedScrollConnection = remember {
     object : NestedScrollConnection {
@@ -119,51 +113,51 @@ fun BasePanel(
         val x = newOffset.coerceIn(-bottomBarHeightPx, 0f)
         Log.i("scroll", "$x")
         bottomBarOffsetHeightPx.value = x
-        visibleState.targetState = x >= -20
-
+        visibleState = x >= -20
         return Offset.Zero
       }
     }
   }
 
-  val scaffoldState = rememberScaffoldState()
+//  val scaffoldState = rememberScaffoldState()
   Scaffold(
-    modifier = Modifier.nestedScroll(nestedScrollConnection),
-    scaffoldState = scaffoldState,
+//    modifier = Modifier.nestedScroll(nestedScrollConnection),
+//    scaffoldState = scaffoldState,
     topBar = {
-      AnimatedVisibility(
-        visibleState = visibleState,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
-      ) {
-        TopAppBar(
-          elevation = 0.dp,
-          backgroundColor = backgroundColor,
-          title = {
-            IconButton(onClick = { /*TODO*/ }) {
-              Icon(
-                imageVector = Icons.Outlined.Search,
-                modifier = Modifier.size(32.dp),
-                contentDescription = "Search a video",
-              )
-            }
-          },
-          navigationIcon = when {
-            subscribe<Boolean>(v(base.is_backstack_available)).w() -> {
-              { BackArrow() }
-            }
-            else -> null
-          },
-          actions = {
-            IconButton(onClick = { /*TODO*/ }) {
-              Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "more"
-              )
-            }
+      // TODO: this ain't it
+//      AnimatedVisibility(
+//        visible = visibleState,
+//        enter = fadeIn() + expandVertically(),
+//        exit = fadeOut() + shrinkVertically(),
+//      ) {
+//      }
+      TopAppBar(
+        elevation = 0.dp,
+        backgroundColor = backgroundColor,
+        title = {
+          IconButton(onClick = { /*TODO*/ }) {
+            Icon(
+              imageVector = Icons.Outlined.Search,
+              modifier = Modifier.size(32.dp),
+              contentDescription = "Search a video",
+            )
           }
-        )
-      }
+        },
+        navigationIcon = when {
+          subscribe<Boolean>(v(base.is_backstack_available)).w() -> {
+            { BackArrow() }
+          }
+          else -> null
+        },
+        actions = {
+          IconButton(onClick = { /*TODO*/ }) {
+            Icon(
+              imageVector = Icons.Default.MoreVert,
+              contentDescription = "more"
+            )
+          }
+        }
+      )
     },
     bottomBar = {
       BottomNavigationBar(backgroundColor)

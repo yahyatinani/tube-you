@@ -48,8 +48,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
+import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
+import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
@@ -85,8 +87,8 @@ fun VideoLengthText(
 }
 
 @Composable
-fun LoadingIndicator(isVisible: Boolean) {
-  if (isVisible)
+fun LoadingIndicator() {
+  if (subscribe<Boolean>(v(home.is_loading)).w())
     CircularProgressIndicator(color = Color.Cyan)
 }
 
@@ -158,7 +160,9 @@ fun VideoListItem(viewModel: VideoViewModel) {
 }
 
 @Composable
-fun PopularVideosList(videos: List<VideoViewModel>) {
+fun PopularVideosList() {
+  val videos =
+    subscribe<List<VideoViewModel>>(v(home.popular_vids_formatted)).w()
   LazyColumn(modifier = Modifier.fillMaxSize()) {
     items(
       items = videos,
@@ -181,12 +185,8 @@ fun Home() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
       ) {
-        PopularVideosList(
-          videos = subscribe<List<VideoViewModel>>(
-            v(home.popular_vids_formatted)
-          ).w()
-        )
-        LoadingIndicator(isVisible = subscribe<Boolean>(v(home.is_loading)).w())
+        PopularVideosList()
+        LoadingIndicator()
       }
     }
   }
@@ -221,43 +221,43 @@ fun VideoLengthTextPreview() {
 @Composable
 fun VideoListPreview() {
   initAppDb()
-  regBaseSubs()
   regHomeSubs()
-  VanceTheme {
-    PopularVideosList(
-      videos = v(
-        VideoViewModel(
-          "#ldfj243kj2r",
-          "Title",
-          "",
-          "2:23",
-          formatVideoInfo(
-            viewCount = "32432",
-            author = "Jon Deo",
-            publishedText = "2 hours ago"
-          )
-        ),
-        VideoViewModel(
-          "#ld2lk43kj2r",
-          "Very long tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" +
-            "iiiiiiiiiiiiiiiiiiiiitle",
-          "",
-          "2:23",
-          formatVideoInfo(
-            viewCount = "32432",
-            author = "Jon Deo",
-            publishedText = "2 hours ago"
-          )
-        ),
-      )
+  regSub<AppDb, Any>(home.popular_vids_formatted) { db, _ ->
+    v(
+      VideoViewModel(
+        "#ldfj243kj2r",
+        "Title",
+        "",
+        "2:23",
+        formatVideoInfo(
+          viewCount = "32432",
+          author = "Jon Deo",
+          publishedText = "2 hours ago"
+        )
+      ),
+      VideoViewModel(
+        "#ld2lk43kj2r",
+        "Very long tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" +
+          "iiiiiiiiiiiiiiiiiiiiitle",
+        "",
+        "2:23",
+        formatVideoInfo(
+          viewCount = "32432",
+          author = "Jon Deo",
+          publishedText = "2 hours ago"
+        )
+      ),
     )
+  }
+  regBaseSubs()
+  VanceTheme {
+    PopularVideosList()
   }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-  initAppDb()
   regBaseSubs()
   regHomeSubs()
   VanceTheme {

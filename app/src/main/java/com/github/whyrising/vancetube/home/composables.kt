@@ -118,7 +118,7 @@ fun VideoListItem(viewModel: VideoViewModel) {
       modifier = Modifier
         .fillMaxWidth()
         .padding(top = 8.dp, start = 10.dp, end = 4.dp)
-        .padding(bottom = 20.dp)
+        .padding(bottom = 24.dp)
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(

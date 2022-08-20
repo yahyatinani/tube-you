@@ -7,5 +7,7 @@ enum class home {
   set_popular_vids,
   thumbnail_height,
   popular_vids_formatted,
-  is_loading
+  is_loading,
+  refresh,
+  is_refreshing
 }

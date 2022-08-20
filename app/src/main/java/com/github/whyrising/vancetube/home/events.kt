@@ -2,6 +2,7 @@ package com.github.whyrising.vancetube.home
 
 import android.util.Log
 import com.github.whyrising.recompose.cofx.injectCofx
+import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
@@ -19,11 +20,12 @@ fun regHomeEvents() {
   regEventFx(home.set_popular_vids) { cofx, (_, vids) ->
     val appDb = (cofx[db] as IPersistentMap<Any, Any>)
       .let { assocIn(it, l(home.panel, home.is_loading), false) }
+      .let { assocIn(it, l(home.panel, home.is_refreshing), false) }
       .let { assocIn(it, l(home.panel, home.popular_vids), vids) }
     m(db to appDb)
   }
 
-  regEventFx(home.get_popular_vids) { cofx, event ->
+  regEventFx(home.get_popular_vids) { cofx, _ ->
     val appDb = cofx[db] as IPersistentMap<Any, Any>
     val api = get(appDb, base.api)
     m(fx to v(v(home.get_popular_vids, api)))
@@ -41,5 +43,13 @@ fun regHomeEvents() {
 
   regEventDb<AppDb>(home.is_loading) { db, (_, flag) ->
     assocIn(db, l(home.panel, home.is_loading), flag)
+  }
+
+  regEventFx(home.refresh) { cofx, _ ->
+    val appDb = cofx[db] as IPersistentMap<Any, Any>
+    m(
+      db to assocIn(appDb, l(home.panel, home.is_refreshing), true),
+      fx to v(v(FxIds.dispatch, v(home.get_popular_vids)))
+    )
   }
 }

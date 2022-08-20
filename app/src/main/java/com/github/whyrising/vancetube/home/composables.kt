@@ -30,9 +30,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -175,11 +172,12 @@ fun PopularVideosList() {
 
 @Composable
 fun Home() {
-  val isRefreshing by remember { mutableStateOf(false) }
   Surface(modifier = Modifier.fillMaxSize()) {
     SwipeRefresh(
-      state = rememberSwipeRefreshState(isRefreshing),
-      onRefresh = { /*TODO: refresh home*/ },
+      state = rememberSwipeRefreshState(
+        isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()
+      ),
+      onRefresh = { dispatch(v(home.refresh)) },
     ) {
       Box(
         modifier = Modifier.fillMaxSize(),

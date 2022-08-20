@@ -26,7 +26,8 @@ fun initAppDb() {
       base.api to API,
       home.panel to m(
         home.popular_vids to v<VideoMetadata>(),
-        home.is_loading to true
+        home.is_loading to true,
+        home.is_refreshing to false
       )
     )
   }

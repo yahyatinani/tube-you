@@ -259,7 +259,7 @@ private fun BottomNavigationTransition(
 
   CompositionLocalProvider(
     LocalContentColor provides color.copy(alpha = 1f),
-    LocalContentAlpha provides color.alpha,
+    LocalContentAlpha provides color.alpha
   ) {
     content(animationProgress)
   }

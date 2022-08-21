@@ -1,6 +1,5 @@
 package com.github.whyrising.vancetube.base
 
-
 import VanceScaffold
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,7 +44,7 @@ import kotlin.math.roundToInt
 fun BottomNavigationBar(backgroundColor: Color) {
   CustomBottomNavigation(
     backgroundColor = backgroundColor,
-    elevation = 0.dp,
+    elevation = 0.dp
   ) {
     VanceBottomNavigationItem(
       selected = true,
@@ -125,7 +124,7 @@ fun BasePanel(
             Icon(
               imageVector = Icons.Outlined.Search,
               modifier = Modifier.size(32.dp),
-              contentDescription = "Search a video",
+              contentDescription = "Search a video"
             )
           }
         },

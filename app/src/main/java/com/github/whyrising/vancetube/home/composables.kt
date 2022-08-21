@@ -80,15 +80,16 @@ fun VideoLengthText(
       color = Color.White,
       fontSize = 12.sp,
       fontWeight = FontWeight.Medium,
-      platformStyle = PlatformTextStyle(includeFontPadding = false),
+      platformStyle = PlatformTextStyle(includeFontPadding = false)
     )
   )
 }
 
 @Composable
 fun LoadingIndicator() {
-  if (subscribe<Boolean>(v(home.is_loading)).w())
+  if (subscribe<Boolean>(v(home.is_loading)).w()) {
     CircularProgressIndicator(color = Color.Cyan)
+  }
 }
 
 @Composable
@@ -109,7 +110,7 @@ fun VideoListItem(viewModel: VideoViewModel) {
       Thumbnail(
         modifier = Modifier
           .height(subscribe<Int>(v(home.thumbnail_height)).w().dp),
-        url = viewModel.thumbnail,
+        url = viewModel.thumbnail
       )
       VideoLengthText(
         modifier = Modifier.padding(8.dp),
@@ -131,14 +132,14 @@ fun VideoListItem(viewModel: VideoViewModel) {
           overflow = TextOverflow.Ellipsis,
           style = MaterialTheme.typography.h6.copy(
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
           )
         )
         Spacer(modifier = Modifier.height(4.dp))
         CompositionLocalProvider(LocalContentAlpha provides medium) {
           Text(
             text = viewModel.info,
-            style = MaterialTheme.typography.body2.copy(fontSize = 12.sp),
+            style = MaterialTheme.typography.body2.copy(fontSize = 12.sp)
           )
         }
       }
@@ -147,7 +148,7 @@ fun VideoListItem(viewModel: VideoViewModel) {
 
       IconButton(
         modifier = Modifier.size(20.dp),
-        onClick = { /*TODO*/ },
+        onClick = { /*TODO*/ }
       ) {
         Icon(
           imageVector = Icons.Filled.MoreVert,
@@ -168,7 +169,7 @@ fun PopularVideosList(paddingValues: PaddingValues = PaddingValues()) {
   ) {
     items(
       items = videos,
-      key = { it.id },
+      key = { it.id }
     ) { videoVm ->
       VideoListItem(viewModel = videoVm)
     }
@@ -187,7 +188,7 @@ fun Home(paddingValues: PaddingValues = PaddingValues()) {
     ) {
       Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
       ) {
         PopularVideosList(paddingValues)
         LoadingIndicator()
@@ -252,7 +253,7 @@ fun VideoListPreview() {
           publishedText = "2 hours ago",
           viewsLabel = "views"
         )
-      ),
+      )
     )
   }
   regBaseSubs()

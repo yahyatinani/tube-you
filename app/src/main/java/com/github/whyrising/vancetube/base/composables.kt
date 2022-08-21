@@ -23,7 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.initAppDb
-import com.github.whyrising.vancetube.ui.theme.Gray300
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
 import com.github.whyrising.vancetube.ui.theme.composables.CustomBottomNavigation
@@ -126,6 +124,7 @@ fun BasePanel(
 //      ) {
 //      }
       TopAppBar(
+        modifier = Modifier.height(48.dp),
         elevation = 0.dp,
         backgroundColor = backgroundColor,
         title = {

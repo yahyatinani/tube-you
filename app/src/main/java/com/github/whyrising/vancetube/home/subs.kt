@@ -1,9 +1,11 @@
 package com.github.whyrising.vancetube.home
 
+import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
+import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
@@ -36,12 +38,13 @@ const val VIDEO_INFO_DIVIDER = " • "
 fun formatVideoInfo(
   author: String,
   viewCount: String,
+  viewsLabel: String,
   publishedText: String
 ): AnnotatedString = buildAnnotatedString {
   append(author)
   append(VIDEO_INFO_DIVIDER)
   append(viewCount)
-  append(" views") // TODO: locale this
+  append(" $viewsLabel")
   append(VIDEO_INFO_DIVIDER)
   append(publishedText)
 }
@@ -81,7 +84,7 @@ data class VideoViewModel(
   val info: AnnotatedString
 )
 
-fun regHomeSubs() {
+fun regHomeSubs(context: Context) {
   regSub<AppDb, Any>(home.popular_vids) { db, _ ->
     popularVideos(db)
   }
@@ -102,9 +105,10 @@ fun regHomeSubs() {
             thumbnail = videoMetadata.videoThumbnails[1].url,
             length = formatSeconds(videoMetadata.lengthSeconds),
             info = formatVideoInfo(
-              videoMetadata.author,
-              formatViews(videoMetadata.viewCount),
-              videoMetadata.publishedText
+              author = videoMetadata.author,
+              viewCount = formatViews(videoMetadata.viewCount),
+              viewsLabel = context.getString(R.string.views_label),
+              publishedText = videoMetadata.publishedText
             )
           )
         )

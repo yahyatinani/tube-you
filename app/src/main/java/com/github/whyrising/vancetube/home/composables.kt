@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -219,7 +220,7 @@ fun VideoLengthTextPreview() {
 @Composable
 fun VideoListPreview() {
   initAppDb()
-  regHomeSubs()
+  regHomeSubs(LocalContext.current)
   regSub<AppDb, Any>(home.popular_vids_formatted) { db, _ ->
     v(
       VideoViewModel(
@@ -230,7 +231,8 @@ fun VideoListPreview() {
         formatVideoInfo(
           viewCount = "32432",
           author = "Jon Deo",
-          publishedText = "2 hours ago"
+          publishedText = "2 hours ago",
+          viewsLabel = "views"
         )
       ),
       VideoViewModel(
@@ -242,7 +244,8 @@ fun VideoListPreview() {
         formatVideoInfo(
           viewCount = "32432",
           author = "Jon Deo",
-          publishedText = "2 hours ago"
+          publishedText = "2 hours ago",
+          viewsLabel = "views"
         )
       ),
     )
@@ -257,7 +260,7 @@ fun VideoListPreview() {
 @Composable
 fun HomePreview() {
   regBaseSubs()
-  regHomeSubs()
+  regHomeSubs(LocalContext.current)
   VanceTheme {
     Home()
   }

@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
     regBaseSubs()
     regHomeEvents()
     regHomeFx(lifecycleScope)
-    regHomeSubs()
+    regHomeSubs(this)
 
     regCofx(home.thumbnail_height) { coeffects: Coeffects ->
       val heightInPixels = (screenWidthPx() * 720) / 1280

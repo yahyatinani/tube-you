@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">VanceTube</string>
+    <string name="views_label">views</string>
 </resources>

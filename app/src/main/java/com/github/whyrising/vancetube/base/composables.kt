@@ -2,7 +2,6 @@ package com.github.whyrising.vancetube.base
 
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -18,16 +17,8 @@ import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.subscribe
@@ -88,41 +79,8 @@ fun BasePanel(
   backgroundColor: Color = MaterialTheme.colors.background,
   content: @Composable (PaddingValues) -> Unit
 ) {
-  val bottomBarHeight = 48.dp
-  val bottomBarHeightPx =
-    with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
-  val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
-  var visibleState by remember { mutableStateOf(true) }
-
-  val nestedScrollConnection = remember {
-    object : NestedScrollConnection {
-      override fun onPreScroll(
-        available: Offset,
-        source: NestedScrollSource
-      ): Offset {
-        val delta = available.y
-        val newOffset = bottomBarOffsetHeightPx.value + delta
-        val x = newOffset.coerceIn(-bottomBarHeightPx, 0f)
-        Log.i("scroll", "$x")
-        bottomBarOffsetHeightPx.value = x
-        visibleState = x >= -20
-        return Offset.Zero
-      }
-    }
-  }
-
-//  val scaffoldState = rememberScaffoldState()
   Scaffold(
-//    modifier = Modifier.nestedScroll(nestedScrollConnection),
-//    scaffoldState = scaffoldState,
     topBar = {
-      // TODO: this ain't it
-//      AnimatedVisibility(
-//        visible = visibleState,
-//        enter = fadeIn() + expandVertically(),
-//        exit = fadeOut() + shrinkVertically(),
-//      ) {
-//      }
       TopAppBar(
         modifier = Modifier.height(48.dp),
         elevation = 0.dp,

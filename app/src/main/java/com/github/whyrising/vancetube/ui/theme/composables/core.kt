@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.ui.theme
+package com.github.whyrising.vancetube.ui.theme.composables
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.CircularProgressIndicator

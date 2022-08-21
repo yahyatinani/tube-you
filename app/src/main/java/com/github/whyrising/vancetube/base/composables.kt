@@ -1,11 +1,11 @@
 package com.github.whyrising.vancetube.base
 
+
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -34,28 +34,21 @@ import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.initAppDb
-import com.github.whyrising.vancetube.ui.theme.BackArrow
-import com.github.whyrising.vancetube.ui.theme.SmallLabelText
+import com.github.whyrising.vancetube.ui.theme.Gray300
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
+import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
+import com.github.whyrising.vancetube.ui.theme.composables.CustomBottomNavigation
+import com.github.whyrising.vancetube.ui.theme.composables.SmallLabelText
+import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavigationItem
 import com.github.whyrising.y.core.v
 
 @Composable
 fun BottomNavigationBar(backgroundColor: Color) {
-  val borderColor = Color.Gray.copy(alpha = .3f)
-  BottomNavigation(
-    modifier = Modifier
-      .drawBehind {
-        drawLine(
-          color = borderColor,
-          start = Offset(0f, 0f),
-          end = Offset(size.width, 0f),
-          strokeWidth = 2f * density
-        )
-      },
+  CustomBottomNavigation(
     backgroundColor = backgroundColor,
     elevation = 0.dp,
   ) {
-    BottomNavigationItem(
+    VanceBottomNavigationItem(
       selected = true,
       onClick = { /*TODO*/ },
       label = { SmallLabelText(text = "Home") },
@@ -63,10 +56,11 @@ fun BottomNavigationBar(backgroundColor: Color) {
         Icon(
           imageVector = Icons.Filled.Home,
           contentDescription = "Home panel",
+          tint = MaterialTheme.colors.onBackground
         )
       }
     )
-    BottomNavigationItem(
+    VanceBottomNavigationItem(
       selected = false,
       onClick = { /*TODO*/ },
       label = { SmallLabelText(text = "Subscriptions") },
@@ -77,7 +71,7 @@ fun BottomNavigationBar(backgroundColor: Color) {
         )
       }
     )
-    BottomNavigationItem(
+    VanceBottomNavigationItem(
       selected = false,
       onClick = { /*TODO*/ },
       label = { SmallLabelText(text = "Library") },
@@ -168,6 +162,14 @@ fun BasePanel(
 }
 
 // -- Previews -----------------------------------------------------------------
+@Preview(showBackground = true)
+@Composable
+fun BottomNavBarPreview() {
+  VanceTheme {
+    BottomNavigationBar(backgroundColor = MaterialTheme.colors.background)
+  }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun BasePanelPreview() {

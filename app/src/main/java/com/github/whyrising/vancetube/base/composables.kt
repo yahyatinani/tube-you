@@ -1,14 +1,15 @@
 package com.github.whyrising.vancetube.base
 
 
+import VanceScaffold
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -17,9 +18,17 @@ import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
@@ -30,6 +39,7 @@ import com.github.whyrising.vancetube.ui.theme.composables.CustomBottomNavigatio
 import com.github.whyrising.vancetube.ui.theme.composables.SmallLabelText
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavigationItem
 import com.github.whyrising.y.core.v
+import kotlin.math.roundToInt
 
 @Composable
 fun BottomNavigationBar(backgroundColor: Color) {
@@ -74,15 +84,40 @@ fun BottomNavigationBar(backgroundColor: Color) {
   }
 }
 
+val TOP_APP_BAR_HEIGHT = 48.dp
+
 @Composable
 fun BasePanel(
   backgroundColor: Color = MaterialTheme.colors.background,
   content: @Composable (PaddingValues) -> Unit
 ) {
-  Scaffold(
+  val topBarHeightPx = with(LocalDensity.current) {
+    TOP_APP_BAR_HEIGHT.roundToPx().toFloat()
+  }
+  val toolbarOffsetHeightPx = remember { mutableStateOf(0f) }
+  val nestedScrollConnection = remember {
+    object : NestedScrollConnection {
+      override fun onPreScroll(
+        available: Offset,
+        source: NestedScrollSource
+      ): Offset {
+        val delta = available.y
+        val newOffset = toolbarOffsetHeightPx.value + delta
+        toolbarOffsetHeightPx.value = newOffset.coerceIn(-topBarHeightPx, 0f)
+        return Offset.Zero
+      }
+    }
+  }
+
+  VanceScaffold(
+    modifier = Modifier.nestedScroll(nestedScrollConnection),
     topBar = {
       TopAppBar(
-        modifier = Modifier.height(48.dp),
+        modifier = Modifier
+          .height(TOP_APP_BAR_HEIGHT)
+          .offset {
+            IntOffset(x = 0, y = toolbarOffsetHeightPx.value.roundToInt())
+          },
         elevation = 0.dp,
         backgroundColor = backgroundColor,
         title = {
@@ -113,8 +148,8 @@ fun BasePanel(
     bottomBar = {
       BottomNavigationBar(backgroundColor)
     }
-  ) { paddingValues ->
-    content(paddingValues)
+  ) {
+    content(PaddingValues(top = TOP_APP_BAR_HEIGHT))
   }
 }
 

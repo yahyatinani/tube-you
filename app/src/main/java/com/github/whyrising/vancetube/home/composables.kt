@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -158,10 +159,13 @@ fun VideoListItem(viewModel: VideoViewModel) {
 }
 
 @Composable
-fun PopularVideosList() {
+fun PopularVideosList(paddingValues: PaddingValues = PaddingValues()) {
   val videos =
     subscribe<List<VideoViewModel>>(v(home.popular_vids_formatted)).w()
-  LazyColumn(modifier = Modifier.fillMaxSize()) {
+  LazyColumn(
+    modifier = Modifier.fillMaxSize(),
+    contentPadding = paddingValues
+  ) {
     items(
       items = videos,
       key = { it.id },
@@ -172,19 +176,20 @@ fun PopularVideosList() {
 }
 
 @Composable
-fun Home() {
+fun Home(paddingValues: PaddingValues = PaddingValues()) {
   Surface(modifier = Modifier.fillMaxSize()) {
     SwipeRefresh(
       state = rememberSwipeRefreshState(
         isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()
       ),
       onRefresh = { dispatch(v(home.refresh)) },
+      indicatorPadding = paddingValues
     ) {
       Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
       ) {
-        PopularVideosList()
+        PopularVideosList(paddingValues)
         LoadingIndicator()
       }
     }
@@ -193,7 +198,7 @@ fun Home() {
 
 // -- navigation ---------------------------------------------------------------
 @OptIn(ExperimentalAnimationApi::class)
-fun NavGraphBuilder.home(animOffSetX: Int) {
+fun NavGraphBuilder.home(animOffSetX: Int, paddingValues: PaddingValues) {
   composable(
     route = home.panel.name,
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
@@ -203,7 +208,7 @@ fun NavGraphBuilder.home(animOffSetX: Int) {
       dispatch(v(home.get_popular_vids))
       dispatch(v(home.thumbnail_height))
     }
-    Home()
+    Home(paddingValues)
   }
 }
 

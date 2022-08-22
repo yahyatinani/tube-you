@@ -1,9 +1,12 @@
 package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.graphics.Bitmap
+import android.graphics.Bitmap.createBitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
-import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -11,6 +14,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsCompat
@@ -35,12 +41,18 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
-fun Main(content: @Composable (PaddingValues) -> Unit) {
+fun Main(
+  setNotchAreaColorInLandscape: (Color) -> Unit = {},
+  content: @Composable (PaddingValues) -> Unit
+) {
   VanceTheme {
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = MaterialTheme.colors.isLight
     val backgroundColor = MaterialTheme.colors.background
+
     SideEffect {
+      setNotchAreaColorInLandscape(backgroundColor)
+
       systemUiController.setSystemBarsColor(
         color = backgroundColor,
         darkIcons = useDarkIcons
@@ -56,7 +68,9 @@ class MainActivity : ComponentActivity() {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
       val metrics = windowManager.currentWindowMetrics
       val insets =
-        metrics.windowInsets.getInsets(WindowInsets.Type.systemBars())
+        metrics.windowInsets.getInsets(
+          android.view.WindowInsets.Type.systemBars()
+        )
       metrics.bounds.width() - insets.left - insets.right
     }
     else -> {
@@ -99,7 +113,17 @@ class MainActivity : ComponentActivity() {
       }
       regBaseFx(navController)
 
-      Main {
+      val configuration = LocalConfiguration.current
+      Main(
+        setNotchAreaColorInLandscape = {
+          if (configuration.orientation == ORIENTATION_LANDSCAPE) {
+            val bitmap = createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply {
+              eraseColor(it.toArgb())
+            }
+            window.setBackgroundDrawable(BitmapDrawable(resources, bitmap))
+          }
+        }
+      ) {
         AnimatedNavHost(
           navController = navController,
           startDestination = home.panel.name
@@ -119,11 +143,11 @@ fun MainPreview() {
   initAppDb()
   regBaseEventHandlers()
   regBaseSubs()
-  Main {}
+//  Main(window = ) {}
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun MainDarkPreview() {
-  Main {}
+//  Main {}
 }

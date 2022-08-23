@@ -12,12 +12,12 @@ plugins {
 }
 
 android {
-  compileSdk = 32
+  compileSdk = 33
 
   defaultConfig {
     applicationId = APP_ID
     minSdk = 23
-    targetSdk = 32
+    targetSdk = 33
     versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
     versionName = "$versionMajor.$versionMinor.$versionPatch"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -28,7 +28,6 @@ android {
 
   signingConfigs {
     create("release") {
-      // TODO: Remember to sing your app before release.
       storeFile = keyStoreBase64ToStoreFile(System.getenv("SIGNING_KEY_BASE64"))
       storePassword = System.getenv("KEYSTORE_PASSWORD")
       keyAlias = System.getenv("KEY_ALIAS")
@@ -49,17 +48,19 @@ android {
         signingConfig = signingConfigs.getByName("debug")
     }
     release {
+      //isDebuggable = true // TODO: Remove when done
       isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
       )
-      signingConfig = signingConfigs.getByName("release")
       resValue(
         type = "string",
         name = "app_version",
         value = "${defaultConfig.versionName}"
       )
+      signingConfig = signingConfigs.getByName("release")
     }
   }
 

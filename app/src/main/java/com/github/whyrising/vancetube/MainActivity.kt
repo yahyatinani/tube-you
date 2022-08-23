@@ -100,8 +100,16 @@ class MainActivity : ComponentActivity() {
     regHomeSubs(this)
 
     regCofx(home.thumbnail_height) { coeffects: Coeffects ->
-      val heightInPixels = (screenWidthPx() * 720) / 1280
-      coeffects.assoc(home.thumbnail_height, pxToDp(heightInPixels))
+      val nativeThumbnailHeight = 720
+      val relativeHeightInPx = (screenWidthPx() * nativeThumbnailHeight) / 1280
+      val heightInPx = when {
+        relativeHeightInPx > nativeThumbnailHeight -> nativeThumbnailHeight
+        else -> relativeHeightInPx
+      }
+      coeffects.assoc(
+        home.thumbnail_height,
+        pxToDp(heightInPx)
+      )
     }
 
     setContent {

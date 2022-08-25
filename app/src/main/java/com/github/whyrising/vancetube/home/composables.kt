@@ -86,13 +86,6 @@ fun VideoLengthText(
 }
 
 @Composable
-fun LoadingIndicator() {
-  if (subscribe<Boolean>(v(home.is_loading)).w()) {
-    CircularProgressIndicator(color = Color.Cyan)
-  }
-}
-
-@Composable
 fun Thumbnail(modifier: Modifier = Modifier, url: String?) {
   AsyncImage(
     model = url,
@@ -179,11 +172,13 @@ fun PopularVideosList(paddingValues: PaddingValues = PaddingValues()) {
 @Composable
 fun Home(paddingValues: PaddingValues = PaddingValues()) {
   Surface(modifier = Modifier.fillMaxSize()) {
+    val isLoading = subscribe<Boolean>(v(home.is_loading)).w()
     SwipeRefresh(
       state = rememberSwipeRefreshState(
         isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()
       ),
       onRefresh = { dispatch(v(home.refresh)) },
+      swipeEnabled = !isLoading,
       indicatorPadding = paddingValues
     ) {
       Box(
@@ -191,7 +186,9 @@ fun Home(paddingValues: PaddingValues = PaddingValues()) {
         contentAlignment = Alignment.Center
       ) {
         PopularVideosList(paddingValues)
-        LoadingIndicator()
+        if (isLoading) {
+          CircularProgressIndicator(color = Color.Cyan)
+        }
       }
     }
   }

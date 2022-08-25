@@ -16,7 +16,6 @@ val TypographyCompact = Typography(
   )
 )
 
-
 val TypographyExpanded = Typography(
   caption = TextStyle(
     fontFamily = FontFamily.Default,

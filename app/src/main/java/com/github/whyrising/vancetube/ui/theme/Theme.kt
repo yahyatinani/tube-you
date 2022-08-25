@@ -1,10 +1,18 @@
+@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+
 package com.github.whyrising.vancetube.ui.theme
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize.Companion.Zero
 
 private val DarkColorPalette = darkColors(
   primary = Purple200,
@@ -28,19 +36,30 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
+fun isPhone(windowSizeClass: WindowSizeClass) =
+  (
+    windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
+      windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
+    )
+
+@Composable
 fun VanceTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
+  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
   content: @Composable () -> Unit
 ) {
-  val colors = if (darkTheme) {
-    DarkColorPalette
-  } else {
-    LightColorPalette
+  Log.i(
+    "VanceTheme",
+    "${windowSizeClass.widthSizeClass},${windowSizeClass.heightSizeClass}"
+  )
+  val typography = when {
+    isPhone(windowSizeClass) -> TypographyCompact
+    else -> TypographyExpanded
   }
 
   MaterialTheme(
-    colors = colors,
-    typography = Typography,
+    colors = if (darkTheme) DarkColorPalette else LightColorPalette,
+    typography = typography,
     shapes = Shapes,
     content = content
   )

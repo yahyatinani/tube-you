@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,44 +42,59 @@ import com.github.whyrising.y.core.v
 import kotlin.math.roundToInt
 
 @Composable
-fun BottomNavigationBar(backgroundColor: Color) {
+fun BottomNavigationBar(
+  backgroundColor: Color,
+  windowSizeClass: WindowSizeClass
+) {
   CustomBottomNavigation(
     backgroundColor = backgroundColor,
-    elevation = 0.dp
+    elevation = 0.dp,
+    windowSizeClass = windowSizeClass
   ) {
     VanceBottomNavigationItem(
       selected = true,
       onClick = { /*TODO*/ },
-      label = { SmallLabelText(text = "Home") },
+      label = {
+        SmallLabelText(text = "Home")
+      },
       icon = {
         Icon(
           imageVector = Icons.Filled.Home,
           contentDescription = "Home panel",
           tint = MaterialTheme.colors.onBackground
         )
-      }
+      },
+      windowSizeClass = windowSizeClass
     )
+
     VanceBottomNavigationItem(
       selected = false,
       onClick = { /*TODO*/ },
-      label = { SmallLabelText(text = "Subscriptions") },
+      label = {
+        SmallLabelText(text = "Subscriptions")
+      },
       icon = {
         Icon(
           imageVector = Icons.Outlined.PlayArrow,
           contentDescription = "Library panel"
         )
-      }
+      },
+      windowSizeClass = windowSizeClass
     )
+
     VanceBottomNavigationItem(
       selected = false,
       onClick = { /*TODO*/ },
-      label = { SmallLabelText(text = "Library") },
+      label = {
+        SmallLabelText(text = "Library")
+      },
       icon = {
         Icon(
           imageVector = Icons.Outlined.List,
           contentDescription = "Library panel"
         )
-      }
+      },
+      windowSizeClass = windowSizeClass
     )
   }
 }
@@ -88,6 +104,7 @@ val TOP_APP_BAR_HEIGHT = 48.dp
 @Composable
 fun BasePanel(
   backgroundColor: Color = MaterialTheme.colors.background,
+  windowSizeClass: WindowSizeClass,
   content: @Composable (PaddingValues) -> Unit
 ) {
   val topBarHeightPx = with(LocalDensity.current) {
@@ -145,7 +162,7 @@ fun BasePanel(
       )
     },
     bottomBar = {
-      BottomNavigationBar(backgroundColor)
+      BottomNavigationBar(backgroundColor, windowSizeClass)
     }
   ) {
     content(PaddingValues(top = TOP_APP_BAR_HEIGHT))
@@ -157,7 +174,10 @@ fun BasePanel(
 @Composable
 fun BottomNavBarPreview() {
   VanceTheme {
-    BottomNavigationBar(backgroundColor = MaterialTheme.colors.background)
+//    BottomNavigationBar(
+//      backgroundColor = MaterialTheme.colors.background,
+//      windowSizeClass = androidx.compose.material3.windowsizeclass.WindowSizeClass.
+//    )
   }
 }
 
@@ -168,7 +188,7 @@ fun BasePanelPreview() {
   regBaseEventHandlers()
   regBaseSubs()
   VanceTheme {
-    BasePanel {}
+//    BasePanel {}
   }
 }
 
@@ -176,6 +196,6 @@ fun BasePanelPreview() {
 @Composable
 fun BasePanelDarkPreview() {
   VanceTheme {
-    BasePanel {}
+//    BasePanel {}
   }
 }

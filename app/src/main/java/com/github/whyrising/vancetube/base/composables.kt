@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -19,6 +20,8 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -42,6 +45,28 @@ import com.github.whyrising.vancetube.ui.theme.composables.SmallLabelText
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavigationItem
 import com.github.whyrising.y.core.v
 import kotlin.math.roundToInt
+
+fun LazyListState.canBeScrolled(): State<Boolean> = derivedStateOf {
+  val layoutInfo = layoutInfo
+  val visibleItemsInfo = layoutInfo.visibleItemsInfo
+
+  if (layoutInfo.totalItemsCount == 0) {
+    false
+  } else {
+    val firstVisibleItem = visibleItemsInfo.first()
+    val lastVisibleItem = visibleItemsInfo.last()
+
+    val viewportHeight =
+      layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
+
+    !(
+      firstVisibleItem.index == 0 &&
+        firstVisibleItem.offset == 0 &&
+        lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
+        lastVisibleItem.offset + lastVisibleItem.size <= viewportHeight
+      )
+  }
+}
 
 @Composable
 fun BottomNavigationBar(
@@ -129,7 +154,12 @@ fun BasePanel(
   }
 
   VanceScaffold(
-    modifier = Modifier.nestedScroll(nestedScrollConnection),
+    modifier = Modifier.then(
+      when {
+        subscribe<Boolean>(v(base.is_top_bar_fixed)).w() -> Modifier
+        else -> Modifier.nestedScroll(nestedScrollConnection)
+      }
+    ),
     topBar = {
       TopAppBar(
         modifier = Modifier

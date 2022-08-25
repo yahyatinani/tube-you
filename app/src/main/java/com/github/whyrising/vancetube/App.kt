@@ -24,6 +24,7 @@ fun initAppDb() {
     m(
       base.is_backstack_available to false,
       base.api to API,
+      base.is_top_bar_fixed to true,
       home.panel to m(
         home.popular_vids to v<VideoMetadata>(),
         home.is_loading to true,

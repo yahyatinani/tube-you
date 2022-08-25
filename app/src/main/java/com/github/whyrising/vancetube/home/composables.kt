@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha.medium
@@ -30,7 +31,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +55,8 @@ import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.AppDb
+import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.vancetube.base.canBeScrolled
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
@@ -156,8 +162,12 @@ fun VideoListItem(viewModel: VideoViewModel) {
 fun PopularVideosList(paddingValues: PaddingValues = PaddingValues()) {
   val videos =
     subscribe<List<VideoViewModel>>(v(home.popular_vids_formatted)).w()
+
+  val state = rememberLazyListState()
+
   LazyColumn(
     modifier = Modifier.fillMaxSize(),
+    state = state,
     contentPadding = paddingValues
   ) {
     items(
@@ -166,6 +176,10 @@ fun PopularVideosList(paddingValues: PaddingValues = PaddingValues()) {
     ) { videoVm ->
       VideoListItem(viewModel = videoVm)
     }
+  }
+  val canBeScrolled by remember { state.canBeScrolled() }
+  LaunchedEffect(key1 = canBeScrolled) {
+    dispatch(v(base.is_top_bar_fixed, canBeScrolled))
   }
 }
 

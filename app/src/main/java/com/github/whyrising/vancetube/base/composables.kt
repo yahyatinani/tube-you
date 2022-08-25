@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.subscribe
@@ -101,10 +103,11 @@ fun BottomNavigationBar(
 
 val TOP_APP_BAR_HEIGHT = 48.dp
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun BasePanel(
   backgroundColor: Color = MaterialTheme.colors.background,
-  windowSizeClass: WindowSizeClass,
+  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
   content: @Composable (PaddingValues) -> Unit
 ) {
   val topBarHeightPx = with(LocalDensity.current) {
@@ -170,14 +173,15 @@ fun BasePanel(
 }
 
 // -- Previews -----------------------------------------------------------------
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
 @Composable
 fun BottomNavBarPreview() {
   VanceTheme {
-//    BottomNavigationBar(
-//      backgroundColor = MaterialTheme.colors.background,
-//      windowSizeClass = androidx.compose.material3.windowsizeclass.WindowSizeClass.
-//    )
+    BottomNavigationBar(
+      backgroundColor = MaterialTheme.colors.background,
+      windowSizeClass = WindowSizeClass.calculateFromSize(Zero)
+    )
   }
 }
 
@@ -188,7 +192,7 @@ fun BasePanelPreview() {
   regBaseEventHandlers()
   regBaseSubs()
   VanceTheme {
-//    BasePanel {}
+    BasePanel {}
   }
 }
 
@@ -196,6 +200,6 @@ fun BasePanelPreview() {
 @Composable
 fun BasePanelDarkPreview() {
   VanceTheme {
-//    BasePanel {}
+    BasePanel {}
   }
 }

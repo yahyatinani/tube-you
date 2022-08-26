@@ -6,6 +6,7 @@ import com.github.whyrising.recompose.regFx
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.v
 import io.ktor.client.HttpClient
+import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpRequestTimeoutException
@@ -68,6 +69,8 @@ fun regHomeFx(scope: CoroutineScope) {
         Log.e("UnknownHostException", "$e")
       } catch (e: HttpRequestTimeoutException) {
         TODO("HttpRequestTimeoutException : ${e.message}")
+      } catch (e: NoTransformationFoundException) {
+        TODO("504 Gateway Time-out: $e")
       } catch (e: Exception) {
         throw e
       }

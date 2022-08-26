@@ -1,7 +1,5 @@
 package com.github.whyrising.vancetube.home
 
-import android.util.Log
-import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
@@ -29,16 +27,6 @@ fun regHomeEvents() {
     val appDb = cofx[db] as IPersistentMap<Any, Any>
     val api = get(appDb, base.api)
     m(fx to v(v(home.get_popular_vids, api)))
-  }
-
-  regEventFx(
-    id = home.thumbnail_height,
-    interceptors = v(injectCofx(home.thumbnail_height))
-  ) { cofx, _ ->
-    val appDb = cofx[db] as AppDb
-    val height = cofx[home.thumbnail_height] as Int
-    Log.w("height", "$height")
-    m(db to assocIn(appDb, l(home.panel, home.thumbnail_height), height))
   }
 
   regEventDb<AppDb>(home.is_loading) { db, (_, flag) ->

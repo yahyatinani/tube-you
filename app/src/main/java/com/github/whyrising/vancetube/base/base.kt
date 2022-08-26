@@ -6,5 +6,6 @@ enum class base {
   go_back,
   set_backstack_status,
   is_backstack_available,
-  api
+  api,
+  is_top_bar_fixed
 }

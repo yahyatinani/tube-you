@@ -7,11 +7,15 @@ import android.graphics.Bitmap.createBitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -21,8 +25,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.github.whyrising.recompose.cofx.Coeffects
-import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.about.about
 import com.github.whyrising.vancetube.base.BasePanel
@@ -43,9 +45,10 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 @Composable
 fun Main(
   setNotchAreaColorInLandscape: (Color) -> Unit = {},
+  windowSizeClass: WindowSizeClass,
   content: @Composable (PaddingValues) -> Unit
 ) {
-  VanceTheme {
+  VanceTheme(windowSizeClass = windowSizeClass) {
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = MaterialTheme.colors.isLight
     val backgroundColor = MaterialTheme.colors.background
@@ -59,7 +62,7 @@ fun Main(
       )
     }
 
-    BasePanel(backgroundColor, content)
+    BasePanel(backgroundColor, windowSizeClass, content)
   }
 }
 
@@ -85,7 +88,10 @@ class MainActivity : ComponentActivity() {
   private fun pxToDp(inPx: Int) =
     (inPx / resources.displayMetrics.density).toInt()
 
-  @OptIn(ExperimentalAnimationApi::class)
+  @OptIn(
+    ExperimentalAnimationApi::class,
+    ExperimentalMaterial3WindowSizeClassApi::class
+  )
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen().apply {
       // TODO: remove this.
@@ -99,20 +105,10 @@ class MainActivity : ComponentActivity() {
     regHomeFx(lifecycleScope)
     regHomeSubs(this)
 
-    regCofx(home.thumbnail_height) { coeffects: Coeffects ->
-      val nativeThumbnailHeight = 720
-      val relativeHeightInPx = (screenWidthPx() * nativeThumbnailHeight) / 1280
-      val heightInPx = when {
-        relativeHeightInPx > nativeThumbnailHeight -> nativeThumbnailHeight
-        else -> relativeHeightInPx
-      }
-      coeffects.assoc(
-        home.thumbnail_height,
-        pxToDp(heightInPx)
-      )
-    }
-
     setContent {
+      val windowSizeClass: WindowSizeClass = calculateWindowSizeClass(this)
+      Log.i("windowSizeClass", "$windowSizeClass")
+
       val navController = rememberAnimatedNavController().apply {
         addOnDestinationChangedListener { controller, _, _ ->
           val flag = controller.previousBackStackEntry != null
@@ -130,13 +126,14 @@ class MainActivity : ComponentActivity() {
             }
             window.setBackgroundDrawable(BitmapDrawable(resources, bitmap))
           }
-        }
+        },
+        windowSizeClass
       ) {
         AnimatedNavHost(
           navController = navController,
           startDestination = home.panel.name
         ) {
-          home(animOffSetX = 300, it)
+          home(animOffSetX = 300, it, windowSizeClass)
           about(animOffSetX = 300)
         }
       }

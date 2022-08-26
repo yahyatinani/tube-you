@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -16,7 +17,11 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,6 +32,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.subscribe
@@ -40,54 +46,93 @@ import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavigation
 import com.github.whyrising.y.core.v
 import kotlin.math.roundToInt
 
+fun LazyListState.canBeScrolled(): State<Boolean> = derivedStateOf {
+  val layoutInfo = layoutInfo
+  val visibleItemsInfo = layoutInfo.visibleItemsInfo
+
+  if (layoutInfo.totalItemsCount == 0) {
+    false
+  } else {
+    val firstVisibleItem = visibleItemsInfo.first()
+    val lastVisibleItem = visibleItemsInfo.last()
+
+    val viewportHeight =
+      layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
+
+    !(
+      firstVisibleItem.index == 0 &&
+        firstVisibleItem.offset == 0 &&
+        lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
+        lastVisibleItem.offset + lastVisibleItem.size <= viewportHeight
+      )
+  }
+}
+
 @Composable
-fun BottomNavigationBar(backgroundColor: Color) {
+fun BottomNavigationBar(
+  backgroundColor: Color,
+  windowSizeClass: WindowSizeClass
+) {
   CustomBottomNavigation(
     backgroundColor = backgroundColor,
-    elevation = 0.dp
+    elevation = 0.dp,
+    windowSizeClass = windowSizeClass
   ) {
     VanceBottomNavigationItem(
       selected = true,
       onClick = { /*TODO*/ },
-      label = { SmallLabelText(text = "Home") },
+      label = {
+        SmallLabelText(text = "Home")
+      },
       icon = {
         Icon(
           imageVector = Icons.Filled.Home,
           contentDescription = "Home panel",
           tint = MaterialTheme.colors.onBackground
         )
-      }
+      },
+      windowSizeClass = windowSizeClass
     )
+
     VanceBottomNavigationItem(
       selected = false,
       onClick = { /*TODO*/ },
-      label = { SmallLabelText(text = "Subscriptions") },
+      label = {
+        SmallLabelText(text = "Subscriptions")
+      },
       icon = {
         Icon(
           imageVector = Icons.Outlined.PlayArrow,
           contentDescription = "Library panel"
         )
-      }
+      },
+      windowSizeClass = windowSizeClass
     )
+
     VanceBottomNavigationItem(
       selected = false,
       onClick = { /*TODO*/ },
-      label = { SmallLabelText(text = "Library") },
+      label = {
+        SmallLabelText(text = "Library")
+      },
       icon = {
         Icon(
           imageVector = Icons.Outlined.List,
           contentDescription = "Library panel"
         )
-      }
+      },
+      windowSizeClass = windowSizeClass
     )
   }
 }
 
 val TOP_APP_BAR_HEIGHT = 48.dp
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun BasePanel(
   backgroundColor: Color = MaterialTheme.colors.background,
+  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
   content: @Composable (PaddingValues) -> Unit
 ) {
   val topBarHeightPx = with(LocalDensity.current) {
@@ -109,7 +154,12 @@ fun BasePanel(
   }
 
   VanceScaffold(
-    modifier = Modifier.nestedScroll(nestedScrollConnection),
+    modifier = Modifier.then(
+      when {
+        subscribe<Boolean>(v(base.is_top_bar_fixed)).w() -> Modifier
+        else -> Modifier.nestedScroll(nestedScrollConnection)
+      }
+    ),
     topBar = {
       TopAppBar(
         modifier = Modifier
@@ -145,7 +195,7 @@ fun BasePanel(
       )
     },
     bottomBar = {
-      BottomNavigationBar(backgroundColor)
+      BottomNavigationBar(backgroundColor, windowSizeClass)
     }
   ) {
     content(PaddingValues(top = TOP_APP_BAR_HEIGHT))
@@ -153,11 +203,15 @@ fun BasePanel(
 }
 
 // -- Previews -----------------------------------------------------------------
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
 @Composable
 fun BottomNavBarPreview() {
   VanceTheme {
-    BottomNavigationBar(backgroundColor = MaterialTheme.colors.background)
+    BottomNavigationBar(
+      backgroundColor = MaterialTheme.colors.background,
+      windowSizeClass = WindowSizeClass.calculateFromSize(Zero)
+    )
   }
 }
 

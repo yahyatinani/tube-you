@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.y.core.v
@@ -36,7 +35,6 @@ fun SmallLabelText(text: String) {
   Text(
     text = text,
     style = MaterialTheme.typography.caption
-      .copy(fontSize = 9.sp)
   )
 }
 

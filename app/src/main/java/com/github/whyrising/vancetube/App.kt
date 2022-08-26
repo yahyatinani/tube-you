@@ -15,7 +15,8 @@ const val https = "https://"
 
 // const val DEFAULT_BASE_ADDRESS = "invidious.tiekoetter.com"
 // const val DEFAULT_BASE_ADDRESS = "invidious.namazso.eu" // empty
-const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
+// const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
+const val DEFAULT_BASE_ADDRESS = "y.com.sb"
 
 const val API = "$https$DEFAULT_BASE_ADDRESS/api/v1"
 
@@ -24,6 +25,7 @@ fun initAppDb() {
     m(
       base.is_backstack_available to false,
       base.api to API,
+      base.is_top_bar_fixed to true,
       home.panel to m(
         home.popular_vids to v<VideoMetadata>(),
         home.is_loading to true,

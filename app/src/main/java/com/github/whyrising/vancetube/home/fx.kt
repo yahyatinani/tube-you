@@ -69,10 +69,9 @@ fun regHomeFx(scope: CoroutineScope) {
         Log.e("UnknownHostException", "$e")
       } catch (e: HttpRequestTimeoutException) {
         TODO("HttpRequestTimeoutException : ${e.message}")
-      } catch (e:NoTransformationFoundException) {
+      } catch (e: NoTransformationFoundException) {
         TODO("504 Gateway Time-out: $e")
-      }
-      catch (e: Exception) {
+      } catch (e: Exception) {
         throw e
       }
     }

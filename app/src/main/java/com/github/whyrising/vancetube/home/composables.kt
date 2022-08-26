@@ -134,7 +134,7 @@ fun VideoItemInfo(viewModel: VideoViewModel) {
               Toast.LENGTH_SHORT
             ).show()
           }
-      },
+      }
     )
   }
 }
@@ -217,9 +217,10 @@ fun VideoListItemPortraitCompact(viewModel: VideoViewModel) {
 
 @Composable
 fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
-  Row(modifier = Modifier
-    .padding(vertical = 8.dp)
-    .clickable { /*todo:*/ }
+  Row(
+    modifier = Modifier
+      .padding(vertical = 8.dp)
+      .clickable { /*todo:*/ }
   ) {
     ThumbnailComposable(
       modifier = Modifier.weight(.24f),
@@ -264,11 +265,15 @@ fun PopularVideosList(
       items = videos,
       key = { it.id }
     ) { viewModel ->
-      if (isHeightCompact)
-        VideoListItemLandscapeCompact(viewModel)
-      else if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact)
-        VideoListItemPortraitCompact(viewModel = viewModel)
-      else TODO("Wide screens")
+      when {
+        isHeightCompact -> VideoListItemLandscapeCompact(viewModel)
+        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact -> {
+          VideoListItemPortraitCompact(viewModel = viewModel)
+        }
+        else -> {
+          TODO("Wide screens")
+        }
+      }
     }
   }
 }

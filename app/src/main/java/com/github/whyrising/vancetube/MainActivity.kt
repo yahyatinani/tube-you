@@ -107,19 +107,6 @@ class MainActivity : ComponentActivity() {
     regHomeFx(lifecycleScope)
     regHomeSubs(this)
 
-    regCofx(home.thumbnail_height) { coeffects: Coeffects ->
-      val nativeThumbnailHeight = 720
-      val relativeHeightInPx = (screenWidthPx() * nativeThumbnailHeight) / 1280
-      val heightInPx = when {
-        relativeHeightInPx > nativeThumbnailHeight -> nativeThumbnailHeight
-        else -> relativeHeightInPx
-      }
-      coeffects.assoc(
-        home.thumbnail_height,
-        pxToDp(heightInPx)
-      )
-    }
-
     setContent {
       val windowSizeClass: WindowSizeClass = calculateWindowSizeClass(this)
       Log.i("windowSizeClass", "$windowSizeClass")
@@ -148,7 +135,7 @@ class MainActivity : ComponentActivity() {
           navController = navController,
           startDestination = home.panel.name
         ) {
-          home(animOffSetX = 300, it)
+          home(animOffSetX = 300, it, windowSizeClass)
           about(animOffSetX = 300)
         }
       }

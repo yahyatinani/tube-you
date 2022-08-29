@@ -352,8 +352,9 @@ fun PopularVideosGrid() {
   }
   Log.i("Count", "these")
   LazyVerticalGrid(
-    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 72.dp),
+    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 56.dp),
     columns = GridCells.Fixed(columnsCount),
+    contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalArrangement = Arrangement.spacedBy(50.dp)
   ) {

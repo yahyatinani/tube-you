@@ -19,8 +19,8 @@ import java.text.DecimalFormat
 
 fun homePanel(db: AppDb) = (db[home.panel] as AppDb)
 
-fun popularVideos(db: AppDb): PersistentVector<VideoMetadata> =
-  homePanel(db)[home.popular_vids] as PersistentVector<VideoMetadata>? ?: v()
+fun popularVideos(db: AppDb): PersistentVector<VideoData> =
+  homePanel(db)[home.popular_vids] as PersistentVector<VideoData>? ?: v()
 
 fun formatSeconds(seconds: Int): String {
   val format = "%02d"
@@ -89,20 +89,11 @@ enum class VideoIds {
   info
 }
 
-data class VideoViewModel(
-  val id: String,
-  val authorId: String,
-  val title: String,
-  val thumbnail: String,
-  val length: String,
-  val info: AnnotatedString
-)
-
 fun regHomeSubs(context: Context) {
   regSub<AppDb, Any>(home.popular_vids) { db, _ ->
     popularVideos(db)
   }
-  regSub<PersistentVector<VideoMetadata>, Any>(
+  regSub<PersistentVector<VideoData>, Any>(
     queryId = home.popular_vids_formatted,
     signalsFn = { subscribe(v(home.popular_vids)) },
     placeholder = v<VideoViewModel>(),
@@ -114,7 +105,7 @@ fun regHomeSubs(context: Context) {
             id = videoMetadata.videoId,
             authorId = videoMetadata.authorId,
             title = videoMetadata.title,
-            thumbnail = videoMetadata.videoThumbnails[1].url,
+            thumbnail = videoMetadata.videoThumbnails[4].url,
             length = formatSeconds(videoMetadata.lengthSeconds),
             info = formatVideoInfo(
               author = videoMetadata.author,

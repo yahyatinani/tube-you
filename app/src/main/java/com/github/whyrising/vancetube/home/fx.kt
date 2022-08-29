@@ -61,7 +61,7 @@ fun regHomeFx(scope: CoroutineScope) {
           502 -> TODO("502 Bad Gateway")
         }
         val popularVideos = httpResponse
-          .body<PersistentVector<VideoMetadata>>()
+          .body<PersistentVector<VideoData>>()
 
         dispatch(v(home.set_popular_vids, popularVideos))
       } catch (e: UnknownHostException) {

@@ -5,7 +5,7 @@ import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.base.init_db
-import com.github.whyrising.vancetube.home.VideoMetadata
+import com.github.whyrising.vancetube.home.VideoData
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.m
@@ -15,8 +15,8 @@ const val https = "https://"
 
 // const val DEFAULT_BASE_ADDRESS = "invidious.tiekoetter.com"
 // const val DEFAULT_BASE_ADDRESS = "invidious.namazso.eu" // empty
-// const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
-const val DEFAULT_BASE_ADDRESS = "y.com.sb"
+ const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
+//const val DEFAULT_BASE_ADDRESS = "y.com.sb"
 
 const val API = "$https$DEFAULT_BASE_ADDRESS/api/v1"
 
@@ -27,7 +27,7 @@ fun initAppDb() {
       base.api to API,
       base.is_top_bar_fixed to true,
       home.panel to m(
-        home.popular_vids to v<VideoMetadata>(),
+        home.popular_vids to v<VideoData>(),
         home.is_loading to true,
         home.is_refreshing to false
       )

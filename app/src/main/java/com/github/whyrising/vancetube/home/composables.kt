@@ -1,10 +1,13 @@
 package com.github.whyrising.vancetube.home
 
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,9 +39,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.PlatformTextStyle
@@ -58,6 +63,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ChainStyle
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavGraphBuilder
 import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
@@ -72,11 +80,14 @@ import com.github.whyrising.vancetube.home.home.popular_vids_formatted
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
+import com.github.whyrising.vancetube.ui.theme.Blue300
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
+import com.github.whyrising.vancetube.ui.theme.composables.isCompact
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlin.system.measureNanoTime
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -106,23 +117,28 @@ fun VideoLengthText(
 fun VideoItemTitle(modifier: Modifier = Modifier, viewModel: VideoViewModel) {
   Text(
     text = viewModel.title,
-    modifier = modifier.fillMaxWidth(),
+    modifier = modifier,
     maxLines = 2,
     softWrap = true,
     overflow = TextOverflow.Ellipsis,
-    style = MaterialTheme.typography.subtitle2
+    style = MaterialTheme.typography.subtitle2.copy(fontWeight = FontWeight.W700)
   )
 }
 
 @Composable
-fun VideoItemInfo(viewModel: VideoViewModel) {
+fun VideoItemInfo(
+  viewModel: VideoViewModel,
+  modifier: Modifier = Modifier,
+  textStyle: TextStyle = TextStyle.Default
+) {
   val videoInfo = viewModel.info
   val context = LocalContext.current
   CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
     val color = LocalContentColor.current.copy(LocalContentAlpha.current)
     ClickableText(
       text = videoInfo,
-      style = TextStyle.Default.copy(color = color, fontSize = 12.sp),
+      modifier = modifier,
+      style = textStyle.copy(color = color),
       onClick = {
         videoInfo
           .getStringAnnotations("author", it, it)
@@ -140,9 +156,9 @@ fun VideoItemInfo(viewModel: VideoViewModel) {
 }
 
 @Composable
-fun VideoItemMoreButton() {
+fun VideoItemMoreButton(modifier: Modifier = Modifier) {
   IconButton(
-    modifier = Modifier.size(20.dp),
+    modifier = modifier.size(20.dp),
     onClick = { /*TODO*/ }
   ) {
     Icon(
@@ -158,7 +174,6 @@ fun ThumbnailImage(modifier: Modifier = Modifier, url: String?) {
     model = url,
     contentDescription = "thumbnail",
     modifier = modifier
-      .fillMaxWidth()
       .background(Color.DarkGray)
       .layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
@@ -168,18 +183,18 @@ fun ThumbnailImage(modifier: Modifier = Modifier, url: String?) {
           placeable.placeRelative(0, 0)
         }
       },
-    contentScale = ContentScale.Fit
+    contentScale = ContentScale.FillWidth
   )
 }
 
 @Composable
-fun ThumbnailComposable(
+fun Thumbnail(
   modifier: Modifier,
   viewModel: VideoViewModel
 ) {
   Box(modifier = modifier, contentAlignment = Alignment.BottomEnd) {
     ThumbnailImage(
-      modifier = modifier,
+      modifier = modifier.fillMaxWidth(),
       url = viewModel.thumbnail
     )
     VideoLengthText(
@@ -190,22 +205,29 @@ fun ThumbnailComposable(
 }
 
 @Composable
-fun VideoListItemPortraitCompact(viewModel: VideoViewModel) {
+fun VideoItemPortrait(
+  modifier: Modifier = Modifier,
+  videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
+  viewModel: VideoViewModel
+) {
   Column(modifier = Modifier.clickable { /*todo:*/ }) {
-    ThumbnailComposable(
+    Thumbnail(
       modifier = Modifier.fillMaxWidth(),
       viewModel = viewModel
     )
     Row(
-      modifier = Modifier
+      modifier = modifier
         .fillMaxWidth()
-        .padding(top = 8.dp, start = 10.dp, end = 4.dp)
-        .padding(bottom = 24.dp)
+        .padding(top = 8.dp, end = 4.dp)
+        .padding(bottom = 48.dp)
     ) {
       Column(modifier = Modifier.weight(1f)) {
         VideoItemTitle(viewModel = viewModel)
         Spacer(modifier = Modifier.height(4.dp))
-        VideoItemInfo(viewModel)
+        VideoItemInfo(
+          viewModel = viewModel,
+          textStyle = videoInfoTextStyle
+        )
       }
 
       Spacer(modifier = Modifier.width(24.dp))
@@ -222,7 +244,7 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
       .padding(vertical = 8.dp)
       .clickable { /*todo:*/ }
   ) {
-    ThumbnailComposable(
+    Thumbnail(
       modifier = Modifier.weight(.24f),
       viewModel = viewModel
     )
@@ -239,24 +261,135 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
   }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun PopularVideosList(
-  paddingValues: PaddingValues = PaddingValues(),
-  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero)
-) {
+fun PerformantVideoItemPortrait(viewModel: VideoViewModel) {
+  ConstraintLayout(
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable { /*todo:*/ }
+  ) {
+    val (thumbnailImg, length, title, info, moreBtn) = createRefs()
+
+    val horizontalChain =
+      createHorizontalChain(title, moreBtn, chainStyle = ChainStyle.Spread)
+
+    constrain(horizontalChain) {
+      start.linkTo(parent.start)
+    }
+
+    AsyncImage(
+      model = viewModel.thumbnail,
+      contentDescription = "thumbnail",
+      modifier = Modifier
+        .background(Color.DarkGray)
+        .layout { measurable, constraints ->
+          val placeable = measurable.measure(constraints)
+          val width = placeable.width
+          val relativeHeightPx = (width * 720) / 1280
+          layout(width, relativeHeightPx) {
+            placeable.placeRelative(0, 0)
+          }
+        }
+        .constrainAs(thumbnailImg) {
+          top.linkTo(parent.top)
+          start.linkTo(parent.start)
+          end.linkTo(parent.end)
+          width = Dimension.fillToConstraints
+          height = Dimension.preferredWrapContent
+        },
+      contentScale = ContentScale.FillWidth
+    )
+    VideoLengthText(
+      modifier = Modifier
+        .constrainAs(length) {
+          bottom.linkTo(thumbnailImg.bottom, 8.dp)
+          end.linkTo(parent.end, 8.dp)
+        },
+      videoLength = viewModel.length
+    )
+    Text(
+      text = viewModel.title,
+      modifier = Modifier
+        .constrainAs(title) {
+          start.linkTo(parent.start)
+          end.linkTo(parent.end)
+          top.linkTo(thumbnailImg.bottom, 10.dp)
+          width = Dimension.fillToConstraints
+        },
+      maxLines = 2,
+      softWrap = true,
+      overflow = TextOverflow.Ellipsis,
+      style = MaterialTheme.typography.subtitle2.copy(fontWeight = FontWeight.W700)
+    )
+
+    VideoItemMoreButton(
+      modifier = Modifier
+        .constrainAs(moreBtn) {
+          top.linkTo(thumbnailImg.bottom, 10.dp)
+        }
+    )
+
+    VideoItemInfo(
+      viewModel = viewModel,
+      modifier = Modifier
+        .padding(bottom = 24.dp)
+        .constrainAs(info) {
+          start.linkTo(parent.start)
+          top.linkTo(title.bottom, margin = 2.dp)
+        },
+      textStyle = TextStyle.Default.copy(fontSize = 14.sp)
+    )
+  }
+}
+
+@Composable
+fun PopularVideosGrid() {
+  val configuration = LocalConfiguration.current
+  val videos = subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
+  val columnsCount = when (configuration.orientation) {
+    ORIENTATION_PORTRAIT -> 2
+    else -> 3
+  }
+  Log.i("Count", "these")
+  LazyVerticalGrid(
+    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 72.dp),
+    columns = GridCells.Fixed(columnsCount),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalArrangement = Arrangement.spacedBy(50.dp)
+  ) {
+    items(
+      items = videos,
+      key = { it.id },
+    ) { viewModel ->
+      val measureNanoTime = measureNanoTime {
+//        VideoItemPortrait(
+//          videoInfoTextStyle = TextStyle.Default.copy(fontSize = 14.sp),
+//          viewModel = viewModel
+//        )
+        PerformantVideoItemPortrait(viewModel = viewModel)
+      }
+      Log.i("item", "$measureNanoTime")
+    }
+  }
+}
+
+@Composable
+fun PopularVideosList(paddingValues: PaddingValues = PaddingValues()) {
   val state = rememberLazyListState()
   val canBeScrolled by remember { state.canBeScrolled() }
   LaunchedEffect(canBeScrolled) { dispatch(v(is_top_bar_fixed, canBeScrolled)) }
-  val videos = subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
-  val isHeightCompact =
-    windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
-
+  val videos =
+    subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
+  val configuration = LocalConfiguration.current
+  Log.i("Count", "these")
   LazyColumn(
     modifier = Modifier
       .fillMaxSize()
       .then(
-        if (isHeightCompact) Modifier.padding(horizontal = 16.dp) else Modifier
+        when (configuration.orientation) {
+          ORIENTATION_PORTRAIT -> Modifier
+          else -> Modifier.padding(horizontal = 16.dp)
+        }
       ),
     state = state,
     contentPadding = paddingValues
@@ -265,16 +398,27 @@ fun PopularVideosList(
       items = videos,
       key = { it.id }
     ) { viewModel ->
-      when {
-        isHeightCompact -> VideoListItemLandscapeCompact(viewModel)
-        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact -> {
-          VideoListItemPortraitCompact(viewModel = viewModel)
+      when (configuration.orientation) {
+        ORIENTATION_PORTRAIT -> {
+          val measureNanoTime = measureNanoTime {
+//            VideoItemPortrait(
+//              modifier = Modifier.padding(start = 10.dp),
+//              viewModel = viewModel
+//            )
+            VideoItemPortrait(viewModel = viewModel)
+          }
+          Log.i("item", "$measureNanoTime")
         }
-        else -> {
-          TODO("Wide screens")
-        }
+        else -> VideoListItemLandscapeCompact(viewModel)
       }
     }
+  }
+}
+
+@Composable
+fun ProgressLoader() {
+  if (subscribe<Boolean>(v(home.is_loading)).w()) {
+    CircularProgressIndicator(color = Blue300)
   }
 }
 
@@ -285,23 +429,26 @@ fun Home(
   windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero)
 ) {
   Surface(modifier = Modifier.fillMaxSize()) {
-    val isLoading = subscribe<Boolean>(v(home.is_loading)).w()
     SwipeRefresh(
-      state = rememberSwipeRefreshState(
-        isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()
-      ),
+      state = rememberSwipeRefreshState(subscribe<Boolean>(v(home.is_refreshing)).w()),
       onRefresh = { dispatch(v(home.refresh)) },
-      swipeEnabled = !isLoading,
+//      swipeEnabled = !isLoading, // todo:
       indicatorPadding = paddingValues
     ) {
       Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
       ) {
-        PopularVideosList(paddingValues, windowSizeClass)
-        if (isLoading) {
-          CircularProgressIndicator(color = Color.Cyan)
+        when {
+          isCompact(windowSizeClass) -> {
+            PopularVideosList(paddingValues = paddingValues)
+          }
+          else -> {
+            PopularVideosGrid()
+          }
         }
+
+        ProgressLoader()
       }
     }
   }
@@ -332,6 +479,30 @@ fun NavGraphBuilder.home(
 fun VideoLengthTextPreview() {
   VanceTheme {
     VideoLengthText(videoLength = "2:23")
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PerformanceItemPreview() {
+  VanceTheme {
+    PerformantVideoItemPortrait(
+      viewModel = VideoViewModel(
+        "#ldfj243kj2r",
+        "2342lk2sdf",
+        "Title title title title title title title title title title " +
+          "title title title title title ",
+        "",
+        "2:23",
+        formatVideoInfo(
+          author = "Jon Deo",
+          authorId = "2342lk2sdf",
+          viewCount = "32432",
+          publishedText = "2 hours ago",
+          viewsLabel = "views"
+        )
+      )
+    )
   }
 }
 

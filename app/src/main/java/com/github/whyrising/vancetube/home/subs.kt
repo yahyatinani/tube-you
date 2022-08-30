@@ -119,9 +119,16 @@ fun regHomeSubs(context: Context) {
       }
     }
   )
-  regSub<AppDb, Boolean>(home.is_loading) { db, _ ->
-    homePanel(db)[home.is_loading] as Boolean
-  }
+
+  regSub<PersistentVector<VideoViewModel>, Boolean>(
+    queryId = home.is_loading,
+    signalsFn = { subscribe(v(home.popular_vids_formatted)) },
+    placeholder = true,
+    computationFn = { vids, _ ->
+      vids.count == 0
+    }
+  )
+
   regSub<AppDb, Boolean>(home.is_refreshing) { db, _ ->
     homePanel(db)[home.is_refreshing] as Boolean
   }

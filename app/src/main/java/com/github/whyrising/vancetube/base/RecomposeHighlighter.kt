@@ -44,9 +44,11 @@ fun Modifier.recomposeHighlighter(): Modifier = this.then(recomposeModifier)
 // Use a single instance + @Stable to ensure that recompositions can enable skipping optimizations
 // Modifier.composed will still remember unique data per call site.
 private val recomposeModifier =
-  Modifier.composed(inspectorInfo = debugInspectorInfo {
-    name = "recomposeHighlighter"
-  }) {
+  Modifier.composed(
+    inspectorInfo = debugInspectorInfo {
+      name = "recomposeHighlighter"
+    }
+  ) {
     // The total number of compositions that have occurred. We're not using a State<> here be
     // able to read/write the value without invalidating (which would cause infinite
     // recomposition).

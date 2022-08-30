@@ -7,7 +7,6 @@ import android.graphics.Bitmap.createBitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -107,7 +106,7 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       val windowSizeClass: WindowSizeClass = calculateWindowSizeClass(this)
-      Log.i("windowSizeClass", "$windowSizeClass")
+      val orientation = LocalConfiguration.current.orientation
 
       val navController = rememberAnimatedNavController().apply {
         addOnDestinationChangedListener { controller, _, _ ->
@@ -133,7 +132,12 @@ class MainActivity : ComponentActivity() {
           navController = navController,
           startDestination = home.panel.name
         ) {
-          home(animOffSetX = 300, it, windowSizeClass)
+          home(
+            animOffSetX = 300,
+            paddingValues = it,
+            windowSizeClass = windowSizeClass,
+            orientation = orientation
+          )
           about(animOffSetX = 300)
         }
       }

@@ -42,7 +42,6 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -51,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.PlatformTextStyle
@@ -69,12 +67,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavGraphBuilder
 import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
-import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.base.AppDb
-import com.github.whyrising.vancetube.base.base.is_top_bar_fixed
 import com.github.whyrising.vancetube.base.canBeScrolled
+import com.github.whyrising.vancetube.base.recomposeHighlighter
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.home.home.popular_vids_formatted
 import com.github.whyrising.vancetube.initAppDb
@@ -121,7 +117,9 @@ fun VideoItemTitle(modifier: Modifier = Modifier, viewModel: VideoViewModel) {
     maxLines = 2,
     softWrap = true,
     overflow = TextOverflow.Ellipsis,
-    style = MaterialTheme.typography.subtitle2.copy(fontWeight = FontWeight.W700)
+    style = MaterialTheme.typography.subtitle2.copy(
+      fontWeight = FontWeight.W700
+    )
   )
 }
 
@@ -218,8 +216,7 @@ fun VideoItemPortrait(
     Row(
       modifier = modifier
         .fillMaxWidth()
-        .padding(top = 8.dp, end = 4.dp)
-        .padding(bottom = 48.dp)
+        .padding(top = 8.dp, end = 4.dp, bottom = 24.dp)
     ) {
       Column(modifier = Modifier.weight(1f)) {
         VideoItemTitle(viewModel = viewModel)
@@ -319,7 +316,9 @@ fun PerformantVideoItemPortrait(viewModel: VideoViewModel) {
       maxLines = 2,
       softWrap = true,
       overflow = TextOverflow.Ellipsis,
-      style = MaterialTheme.typography.subtitle2.copy(fontWeight = FontWeight.W700)
+      style = MaterialTheme.typography.subtitle2.copy(
+        fontWeight = FontWeight.W700
+      )
     )
 
     VideoItemMoreButton(
@@ -343,83 +342,34 @@ fun PerformantVideoItemPortrait(viewModel: VideoViewModel) {
 }
 
 @Composable
-fun PopularVideosGrid() {
-  val configuration = LocalConfiguration.current
-  val videos = subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
-  val columnsCount = when (configuration.orientation) {
-    ORIENTATION_PORTRAIT -> 2
-    else -> 3
-  }
-  Log.i("Count", "these")
+fun WideScreen(videos: List<VideoViewModel>, orientation: Int) {
   LazyVerticalGrid(
-    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 56.dp),
-    columns = GridCells.Fixed(columnsCount),
-    contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp),
+    modifier = Modifier
+      .recomposeHighlighter()
+      .padding(start = 16.dp, end = 16.dp),
+    columns = GridCells.Fixed(
+      count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
+    ),
+    contentPadding = PaddingValues(top = 72.dp, bottom = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalArrangement = Arrangement.spacedBy(50.dp)
   ) {
     items(
       items = videos,
-      key = { it.id },
-    ) { viewModel ->
-      val measureNanoTime = measureNanoTime {
-//        VideoItemPortrait(
-//          videoInfoTextStyle = TextStyle.Default.copy(fontSize = 14.sp),
-//          viewModel = viewModel
-//        )
-        PerformantVideoItemPortrait(viewModel = viewModel)
-      }
-      Log.i("item", "$measureNanoTime")
-    }
-  }
-}
-
-@Composable
-fun PopularVideosList(paddingValues: PaddingValues = PaddingValues()) {
-  val state = rememberLazyListState()
-  val canBeScrolled by remember { state.canBeScrolled() }
-  LaunchedEffect(canBeScrolled) { dispatch(v(is_top_bar_fixed, canBeScrolled)) }
-  val videos =
-    subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
-  val configuration = LocalConfiguration.current
-  Log.i("Count", "these")
-  LazyColumn(
-    modifier = Modifier
-      .fillMaxSize()
-      .then(
-        when (configuration.orientation) {
-          ORIENTATION_PORTRAIT -> Modifier
-          else -> Modifier.padding(horizontal = 16.dp)
-        }
-      ),
-    state = state,
-    contentPadding = paddingValues
-  ) {
-    items(
-      items = videos,
       key = { it.id }
     ) { viewModel ->
-      when (configuration.orientation) {
-        ORIENTATION_PORTRAIT -> {
-          val measureNanoTime = measureNanoTime {
-//            VideoItemPortrait(
-//              modifier = Modifier.padding(start = 10.dp),
-//              viewModel = viewModel
-//            )
-            VideoItemPortrait(viewModel = viewModel)
-          }
-          Log.i("item", "$measureNanoTime")
-        }
-        else -> VideoListItemLandscapeCompact(viewModel)
+      val measureNanoTime = measureNanoTime {
+        VideoItemPortrait(
+          modifier = Modifier.padding(bottom = 24.dp),
+          videoInfoTextStyle = TextStyle.Default.copy(
+            fontSize = 14.sp
+          ),
+          viewModel = viewModel
+        )
+//                  PerformantVideoItemPortrait(viewModel = viewModel)
       }
+//                Log.i("measureNanoTimeItem", "$measureNanoTime")
     }
-  }
-}
-
-@Composable
-fun ProgressLoader() {
-  if (subscribe<Boolean>(v(home.is_loading)).w()) {
-    CircularProgressIndicator(color = Blue300)
   }
 }
 
@@ -427,29 +377,67 @@ fun ProgressLoader() {
 @Composable
 fun Home(
   paddingValues: PaddingValues = PaddingValues(),
-  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero)
+  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
+  orientation: Int = 1
 ) {
   Surface(modifier = Modifier.fillMaxSize()) {
+    val isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()
     SwipeRefresh(
-      state = rememberSwipeRefreshState(subscribe<Boolean>(v(home.is_refreshing)).w()),
+      state = rememberSwipeRefreshState(isRefreshing),
       onRefresh = { dispatch(v(home.refresh)) },
-//      swipeEnabled = !isLoading, // todo:
+      modifier = Modifier,
       indicatorPadding = paddingValues
     ) {
       Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+//          .recomposeHighlighter()
+          .fillMaxSize(),
         contentAlignment = Alignment.Center
       ) {
-        when {
-          isCompact(windowSizeClass) -> {
-            PopularVideosList(paddingValues = paddingValues)
-          }
-          else -> {
-            PopularVideosGrid()
+        if (subscribe<Boolean>(v(home.is_loading)).w()) {
+          CircularProgressIndicator(color = Blue300)
+        } else {
+          val videos =
+            subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
+          if (isCompact(windowSizeClass)) {
+            val state = rememberLazyListState()
+            val canBeScrolled by remember { state.canBeScrolled() }
+//            LaunchedEffect(canBeScrolled) {
+//            dispatch(v(base.is_top_bar_fixed, canBeScrolled)) }
+            LazyColumn(
+              modifier = Modifier
+//                .recomposeHighlighter()
+                .fillMaxSize()
+                .then(
+                  if (orientation == ORIENTATION_PORTRAIT) Modifier
+                  else Modifier.padding(horizontal = 16.dp)
+                ),
+              state = state,
+              contentPadding = paddingValues
+            ) {
+              items(
+                items = videos,
+                key = { it.id }
+              ) { viewModel ->
+                when (orientation) {
+                  ORIENTATION_PORTRAIT -> {
+                    val measureNanoTime = measureNanoTime {
+                      VideoItemPortrait(
+                        modifier = Modifier.padding(start = 12.dp),
+                        viewModel = viewModel
+                      )
+                    }
+                    Log.i("measureNanoTimeItem", "$measureNanoTime")
+                  }
+                  else -> VideoListItemLandscapeCompact(viewModel)
+                }
+              }
+            }
+          } else {
+//            Box(modifier = Modifier.fillMaxSize().background(color = Color.Red))
+            WideScreen(videos = videos, orientation = orientation)
           }
         }
-
-        ProgressLoader()
       }
     }
   }
@@ -460,7 +448,8 @@ fun Home(
 fun NavGraphBuilder.home(
   animOffSetX: Int,
   paddingValues: PaddingValues,
-  windowSizeClass: WindowSizeClass
+  windowSizeClass: WindowSizeClass,
+  orientation: Int
 ) {
   composable(
     route = home.panel.name,
@@ -470,7 +459,7 @@ fun NavGraphBuilder.home(
     SideEffect {
       dispatch(v(home.get_popular_vids))
     }
-    Home(paddingValues, windowSizeClass)
+    Home(paddingValues, windowSizeClass, orientation)
   }
 }
 
@@ -511,44 +500,41 @@ fun PerformanceItemPreview() {
 @Composable
 fun VideoListPreview() {
   initAppDb()
-  regHomeSubs(LocalContext.current)
-  regSub<AppDb, Any>(popular_vids_formatted) { _, _ ->
-    v(
-      VideoViewModel(
-        "#ldfj243kj2r",
-        "2342lk2sdf",
-        "Title",
-        "",
-        "2:23",
-        formatVideoInfo(
-          author = "Jon Deo",
-          authorId = "2342lk2sdf",
-          viewCount = "32432",
-          publishedText = "2 hours ago",
-          viewsLabel = "views"
-        )
-      ),
-      VideoViewModel(
-        "#ld2lk43kj2r",
-        "fklj223jflrk23j",
-        "Very long tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" +
-          "iiiiiiiiiiiiiiiiiiiiitle",
-        "",
-        "2:23",
-        formatVideoInfo(
-          author = "Jon Deo",
-          authorId = "2342lk2sdf",
-          viewCount = "32432",
-          publishedText = "2 hours ago",
-          viewsLabel = "views"
-        )
-      )
-    )
-  }
-  regBaseSubs()
-  VanceTheme {
-    PopularVideosList()
-  }
+//  VanceTheme {
+//    PopularVideosList(
+//      videos = v(
+//        VideoViewModel(
+//          "#ldfj243kj2r",
+//          "2342lk2sdf",
+//          "Title",
+//          "",
+//          "2:23",
+//          formatVideoInfo(
+//            author = "Jon Deo",
+//            authorId = "2342lk2sdf",
+//            viewCount = "32432",
+//            publishedText = "2 hours ago",
+//            viewsLabel = "views"
+//          )
+//        ),
+//        VideoViewModel(
+//          "#ld2lk43kj2r",
+//          "fklj223jflrk23j",
+//          "Very long tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" +
+//            "iiiiiiiiiiiiiiiiiiiiitle",
+//          "",
+//          "2:23",
+//          formatVideoInfo(
+//            author = "Jon Deo",
+//            authorId = "2342lk2sdf",
+//            viewCount = "32432",
+//            publishedText = "2 hours ago",
+//            viewsLabel = "views"
+//          )
+//        )
+//      )
+//    )
+//  }
 }
 
 @Preview(showBackground = true)

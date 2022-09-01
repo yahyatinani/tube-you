@@ -2,7 +2,6 @@ package com.github.whyrising.vancetube.home
 
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
@@ -70,7 +69,6 @@ import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.canBeScrolled
-import com.github.whyrising.vancetube.base.recomposeHighlighter
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.home.home.popular_vids_formatted
 import com.github.whyrising.vancetube.initAppDb
@@ -83,7 +81,6 @@ import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import kotlin.system.measureNanoTime
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -345,7 +342,7 @@ fun PerformantVideoItemPortrait(viewModel: VideoViewModel) {
 fun WideScreen(videos: List<VideoViewModel>, orientation: Int) {
   LazyVerticalGrid(
     modifier = Modifier
-      .recomposeHighlighter()
+//      .recomposeHighlighter()
       .padding(start = 16.dp, end = 16.dp),
     columns = GridCells.Fixed(
       count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
@@ -358,17 +355,14 @@ fun WideScreen(videos: List<VideoViewModel>, orientation: Int) {
       items = videos,
       key = { it.id }
     ) { viewModel ->
-      val measureNanoTime = measureNanoTime {
-        VideoItemPortrait(
-          modifier = Modifier.padding(bottom = 24.dp),
-          videoInfoTextStyle = TextStyle.Default.copy(
-            fontSize = 14.sp
-          ),
-          viewModel = viewModel
-        )
+      VideoItemPortrait(
+        modifier = Modifier.padding(bottom = 24.dp),
+        videoInfoTextStyle = TextStyle.Default.copy(
+          fontSize = 14.sp
+        ),
+        viewModel = viewModel
+      )
 //                  PerformantVideoItemPortrait(viewModel = viewModel)
-      }
-//                Log.i("measureNanoTimeItem", "$measureNanoTime")
     }
   }
 }
@@ -421,13 +415,10 @@ fun Home(
               ) { viewModel ->
                 when (orientation) {
                   ORIENTATION_PORTRAIT -> {
-                    val measureNanoTime = measureNanoTime {
-                      VideoItemPortrait(
-                        modifier = Modifier.padding(start = 12.dp),
-                        viewModel = viewModel
-                      )
-                    }
-                    Log.i("measureNanoTimeItem", "$measureNanoTime")
+                    VideoItemPortrait(
+                      modifier = Modifier.padding(start = 12.dp),
+                      viewModel = viewModel
+                    )
                   }
                   else -> VideoListItemLandscapeCompact(viewModel)
                 }

@@ -345,7 +345,16 @@ fun Home(
   windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
   orientation: Int = 1
 ) {
-  Surface(modifier = Modifier.fillMaxSize()) {
+  Box(
+    modifier = Modifier
+//          .recomposeHighlighter()
+      .fillMaxSize(),
+    contentAlignment = Alignment.Center
+  ) {
+    if (subscribe<Boolean>(v(home.is_loading)).w()) {
+      CircularProgressIndicator(color = Blue300)
+    }
+
     val isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()
     SwipeRefresh(
       state = rememberSwipeRefreshState(isRefreshing),
@@ -353,75 +362,64 @@ fun Home(
       modifier = Modifier,
       indicatorPadding = paddingValues
     ) {
-      Box(
-        modifier = Modifier
-//          .recomposeHighlighter()
-          .fillMaxSize(),
-        contentAlignment = Alignment.Center
-      ) {
-        if (subscribe<Boolean>(v(home.is_loading)).w()) {
-          CircularProgressIndicator(color = Blue300)
-        } else {
-          val videos =
-            subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
-          if (isCompact(windowSizeClass)) {
-            val state = rememberLazyListState()
-            val canBeScrolled by remember { state.canBeScrolled() }
+      val videos =
+        subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
+      if (isCompact(windowSizeClass)) {
+        val state = rememberLazyListState()
+        val canBeScrolled by remember { state.canBeScrolled() }
 //            LaunchedEffect(canBeScrolled) {
 //            dispatch(v(base.is_top_bar_fixed, canBeScrolled)) }
-            LazyColumn(
-              modifier = Modifier
+        LazyColumn(
+          modifier = Modifier
 //                .recomposeHighlighter()
-                .fillMaxSize()
-                .then(
-                  if (orientation == ORIENTATION_PORTRAIT) Modifier
-                  else Modifier.padding(horizontal = 16.dp)
-                ),
-              state = state,
-              contentPadding = paddingValues
-            ) {
-              items(
-                items = videos,
-                key = { it.id }
-              ) { viewModel ->
-                when (orientation) {
-                  ORIENTATION_PORTRAIT -> {
-                    VideoItemPortrait(
-                      modifier = Modifier.padding(start = 12.dp),
-                      viewModel = viewModel
-                    )
-                  }
-                  else -> VideoListItemLandscapeCompact(viewModel)
-                }
-              }
-            }
-          } else {
-//            Box(modifier = Modifier.fillMaxSize().background(color = Color.Red))
-            LazyVerticalGrid(
-              modifier = Modifier
-                //      .recomposeHighlighter()
-                .padding(start = 16.dp, end = 16.dp),
-              columns = GridCells.Fixed(
-                count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
-              ),
-              contentPadding = PaddingValues(top = 72.dp, bottom = 16.dp),
-              horizontalArrangement = Arrangement.spacedBy(12.dp),
-              verticalArrangement = Arrangement.spacedBy(50.dp)
-            ) {
-              items(
-                items = videos,
-                key = { it.id }
-              ) { viewModel ->
+            .fillMaxSize()
+            .then(
+              if (orientation == ORIENTATION_PORTRAIT) Modifier
+              else Modifier.padding(horizontal = 16.dp)
+            ),
+          state = state,
+          contentPadding = paddingValues
+        ) {
+          items(
+            items = videos,
+            key = { it.id }
+          ) { viewModel ->
+            when (orientation) {
+              ORIENTATION_PORTRAIT -> {
                 VideoItemPortrait(
-                  modifier = Modifier.padding(bottom = 24.dp),
-                  videoInfoTextStyle = TextStyle.Default.copy(
-                    fontSize = 14.sp
-                  ),
+                  modifier = Modifier.padding(start = 12.dp),
                   viewModel = viewModel
                 )
-                //                  PerformantVideoItemPortrait(viewModel = viewModel)
               }
+              else -> VideoListItemLandscapeCompact(viewModel)
             }
+          }
+        }
+      } else {
+//            Box(modifier = Modifier.fillMaxSize().background(color = Color.Red))
+        LazyVerticalGrid(
+          modifier = Modifier
+            //      .recomposeHighlighter()
+            .padding(start = 16.dp, end = 16.dp),
+          columns = GridCells.Fixed(
+            count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
+          ),
+          contentPadding = PaddingValues(top = 72.dp, bottom = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalArrangement = Arrangement.spacedBy(50.dp)
+        ) {
+          items(
+            items = videos,
+            key = { it.id }
+          ) { viewModel ->
+            VideoItemPortrait(
+              modifier = Modifier.padding(bottom = 24.dp),
+              videoInfoTextStyle = TextStyle.Default.copy(
+                fontSize = 14.sp
+              ),
+              viewModel = viewModel
+            )
+            // PerformantVideoItemPortrait(viewModel = viewModel)
           }
         }
       }

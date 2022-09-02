@@ -338,35 +338,6 @@ fun PerformantVideoItemPortrait(viewModel: VideoViewModel) {
   }
 }
 
-@Composable
-fun WideScreen(videos: List<VideoViewModel>, orientation: Int) {
-  LazyVerticalGrid(
-    modifier = Modifier
-//      .recomposeHighlighter()
-      .padding(start = 16.dp, end = 16.dp),
-    columns = GridCells.Fixed(
-      count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
-    ),
-    contentPadding = PaddingValues(top = 72.dp, bottom = 16.dp),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalArrangement = Arrangement.spacedBy(50.dp)
-  ) {
-    items(
-      items = videos,
-      key = { it.id }
-    ) { viewModel ->
-      VideoItemPortrait(
-        modifier = Modifier.padding(bottom = 24.dp),
-        videoInfoTextStyle = TextStyle.Default.copy(
-          fontSize = 14.sp
-        ),
-        viewModel = viewModel
-      )
-//                  PerformantVideoItemPortrait(viewModel = viewModel)
-    }
-  }
-}
-
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun Home(
@@ -426,7 +397,31 @@ fun Home(
             }
           } else {
 //            Box(modifier = Modifier.fillMaxSize().background(color = Color.Red))
-            WideScreen(videos = videos, orientation = orientation)
+            LazyVerticalGrid(
+              modifier = Modifier
+                //      .recomposeHighlighter()
+                .padding(start = 16.dp, end = 16.dp),
+              columns = GridCells.Fixed(
+                count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
+              ),
+              contentPadding = PaddingValues(top = 72.dp, bottom = 16.dp),
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+              verticalArrangement = Arrangement.spacedBy(50.dp)
+            ) {
+              items(
+                items = videos,
+                key = { it.id }
+              ) { viewModel ->
+                VideoItemPortrait(
+                  modifier = Modifier.padding(bottom = 24.dp),
+                  videoInfoTextStyle = TextStyle.Default.copy(
+                    fontSize = 14.sp
+                  ),
+                  viewModel = viewModel
+                )
+                //                  PerformantVideoItemPortrait(viewModel = viewModel)
+              }
+            }
           }
         }
       }

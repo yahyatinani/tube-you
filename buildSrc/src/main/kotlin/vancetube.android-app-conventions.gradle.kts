@@ -39,6 +39,7 @@ android {
     debug {
       isMinifyEnabled = false
       versionNameSuffix = "-debug"
+      applicationIdSuffix = ".debug"
       resValue(
         type = "string",
         name = "app_version",

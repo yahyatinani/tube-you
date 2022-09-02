@@ -1,20 +1,18 @@
 [versions]
 kotlin = "1.7.10"
 ylib = "0.2.0"
-kotest = "5.4.1"
+kotest = "5.4.2"
 ktlint = "0.46.1"
 kover = "0.5.1"
 gradleplugin = "7.2.2"
 compose = "1.3.0-beta01"
 navigation-compose = "2.5.1"
-nav-anim = "0.25.0"
-activity-compose = "1.5.1"
+activity-compose = "1.6.0-rc01"
 splashscreen = "1.0.0"
-systemuicontroller = "0.25.0"
-swiperefresh = "0.25.0"
+accompanist = "0.26.2-beta"
 desugar = "1.1.6"
 core-ktx = "1.8.0"
-appcompat = "1.5.0-rc01"
+appcompat = "1.5.0"
 lifecycle = "2.5.1"
 coroutines = "1.6.4"
 mockk = "1.12.0"
@@ -58,9 +56,9 @@ androidx-lifecycle-viewmodelCompose = { module = "androidx.lifecycle:lifecycle-v
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout" }
 android-tools-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
-accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "systemuicontroller" }
-accompanist-nav-anim = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "nav-anim" }
-accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "nav-anim" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
+accompanist-nav-anim = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanist" }
+accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }

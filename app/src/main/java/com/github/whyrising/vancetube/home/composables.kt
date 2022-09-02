@@ -33,7 +33,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -349,10 +348,12 @@ fun Home(
     modifier = Modifier
 //          .recomposeHighlighter()
       .fillMaxSize(),
-    contentAlignment = Alignment.Center
   ) {
     if (subscribe<Boolean>(v(home.is_loading)).w()) {
-      CircularProgressIndicator(color = Blue300)
+      CircularProgressIndicator(
+        modifier = Modifier.align(Alignment.Center),
+        color = Blue300
+      )
     }
 
     val isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()

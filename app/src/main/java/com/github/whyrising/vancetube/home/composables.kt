@@ -33,6 +33,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -64,8 +65,6 @@ import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.canBeScrolled
-import com.github.whyrising.vancetube.base.regBaseSubs
-import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.Blue300
@@ -369,7 +368,8 @@ fun VideosList(
 
 @Composable
 fun VideosGrid(
-  orientation: Int = 1, paddingValues: PaddingValues,
+  orientation: Int = 1,
+  paddingValues: PaddingValues,
   videos: List<VideoViewModel>
 ) {
   LazyVerticalGrid(
@@ -512,54 +512,51 @@ fun PerformanceItemPreview() {
   }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun VideoListPreview() {
-  initAppDb()
-//  VanceTheme {
-//    PopularVideosList(
-//      videos = v(
-//        VideoViewModel(
-//          "#ldfj243kj2r",
-//          "2342lk2sdf",
-//          "Title",
-//          "",
-//          "2:23",
-//          formatVideoInfo(
-//            author = "Jon Deo",
-//            authorId = "2342lk2sdf",
-//            viewCount = "32432",
-//            publishedText = "2 hours ago",
-//            viewsLabel = "views"
-//          )
-//        ),
-//        VideoViewModel(
-//          "#ld2lk43kj2r",
-//          "fklj223jflrk23j",
-//          "Very long tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" +
-//            "iiiiiiiiiiiiiiiiiiiiitle",
-//          "",
-//          "2:23",
-//          formatVideoInfo(
-//            author = "Jon Deo",
-//            authorId = "2342lk2sdf",
-//            viewCount = "32432",
-//            publishedText = "2 hours ago",
-//            viewsLabel = "views"
-//          )
-//        )
-//      )
-//    )
-//  }
-}
+private val designTimeData = v(
+  VideoViewModel(
+    "#ldfj243kj2r",
+    "2342lk2sdf",
+    "Title",
+    "",
+    "2:23",
+    formatVideoInfo(
+      author = "Jon Deo",
+      authorId = "2342lk2sdf",
+      viewCount = "32432",
+      publishedText = "2 hours ago",
+      viewsLabel = "views"
+    )
+  ),
+  VideoViewModel(
+    "#ld2lk43kj2r",
+    "fklj223jflrk23j",
+    "Very long tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" +
+      "iiiiiiiiiiiiiiiiiiiiitle",
+    "",
+    "2:23",
+    formatVideoInfo(
+      author = "Jon Deo",
+      authorId = "2342lk2sdf",
+      viewCount = "32432",
+      publishedText = "2 hours ago",
+      viewsLabel = "views"
+    )
+  )
+)
 
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-  regBaseSubs()
-  regHomeSubs(LocalContext.current)
   VanceTheme {
-//    Home()
+    Home(
+      state = HomePanelState.Materialised(designTimeData)
+    ) {
+      VideosList(
+        orientation = 1,
+        paddingValues = PaddingValues(),
+        videos = it
+      )
+    }
   }
 }
 
@@ -567,6 +564,16 @@ fun HomePreview() {
 @Composable
 fun HomeDarkPreview() {
   VanceTheme {
-//    Home()
+    Surface {
+      Home(
+        state = HomePanelState.Materialised(designTimeData)
+      ) {
+        VideosList(
+          orientation = 1,
+          paddingValues = PaddingValues(),
+          videos = it
+        )
+      }
+    }
   }
 }

@@ -4,11 +4,10 @@ import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Immutable
 data class ThumbnailData(val url: String)
 
-@Serializable
 @Immutable
+@Serializable
 data class VideoData(
   val videoId: String,
   val title: String,

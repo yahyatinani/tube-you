@@ -32,10 +32,12 @@ import com.github.whyrising.vancetube.base.regBaseEventHandlers
 import com.github.whyrising.vancetube.base.regBaseFx
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.home.home
+import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.home.regHomeEvents
 import com.github.whyrising.vancetube.home.regHomeFx
 import com.github.whyrising.vancetube.home.regHomeSubs
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
+import com.github.whyrising.vancetube.ui.theme.composables.isCompact
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -105,9 +107,6 @@ class MainActivity : ComponentActivity() {
     regHomeSubs(this)
 
     setContent {
-      val windowSizeClass: WindowSizeClass = calculateWindowSizeClass(this)
-      val orientation = LocalConfiguration.current.orientation
-
       val navController = rememberAnimatedNavController().apply {
         addOnDestinationChangedListener { controller, _, _ ->
           val flag = controller.previousBackStackEntry != null
@@ -116,28 +115,35 @@ class MainActivity : ComponentActivity() {
       }
       regBaseFx(navController)
 
-      val configuration = LocalConfiguration.current
+      val windowSizeClass = calculateWindowSizeClass(this)
+      val orientation = LocalConfiguration.current.orientation
       Main(
         setNotchAreaColorInLandscape = {
-          if (configuration.orientation == ORIENTATION_LANDSCAPE) {
+          if (orientation == ORIENTATION_LANDSCAPE) {
             val bitmap = createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply {
               eraseColor(it.toArgb())
             }
             window.setBackgroundDrawable(BitmapDrawable(resources, bitmap))
           }
         },
-        windowSizeClass
+        windowSizeClass = windowSizeClass
       ) {
         AnimatedNavHost(
           navController = navController,
           startDestination = home.panel.name
         ) {
-          home(
-            animOffSetX = 300,
-            paddingValues = it,
-            windowSizeClass = windowSizeClass,
-            orientation = orientation
-          )
+          when {
+            isCompact(windowSizeClass) -> home(
+              animOffSetX = 300,
+              paddingValues = it,
+              orientation = orientation
+            )
+            else -> homeLarge(
+              animOffSetX = 300,
+              paddingValues = it,
+              orientation = orientation
+            )
+          }
           about(animOffSetX = 300)
         }
       }

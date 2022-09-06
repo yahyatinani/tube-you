@@ -36,11 +36,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -49,14 +47,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ChainStyle
@@ -69,19 +65,16 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.canBeScrolled
 import com.github.whyrising.vancetube.base.regBaseSubs
-import com.github.whyrising.vancetube.home.home.popular_vids_formatted
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.Blue300
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
-import com.github.whyrising.vancetube.ui.theme.composables.isCompact
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun VideoLengthText(
   modifier: Modifier = Modifier,
@@ -337,92 +330,100 @@ fun PerformantVideoItemPortrait(viewModel: VideoViewModel) {
   }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Composable
+fun VideosList(
+  orientation: Int = 1,
+  paddingValues: PaddingValues,
+  videos: List<VideoViewModel>
+) {
+  val state = rememberLazyListState()
+  val canBeScrolled by remember { state.canBeScrolled() }
+//            LaunchedEffect(canBeScrolled) {
+//            dispatch(v(base.is_top_bar_fixed, canBeScrolled)) }
+  LazyColumn(
+    modifier = Modifier
+      .fillMaxSize()
+      .then(
+        if (orientation == ORIENTATION_PORTRAIT) Modifier
+        else Modifier.padding(horizontal = 16.dp)
+      ),
+    state = state,
+    contentPadding = paddingValues
+  ) {
+    items(
+      items = videos,
+      key = { it.id }
+    ) { viewModel ->
+      when (orientation) {
+        ORIENTATION_PORTRAIT -> {
+          VideoItemPortrait(
+            modifier = Modifier.padding(start = 12.dp),
+            viewModel = viewModel
+          )
+        }
+        else -> VideoListItemLandscapeCompact(viewModel)
+      }
+    }
+  }
+}
+
+@Composable
+fun VideosGrid(
+  orientation: Int = 1, paddingValues: PaddingValues,
+  videos: List<VideoViewModel>
+) {
+  LazyVerticalGrid(
+    modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+    columns = GridCells.Fixed(
+      count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
+    ),
+    contentPadding = paddingValues,
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalArrangement = Arrangement.spacedBy(50.dp)
+  ) {
+    items(
+      items = videos,
+      key = { it.id }
+    ) { viewModel ->
+      VideoItemPortrait(
+        modifier = Modifier.padding(bottom = 24.dp),
+        videoInfoTextStyle = TextStyle.Default.copy(
+          fontSize = 14.sp
+        ),
+        viewModel = viewModel
+      )
+    }
+  }
+}
+
 @Composable
 fun Home(
+  modifier: Modifier = Modifier,
   paddingValues: PaddingValues = PaddingValues(),
-  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
-  orientation: Int = 1
+  state: HomePanelState,
+  content: @Composable (videos: List<VideoViewModel>) -> Unit
 ) {
-  Box(
-    modifier = Modifier
-//          .recomposeHighlighter()
-      .fillMaxSize(),
-  ) {
-    if (subscribe<Boolean>(v(home.is_loading)).w()) {
+  Box(modifier = modifier.fillMaxSize()) {
+    if (state is HomePanelState.Loading) {
       CircularProgressIndicator(
         modifier = Modifier.align(Alignment.Center),
         color = Blue300
       )
     }
 
-    val isRefreshing = subscribe<Boolean>(v(home.is_refreshing)).w()
-    SwipeRefresh(
-      state = rememberSwipeRefreshState(isRefreshing),
-      onRefresh = { dispatch(v(home.refresh)) },
-      modifier = Modifier,
-      indicatorPadding = paddingValues
-    ) {
-      val videos =
-        subscribe<List<VideoViewModel>>(v(popular_vids_formatted)).w()
-      if (isCompact(windowSizeClass)) {
-        val state = rememberLazyListState()
-        val canBeScrolled by remember { state.canBeScrolled() }
-//            LaunchedEffect(canBeScrolled) {
-//            dispatch(v(base.is_top_bar_fixed, canBeScrolled)) }
-        LazyColumn(
-          modifier = Modifier
-//                .recomposeHighlighter()
-            .fillMaxSize()
-            .then(
-              if (orientation == ORIENTATION_PORTRAIT) Modifier
-              else Modifier.padding(horizontal = 16.dp)
-            ),
-          state = state,
-          contentPadding = paddingValues
-        ) {
-          items(
-            items = videos,
-            key = { it.id }
-          ) { viewModel ->
-            when (orientation) {
-              ORIENTATION_PORTRAIT -> {
-                VideoItemPortrait(
-                  modifier = Modifier.padding(start = 12.dp),
-                  viewModel = viewModel
-                )
-              }
-              else -> VideoListItemLandscapeCompact(viewModel)
-            }
-          }
+    val isMaterialised = state is HomePanelState.Materialised
+    val isRefreshing = !isMaterialised && state is HomePanelState.Refreshing
+    if (isMaterialised || isRefreshing) {
+      SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing),
+        onRefresh = { dispatch(v(home.refresh, state)) },
+        indicatorPadding = paddingValues
+      ) {
+        val videos = when {
+          isMaterialised -> (state as HomePanelState.Materialised).popularVideos
+          else -> (state as HomePanelState.Refreshing).currentPopularVideos
         }
-      } else {
-//            Box(modifier = Modifier.fillMaxSize().background(color = Color.Red))
-        LazyVerticalGrid(
-          modifier = Modifier
-            //      .recomposeHighlighter()
-            .padding(start = 16.dp, end = 16.dp),
-          columns = GridCells.Fixed(
-            count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
-          ),
-          contentPadding = PaddingValues(top = 72.dp, bottom = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-          verticalArrangement = Arrangement.spacedBy(50.dp)
-        ) {
-          items(
-            items = videos,
-            key = { it.id }
-          ) { viewModel ->
-            VideoItemPortrait(
-              modifier = Modifier.padding(bottom = 24.dp),
-              videoInfoTextStyle = TextStyle.Default.copy(
-                fontSize = 14.sp
-              ),
-              viewModel = viewModel
-            )
-            // PerformantVideoItemPortrait(viewModel = viewModel)
-          }
-        }
+        content(videos)
       }
     }
   }
@@ -430,21 +431,51 @@ fun Home(
 
 // -- navigation ---------------------------------------------------------------
 @OptIn(ExperimentalAnimationApi::class)
-fun NavGraphBuilder.home(
+private fun NavGraphBuilder.setupHome(
   animOffSetX: Int,
   paddingValues: PaddingValues,
-  windowSizeClass: WindowSizeClass,
-  orientation: Int
+  content: @Composable (videos: List<VideoViewModel>) -> Unit
 ) {
   composable(
     route = home.panel.name,
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
-    SideEffect {
-      dispatch(v(home.get_popular_vids))
-    }
-    Home(paddingValues, windowSizeClass, orientation)
+    LaunchedEffect(true) { dispatch(v(home.load)) }
+
+    Home(
+      paddingValues = paddingValues,
+      state = subscribe<HomePanelState>(v(home.matrialised_state)).w(),
+      content = content
+    )
+  }
+}
+
+fun NavGraphBuilder.home(
+  animOffSetX: Int,
+  paddingValues: PaddingValues,
+  orientation: Int
+) {
+  setupHome(animOffSetX, paddingValues) {
+    VideosList(
+      orientation = orientation,
+      paddingValues = paddingValues,
+      videos = it
+    )
+  }
+}
+
+fun NavGraphBuilder.homeLarge(
+  animOffSetX: Int,
+  paddingValues: PaddingValues,
+  orientation: Int
+) {
+  setupHome(animOffSetX, paddingValues) {
+    VideosGrid(
+      orientation = orientation,
+      paddingValues = paddingValues,
+      videos = it
+    )
   }
 }
 
@@ -528,7 +559,7 @@ fun HomePreview() {
   regBaseSubs()
   regHomeSubs(LocalContext.current)
   VanceTheme {
-    Home()
+//    Home()
   }
 }
 
@@ -536,6 +567,6 @@ fun HomePreview() {
 @Composable
 fun HomeDarkPreview() {
   VanceTheme {
-    Home()
+//    Home()
   }
 }

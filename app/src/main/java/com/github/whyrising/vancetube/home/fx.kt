@@ -46,7 +46,7 @@ val client = HttpClient(Android) {
 }
 
 fun regHomeFx(scope: CoroutineScope) {
-  regFx(home.get_popular_vids) { api ->
+  regFx(home.load) { api ->
     scope.launch(Dispatchers.IO) {
       val endpoint = "$api/popular?fields=videoId,title,videoThumbnails," +
         "lengthSeconds,viewCount,author,publishedText,authorId"

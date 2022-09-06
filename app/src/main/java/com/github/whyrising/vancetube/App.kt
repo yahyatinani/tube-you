@@ -15,9 +15,9 @@ const val https = "https://"
 
 // const val DEFAULT_BASE_ADDRESS = "invidious.tiekoetter.com"
 // const val DEFAULT_BASE_ADDRESS = "invidious.namazso.eu" // empty
-//const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
+// const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
 // const val DEFAULT_BASE_ADDRESS = "invidious.snopyta.org"
- const val DEFAULT_BASE_ADDRESS = "y.com.sb"
+const val DEFAULT_BASE_ADDRESS = "y.com.sb"
 
 const val API = "$https$DEFAULT_BASE_ADDRESS/api/v1"
 

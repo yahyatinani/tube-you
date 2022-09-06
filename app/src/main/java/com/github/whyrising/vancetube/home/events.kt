@@ -1,6 +1,5 @@
 package com.github.whyrising.vancetube.home
 
-import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
@@ -15,29 +14,28 @@ import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
 fun regHomeEvents() {
-  regEventFx(home.set_popular_vids) { cofx, (_, vids) ->
-    val appDb = (cofx[db] as IPersistentMap<Any, Any>)
-      .let { assocIn(it, l(home.panel, home.is_loading), false) }
-      .let { assocIn(it, l(home.panel, home.is_refreshing), false) }
-      .let { assocIn(it, l(home.panel, home.popular_vids), vids) }
-    m(db to appDb)
-  }
-
-  regEventFx(home.get_popular_vids) { cofx, _ ->
+  regEventFx(home.load) { cofx, _ ->
     val appDb = cofx[db] as IPersistentMap<Any, Any>
     val api = get(appDb, base.api)
-    m(fx to v(v(home.get_popular_vids, api)))
-  }
-
-  regEventDb<AppDb>(home.is_loading) { db, (_, flag) ->
-    assocIn(db, l(home.panel, home.is_loading), flag)
-  }
-
-  regEventFx(home.refresh) { cofx, _ ->
-    val appDb = cofx[db] as IPersistentMap<Any, Any>
     m(
-      db to assocIn(appDb, l(home.panel, home.is_refreshing), true),
-      fx to v(v(FxIds.dispatch, v(home.get_popular_vids)))
+      db to assocIn(appDb, l(home.panel), HomePanelState.Loading),
+      fx to v(v(home.load, api))
+    )
+  }
+
+  regEventDb<AppDb>(id = home.set_popular_vids) { db, (_, vids) ->
+    assocIn(db, l(home.panel), HomePanelState.Loaded(vids as List<VideoData>))
+  }
+
+  regEventFx(home.refresh) { cofx, (_, materialised) ->
+    val appDb = cofx[db] as IPersistentMap<Any, Any>
+    val api = get(appDb, base.api)
+    val newState = HomePanelState.Refreshing(
+      (materialised as HomePanelState.Materialised).popularVideos
+    )
+    m(
+      db to assocIn(appDb, l(home.panel), newState),
+      fx to v(v(home.load, api))
     )
   }
 }

@@ -35,12 +35,9 @@ private val LightColorPalette = lightColors(
     */
 )
 
-@Composable
 fun isPhone(windowSizeClass: WindowSizeClass) =
-  (
-    windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
-      windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
-    )
+  windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
+    windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
 
 @Composable
 fun VanceTheme(

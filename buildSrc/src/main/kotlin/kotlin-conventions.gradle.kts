@@ -27,7 +27,17 @@ tasks.withType<Test> {
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
+    val buildDirAbsolutePath = project.buildDir.absolutePath
+    val out = "/compose_metrics"
+    val composePlugin = "plugin:androidx.compose.compiler.plugins.kotlin"
+    freeCompilerArgs = freeCompilerArgs + listOf(
+      "-P",
+      "$composePlugin:reportsDestination=$buildDirAbsolutePath$out",
+      "-P",
+      "$composePlugin:metricsDestination=$buildDirAbsolutePath$out"
+    )
     freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
+
     jvmTarget = Build.Versions.JVM
     apiVersion = Build.Versions.KOTLIN
     languageVersion = Build.Versions.KOTLIN

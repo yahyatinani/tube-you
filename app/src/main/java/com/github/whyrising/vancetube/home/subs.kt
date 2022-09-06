@@ -9,18 +9,12 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.ui.theme.Blue300
-import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.LocalTime
 import java.math.RoundingMode
 import java.text.DecimalFormat
-
-fun homePanel(db: AppDb) = (db[home.panel] as AppDb)
-
-fun popularVideos(db: AppDb): PersistentVector<VideoMetadata> =
-  homePanel(db)[home.popular_vids] as PersistentVector<VideoMetadata>? ?: v()
 
 fun formatSeconds(seconds: Int): String {
   val format = "%02d"
@@ -81,57 +75,42 @@ fun formatViews(viewsCount: Long): String = when {
   else -> "${viewsCount / 1_000_000_000}$BillionsSign"
 }
 
-enum class VideoIds {
-  id,
-  thumbnail,
-  title,
-  length,
-  info
-}
-
-data class VideoViewModel(
-  val id: String,
-  val authorId: String,
-  val title: String,
-  val thumbnail: String,
-  val length: String,
-  val info: AnnotatedString
-)
-
 fun regHomeSubs(context: Context) {
-  regSub<AppDb, Any>(home.popular_vids) { db, _ ->
-    popularVideos(db)
+  regSub<AppDb, HomePanelState>(queryId = home.state) { db, _ ->
+    db[home.panel] as HomePanelState
   }
-  regSub<PersistentVector<VideoMetadata>, Any>(
-    queryId = home.popular_vids_formatted,
-    signalsFn = { subscribe(v(home.popular_vids)) },
-    placeholder = v<VideoViewModel>(),
+
+  regSub<HomePanelState, HomePanelState>(
+    queryId = home.matrialised_state,
+    signalsFn = { subscribe(v(home.state)) },
+    placeholder = HOME_START,
     context = Dispatchers.Default,
-    computationFn = { videos, _ ->
-      videos.fold(v<VideoViewModel>()) { acc, videoMetadata ->
-        acc.conj(
-          VideoViewModel(
-            id = videoMetadata.videoId,
-            authorId = videoMetadata.authorId,
-            title = videoMetadata.title,
-            thumbnail = videoMetadata.videoThumbnails[1].url,
-            length = formatSeconds(videoMetadata.lengthSeconds),
-            info = formatVideoInfo(
-              author = videoMetadata.author,
-              authorId = videoMetadata.authorId,
-              viewCount = formatViews(videoMetadata.viewCount),
-              viewsLabel = context.getString(R.string.views_label),
-              publishedText = videoMetadata.publishedText
-            )
-          )
-        )
+    computationFn = { state, _ ->
+      when (state) {
+        is HomePanelState.Loaded -> {
+          val formatted = state.popularVideos
+            .fold(v<VideoViewModel>()) { acc, videoMetadata ->
+              acc.conj(
+                VideoViewModel(
+                  id = videoMetadata.videoId,
+                  authorId = videoMetadata.authorId,
+                  title = videoMetadata.title,
+                  thumbnail = videoMetadata.videoThumbnails[4].url,
+                  length = formatSeconds(videoMetadata.lengthSeconds),
+                  info = formatVideoInfo(
+                    author = videoMetadata.author,
+                    authorId = videoMetadata.authorId,
+                    viewCount = formatViews(videoMetadata.viewCount),
+                    viewsLabel = context.getString(R.string.views_label),
+                    publishedText = videoMetadata.publishedText
+                  )
+                )
+              )
+            }
+          HomePanelState.Materialised(formatted)
+        }
+        else -> state
       }
     }
   )
-  regSub<AppDb, Boolean>(home.is_loading) { db, _ ->
-    homePanel(db)[home.is_loading] as Boolean
-  }
-  regSub<AppDb, Boolean>(home.is_refreshing) { db, _ ->
-    homePanel(db)[home.is_refreshing] as Boolean
-  }
 }

@@ -36,17 +36,24 @@ android {
   }
 
   buildTypes {
-    debug {
+        debug {
       isMinifyEnabled = false
       versionNameSuffix = "-debug"
+      applicationIdSuffix = ".debug"
       resValue(
         type = "string",
         name = "app_version",
         value = "${defaultConfig.versionName}$versionNameSuffix"
       )
+      resValue(
+        type = "string",
+        name = "app_name",
+        value = "VanceTube-debug"
+      )
       if (System.getenv("SIGNING_KEY_BASE64") != null)
         signingConfig = signingConfigs.getByName("debug")
     }
+
     release {
       //isDebuggable = true // TODO: Remove when done
       isMinifyEnabled = true
@@ -59,6 +66,11 @@ android {
         type = "string",
         name = "app_version",
         value = "${defaultConfig.versionName}"
+      )
+      resValue(
+        type = "string",
+        name = "app_name",
+        value = "VanceTube"
       )
       signingConfig = signingConfigs.getByName("release")
     }

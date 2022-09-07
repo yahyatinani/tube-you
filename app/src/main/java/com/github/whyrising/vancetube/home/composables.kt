@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,9 +57,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ChainStyle
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavGraphBuilder
 import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
@@ -226,6 +224,7 @@ fun VideoItemPortrait(
 fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
   Row(
     modifier = Modifier
+      .testTag("video")
       .padding(vertical = 8.dp)
       .clickable { /*todo:*/ }
   ) {
@@ -247,89 +246,6 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
 }
 
 @Composable
-fun PerformantVideoItemPortrait(viewModel: VideoViewModel) {
-  ConstraintLayout(
-    modifier = Modifier
-      .fillMaxWidth()
-      .clickable { /*todo:*/ }
-  ) {
-    val (thumbnailImg, length, title, info, moreBtn) = createRefs()
-
-    val horizontalChain =
-      createHorizontalChain(title, moreBtn, chainStyle = ChainStyle.Spread)
-
-    constrain(horizontalChain) {
-      start.linkTo(parent.start)
-    }
-
-    AsyncImage(
-      model = viewModel.thumbnail,
-      contentDescription = "thumbnail",
-      modifier = Modifier
-        .background(Color.DarkGray)
-        .layout { measurable, constraints ->
-          val placeable = measurable.measure(constraints)
-          val width = placeable.width
-          val relativeHeightPx = (width * 720) / 1280
-          layout(width, relativeHeightPx) {
-            placeable.placeRelative(0, 0)
-          }
-        }
-        .constrainAs(thumbnailImg) {
-          top.linkTo(parent.top)
-          start.linkTo(parent.start)
-          end.linkTo(parent.end)
-          width = Dimension.fillToConstraints
-          height = Dimension.preferredWrapContent
-        },
-      contentScale = ContentScale.FillWidth
-    )
-    VideoLengthText(
-      modifier = Modifier
-        .constrainAs(length) {
-          bottom.linkTo(thumbnailImg.bottom, 8.dp)
-          end.linkTo(parent.end, 8.dp)
-        },
-      videoLength = viewModel.length
-    )
-    Text(
-      text = viewModel.title,
-      modifier = Modifier
-        .constrainAs(title) {
-          start.linkTo(parent.start)
-          end.linkTo(parent.end)
-          top.linkTo(thumbnailImg.bottom, 10.dp)
-          width = Dimension.fillToConstraints
-        },
-      maxLines = 2,
-      softWrap = true,
-      overflow = TextOverflow.Ellipsis,
-      style = MaterialTheme.typography.subtitle2.copy(
-        fontWeight = FontWeight.W700
-      )
-    )
-
-    VideoItemMoreButton(
-      modifier = Modifier
-        .constrainAs(moreBtn) {
-          top.linkTo(thumbnailImg.bottom, 10.dp)
-        }
-    )
-
-    VideoItemInfo(
-      viewModel = viewModel,
-      modifier = Modifier
-        .padding(bottom = 24.dp)
-        .constrainAs(info) {
-          start.linkTo(parent.start)
-          top.linkTo(title.bottom, margin = 2.dp)
-        },
-      textStyle = TextStyle.Default.copy(fontSize = 14.sp)
-    )
-  }
-}
-
-@Composable
 fun VideosList(
   orientation: Int = 1,
   paddingValues: PaddingValues,
@@ -341,6 +257,7 @@ fun VideosList(
 //            dispatch(v(base.is_top_bar_fixed, canBeScrolled)) }
   LazyColumn(
     modifier = Modifier
+      .testTag("popular_videos_list")
       .fillMaxSize()
       .then(
         if (orientation == ORIENTATION_PORTRAIT) Modifier
@@ -373,7 +290,9 @@ fun VideosGrid(
   videos: List<VideoViewModel>
 ) {
   LazyVerticalGrid(
-    modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+    modifier = Modifier
+      .testTag("popular_videos_list")
+      .padding(start = 16.dp, end = 16.dp),
     columns = GridCells.Fixed(
       count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
     ),
@@ -386,7 +305,9 @@ fun VideosGrid(
       key = { it.id }
     ) { viewModel ->
       VideoItemPortrait(
-        modifier = Modifier.padding(bottom = 24.dp),
+        modifier = Modifier
+          .testTag("video")
+          .padding(bottom = 24.dp),
         videoInfoTextStyle = TextStyle.Default.copy(
           fontSize = 14.sp
         ),
@@ -415,6 +336,7 @@ fun Home(
     val isRefreshing = !isMaterialised && state is HomePanelState.Refreshing
     if (isMaterialised || isRefreshing) {
       SwipeRefresh(
+        modifier = Modifier.testTag("swipe_refresh"),
         state = rememberSwipeRefreshState(isRefreshing),
         onRefresh = { dispatch(v(home.refresh, state)) },
         indicatorPadding = paddingValues
@@ -485,30 +407,6 @@ fun NavGraphBuilder.homeLarge(
 fun VideoLengthTextPreview() {
   VanceTheme {
     VideoLengthText(videoLength = "2:23")
-  }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PerformanceItemPreview() {
-  VanceTheme {
-    PerformantVideoItemPortrait(
-      viewModel = VideoViewModel(
-        "#ldfj243kj2r",
-        "2342lk2sdf",
-        "Title title title title title title title title title title " +
-          "title title title title title ",
-        "",
-        "2:23",
-        formatVideoInfo(
-          author = "Jon Deo",
-          authorId = "2342lk2sdf",
-          viewCount = "32432",
-          publishedText = "2 hours ago",
-          viewsLabel = "views"
-        )
-      )
-    )
   }
 }
 

@@ -6,6 +6,7 @@ kotest = "5.4.2"
 ktlint = "0.46.1"
 kover = "0.5.1"
 spotless = "6.9.0"
+junit4 = "4.13.2"
 
 compose = "1.3.0-beta01"
 material3 = "1.0.0-beta01"
@@ -38,6 +39,7 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotest-jvm-runner = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
 y-core = { module = "com.github.whyrising.y:y-core", version.ref = "ylib" }
 y-concurrency = { module = "com.github.whyrising.y:y-concurrency", version.ref = "ylib" }
 recompose = { module = "com.github.whyrising.recompose:recompose", version.ref = "recompose" }

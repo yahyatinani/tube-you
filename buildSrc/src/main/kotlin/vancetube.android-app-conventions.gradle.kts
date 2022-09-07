@@ -36,10 +36,9 @@ android {
   }
 
   buildTypes {
-        debug {
+    val debug by getting {
       isMinifyEnabled = false
       versionNameSuffix = "-debug"
-      applicationIdSuffix = ".debug"
       resValue(
         type = "string",
         name = "app_version",
@@ -54,7 +53,7 @@ android {
         signingConfig = signingConfigs.getByName("debug")
     }
 
-    release {
+    val release by getting {
       //isDebuggable = true // TODO: Remove when done
       isMinifyEnabled = true
       isShrinkResources = true
@@ -73,6 +72,15 @@ android {
         value = "VanceTube"
       )
       signingConfig = signingConfigs.getByName("release")
+    }
+
+    val benchmark by creating {
+      initWith(release)
+      matchingFallbacks.add("release")
+      signingConfig = signingConfigs.getByName("debug")
+      // Only use benchmark proguard rules
+      proguardFiles("benchmark-rules.pro")
+      isDebuggable = false
     }
   }
 

@@ -24,6 +24,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.IntOffset
@@ -128,7 +131,10 @@ fun BottomNavigationBar(
 
 val TOP_APP_BAR_HEIGHT = 48.dp
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(
+  ExperimentalMaterial3WindowSizeClassApi::class,
+  ExperimentalComposeUiApi::class
+)
 @Composable
 fun BasePanel(
   backgroundColor: Color = MaterialTheme.colors.background,
@@ -154,12 +160,17 @@ fun BasePanel(
   }
 
   VanceScaffold(
-    modifier = Modifier.then(
-      when {
-        subscribe<Boolean>(v(base.is_top_bar_fixed)).w() -> Modifier
-        else -> Modifier.nestedScroll(nestedScrollConnection)
+    modifier = Modifier
+      .semantics {
+        // Allows to use testTag() for UiAutomator resource-id.
+        testTagsAsResourceId = true
       }
-    ),
+      .then(
+        when {
+          subscribe<Boolean>(v(base.is_top_bar_fixed)).w() -> Modifier
+          else -> Modifier.nestedScroll(nestedScrollConnection)
+        }
+      ),
     topBar = {
       TopAppBar(
         modifier = Modifier

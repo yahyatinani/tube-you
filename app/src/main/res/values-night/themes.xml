@@ -7,7 +7,7 @@
     </item>
   </style>
 
-  <style name="Theme.MyApp.SplashScreen" parent="Theme.MyApp.SplashScreen.Base">
+  <style name="Theme.Vance.Splash" parent="Theme.Vance.Splash.Base">
     <item name="windowSplashScreenBackground">@color/black</item>
   </style>
 </resources>

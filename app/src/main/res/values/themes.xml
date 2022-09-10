@@ -17,14 +17,14 @@
     <item name="android:windowLightStatusBar">true</item>
   </style>
 
-  <style name="Theme.MyApp.SplashScreen.Base" parent="Theme.SplashScreen">
+  <style name="Theme.Vance.Splash.Base" parent="Theme.SplashScreen">
     <item name="postSplashScreenTheme">@style/Theme.Vance</item>
     <item name="windowSplashScreenAnimationDuration">1000</item>
     <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen
     </item>
   </style>
 
-  <style name="Theme.MyApp.SplashScreen" parent="Theme.MyApp.SplashScreen.Base">
+  <style name="Theme.Vance.Splash" parent="Theme.Vance.Splash.Base">
     <item name="windowSplashScreenBackground">@color/white</item>
   </style>
 </resources>

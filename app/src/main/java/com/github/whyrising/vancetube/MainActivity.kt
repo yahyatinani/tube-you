@@ -74,8 +74,7 @@ class MainActivity : ComponentActivity() {
   )
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen().apply {
-      // TODO: remove this.
-//       setKeepOnScreenCondition { true }
+      // FIXME: remove me! setKeepOnScreenCondition { true }
     }
     super.onCreate(savedInstanceState)
 

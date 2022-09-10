@@ -1,13 +1,13 @@
 package com.github.whyrising.vancetube.ui.theme.composables
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +34,7 @@ fun BackArrow() {
 fun SmallLabelText(text: String) {
   Text(
     text = text,
-    style = MaterialTheme.typography.caption
+    style = MaterialTheme.typography.labelSmall
   )
 }
 

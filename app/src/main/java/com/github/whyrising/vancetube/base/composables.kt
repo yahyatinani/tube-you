@@ -1,53 +1,47 @@
 package com.github.whyrising.vancetube.base
 
-import VanceScaffold
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.initAppDb
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
-import com.github.whyrising.vancetube.ui.theme.composables.CustomBottomNavigation
-import com.github.whyrising.vancetube.ui.theme.composables.SmallLabelText
-import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavigationItem
 import com.github.whyrising.y.core.v
-import kotlin.math.roundToInt
 
 fun LazyListState.canBeScrolled(): State<Boolean> = derivedStateOf {
   val layoutInfo = layoutInfo
@@ -71,115 +65,26 @@ fun LazyListState.canBeScrolled(): State<Boolean> = derivedStateOf {
   }
 }
 
-@Composable
-fun BottomNavigationBar(
-  backgroundColor: Color,
-  windowSizeClass: WindowSizeClass
-) {
-  CustomBottomNavigation(
-    backgroundColor = backgroundColor,
-    elevation = 0.dp,
-    windowSizeClass = windowSizeClass
-  ) {
-    VanceBottomNavigationItem(
-      selected = true,
-      onClick = { /*TODO*/ },
-      label = {
-        SmallLabelText(text = "Home")
-      },
-      icon = {
-        Icon(
-          imageVector = Icons.Filled.Home,
-          contentDescription = "Home panel",
-          tint = MaterialTheme.colors.onBackground
-        )
-      },
-      windowSizeClass = windowSizeClass
-    )
-
-    VanceBottomNavigationItem(
-      selected = false,
-      onClick = { /*TODO*/ },
-      label = {
-        SmallLabelText(text = "Subscriptions")
-      },
-      icon = {
-        Icon(
-          imageVector = Icons.Outlined.PlayArrow,
-          contentDescription = "Library panel"
-        )
-      },
-      windowSizeClass = windowSizeClass
-    )
-
-    VanceBottomNavigationItem(
-      selected = false,
-      onClick = { /*TODO*/ },
-      label = {
-        SmallLabelText(text = "Library")
-      },
-      icon = {
-        Icon(
-          imageVector = Icons.Outlined.List,
-          contentDescription = "Library panel"
-        )
-      },
-      windowSizeClass = windowSizeClass
-    )
-  }
-}
-
-val TOP_APP_BAR_HEIGHT = 48.dp
-
 @OptIn(
   ExperimentalMaterial3WindowSizeClassApi::class,
-  ExperimentalComposeUiApi::class
+  ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class
 )
 @Composable
 fun BasePanel(
-  backgroundColor: Color = MaterialTheme.colors.background,
+  backgroundColor: Color = MaterialTheme.colorScheme.background,
   windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
   content: @Composable (PaddingValues) -> Unit
 ) {
-  val topBarHeightPx = with(LocalDensity.current) {
-    TOP_APP_BAR_HEIGHT.roundToPx().toFloat()
-  }
-  val toolbarOffsetHeightPx = remember { mutableStateOf(0f) }
-  val nestedScrollConnection = remember {
-    object : NestedScrollConnection {
-      override fun onPreScroll(
-        available: Offset,
-        source: NestedScrollSource
-      ): Offset {
-        val delta = available.y
-        val newOffset = toolbarOffsetHeightPx.value + delta
-        toolbarOffsetHeightPx.value = newOffset.coerceIn(-topBarHeightPx, 0f)
-        return Offset.Zero
-      }
-    }
-  }
-
-  VanceScaffold(
+  val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+  Scaffold(
     modifier = Modifier
+      .nestedScroll(scrollBehavior.nestedScrollConnection)
       .semantics {
         // Allows to use testTag() for UiAutomator resource-id.
         testTagsAsResourceId = true
-      }
-      .then(
-        when {
-          subscribe<Boolean>(v(base.is_top_bar_fixed)).w() -> Modifier
-          else -> Modifier.nestedScroll(nestedScrollConnection)
-        }
-      ),
+      },
     topBar = {
       TopAppBar(
-        modifier = Modifier
-          .height(TOP_APP_BAR_HEIGHT)
-          .offset {
-            IntOffset(x = 0, y = toolbarOffsetHeightPx.value.roundToInt())
-          },
-        elevation = 0.dp,
-        backgroundColor = backgroundColor,
         title = {
           IconButton(onClick = { /*TODO*/ }) {
             Icon(
@@ -189,11 +94,10 @@ fun BasePanel(
             )
           }
         },
-        navigationIcon = when {
-          subscribe<Boolean>(v(base.is_backstack_available)).w() -> {
-            { BackArrow() }
-          }
-          else -> null
+        scrollBehavior = scrollBehavior,
+        navigationIcon = {
+          if (subscribe<Boolean>(v(base.is_backstack_available)).w())
+            BackArrow()
         },
         actions = {
           IconButton(onClick = { /*TODO*/ }) {
@@ -206,10 +110,62 @@ fun BasePanel(
       )
     },
     bottomBar = {
-      BottomNavigationBar(backgroundColor, windowSizeClass)
+      Column {
+        Divider(
+          color = MaterialTheme.colorScheme.onSurface.copy(.15f),
+          thickness = .6.dp
+        )
+        NavigationBar(
+          modifier = Modifier,
+          containerColor = MaterialTheme.colorScheme.background
+        ) {
+          val style = MaterialTheme.typography.labelSmall
+          NavigationBarItem(
+            modifier = Modifier,
+            selected = true,
+            icon = {
+              Icon(
+                imageVector = Icons.Filled.Home,
+                contentDescription = "Home panel",
+                tint = MaterialTheme.colorScheme.onBackground
+              )
+            },
+            label = {
+              Text(text = "Home", style = style)
+            },
+            onClick = {},
+          )
+          NavigationBarItem(
+            selected = false,
+            icon = {
+              Icon(
+                imageVector = Icons.Outlined.PlayArrow,
+                contentDescription = "Subscriptions panel"
+              )
+            },
+            label = {
+              Text(text = "Subscriptions", style = style)
+            },
+            onClick = {},
+          )
+          NavigationBarItem(
+            selected = false,
+            icon = {
+              Icon(
+                imageVector = Icons.Outlined.List,
+                contentDescription = "Library panel"
+              )
+            },
+            label = {
+              Text(text = "Library", style = style)
+            },
+            onClick = {},
+          )
+        }
+      }
     }
   ) {
-    content(PaddingValues(top = TOP_APP_BAR_HEIGHT))
+    content(it)
   }
 }
 
@@ -219,10 +175,10 @@ fun BasePanel(
 @Composable
 fun BottomNavBarPreview() {
   VanceTheme {
-    BottomNavigationBar(
-      backgroundColor = MaterialTheme.colors.background,
-      windowSizeClass = WindowSizeClass.calculateFromSize(Zero)
-    )
+//    BottomNavigationBar(
+//      backgroundColor = MaterialTheme.colorScheme.background,
+//      windowSizeClass = WindowSizeClass.calculateFromSize(Zero)
+//    )
   }
 }
 

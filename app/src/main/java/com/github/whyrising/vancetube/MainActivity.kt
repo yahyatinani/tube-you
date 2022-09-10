@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube
 
+//import com.github.whyrising.vancetube.ui.theme.composables.isCompact
 import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.graphics.Bitmap
@@ -11,9 +12,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -37,11 +40,15 @@ import com.github.whyrising.vancetube.home.regHomeEvents
 import com.github.whyrising.vancetube.home.regHomeFx
 import com.github.whyrising.vancetube.home.regHomeSubs
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
-import com.github.whyrising.vancetube.ui.theme.composables.isCompact
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+
+
+fun isCompact(windowSizeClass: WindowSizeClass) =
+  windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
+    windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
 
 @Composable
 fun Main(
@@ -51,16 +58,11 @@ fun Main(
 ) {
   VanceTheme(windowSizeClass = windowSizeClass) {
     val systemUiController = rememberSystemUiController()
-    val useDarkIcons = MaterialTheme.colors.isLight
-    val backgroundColor = MaterialTheme.colors.background
+    val backgroundColor = MaterialTheme.colorScheme.background
 
     SideEffect {
       setNotchAreaColorInLandscape(backgroundColor)
-
-      systemUiController.setSystemBarsColor(
-        color = backgroundColor,
-        darkIcons = useDarkIcons
-      )
+      systemUiController.setSystemBarsColor(backgroundColor)
     }
 
     BasePanel(backgroundColor, windowSizeClass, content)

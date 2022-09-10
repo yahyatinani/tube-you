@@ -23,25 +23,19 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,7 +56,6 @@ import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.base.canBeScrolled
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.Blue300
@@ -70,6 +63,7 @@ import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @Composable
@@ -86,7 +80,7 @@ fun VideoLengthText(
       .padding(horizontal = 3.dp),
     text = videoLength,
     textAlign = TextAlign.Center,
-    style = MaterialTheme.typography.body1.copy(
+    style = MaterialTheme.typography.bodySmall.copy(
       color = Color.White,
       fontSize = 12.sp,
       fontWeight = FontWeight.Medium,
@@ -103,7 +97,7 @@ fun VideoItemTitle(modifier: Modifier = Modifier, viewModel: VideoViewModel) {
     maxLines = 2,
     softWrap = true,
     overflow = TextOverflow.Ellipsis,
-    style = MaterialTheme.typography.subtitle2.copy(
+    style = MaterialTheme.typography.titleMedium.copy(
       fontWeight = FontWeight.W700
     )
   )
@@ -117,26 +111,24 @@ fun VideoItemInfo(
 ) {
   val videoInfo = viewModel.info
   val context = LocalContext.current
-  CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-    val color = LocalContentColor.current.copy(LocalContentAlpha.current)
-    ClickableText(
-      text = videoInfo,
-      modifier = modifier,
-      style = textStyle.copy(color = color),
-      onClick = {
-        videoInfo
-          .getStringAnnotations("author", it, it)
-          .firstOrNull()?.let { stringAnnotation ->
-            // TODO: visit the channel of this video by id in stringAnnotation.
-            Toast.makeText(
-              context,
-              "TODO: not implemented yet",
-              Toast.LENGTH_SHORT
-            ).show()
-          }
-      }
-    )
-  }
+  val color = LocalContentColor.current.copy(alpha = .4f)
+  ClickableText(
+    text = videoInfo,
+    modifier = modifier,
+    style = textStyle.copy(color = color),
+    onClick = {
+      videoInfo
+        .getStringAnnotations("author", it, it)
+        .firstOrNull()?.let { stringAnnotation ->
+          // TODO: visit the channel of this video by id in stringAnnotation.
+          Toast.makeText(
+            context,
+            "TODO: not implemented yet",
+            Toast.LENGTH_SHORT
+          ).show()
+        }
+    }
+  )
 }
 
 @Composable
@@ -251,10 +243,6 @@ fun VideosList(
   paddingValues: PaddingValues,
   videos: List<VideoViewModel>
 ) {
-  val state = rememberLazyListState()
-  val canBeScrolled by remember { state.canBeScrolled() }
-//            LaunchedEffect(canBeScrolled) {
-//            dispatch(v(base.is_top_bar_fixed, canBeScrolled)) }
   LazyColumn(
     modifier = Modifier
       .testTag("popular_videos_list")
@@ -263,7 +251,6 @@ fun VideosList(
         if (orientation == ORIENTATION_PORTRAIT) Modifier
         else Modifier.padding(horizontal = 16.dp)
       ),
-    state = state,
     contentPadding = paddingValues
   ) {
     items(
@@ -339,6 +326,16 @@ fun Home(
         modifier = Modifier.testTag("swipe_refresh"),
         state = rememberSwipeRefreshState(isRefreshing),
         onRefresh = { dispatch(v(home.refresh, state)) },
+        indicator = { state, refreshTrigger ->
+          val colorScheme = MaterialTheme.colorScheme
+          SwipeRefreshIndicator(
+            state = state,
+            refreshTriggerDistance = refreshTrigger,
+            scale = true,
+            backgroundColor = colorScheme.background,
+            contentColor = colorScheme.onSurface
+          )
+        },
         indicatorPadding = paddingValues
       ) {
         val videos = when {

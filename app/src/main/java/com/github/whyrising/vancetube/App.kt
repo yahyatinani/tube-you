@@ -26,7 +26,6 @@ fun initAppDb() {
     m(
       base.is_backstack_available to false,
       base.api to API,
-      base.is_top_bar_fixed to true,
       home.panel to HOME_START
     )
   }

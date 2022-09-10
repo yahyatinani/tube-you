@@ -12,19 +12,16 @@
   </style>
 
   <!-- Main theme. -->
-  <style name="Theme.Vance" parent="PlatformAdjusted.Theme.Vance">
-    <item name="android:statusBarColor">@android:color/transparent</item>
-    <item name="android:windowLightStatusBar">true</item>
-  </style>
+  <style name="Theme.Vance" parent="PlatformAdjusted.Theme.Vance" />
 
-  <style name="Theme.Vance.Splash.Base" parent="Theme.SplashScreen">
-    <item name="postSplashScreenTheme">@style/Theme.Vance</item>
-    <item name="windowSplashScreenAnimationDuration">1000</item>
-    <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen
+  <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowLightNavigationBar" tools:targetApi="27">true
     </item>
   </style>
 
-  <style name="Theme.Vance.Splash" parent="Theme.Vance.Splash.Base">
-    <item name="windowSplashScreenBackground">@color/white</item>
+  <style name="Theme.Vance.Splash" parent="NightAdjusted.Theme.Splash">
+    <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen</item>
+    <item name="postSplashScreenTheme">@style/Theme.Vance</item>
   </style>
 </resources>

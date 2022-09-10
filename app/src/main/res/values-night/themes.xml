@@ -7,7 +7,9 @@
     </item>
   </style>
 
-  <style name="Theme.Vance.Splash" parent="Theme.Vance.Splash.Base">
-    <item name="windowSplashScreenBackground">@color/black</item>
+  <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar" tools:targetApi="27">false
+    </item>
   </style>
 </resources>

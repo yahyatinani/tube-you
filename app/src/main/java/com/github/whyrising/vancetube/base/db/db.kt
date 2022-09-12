@@ -20,6 +20,11 @@ const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
 val initialDb = m(
   base.is_backstack_available to false,
   base.api to "https://$DEFAULT_BASE_ADDRESS/api/v1",
+  base.bottom_nav_items to listOf(
+    NavigationItemState.Home(isSelected = true),
+    NavigationItemState.Subscriptions(),
+    NavigationItemState.Library()
+  ),
   home.panel to HOME_STATE
 )
 

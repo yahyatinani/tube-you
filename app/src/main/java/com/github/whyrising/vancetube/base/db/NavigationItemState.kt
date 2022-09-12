@@ -16,6 +16,8 @@ sealed interface NavigationItemState {
   val icon: ImageVector
   val contentDescTextId: Int
 
+  fun toggleSelection(): NavigationItemState
+
   data class Home(override val isSelected: Boolean = false) :
     NavigationItemState {
     override val labelTextId: Int = R.string.nav_item_label_home
@@ -24,6 +26,8 @@ sealed interface NavigationItemState {
       isSelected -> Icons.Filled.Home
       else -> Icons.Outlined.Home
     }
+
+    override fun toggleSelection(): NavigationItemState = Home(!isSelected)
   }
 
   data class Subscriptions(override val isSelected: Boolean = false) :
@@ -34,6 +38,8 @@ sealed interface NavigationItemState {
       isSelected -> Icons.Filled.PlayArrow
       else -> Icons.Outlined.PlayArrow
     }
+
+    override fun toggleSelection() = Subscriptions(isSelected = !isSelected)
   }
 
   data class Library(override val isSelected: Boolean = false) :
@@ -44,5 +50,7 @@ sealed interface NavigationItemState {
       isSelected -> Icons.Filled.List
       else -> Icons.Outlined.List
     }
+
+    override fun toggleSelection(): NavigationItemState = Library(!isSelected)
   }
 }

@@ -20,7 +20,7 @@ import com.github.whyrising.y.core.v
 fun BackArrow() {
   IconButton(
     onClick = {
-      dispatch(v(base.navigate, base.go_back))
+      dispatch(v(base.navigate_to, base.go_back))
     }
   ) {
     Icon(

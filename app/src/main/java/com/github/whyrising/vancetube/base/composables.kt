@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
+import com.github.whyrising.vancetube.base.base.bottom_nav_items
 import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.base.db.initAppDb
 import com.github.whyrising.vancetube.home.home
@@ -128,12 +129,9 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
               ),
               containerColor = Color.Transparent
             ) {
-              // TODO: extract this list to a sub
-              listOf(
-                NavigationItemState.Home(isSelected = true),
-                NavigationItemState.Subscriptions(),
-                NavigationItemState.Library()
-              ).forEach {
+              val navItems =
+                subscribe<List<NavigationItemState>>(v(bottom_nav_items)).w()
+              navItems.forEach {
                 NavigationBarItem(
                   selected = it.isSelected,
                   icon = {
@@ -149,7 +147,7 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
                       style = MaterialTheme.typography.labelSmall
                     )
                   },
-                  onClick = { /* todo: */ }
+                  onClick = { dispatch(v(base.select_bottom_nav_item, it)) }
                 )
               }
             }

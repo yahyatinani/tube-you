@@ -273,8 +273,8 @@ fun RowScope.VanceBottomNavigationItem(
 object BottomNavigationDefaults {
   */
 /**
-   * Default elevation used for [BottomNavigation].
-   *//*
+ * Default elevation used for [BottomNavigation].
+ *//*
 
   val Elevation = 8.dp
 }

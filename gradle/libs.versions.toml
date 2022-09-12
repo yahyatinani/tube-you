@@ -85,7 +85,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 
 [bundles]
 compose = ["androidx-compose-ui-ui", "androidx-compose-ui-util", "androidx-compose-ui-tooling", "androidx-compose-material3", "androidx-constraintlayout-compose", "accompanist-swiperefresh", "androidx-compose-material3-windowssizeclass", "androidx-profileinstaller"]
-kotest = ["kotest-jvm-runner", "kotest-assertions"]
+kotest = ["kotest-jvm-runner", "kotest-assertions", "kotlin-reflect"]
 ktor = ["ktor-client-core", "ktor-client-android", "ktor-client-contentnegotiation", "ktor-serialization-json", "ktor-client-logging", "slf4j"]
 
 [plugins]

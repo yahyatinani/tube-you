@@ -83,7 +83,7 @@ fun regHomeSubs(context: Context) {
   regSub<HomePanelState, HomePanelState>(
     queryId = home.matrialised_state,
     signalsFn = { subscribe(v(home.state)) },
-    placeholder = HOME_START,
+    placeholder = HOME_STATE,
     context = Dispatchers.Default,
     computationFn = { state, _ ->
       when (state) {

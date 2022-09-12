@@ -35,7 +35,7 @@ private val LightColorPalette = lightColorScheme(
     */
 )
 
-fun isPhone(windowSizeClass: WindowSizeClass) =
+fun isCompact(windowSizeClass: WindowSizeClass) =
   windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
     windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
 
@@ -45,12 +45,8 @@ fun VanceTheme(
   windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
   content: @Composable () -> Unit
 ) {
-  Log.i(
-    "VanceTheme",
-    "${windowSizeClass.widthSizeClass},${windowSizeClass.heightSizeClass}"
-  )
   val typography = when {
-    isPhone(windowSizeClass) -> TypographyCompact
+    isCompact(windowSizeClass) -> TypographyCompact
     else -> TypographyExpanded
   }
 

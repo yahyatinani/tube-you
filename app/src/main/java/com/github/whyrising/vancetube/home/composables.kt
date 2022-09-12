@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +35,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -240,7 +240,6 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
 @Composable
 fun VideosList(
   orientation: Int = 1,
-  paddingValues: PaddingValues,
   videos: List<VideoViewModel>
 ) {
   LazyColumn(
@@ -250,8 +249,7 @@ fun VideosList(
       .then(
         if (orientation == ORIENTATION_PORTRAIT) Modifier
         else Modifier.padding(horizontal = 16.dp)
-      ),
-    contentPadding = paddingValues
+      )
   ) {
     items(
       items = videos,
@@ -273,7 +271,6 @@ fun VideosList(
 @Composable
 fun VideosGrid(
   orientation: Int = 1,
-  paddingValues: PaddingValues,
   videos: List<VideoViewModel>
 ) {
   LazyVerticalGrid(
@@ -283,7 +280,6 @@ fun VideosGrid(
     columns = GridCells.Fixed(
       count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
     ),
-    contentPadding = paddingValues,
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalArrangement = Arrangement.spacedBy(50.dp)
   ) {
@@ -307,7 +303,6 @@ fun VideosGrid(
 @Composable
 fun Home(
   modifier: Modifier = Modifier,
-  paddingValues: PaddingValues = PaddingValues(),
   state: HomePanelState,
   content: @Composable (videos: List<VideoViewModel>) -> Unit
 ) {
@@ -335,8 +330,7 @@ fun Home(
             backgroundColor = colorScheme.background,
             contentColor = colorScheme.onSurface
           )
-        },
-        indicatorPadding = paddingValues
+        }
       ) {
         val videos = when {
           isMaterialised -> (state as HomePanelState.Materialised).popularVideos
@@ -352,7 +346,6 @@ fun Home(
 @OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.setupHome(
   animOffSetX: Int,
-  paddingValues: PaddingValues,
   content: @Composable (videos: List<VideoViewModel>) -> Unit
 ) {
   composable(
@@ -360,10 +353,15 @@ private fun NavGraphBuilder.setupHome(
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
-    LaunchedEffect(true) { dispatch(v(home.load)) }
+    regHomeFx(rememberCoroutineScope())
+    regHomeSubs(LocalContext.current)
+
+    LaunchedEffect(true) {
+      regHomeEvents()
+      dispatch(v(home.load))
+    }
 
     Home(
-      paddingValues = paddingValues,
       state = subscribe<HomePanelState>(v(home.matrialised_state)).w(),
       content = content
     )
@@ -372,13 +370,11 @@ private fun NavGraphBuilder.setupHome(
 
 fun NavGraphBuilder.home(
   animOffSetX: Int,
-  paddingValues: PaddingValues,
   orientation: Int
 ) {
-  setupHome(animOffSetX, paddingValues) {
+  setupHome(animOffSetX) {
     VideosList(
       orientation = orientation,
-      paddingValues = paddingValues,
       videos = it
     )
   }
@@ -386,13 +382,11 @@ fun NavGraphBuilder.home(
 
 fun NavGraphBuilder.homeLarge(
   animOffSetX: Int,
-  paddingValues: PaddingValues,
   orientation: Int
 ) {
-  setupHome(animOffSetX, paddingValues) {
+  setupHome(animOffSetX) {
     VideosGrid(
       orientation = orientation,
-      paddingValues = paddingValues,
       videos = it
     )
   }
@@ -448,7 +442,6 @@ fun HomePreview() {
     ) {
       VideosList(
         orientation = 1,
-        paddingValues = PaddingValues(),
         videos = it
       )
     }
@@ -465,7 +458,6 @@ fun HomeDarkPreview() {
       ) {
         VideosList(
           orientation = 1,
-          paddingValues = PaddingValues(),
           videos = it
         )
       }

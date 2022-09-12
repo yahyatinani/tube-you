@@ -27,4 +27,4 @@ sealed interface HomePanelState {
   value class Failed(val error: Error) : HomePanelState
 }
 
-val HOME_START: HomePanelState = HomePanelState.Loading
+val HOME_STATE: HomePanelState = HomePanelState.Loading

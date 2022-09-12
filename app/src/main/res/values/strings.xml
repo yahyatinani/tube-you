@@ -1,3 +1,9 @@
 <resources>
     <string name="views_label">views</string>
+  <string name="nav_item_label_home">Home</string>
+  <string name="nav_item_label_subs">Subscriptions</string>
+  <string name="nav_item_label_library">Library</string>
+  <string name="nav_item_desc_home">Home in navigation bar</string>
+  <string name="nav_item_desc_subs">Subscriptions in navigation bar</string>
+  <string name="nav_item_desc_library">Library in navigation bar</string>
 </resources>

@@ -1,4 +1,6 @@
-package com.github.whyrising.vancetube.ui.theme.composables/*
+/*
+package com.github.whyrising.vancetube.ui.theme.composables*/
+/*
  * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +14,8 @@ package com.github.whyrising.vancetube.ui.theme.composables/*
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 
 import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -75,6 +78,7 @@ import kotlin.math.roundToInt
 
 // TODO: b/149825331 add documentation references to Scaffold here and samples
 //  for using BottomNavigation inside a Scaffold
+*/
 /**
  * <a href="https://material.io/components/bottom-navigation" class="external"
  * target="_blank">Material Design bottom navigation</a>.
@@ -111,7 +115,8 @@ import kotlin.math.roundToInt
  * @param content destinations inside this BottomNavigation, this should contain
  * multiple
  * [BottomNavigationItem]s
- */
+ *//*
+
 @Composable
 fun CustomBottomNavigation(
   modifier: Modifier = Modifier,
@@ -154,10 +159,8 @@ fun CustomBottomNavigation(
   }
 }
 
-fun isCompact(windowSizeClass: WindowSizeClass) =
-  windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
-    windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
 
+*/
 /**
  * <a href="https://material.io/components/bottom-navigation" class="external"
  * target="_blank">Material Design bottom navigation</a> item.
@@ -199,7 +202,8 @@ fun isCompact(windowSizeClass: WindowSizeClass) =
  * and the color of the ripple.
  * @param unselectedContentColor the color of the text label and icon when this
  * item is not selected
- */
+ *//*
+
 @Composable
 fun RowScope.VanceBottomNavigationItem(
   selected: Boolean,
@@ -261,16 +265,21 @@ fun RowScope.VanceBottomNavigationItem(
   }
 }
 
+*/
 /**
  * Contains default values used for [BottomNavigation].
- */
+ *//*
+
 object BottomNavigationDefaults {
-  /**
-   * Default elevation used for [BottomNavigation].
-   */
+  */
+/**
+ * Default elevation used for [BottomNavigation].
+ *//*
+
   val Elevation = 8.dp
 }
 
+*/
 /**
  * Transition that animates [LocalContentColor] between [inactiveColor] and
  * [activeColor], depending on [selected]. This component also provides the
@@ -284,7 +293,8 @@ object BottomNavigationDefaults {
  * @param content the content of the [BottomNavigationItem] to animate
  * [LocalContentColor] for, where the animationProgress is the current progress
  * of the animation from 0f to 1f.
- */
+ *//*
+
 @Composable
 private fun BottomNavigationTransition(
   activeColor: Color,
@@ -307,6 +317,7 @@ private fun BottomNavigationTransition(
   }
 }
 
+*/
 /**
  * Base layout for a [BottomNavigationItem]
  *
@@ -316,12 +327,15 @@ private fun BottomNavigationTransition(
  * icon position, where 0 represents its unselected position and 1 represents
  * its selected position. If both the [icon] and [label] should be shown at all
  * times, this will always be 1, as the icon position should remain constant.
- */
+ *//*
+
 @Composable
 private fun BottomNavigationItemBaselineLayout(
   icon: @Composable () -> Unit,
   label: @Composable() (() -> Unit)?,
-  /*@FloatRange(from = 0.0, to = 1.0)*/
+  */
+/*@FloatRange(from = 0.0, to = 1.0)*//*
+
   iconPositionAnimationProgress: Float,
   windowSizeClass: WindowSizeClass
 ) {
@@ -368,10 +382,12 @@ private fun BottomNavigationItemBaselineLayout(
   }
 }
 
+*/
 /**
  * Places the provided [iconPlaceable] in the vertical center of the provided
  * [constraints]
- */
+ *//*
+
 private fun MeasureScope.placeIcon(
   iconPlaceable: Placeable,
   constraints: Constraints
@@ -385,6 +401,7 @@ private fun MeasureScope.placeIcon(
 
 var maxWidth = MutableStateFlow(0)
 
+*/
 /**
  * Places the provided [labelPlaceable] and [iconPlaceable] in the correct
  * position, depending on [iconPositionAnimationProgress].
@@ -407,12 +424,15 @@ var maxWidth = MutableStateFlow(0)
  * animation, where 0 represents centered icon and no label, and 1 represents
  * top aligned icon with label. Values between 0 and 1 interpolate the icon
  * position so we can smoothly move the icon.
- */
+ *//*
+
 private fun MeasureScope.placeLabelAndIcon(
   labelPlaceable: Placeable,
   iconPlaceable: Placeable,
   constraints: Constraints,
-  /*@FloatRange(from = 0.0, to = 1.0)*/
+  */
+/*@FloatRange(from = 0.0, to = 1.0)*//*
+
   iconPositionAnimationProgress: Float
 ): MeasureResult {
   val height = constraints.maxHeight
@@ -463,31 +483,40 @@ private fun MeasureScope.placeLabelAndIcon(
   }
 }
 
+*/
 /**
  * [VectorizedAnimationSpec] controlling the transition between unselected and
  * selected
  * [BottomNavigationItem]s.
- */
+ *//*
+
 private val BottomNavigationAnimationSpec = TweenSpec<Float>(
   durationMillis = 300,
   easing = FastOutSlowInEasing
 )
 
+*/
 /**
  * Height of a [BottomNavigation] component
- */
+ *//*
+
 private val BottomNavigationHeight = 47.dp
 
+*/
 /**
  * Padding at the start and end of a [BottomNavigationItem]
- */
+ *//*
+
 private val BottomNavigationItemHorizontalPadding = 12.dp
 
 private val BottomNavigationItemHorizontalLargePadding = 24.dp
 
+*/
 /**
  * The space between the text baseline and the bottom of the
  * [BottomNavigationItem], and between the text baseline and the bottom of the
  * icon placed above it.
- */
+ *//*
+
 private val CombinedItemTextBaseline = 12.dp
+*/

@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-  <style name="Theme.MyApp" parent="android:Theme.Material.Light.NoActionBar">
-    <item name="android:statusBarColor">@color/white</item>
-  </style>
-
-  <style name="Theme.MyApp.SplashScreen.Base" parent="Theme.SplashScreen">
-    <item name="postSplashScreenTheme">@style/Theme.MyApp</item>
-    <item name="windowSplashScreenAnimationDuration">1000</item>
-    <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen
+  <style name="NightAdjusted.Theme.Vance" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowLightNavigationBar" tools:targetApi="27">true
     </item>
   </style>
 
-  <style name="Theme.MyApp.SplashScreen" parent="Theme.MyApp.SplashScreen.Base">
-    <item name="windowSplashScreenBackground">@color/white</item>
+  <style name="PlatformAdjusted.Theme.Vance" parent="NightAdjusted.Theme.Vance">
+    <item name="android:statusBarColor">@color/black_900</item>
+  </style>
+
+  <!-- Main theme. -->
+  <style name="Theme.Vance" parent="PlatformAdjusted.Theme.Vance" />
+
+  <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
+    <item name="android:windowLightStatusBar">true</item>
+    <item name="android:windowLightNavigationBar" tools:targetApi="27">true
+    </item>
+  </style>
+
+  <style name="Theme.Vance.Splash" parent="NightAdjusted.Theme.Splash">
+    <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen</item>
+    <item name="postSplashScreenTheme">@style/Theme.Vance</item>
   </style>
 </resources>

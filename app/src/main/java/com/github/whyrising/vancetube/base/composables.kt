@@ -1,215 +1,183 @@
 package com.github.whyrising.vancetube.base
 
-import VanceScaffold
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
+import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
+import androidx.compose.foundation.layout.consumedWindowInsets
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.initAppDb
+import com.github.whyrising.vancetube.base.db.NavigationItemState
+import com.github.whyrising.vancetube.base.db.initAppDb
+import com.github.whyrising.vancetube.home.home
+import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
-import com.github.whyrising.vancetube.ui.theme.composables.CustomBottomNavigation
-import com.github.whyrising.vancetube.ui.theme.composables.SmallLabelText
-import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavigationItem
+import com.github.whyrising.vancetube.ui.theme.isCompact
 import com.github.whyrising.y.core.v
-import kotlin.math.roundToInt
-
-fun LazyListState.canBeScrolled(): State<Boolean> = derivedStateOf {
-  val layoutInfo = layoutInfo
-  val visibleItemsInfo = layoutInfo.visibleItemsInfo
-
-  if (layoutInfo.totalItemsCount == 0) {
-    false
-  } else {
-    val firstVisibleItem = visibleItemsInfo.first()
-    val lastVisibleItem = visibleItemsInfo.last()
-
-    val viewportHeight =
-      layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
-
-    !(
-      firstVisibleItem.index == 0 &&
-        firstVisibleItem.offset == 0 &&
-        lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
-        lastVisibleItem.offset + lastVisibleItem.size <= viewportHeight
-      )
-  }
-}
-
-@Composable
-fun BottomNavigationBar(
-  backgroundColor: Color,
-  windowSizeClass: WindowSizeClass
-) {
-  CustomBottomNavigation(
-    backgroundColor = backgroundColor,
-    elevation = 0.dp,
-    windowSizeClass = windowSizeClass
-  ) {
-    VanceBottomNavigationItem(
-      selected = true,
-      onClick = { /*TODO*/ },
-      label = {
-        SmallLabelText(text = "Home")
-      },
-      icon = {
-        Icon(
-          imageVector = Icons.Filled.Home,
-          contentDescription = "Home panel",
-          tint = MaterialTheme.colors.onBackground
-        )
-      },
-      windowSizeClass = windowSizeClass
-    )
-
-    VanceBottomNavigationItem(
-      selected = false,
-      onClick = { /*TODO*/ },
-      label = {
-        SmallLabelText(text = "Subscriptions")
-      },
-      icon = {
-        Icon(
-          imageVector = Icons.Outlined.PlayArrow,
-          contentDescription = "Library panel"
-        )
-      },
-      windowSizeClass = windowSizeClass
-    )
-
-    VanceBottomNavigationItem(
-      selected = false,
-      onClick = { /*TODO*/ },
-      label = {
-        SmallLabelText(text = "Library")
-      },
-      icon = {
-        Icon(
-          imageVector = Icons.Outlined.List,
-          contentDescription = "Library panel"
-        )
-      },
-      windowSizeClass = windowSizeClass
-    )
-  }
-}
-
-val TOP_APP_BAR_HEIGHT = 48.dp
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 @OptIn(
-  ExperimentalMaterial3WindowSizeClassApi::class,
-  ExperimentalComposeUiApi::class
+  ExperimentalMaterial3Api::class,
+  ExperimentalComposeUiApi::class,
+  ExperimentalAnimationApi::class,
+  ExperimentalLayoutApi::class
 )
 @Composable
-fun BasePanel(
-  backgroundColor: Color = MaterialTheme.colors.background,
-  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
-  content: @Composable (PaddingValues) -> Unit
-) {
-  val topBarHeightPx = with(LocalDensity.current) {
-    TOP_APP_BAR_HEIGHT.roundToPx().toFloat()
-  }
-  val toolbarOffsetHeightPx = remember { mutableStateOf(0f) }
-  val nestedScrollConnection = remember {
-    object : NestedScrollConnection {
-      override fun onPreScroll(
-        available: Offset,
-        source: NestedScrollSource
-      ): Offset {
-        val delta = available.y
-        val newOffset = toolbarOffsetHeightPx.value + delta
-        toolbarOffsetHeightPx.value = newOffset.coerceIn(-topBarHeightPx, 0f)
-        return Offset.Zero
-      }
+fun VanceApp(windowSizeClass: WindowSizeClass) {
+  val navController = rememberAnimatedNavController().apply {
+    addOnDestinationChangedListener { controller, _, _ ->
+      val flag = controller.previousBackStackEntry != null
+      dispatch(v(base.set_backstack_status, flag))
     }
   }
-
-  VanceScaffold(
-    modifier = Modifier
-      .semantics {
-        // Allows to use testTag() for UiAutomator resource-id.
-        testTagsAsResourceId = true
-      }
-      .then(
-        when {
-          subscribe<Boolean>(v(base.is_top_bar_fixed)).w() -> Modifier
-          else -> Modifier.nestedScroll(nestedScrollConnection)
-        }
-      ),
-    topBar = {
-      TopAppBar(
-        modifier = Modifier
-          .height(TOP_APP_BAR_HEIGHT)
-          .offset {
-            IntOffset(x = 0, y = toolbarOffsetHeightPx.value.roundToInt())
+  regBaseFx(navController)
+  VanceTheme(windowSizeClass = windowSizeClass) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    Scaffold(
+      modifier = Modifier
+        .nestedScroll(scrollBehavior.nestedScrollConnection)
+        .semantics {
+          // Allows to use testTag() for UiAutomator resource-id.
+          testTagsAsResourceId = true
+        },
+      topBar = {
+        TopAppBar(
+          modifier = Modifier.windowInsetsPadding(
+            WindowInsets.safeDrawing.only(WindowInsetsSides.Top + Horizontal)
+          ),
+          title = {
+            IconButton(onClick = { /*TODO*/ }) {
+              Icon(
+                imageVector = Icons.Outlined.Search,
+                modifier = Modifier.size(32.dp),
+                contentDescription = "Search a video"
+              )
+            }
           },
-        elevation = 0.dp,
-        backgroundColor = backgroundColor,
-        title = {
-          IconButton(onClick = { /*TODO*/ }) {
-            Icon(
-              imageVector = Icons.Outlined.Search,
-              modifier = Modifier.size(32.dp),
-              contentDescription = "Search a video"
-            )
+          scrollBehavior = scrollBehavior,
+          navigationIcon = {
+            if (subscribe<Boolean>(v(base.is_backstack_available)).w()) {
+              BackArrow()
+            }
+          },
+          actions = {
+            IconButton(onClick = { /*TODO*/ }) {
+              Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "more"
+              )
+            }
           }
-        },
-        navigationIcon = when {
-          subscribe<Boolean>(v(base.is_backstack_available)).w() -> {
-            { BackArrow() }
-          }
-          else -> null
-        },
-        actions = {
-          IconButton(onClick = { /*TODO*/ }) {
-            Icon(
-              imageVector = Icons.Default.MoreVert,
-              contentDescription = "more"
+        )
+      },
+      bottomBar = {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+          Column(
+            modifier = Modifier.windowInsetsPadding(
+              WindowInsets.safeDrawing.only(Horizontal + Bottom)
             )
+          ) {
+            Divider(
+              color = MaterialTheme.colorScheme.onSurface.copy(.15f),
+              thickness = .6.dp
+            )
+            NavigationBar(
+              modifier = Modifier.windowInsetsPadding(
+                WindowInsets.safeDrawing.only(Horizontal + Bottom)
+              ),
+              containerColor = Color.Transparent
+            ) {
+              // TODO: extract this list to a sub
+              listOf(
+                NavigationItemState.Home(isSelected = true),
+                NavigationItemState.Subscriptions(),
+                NavigationItemState.Library()
+              ).forEach {
+                NavigationBarItem(
+                  selected = it.isSelected,
+                  icon = {
+                    Icon(
+                      imageVector = it.icon,
+                      contentDescription = stringResource(it.contentDescTextId),
+                      tint = MaterialTheme.colorScheme.onBackground
+                    )
+                  },
+                  label = {
+                    Text(
+                      text = stringResource(it.labelTextId),
+                      style = MaterialTheme.typography.labelSmall
+                    )
+                  },
+                  onClick = { /* todo: */ }
+                )
+              }
+            }
           }
         }
-      )
-    },
-    bottomBar = {
-      BottomNavigationBar(backgroundColor, windowSizeClass)
+      }
+    ) {
+      val orientation = LocalConfiguration.current.orientation
+      AnimatedNavHost(
+        navController = navController,
+        startDestination = home.panel.name,
+        modifier = Modifier
+          .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
+          .padding(it)
+          .consumedWindowInsets(it)
+      ) {
+        when {
+          isCompact(windowSizeClass) -> home(
+            animOffSetX = 300,
+            orientation = orientation
+          )
+          else -> homeLarge(
+            animOffSetX = 300,
+            orientation = orientation
+          )
+        }
+      }
     }
-  ) {
-    content(PaddingValues(top = TOP_APP_BAR_HEIGHT))
   }
 }
 
@@ -217,30 +185,15 @@ fun BasePanel(
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
 @Composable
-fun BottomNavBarPreview() {
-  VanceTheme {
-    BottomNavigationBar(
-      backgroundColor = MaterialTheme.colors.background,
-      windowSizeClass = WindowSizeClass.calculateFromSize(Zero)
-    )
-  }
-}
-
-@Preview(showBackground = true)
-@Composable
 fun BasePanelPreview() {
   initAppDb()
-  regBaseEventHandlers()
-  regBaseSubs()
-  VanceTheme {
-    BasePanel {}
-  }
+  VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun BasePanelDarkPreview() {
-  VanceTheme {
-    BasePanel {}
-  }
+  initAppDb()
+  VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))
 }

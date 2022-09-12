@@ -2,11 +2,10 @@
 
 package com.github.whyrising.vancetube.ui.theme
 
-import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -14,15 +13,15 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 
-private val DarkColorPalette = darkColors(
+private val DarkColorPalette = darkColorScheme(
   primary = Purple200,
-  primaryVariant = Purple700,
+  primaryContainer = Purple700,
   secondary = Teal200
 )
 
-private val LightColorPalette = lightColors(
+private val LightColorPalette = lightColorScheme(
   primary = Purple500,
-  primaryVariant = Purple700,
+  primaryContainer = Purple700,
   secondary = Teal200
 
   /* Other default colors to override
@@ -35,7 +34,7 @@ private val LightColorPalette = lightColors(
     */
 )
 
-fun isPhone(windowSizeClass: WindowSizeClass) =
+fun isCompact(windowSizeClass: WindowSizeClass) =
   windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
     windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
 
@@ -45,17 +44,13 @@ fun VanceTheme(
   windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
   content: @Composable () -> Unit
 ) {
-  Log.i(
-    "VanceTheme",
-    "${windowSizeClass.widthSizeClass},${windowSizeClass.heightSizeClass}"
-  )
   val typography = when {
-    isPhone(windowSizeClass) -> TypographyCompact
+    isCompact(windowSizeClass) -> TypographyCompact
     else -> TypographyExpanded
   }
 
   MaterialTheme(
-    colors = if (darkTheme) DarkColorPalette else LightColorPalette,
+    colorScheme = if (darkTheme) DarkColorPalette else LightColorPalette,
     typography = typography,
     shapes = Shapes,
     content = content

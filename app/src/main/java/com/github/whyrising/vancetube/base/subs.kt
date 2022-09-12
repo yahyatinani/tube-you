@@ -8,7 +8,4 @@ fun regBaseSubs() {
   regSub<IPersistentMap<*, *>, Boolean>(base.is_backstack_available) { db, _ ->
     db[base.is_backstack_available] as Boolean
   }
-  regSub<IPersistentMap<*, *>, Boolean>(base.is_top_bar_fixed) { db, _ ->
-    db[base.is_top_bar_fixed] as Boolean
-  }
 }

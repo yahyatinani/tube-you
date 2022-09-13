@@ -56,6 +56,7 @@ import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
+import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.Blue300
@@ -349,17 +350,17 @@ private fun NavGraphBuilder.setupHome(
   content: @Composable (videos: List<VideoViewModel>) -> Unit
 ) {
   composable(
-    route = home.panel.name,
+    route = NavigationItemState.Home.route,
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
-    regHomeFx(rememberCoroutineScope())
-    regHomeSubs(LocalContext.current)
-
+    val scope = rememberCoroutineScope()
     LaunchedEffect(true) {
+      regHomeFx(scope)
       regHomeEvents()
       dispatch(v(home.load))
     }
+    regHomeSubs(LocalContext.current)
 
     Home(
       state = subscribe<HomePanelState>(v(home.matrialised_state)).w(),

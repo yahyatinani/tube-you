@@ -18,6 +18,8 @@ sealed interface NavigationItemState {
 
   fun toggleSelection(): NavigationItemState
 
+  /* Sub-classes */
+
   data class Home(override val isSelected: Boolean = false) :
     NavigationItemState {
     override val labelTextId: Int = R.string.nav_item_label_home
@@ -28,6 +30,12 @@ sealed interface NavigationItemState {
     }
 
     override fun toggleSelection(): NavigationItemState = Home(!isSelected)
+
+    override fun toString(): String = route
+
+    companion object {
+      const val route: String = "home_route"
+    }
   }
 
   data class Subscriptions(override val isSelected: Boolean = false) :
@@ -40,6 +48,12 @@ sealed interface NavigationItemState {
     }
 
     override fun toggleSelection() = Subscriptions(isSelected = !isSelected)
+
+    override fun toString(): String = route
+
+    companion object {
+      const val route: String = "subscriptions_route"
+    }
   }
 
   data class Library(override val isSelected: Boolean = false) :
@@ -52,5 +66,11 @@ sealed interface NavigationItemState {
     }
 
     override fun toggleSelection(): NavigationItemState = Library(!isSelected)
+
+    override fun toString(): String = route
+
+    companion object {
+      const val route: String = "library_route"
+    }
   }
 }

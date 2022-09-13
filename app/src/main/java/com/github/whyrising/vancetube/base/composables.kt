@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.consumedWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -32,6 +33,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +45,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
@@ -51,11 +54,14 @@ import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.base.db.initAppDb
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.homeLarge
+import com.github.whyrising.vancetube.ui.anim.enterAnimation
+import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
 import com.github.whyrising.vancetube.ui.theme.isCompact
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 @OptIn(
@@ -66,10 +72,23 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 )
 @Composable
 fun VanceApp(windowSizeClass: WindowSizeClass) {
-  val navController = rememberAnimatedNavController().apply {
-    addOnDestinationChangedListener { controller, _, _ ->
-      val flag = controller.previousBackStackEntry != null
-      dispatch(v(base.set_backstack_status, flag))
+  val navController = rememberAnimatedNavController()
+  DisposableEffect(navController) {
+    val listener = NavController
+      .OnDestinationChangedListener { navCtrl, navDestination, _ ->
+        val route = navDestination.route
+        if (route != null) {
+          dispatch(v(base.select_bottom_nav_item, route))
+        }
+        // FIXME: use this when a new activity on top
+//        val flag = navCtrl.previousBackStackEntry != null
+//        dispatch(v(base.set_backstack_status, flag))
+      }
+
+    navController.addOnDestinationChangedListener(listener)
+
+    onDispose {
+      navController.removeOnDestinationChangedListener(listener)
     }
   }
   regBaseFx(navController)
@@ -147,7 +166,7 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
                       style = MaterialTheme.typography.labelSmall
                     )
                   },
-                  onClick = { dispatch(v(base.select_bottom_nav_item, it)) }
+                  onClick = { dispatch(v(base.navigate_to, it)) }
                 )
               }
             }
@@ -158,7 +177,7 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
       val orientation = LocalConfiguration.current.orientation
       AnimatedNavHost(
         navController = navController,
-        startDestination = home.panel.name,
+        startDestination = NavigationItemState.Home.route,
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)
@@ -173,6 +192,25 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
             animOffSetX = 300,
             orientation = orientation
           )
+        }
+
+        composable(
+          route = NavigationItemState.Subscriptions.route,
+          exitTransition = { exitAnimation(targetOffsetX = -300) },
+          popEnterTransition = { enterAnimation(initialOffsetX = -300) }
+        ) {
+          Surface(modifier = Modifier.fillMaxSize()) {
+            Text(text = "TODO: subs")
+          }
+        }
+        composable(
+          route = NavigationItemState.Library.route,
+          exitTransition = { exitAnimation(targetOffsetX = -300) },
+          popEnterTransition = { enterAnimation(initialOffsetX = -300) }
+        ) {
+          Surface(modifier = Modifier.fillMaxSize()) {
+            Text(text = "TODO: library")
+          }
         }
       }
     }

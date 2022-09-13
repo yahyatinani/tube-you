@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +57,9 @@ import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
+import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.db.NavigationItemState
+import com.github.whyrising.vancetube.home.home.matrialised_state
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.Blue300
@@ -355,15 +358,17 @@ private fun NavGraphBuilder.setupHome(
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
     val scope = rememberCoroutineScope()
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
       regHomeFx(scope)
-      regHomeEvents()
-      dispatch(v(home.load))
+      regHomeEvents
+      dispatch(v(home.load_popular_videos))
     }
-    regHomeSubs(LocalContext.current)
+    regHomeSubs
 
     Home(
-      state = subscribe<HomePanelState>(v(home.matrialised_state)).w(),
+      state = subscribe<HomePanelState>(
+        qvec = v(matrialised_state, stringResource(R.string.views_label))
+      ).w(),
       content = content
     )
   }

@@ -1,12 +1,11 @@
 package com.github.whyrising.vancetube.home
 
-import android.content.Context
+import android.util.Log
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
-import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.ui.theme.Blue300
 import com.github.whyrising.y.core.get
@@ -38,6 +37,7 @@ fun formatVideoInfo(
   viewsLabel: String,
   publishedText: String
 ): AnnotatedString = buildAnnotatedString {
+  "%#x ".format(3)
   val str = "$author$VIDEO_INFO_DIVIDER$viewCount $viewsLabel" +
     "$VIDEO_INFO_DIVIDER$publishedText"
   val startIndex = 0
@@ -75,7 +75,12 @@ fun formatViews(viewsCount: Long): String = when {
   else -> "${viewsCount / 1_000_000_000}$BillionsSign"
 }
 
-fun regHomeSubs(context: Context) {
+/**
+ * Call this lazy global property to initialise all [Home] page subscriptions.
+ * @return [Unit]
+ */
+val regHomeSubs by lazy {
+  Log.i("regHomeSubs", "dsflksdajfjsd")
   regSub<AppDb, HomePanelState>(queryId = home.state) { db, _ ->
     db[home.panel] as HomePanelState
   }
@@ -85,7 +90,7 @@ fun regHomeSubs(context: Context) {
     signalsFn = { subscribe(v(home.state)) },
     placeholder = HOME_STATE,
     context = Dispatchers.Default,
-    computationFn = { state, _ ->
+    computationFn = { state, (_, viewsLabel) ->
       when (state) {
         is HomePanelState.Loaded -> {
           val formatted = state.popularVideos
@@ -101,7 +106,7 @@ fun regHomeSubs(context: Context) {
                     author = videoMetadata.author,
                     authorId = videoMetadata.authorId,
                     viewCount = formatViews(videoMetadata.viewCount),
-                    viewsLabel = context.getString(R.string.views_label),
+                    viewsLabel = viewsLabel as String,
                     publishedText = videoMetadata.publishedText
                   )
                 )

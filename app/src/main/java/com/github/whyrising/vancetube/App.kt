@@ -8,5 +8,9 @@ class App : Application() {
     super.onCreate()
 
     initAppDb()
+
+    // FIXME: remove this for release
+//    System.setProperty("kotlinx.coroutines.debug", "on")
+//    Log.i("currentThreadName", Thread.currentThread().name)
   }
 }

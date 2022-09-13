@@ -8,5 +8,5 @@ enum class home {
   //  events
   set_popular_vids,
   refresh,
-  load
+  load_popular_videos
 }

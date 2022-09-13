@@ -2,12 +2,12 @@ package com.github.whyrising.vancetube.base.db
 
 import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.regEventDb
+import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.regBaseEventHandlers
 import com.github.whyrising.vancetube.base.regBaseSubs
 import com.github.whyrising.vancetube.home.HOME_STATE
 import com.github.whyrising.vancetube.home.home
-import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
@@ -29,7 +29,7 @@ val initialDb = m(
 )
 
 fun initAppDb() {
-  regEventDb<IPersistentMap<Any, Any>>(base.init_db) { _, _ -> initialDb }
+  regEventDb<AppDb>(base.init_db) { _, _ -> initialDb }
   dispatchSync(v(base.init_db))
 
   regBaseEventHandlers()

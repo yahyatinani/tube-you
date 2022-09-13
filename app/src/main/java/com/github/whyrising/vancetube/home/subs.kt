@@ -10,7 +10,6 @@ import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.ui.theme.Blue300
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
-import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.LocalTime
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -89,11 +88,10 @@ val regHomeSubs by lazy {
     queryId = home.matrialised_state,
     signalsFn = { subscribe(v(home.state)) },
     placeholder = HOME_STATE,
-    context = Dispatchers.Default,
-    computationFn = { state, (_, viewsLabel) ->
-      when (state) {
+    computationFn = { homeState, (_, viewsLabel) ->
+      when (homeState) {
         is HomePanelState.Loaded -> {
-          val formatted = state.popularVideos
+          val formatted = homeState.popularVideos
             .fold(v<VideoViewModel>()) { acc, videoMetadata ->
               acc.conj(
                 VideoViewModel(
@@ -114,7 +112,7 @@ val regHomeSubs by lazy {
             }
           HomePanelState.Materialised(formatted)
         }
-        else -> state
+        else -> homeState
       }
     }
   )

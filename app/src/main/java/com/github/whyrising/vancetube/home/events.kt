@@ -9,7 +9,6 @@ import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.home.home.load_popular_videos
 import com.github.whyrising.y.core.assocIn
-import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
@@ -18,11 +17,12 @@ import com.github.whyrising.y.core.v
 val regHomeEvents by lazy {
   Log.i("regHomeEvents", "init")
   regEventFx(load_popular_videos) { cofx, _ ->
-    val appDb = cofx[db] as IPersistentMap<Any, Any>
-    val api = get(appDb, base.api)
+    val appDb = cofx[db] as AppDb
+    if (appDb[home.panel] is HomePanelState.Loaded)
+      return@regEventFx m()
     m(
       db to assocIn(appDb, l(home.panel), HomePanelState.Loading),
-      fx to v(v(load_popular_videos, api))
+      fx to v(v(load_popular_videos, get(appDb, base.api)))
     )
   }
 
@@ -31,7 +31,7 @@ val regHomeEvents by lazy {
   }
 
   regEventFx(home.refresh) { cofx, (_, materialised) ->
-    val appDb = cofx[db] as IPersistentMap<Any, Any>
+    val appDb = cofx[db] as AppDb
     val api = get(appDb, base.api)
     val newState = HomePanelState.Refreshing(
       (materialised as HomePanelState.Materialised).popularVideos

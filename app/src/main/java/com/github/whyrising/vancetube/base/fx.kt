@@ -23,7 +23,7 @@ fun regBaseFx(navController: NavHostController) {
           // reselecting the same item
           launchSingleTop = true
           // Restore state when reselecting a previously selected item
-          restoreState = true
+//          restoreState = true // Fixme: this flag breaks go_top_list
         }
         route == base.go_back.name -> navController.popBackStack()
         else -> navController.navigate(route)

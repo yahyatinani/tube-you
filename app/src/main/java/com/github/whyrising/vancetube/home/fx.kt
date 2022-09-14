@@ -46,6 +46,7 @@ val client = HttpClient(Android) {
 
 fun regHomeFx(scope: CoroutineScope) {
   Log.i("regHomeFx", "init")
+
   regFx(home.load_popular_videos) { api ->
     scope.launch {
       val endpoint = "$api/popular?fields=videoId,title,videoThumbnails," +
@@ -73,6 +74,18 @@ fun regHomeFx(scope: CoroutineScope) {
       } catch (e: Exception) {
         throw e
       }
+    }
+  }
+}
+
+fun regScrollToTopListFx(
+  scope: CoroutineScope,
+  scrollToTop: suspend () -> Unit
+) {
+  regFx(home.go_top_list) {
+    scope.launch {
+      // TODO: expand TopAppBar
+      scrollToTop()
     }
   }
 }

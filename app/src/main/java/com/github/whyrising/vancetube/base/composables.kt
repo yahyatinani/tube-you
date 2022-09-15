@@ -34,6 +34,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -93,10 +94,18 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
   }
   regBaseFx(navController)
   VanceTheme(windowSizeClass = windowSizeClass) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val isCompactDisplay = remember { isCompact(windowSizeClass) }
+    val scrollBehavior = when {
+      isCompactDisplay -> TopAppBarDefaults.enterAlwaysScrollBehavior()
+      else -> TopAppBarDefaults.pinnedScrollBehavior()
+    }
     Scaffold(
       modifier = Modifier
-        .nestedScroll(scrollBehavior.nestedScrollConnection)
+        .then(
+          if (isCompactDisplay) {
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+          } else Modifier
+        )
         .semantics {
           // Allows to use testTag() for UiAutomator resource-id.
           testTagsAsResourceId = true
@@ -184,10 +193,12 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
           .consumedWindowInsets(it)
       ) {
         when {
-          isCompact(windowSizeClass) -> home(
-            animOffSetX = 300,
-            orientation = orientation
-          )
+          isCompactDisplay -> {
+            home(
+              animOffSetX = 300,
+              orientation = orientation
+            )
+          }
           else -> homeLarge(
             animOffSetX = 300,
             orientation = orientation

@@ -13,9 +13,10 @@ import com.github.whyrising.y.core.v
 
 // const val DEFAULT_BASE_ADDRESS = "invidious.tiekoetter.com"
 // const val DEFAULT_BASE_ADDRESS = "invidious.namazso.eu" // empty
-const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
+//const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
 // const val DEFAULT_BASE_ADDRESS = "invidious.snopyta.org"
-// const val DEFAULT_BASE_ADDRESS = "y.com.sb"
+//const val DEFAULT_BASE_ADDRESS = "y.com.sb"
+const val DEFAULT_BASE_ADDRESS = "invidious.slipfox.xyz"
 
 val initialDb = m(
   base.is_backstack_available to false,

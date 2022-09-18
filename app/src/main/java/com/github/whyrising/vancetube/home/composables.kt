@@ -384,14 +384,12 @@ private fun NavGraphBuilder.setupHome(
   }
 }
 
-fun NavGraphBuilder.home(
-  animOffSetX: Int,
-  orientation: Int
-) {
+fun NavGraphBuilder.home(animOffSetX: Int, orientation: Int) {
   setupHome(animOffSetX) { videos ->
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     LaunchedEffect(Unit) {
+      dispatch(v("expand_top_app_bar"))
       regScrollToTopListFx(scope) {
         listState.animateScrollToItem(0)
       }

@@ -84,7 +84,7 @@ fun regScrollToTopListFx(
 ) {
   regFx(home.go_top_list) {
     scope.launch {
-      // TODO: expand TopAppBar
+      dispatch(v("expand_top_app_bar"))
       scrollToTop()
     }
   }

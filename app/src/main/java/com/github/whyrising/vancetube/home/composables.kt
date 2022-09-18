@@ -18,10 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
@@ -31,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +60,12 @@ import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
+import com.github.whyrising.vancetube.R
+import com.github.whyrising.vancetube.base.db.NavigationItemState
+import com.github.whyrising.vancetube.home.HomePanelState.Loading
+import com.github.whyrising.vancetube.home.HomePanelState.Materialised
+import com.github.whyrising.vancetube.home.HomePanelState.Refreshing
+import com.github.whyrising.vancetube.home.home.matrialised_state
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.Blue300
@@ -240,9 +250,11 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
 @Composable
 fun VideosList(
   orientation: Int = 1,
+  listState: LazyListState,
   videos: List<VideoViewModel>
 ) {
   LazyColumn(
+    state = listState,
     modifier = Modifier
       .testTag("popular_videos_list")
       .fillMaxSize()
@@ -271,17 +283,19 @@ fun VideosList(
 @Composable
 fun VideosGrid(
   orientation: Int = 1,
+  gridState: LazyGridState,
   videos: List<VideoViewModel>
 ) {
   LazyVerticalGrid(
-    modifier = Modifier
-      .testTag("popular_videos_list")
-      .padding(start = 16.dp, end = 16.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalArrangement = Arrangement.spacedBy(50.dp),
+    state = gridState,
     columns = GridCells.Fixed(
       count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
     ),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalArrangement = Arrangement.spacedBy(50.dp)
+    modifier = Modifier
+      .testTag("popular_videos_list")
+      .padding(start = 16.dp, end = 16.dp)
   ) {
     items(
       items = videos,
@@ -303,24 +317,24 @@ fun VideosGrid(
 @Composable
 fun Home(
   modifier: Modifier = Modifier,
-  state: HomePanelState,
+  homeState: HomePanelState,
   content: @Composable (videos: List<VideoViewModel>) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    if (state is HomePanelState.Loading) {
+    if (homeState is Loading) {
       CircularProgressIndicator(
         modifier = Modifier.align(Alignment.Center),
         color = Blue300
       )
     }
 
-    val isMaterialised = state is HomePanelState.Materialised
-    val isRefreshing = !isMaterialised && state is HomePanelState.Refreshing
+    val isMaterialised = homeState is Materialised
+    val isRefreshing = !isMaterialised && homeState is Refreshing
     if (isMaterialised || isRefreshing) {
       SwipeRefresh(
         modifier = Modifier.testTag("swipe_refresh"),
         state = rememberSwipeRefreshState(isRefreshing),
-        onRefresh = { dispatch(v(home.refresh, state)) },
+        onRefresh = { dispatch(v(home.refresh, homeState)) },
         indicator = { state, refreshTrigger ->
           val colorScheme = MaterialTheme.colorScheme
           SwipeRefreshIndicator(
@@ -333,8 +347,8 @@ fun Home(
         }
       ) {
         val videos = when {
-          isMaterialised -> (state as HomePanelState.Materialised).popularVideos
-          else -> (state as HomePanelState.Refreshing).currentPopularVideos
+          isMaterialised -> (homeState as Materialised).popularVideos
+          else -> (homeState as Refreshing).currentPopularVideos
         }
         content(videos)
       }
@@ -349,20 +363,22 @@ private fun NavGraphBuilder.setupHome(
   content: @Composable (videos: List<VideoViewModel>) -> Unit
 ) {
   composable(
-    route = home.panel.name,
+    route = NavigationItemState.Home.route,
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
-    regHomeFx(rememberCoroutineScope())
-    regHomeSubs(LocalContext.current)
-
-    LaunchedEffect(true) {
-      regHomeEvents()
-      dispatch(v(home.load))
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+      regHomeFx(scope)
+      regHomeEvents
+      dispatch(v(home.load_popular_videos))
     }
+    regHomeSubs
 
     Home(
-      state = subscribe<HomePanelState>(v(home.matrialised_state)).w(),
+      homeState = subscribe<HomePanelState>(
+        qvec = v(matrialised_state, stringResource(R.string.views_label))
+      ).w(),
       content = content
     )
   }
@@ -372,22 +388,36 @@ fun NavGraphBuilder.home(
   animOffSetX: Int,
   orientation: Int
 ) {
-  setupHome(animOffSetX) {
+  setupHome(animOffSetX) { videos ->
+    val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    LaunchedEffect(Unit) {
+      regScrollToTopListFx(scope) {
+        listState.animateScrollToItem(0)
+      }
+    }
+
     VideosList(
       orientation = orientation,
-      videos = it
+      listState = listState,
+      videos = videos
     )
   }
 }
 
-fun NavGraphBuilder.homeLarge(
-  animOffSetX: Int,
-  orientation: Int
-) {
-  setupHome(animOffSetX) {
+fun NavGraphBuilder.homeLarge(animOffSetX: Int, orientation: Int) {
+  setupHome(animOffSetX) { videos ->
+    val scope = rememberCoroutineScope()
+    val gridState = rememberLazyGridState()
+    LaunchedEffect(Unit) {
+      regScrollToTopListFx(scope) {
+        gridState.animateScrollToItem(0)
+      }
+    }
     VideosGrid(
       orientation = orientation,
-      videos = it
+      gridState = gridState,
+      videos = videos
     )
   }
 }
@@ -437,12 +467,11 @@ private val designTimeData = v(
 @Composable
 fun HomePreview() {
   VanceTheme {
-    Home(
-      state = HomePanelState.Materialised(designTimeData)
-    ) {
+    Home(homeState = Materialised(designTimeData)) { videos ->
       VideosList(
         orientation = 1,
-        videos = it
+        listState = rememberLazyListState(),
+        videos = videos
       )
     }
   }
@@ -451,16 +480,5 @@ fun HomePreview() {
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun HomeDarkPreview() {
-  VanceTheme {
-    Surface {
-      Home(
-        state = HomePanelState.Materialised(designTimeData)
-      ) {
-        VideosList(
-          orientation = 1,
-          videos = it
-        )
-      }
-    }
-  }
+  HomePreview()
 }

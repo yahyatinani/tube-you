@@ -36,5 +36,16 @@ class BaselineProfileGenerator {
     val swipeRefresh = device.findObject(By.res("swipe_refresh"))
     swipeRefresh.swipe(Direction.DOWN, .8f)
     device.wait(Until.gone(By.res("swipe_refresh")), 5000)
+
+    // Navigate to Subscriptions tab
+    device.findObject(By.text("Subscriptions")).click()
+    device.waitForIdle()
+
+    // Navigate to Library tab
+    device.findObject(By.text("Library")).click()
+    device.waitForIdle()
+
+    // Navigate back to Home tab
+    device.findObject(By.text("Home")).click()
   }
 }

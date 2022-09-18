@@ -33,10 +33,7 @@ fun regBaseEventHandlers() {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx
       m(fx to v(v(home.go_top_list)))
     } else {
-      m<Any, Any>(
-        db to appDb.assoc(current_bottom_nav_panel, "$destination"),
-        fx to v(v(navigate_to, destination))
-      )
+      m<Any, Any>(db to appDb.assoc(current_bottom_nav_panel, "$destination"))
     }
   }
 }

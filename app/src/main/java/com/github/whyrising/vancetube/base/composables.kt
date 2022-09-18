@@ -77,10 +77,10 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
   DisposableEffect(navController) {
     val listener = NavController
       .OnDestinationChangedListener { navCtrl, navDestination, _ ->
-//        val route = navDestination.route
-//        if (route != null) {
-//          dispatch(v("set_current_nav", route))
-//        }
+        val route = navDestination.route
+        if (route != null) {
+          dispatch(v(base.on_bottom_nav_click, route))
+        }
         // FIXME: use this when a new activity on top
 //        val flag = navCtrl.previousBackStackEntry != null
 //        dispatch(v(base.set_backstack_status, flag))
@@ -92,6 +92,7 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
       navController.removeOnDestinationChangedListener(listener)
     }
   }
+
   regBaseFx(navController)
   VanceTheme(windowSizeClass = windowSizeClass) {
     val isCompactDisplay = remember { isCompact(windowSizeClass) }
@@ -177,7 +178,7 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
                       style = MaterialTheme.typography.labelSmall
                     )
                   },
-                  onClick = { dispatch(v(base.on_bottom_nav_click, it)) }
+                  onClick = { dispatch(v(base.navigate_to, it)) }
                 )
               }
             }

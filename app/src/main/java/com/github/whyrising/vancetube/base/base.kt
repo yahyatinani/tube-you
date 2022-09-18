@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube.base
 
+@Suppress("EnumEntryName")
 enum class base {
   init_db,
   navigate_to,
@@ -8,5 +9,6 @@ enum class base {
   is_backstack_available,
   api,
   bottom_nav_items,
-  current_battom_nav_panel
+  current_bottom_nav_panel,
+  on_bottom_nav_click
 }

@@ -177,7 +177,7 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
                       style = MaterialTheme.typography.labelSmall
                     )
                   },
-                  onClick = { dispatch(v(base.navigate_to, it)) }
+                  onClick = { dispatch(v(base.on_bottom_nav_click, it)) }
                 )
               }
             }

@@ -8,5 +8,5 @@ enum class base {
   is_backstack_available,
   api,
   bottom_nav_items,
-  select_bottom_nav_item
+  current_battom_nav_panel
 }

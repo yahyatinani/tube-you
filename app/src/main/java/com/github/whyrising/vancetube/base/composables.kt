@@ -77,10 +77,10 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
   DisposableEffect(navController) {
     val listener = NavController
       .OnDestinationChangedListener { navCtrl, navDestination, _ ->
-        val route = navDestination.route
-        if (route != null) {
-          dispatch(v(base.select_bottom_nav_item, route))
-        }
+//        val route = navDestination.route
+//        if (route != null) {
+//          dispatch(v("set_current_nav", route))
+//        }
         // FIXME: use this when a new activity on top
 //        val flag = navCtrl.previousBackStackEntry != null
 //        dispatch(v(base.set_backstack_status, flag))
@@ -165,7 +165,9 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
                   icon = {
                     Icon(
                       imageVector = it.icon,
-                      contentDescription = stringResource(it.contentDescTextId),
+                      contentDescription = stringResource(
+                        it.iconContentDescTextId
+                      ),
                       tint = MaterialTheme.colorScheme.onBackground
                     )
                   },
@@ -204,7 +206,15 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
             orientation = orientation
           )
         }
-
+        composable(
+          route = NavigationItemState.Trending.route,
+          exitTransition = { exitAnimation(targetOffsetX = -300) },
+          popEnterTransition = { enterAnimation(initialOffsetX = -300) }
+        ) {
+          Surface(modifier = Modifier.fillMaxSize()) {
+            Text(text = "TODO: trends")
+          }
+        }
         composable(
           route = NavigationItemState.Subscriptions.route,
           exitTransition = { exitAnimation(targetOffsetX = -300) },

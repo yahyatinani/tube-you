@@ -87,7 +87,7 @@ val regHomeSubs by lazy {
   regSub<HomePanelState, HomePanelState>(
     queryId = home.matrialised_state,
     signalsFn = { subscribe(v(home.state)) },
-    placeholder = HOME_STATE,
+    initial = HOME_STATE,
     computationFn = { homeState, (_, viewsLabel) ->
       when (homeState) {
         is HomePanelState.Loaded -> {

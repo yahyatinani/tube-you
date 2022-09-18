@@ -2,34 +2,32 @@ package com.github.whyrising.vancetube.base.db
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlaylistPlay
+import androidx.compose.material.icons.filled.Subscriptions
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.PlaylistPlay
+import androidx.compose.material.icons.outlined.Subscriptions
+import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.whyrising.vancetube.R
 
-sealed interface NavigationItemState {
-  val isSelected: Boolean
-  val labelTextId: Int
-  val icon: ImageVector
-  val contentDescTextId: Int
+sealed class NavigationItemState(activeNavItem: String) {
+  abstract val labelTextId: Int
+  abstract val icon: ImageVector
+  abstract val iconContentDescTextId: Int
 
-  fun toggleSelection(): NavigationItemState
+  val isSelected: Boolean = activeNavItem == this.toString()
 
   /* Sub-classes */
 
-  data class Home(override val isSelected: Boolean = false) :
-    NavigationItemState {
+  class Home(activeNavItem: String) : NavigationItemState(activeNavItem) {
     override val labelTextId: Int = R.string.nav_item_label_home
-    override val contentDescTextId: Int = R.string.nav_item_desc_home
+    override val iconContentDescTextId: Int = R.string.nav_item_desc_home
     override val icon: ImageVector = when {
       isSelected -> Icons.Filled.Home
       else -> Icons.Outlined.Home
     }
-
-    override fun toggleSelection(): NavigationItemState = Home(!isSelected)
 
     override fun toString(): String = route
 
@@ -38,16 +36,29 @@ sealed interface NavigationItemState {
     }
   }
 
-  data class Subscriptions(override val isSelected: Boolean = false) :
-    NavigationItemState {
-    override val labelTextId: Int = R.string.nav_item_label_subs
-    override val contentDescTextId: Int = R.string.nav_item_desc_subs
+  class Trending(activeNavItem: String) : NavigationItemState(activeNavItem) {
+    override val labelTextId: Int = R.string.nav_item_label_trend
+    override val iconContentDescTextId: Int = R.string.nav_item_desc_home
     override val icon: ImageVector = when {
-      isSelected -> Icons.Filled.PlayArrow
-      else -> Icons.Outlined.PlayArrow
+      isSelected -> Icons.Filled.TrendingUp
+      else -> Icons.Outlined.TrendingUp
     }
 
-    override fun toggleSelection() = Subscriptions(isSelected = !isSelected)
+    override fun toString(): String = route
+
+    companion object {
+      const val route: String = "trending_route"
+    }
+  }
+
+  class Subscriptions(activeNavItem: String) :
+    NavigationItemState(activeNavItem) {
+    override val labelTextId: Int = R.string.nav_item_label_subs
+    override val iconContentDescTextId: Int = R.string.nav_item_desc_subs
+    override val icon: ImageVector = when {
+      isSelected -> Icons.Filled.Subscriptions
+      else -> Icons.Outlined.Subscriptions
+    }
 
     override fun toString(): String = route
 
@@ -56,16 +67,13 @@ sealed interface NavigationItemState {
     }
   }
 
-  data class Library(override val isSelected: Boolean = false) :
-    NavigationItemState {
+  class Library(activeNavItem: String) : NavigationItemState(activeNavItem) {
     override val labelTextId: Int = R.string.nav_item_label_library
-    override val contentDescTextId: Int = R.string.nav_item_desc_library
+    override val iconContentDescTextId: Int = R.string.nav_item_desc_library
     override val icon: ImageVector = when {
-      isSelected -> Icons.Filled.List
-      else -> Icons.Outlined.List
+      isSelected -> Icons.Filled.PlaylistPlay
+      else -> Icons.Outlined.PlaylistPlay
     }
-
-    override fun toggleSelection(): NavigationItemState = Library(!isSelected)
 
     override fun toString(): String = route
 

@@ -61,6 +61,7 @@ import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.R
+import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.home.HomePanelState.Loading
 import com.github.whyrising.vancetube.home.HomePanelState.Materialised
@@ -384,14 +385,12 @@ private fun NavGraphBuilder.setupHome(
   }
 }
 
-fun NavGraphBuilder.home(
-  animOffSetX: Int,
-  orientation: Int
-) {
+fun NavGraphBuilder.home(animOffSetX: Int, orientation: Int) {
   setupHome(animOffSetX) { videos ->
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     LaunchedEffect(Unit) {
+      dispatch(v(base.expand_top_app_bar))
       regScrollToTopListFx(scope) {
         listState.animateScrollToItem(0)
       }

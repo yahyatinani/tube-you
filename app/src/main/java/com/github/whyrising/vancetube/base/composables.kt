@@ -29,12 +29,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
+import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,9 +50,13 @@ import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.github.whyrising.recompose.dispatch
+import com.github.whyrising.recompose.fx.FxIds
+import com.github.whyrising.recompose.regEventFx
+import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.base.bottom_nav_items
+import com.github.whyrising.vancetube.base.base.expand_top_app_bar
 import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.base.db.initAppDb
 import com.github.whyrising.vancetube.home.home
@@ -60,6 +66,7 @@ import com.github.whyrising.vancetube.ui.anim.exitAnimation
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
 import com.github.whyrising.vancetube.ui.theme.isCompact
+import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -82,7 +89,11 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
           dispatch(v(base.on_bottom_nav_click, route))
         }
         // FIXME: use this when a new activity on top
-//        val flag = navCtrl.previousBackStackEntry != null
+//        val previousBackStackEntry = navCtrl.previousBackStackEntry
+//        if (previousBackStackEntry != null) {
+//          val route = previousBackStackEntry.destination.route
+//          if (route != null) dispatch(v(base.current_bottom_nav_panel, route))
+//        }
 //        dispatch(v(base.set_backstack_status, flag))
       }
 
@@ -93,13 +104,28 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
     }
   }
 
-  regBaseFx(navController)
+  LaunchedEffect(Unit) {
+    regBaseFx(navController)
+  }
+
   VanceTheme(windowSizeClass = windowSizeClass) {
-    val isCompactDisplay = remember { isCompact(windowSizeClass) }
+    val isCompactDisplay = isCompact(windowSizeClass)
     val scrollBehavior = when {
-      isCompactDisplay -> TopAppBarDefaults.enterAlwaysScrollBehavior()
-      else -> TopAppBarDefaults.pinnedScrollBehavior()
+      isCompactDisplay -> {
+        val topAppBarState = rememberTopAppBarState()
+        LaunchedEffect(Unit) {
+          regFx(expand_top_app_bar) {
+            topAppBarState.heightOffset = 0f
+          }
+          regEventFx(expand_top_app_bar) { _, _ ->
+            m(FxIds.fx to v(v(expand_top_app_bar)))
+          }
+        }
+        enterAlwaysScrollBehavior(topAppBarState)
+      }
+      else -> pinnedScrollBehavior()
     }
+
     Scaffold(
       modifier = Modifier
         .then(

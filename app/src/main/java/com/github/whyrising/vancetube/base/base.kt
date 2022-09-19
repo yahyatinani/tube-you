@@ -10,5 +10,6 @@ enum class base {
   api,
   bottom_nav_items,
   current_bottom_nav_panel,
-  on_bottom_nav_click
+  on_bottom_nav_click,
+  expand_top_app_bar
 }

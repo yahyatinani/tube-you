@@ -7,7 +7,10 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.base.VanceApp
+import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.y.core.v
 
 class MainActivity : ComponentActivity() {
   @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -22,5 +25,11 @@ class MainActivity : ComponentActivity() {
     setContent {
       VanceApp(calculateWindowSizeClass(this))
     }
+  }
+
+  override fun onResume() {
+    super.onResume()
+
+    dispatch(v(base.expand_top_app_bar))
   }
 }

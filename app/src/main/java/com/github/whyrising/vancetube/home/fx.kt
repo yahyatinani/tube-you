@@ -3,6 +3,7 @@ package com.github.whyrising.vancetube.home
 import android.util.Log
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.regFx
+import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.v
 import io.ktor.client.HttpClient
@@ -84,7 +85,7 @@ fun regScrollToTopListFx(
 ) {
   regFx(home.go_top_list) {
     scope.launch {
-      // TODO: expand TopAppBar
+      dispatch(v(base.expand_top_app_bar))
       scrollToTop()
     }
   }

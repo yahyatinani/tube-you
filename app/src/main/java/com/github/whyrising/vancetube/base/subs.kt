@@ -9,7 +9,7 @@ import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
 
-fun regBaseSubs() {
+val regBaseSubs by lazy {
   regSub<AppDb, Boolean>(is_backstack_available) { db, _ ->
     db[is_backstack_available] as Boolean
   }

@@ -16,7 +16,7 @@ import com.github.whyrising.y.core.v
 
 typealias AppDb = IPersistentMap<Any, Any>
 
-fun regBaseEventHandlers() {
+val regBaseEventHandlers by lazy {
   regEventFx(navigate_to) { _, (_, destination) ->
     m<Any, Any>(fx to v(v(navigate_to, destination)))
   }
@@ -26,6 +26,7 @@ fun regBaseEventHandlers() {
   }
 
   regEventFx(base.on_bottom_nav_click) { cofx, (_, destination) ->
+    // TODO: make sure this is a bottom navigation else skip
     val appDb = getAppDb(cofx)
     val currentNavPanel = appDb[current_bottom_nav_panel] as String
 

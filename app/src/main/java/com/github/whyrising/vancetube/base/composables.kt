@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.consumedWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -49,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.regEventFx
@@ -61,32 +61,28 @@ import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.base.db.initAppDb
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.homeLarge
-import com.github.whyrising.vancetube.ui.anim.enterAnimation
-import com.github.whyrising.vancetube.ui.anim.exitAnimation
+import com.github.whyrising.vancetube.library.library
+import com.github.whyrising.vancetube.subscriptions.subscriptions
+import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
 import com.github.whyrising.vancetube.ui.theme.isCompact
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
-@OptIn(
-  ExperimentalMaterial3Api::class,
-  ExperimentalComposeUiApi::class,
-  ExperimentalAnimationApi::class,
-  ExperimentalLayoutApi::class
-)
+const val ANIM_OFFSET_X = 300
+
 @Composable
-fun VanceApp(windowSizeClass: WindowSizeClass) {
-  val navController = rememberAnimatedNavController()
+private fun DestinationTrackingSideEffect(navController: NavHostController) {
   DisposableEffect(navController) {
     val listener = NavController
-      .OnDestinationChangedListener { navCtrl, navDestination, _ ->
-        val route = navDestination.route
-        if (route != null) {
-          dispatch(v(base.on_bottom_nav_click, route))
+      .OnDestinationChangedListener { _, navDestination, _ ->
+        navDestination.route.let {
+          if (it != null) {
+            dispatch(v(base.on_bottom_nav_click, it))
+          }
         }
         // FIXME: use this when a new activity on top
 //        val previousBackStackEntry = navCtrl.previousBackStackEntry
@@ -103,13 +99,29 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
       navController.removeOnDestinationChangedListener(listener)
     }
   }
+}
+
+@OptIn(
+  ExperimentalMaterial3Api::class,
+  ExperimentalComposeUiApi::class,
+  ExperimentalAnimationApi::class,
+  ExperimentalLayoutApi::class
+)
+@Composable
+fun VanceApp(
+  windowSizeClass: WindowSizeClass,
+  navController: NavHostController = rememberAnimatedNavController()
+) {
+  DestinationTrackingSideEffect(navController)
 
   LaunchedEffect(Unit) {
     regBaseFx(navController)
+    regBaseEventHandlers
   }
+  regBaseSubs
 
-  VanceTheme(windowSizeClass = windowSizeClass) {
-    val isCompactDisplay = isCompact(windowSizeClass)
+  val isCompactDisplay = isCompact(windowSizeClass)
+  VanceTheme(isCompact = isCompactDisplay) {
     val scrollBehavior = when {
       isCompactDisplay -> {
         val topAppBarState = rememberTopAppBarState()
@@ -125,7 +137,6 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
       }
       else -> pinnedScrollBehavior()
     }
-
     Scaffold(
       modifier = Modifier
         .then(
@@ -179,10 +190,10 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
               thickness = .6.dp
             )
             NavigationBar(
+              containerColor = Color.Transparent,
               modifier = Modifier.windowInsetsPadding(
                 WindowInsets.safeDrawing.only(Horizontal + Bottom)
-              ),
-              containerColor = Color.Transparent
+              )
             ) {
               val navItems =
                 subscribe<List<NavigationItemState>>(v(bottom_nav_items)).w()
@@ -221,44 +232,16 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
           .padding(it)
           .consumedWindowInsets(it)
       ) {
-        when {
-          isCompactDisplay -> {
-            home(
-              animOffSetX = 300,
-              orientation = orientation
-            )
-          }
-          else -> homeLarge(
-            animOffSetX = 300,
-            orientation = orientation
-          )
-        }
-        composable(
-          route = NavigationItemState.Trending.route,
-          exitTransition = { exitAnimation(targetOffsetX = -300) },
-          popEnterTransition = { enterAnimation(initialOffsetX = -300) }
-        ) {
-          Surface(modifier = Modifier.fillMaxSize()) {
-            Text(text = "TODO: trends")
-          }
-        }
-        composable(
-          route = NavigationItemState.Subscriptions.route,
-          exitTransition = { exitAnimation(targetOffsetX = -300) },
-          popEnterTransition = { enterAnimation(initialOffsetX = -300) }
-        ) {
-          Surface(modifier = Modifier.fillMaxSize()) {
-            Text(text = "TODO: subs")
-          }
-        }
-        composable(
-          route = NavigationItemState.Library.route,
-          exitTransition = { exitAnimation(targetOffsetX = -300) },
-          popEnterTransition = { enterAnimation(initialOffsetX = -300) }
-        ) {
-          Surface(modifier = Modifier.fillMaxSize()) {
-            Text(text = "TODO: library")
-          }
+        if (isCompactDisplay) {
+          home(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
+          trending(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
+          subscriptions(animOffsetX = ANIM_OFFSET_X, orientation = orientation)
+          library(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
+        } else {
+          homeLarge(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
+          trending(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
+          subscriptions(animOffsetX = ANIM_OFFSET_X, orientation = orientation)
+          library(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
         }
       }
     }
@@ -274,10 +257,8 @@ fun BasePanelPreview() {
   VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun BasePanelDarkPreview() {
-  initAppDb()
-  VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))
+  BasePanelPreview()
 }

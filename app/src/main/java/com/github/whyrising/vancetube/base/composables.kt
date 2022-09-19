@@ -36,7 +36,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +56,7 @@ import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.base.bottom_nav_items
+import com.github.whyrising.vancetube.base.base.expand_top_app_bar
 import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.base.db.initAppDb
 import com.github.whyrising.vancetube.home.home
@@ -103,19 +104,23 @@ fun VanceApp(windowSizeClass: WindowSizeClass) {
     }
   }
 
-  regBaseFx(navController)
+  LaunchedEffect(Unit) {
+    regBaseFx(navController)
+  }
+
   VanceTheme(windowSizeClass = windowSizeClass) {
-    val isCompactDisplay = remember { isCompact(windowSizeClass) }
+    val isCompactDisplay = isCompact(windowSizeClass)
     val scrollBehavior = when {
       isCompactDisplay -> {
         val topAppBarState = rememberTopAppBarState()
-        regFx("expand_top_app_bar") {
-          topAppBarState.heightOffset = 0f
+        LaunchedEffect(Unit) {
+          regFx(expand_top_app_bar) {
+            topAppBarState.heightOffset = 0f
+          }
+          regEventFx(expand_top_app_bar) { _, _ ->
+            m(FxIds.fx to v(v(expand_top_app_bar)))
+          }
         }
-        regEventFx("expand_top_app_bar") { _, _ ->
-          m(FxIds.fx to v(v("expand_top_app_bar")))
-        }
-
         enterAlwaysScrollBehavior(topAppBarState)
       }
       else -> pinnedScrollBehavior()

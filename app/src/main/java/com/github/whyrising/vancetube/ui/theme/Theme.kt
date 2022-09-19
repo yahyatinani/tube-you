@@ -34,6 +34,7 @@ private val LightColorPalette = lightColorScheme(
     */
 )
 
+@Composable
 fun isCompact(windowSizeClass: WindowSizeClass) =
   windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
     windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact

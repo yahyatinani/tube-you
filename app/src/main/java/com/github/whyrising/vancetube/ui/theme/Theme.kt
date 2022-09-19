@@ -11,7 +11,6 @@ import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.DpSize.Companion.Zero
 
 private val DarkColorPalette = darkColorScheme(
   primary = Purple200,
@@ -42,11 +41,11 @@ fun isCompact(windowSizeClass: WindowSizeClass) =
 @Composable
 fun VanceTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
-  windowSizeClass: WindowSizeClass = WindowSizeClass.calculateFromSize(Zero),
+  isCompact: Boolean = true,
   content: @Composable () -> Unit
 ) {
   val typography = when {
-    isCompact(windowSizeClass) -> TypographyCompact
+    isCompact -> TypographyCompact
     else -> TypographyExpanded
   }
 

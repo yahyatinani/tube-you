@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,12 +64,10 @@ import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.db.NavigationItemState
-import com.github.whyrising.vancetube.home.HomePanelState.Loading
-import com.github.whyrising.vancetube.home.HomePanelState.Materialised
-import com.github.whyrising.vancetube.home.HomePanelState.Refreshing
-import com.github.whyrising.vancetube.home.home.matrialised_state
+import com.github.whyrising.vancetube.home.home.view_model
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
+import com.github.whyrising.vancetube.ui.recomposeHighlighter
 import com.github.whyrising.vancetube.ui.theme.Blue300
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
@@ -252,11 +251,12 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
 fun VideosList(
   orientation: Int = 1,
   listState: LazyListState,
-  videos: List<VideoViewModel>
+  videos: PopularVideos
 ) {
   LazyColumn(
     state = listState,
     modifier = Modifier
+      .recomposeHighlighter()
       .testTag("popular_videos_list")
       .fillMaxSize()
       .then(
@@ -265,7 +265,7 @@ fun VideosList(
       )
   ) {
     items(
-      items = videos,
+      items = videos.value,
       key = { it.id }
     ) { viewModel ->
       when (orientation) {
@@ -285,7 +285,7 @@ fun VideosList(
 fun VideosGrid(
   orientation: Int = 1,
   gridState: LazyGridState,
-  videos: List<VideoViewModel>
+  videos: PopularVideos
 ) {
   LazyVerticalGrid(
     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -299,7 +299,7 @@ fun VideosGrid(
       .padding(start = 16.dp, end = 16.dp)
   ) {
     items(
-      items = videos,
+      items = videos.value,
       key = { it.id }
     ) { viewModel ->
       VideoItemPortrait(
@@ -318,24 +318,22 @@ fun VideosGrid(
 @Composable
 fun Home(
   modifier: Modifier = Modifier,
-  homeState: HomePanelState,
-  content: @Composable (videos: List<VideoViewModel>) -> Unit
+  viewModel: HomeViewModel,
+  content: @Composable (videos: PopularVideos) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    if (homeState is Loading) {
+    if (viewModel.isLoading) {
       CircularProgressIndicator(
         modifier = Modifier.align(Alignment.Center),
         color = Blue300
       )
     }
 
-    val isMaterialised = homeState is Materialised
-    val isRefreshing = !isMaterialised && homeState is Refreshing
-    if (isMaterialised || isRefreshing) {
+    if (viewModel.showList) {
       SwipeRefresh(
         modifier = Modifier.testTag("swipe_refresh"),
-        state = rememberSwipeRefreshState(isRefreshing),
-        onRefresh = { dispatch(v(home.refresh, homeState)) },
+        state = rememberSwipeRefreshState(viewModel.isRefreshing),
+        onRefresh = { dispatch(v(home.refresh)) },
         indicator = { state, refreshTrigger ->
           val colorScheme = MaterialTheme.colorScheme
           SwipeRefreshIndicator(
@@ -347,11 +345,7 @@ fun Home(
           )
         }
       ) {
-        val videos = when {
-          isMaterialised -> (homeState as Materialised).popularVideos
-          else -> (homeState as Refreshing).currentPopularVideos
-        }
-        content(videos)
+        content(viewModel.popularVideos)
       }
     }
   }
@@ -361,7 +355,7 @@ fun Home(
 @OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.setupHome(
   animOffSetX: Int,
-  content: @Composable (videos: List<VideoViewModel>) -> Unit
+  content: @Composable (videos: PopularVideos) -> Unit
 ) {
   composable(
     route = NavigationItemState.Home.route,
@@ -377,8 +371,8 @@ private fun NavGraphBuilder.setupHome(
     regHomeSubs
 
     Home(
-      homeState = subscribe<HomePanelState>(
-        qvec = v(matrialised_state, stringResource(R.string.views_label))
+      viewModel = subscribe<HomeViewModel>(
+        qvec = v(view_model, stringResource(R.string.views_label))
       ).w(),
       content = content
     )
@@ -466,13 +460,13 @@ private val designTimeData = v(
 @Composable
 fun HomePreview() {
   VanceTheme {
-    Home(homeState = Materialised(designTimeData)) { videos ->
-      VideosList(
-        orientation = 1,
-        listState = rememberLazyListState(),
-        videos = videos
-      )
-    }
+//    Home(homeState = Materialised(designTimeData)) { videos ->
+//      VideosList(
+//        orientation = 1,
+//        listState = rememberLazyListState(),
+//        videos = videos
+//      )
+//    }
   }
 }
 

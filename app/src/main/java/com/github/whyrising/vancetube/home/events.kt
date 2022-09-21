@@ -1,6 +1,5 @@
 package com.github.whyrising.vancetube.home
 
-import android.util.Log
 import com.github.whyrising.recompose.cofx.Coeffects
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
@@ -18,37 +17,34 @@ import com.github.whyrising.y.core.v
 fun getAppDb(cofx: Coeffects): AppDb = cofx[db] as AppDb
 
 val regHomeEvents by lazy {
-  Log.i("regHomeEvents", "init")
   regEventFx(load_popular_videos) { cofx, _ ->
     val appDb = getAppDb(cofx)
-    if (appDb[home.panel] is HomePanelState.Loaded) {
+    if ((appDb[home.panel] as HomeDb).state == States.Loaded) {
       return@regEventFx m()
     }
     m(
-      db to assocIn(appDb, l(home.panel), HomePanelState.Loading),
+      db to assocIn(appDb, l(home.panel), HomeDb()),
       fx to v(v(load_popular_videos, get(appDb, base.api)))
     )
   }
 
   regEventDb<AppDb>(id = home.set_popular_vids) { db, (_, vids) ->
-    assocIn(db, l(home.panel), HomePanelState.Loaded(vids as List<VideoData>))
+    assocIn(db, l(home.panel), HomeDb(States.Loaded, vids as List<VideoData>))
   }
 
-  regEventFx(home.refresh) { cofx, (_, materialised) ->
+  regEventFx(home.refresh) { cofx, _ ->
     val appDb = getAppDb(cofx)
     val api = get(appDb, base.api)
-    val newState = HomePanelState.Refreshing(
-      (materialised as HomePanelState.Materialised).popularVideos
-    )
+    val homeDb = (appDb[home.panel] as HomeDb).copy(state = States.Refreshing)
     m(
-      db to assocIn(appDb, l(home.panel), newState),
+      db to assocIn(appDb, l(home.panel), homeDb),
       fx to v(v(load_popular_videos, api))
     )
   }
 
   regEventFx(home.go_top_list) { cofx, _ ->
     val appDb = getAppDb(cofx)
-    if (appDb[home.panel] !is HomePanelState.Loaded) {
+    if ((appDb[home.panel] as HomeDb).state == States.Loaded) {
       return@regEventFx m()
     }
 

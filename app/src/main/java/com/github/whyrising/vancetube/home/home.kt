@@ -3,7 +3,7 @@ package com.github.whyrising.vancetube.home
 enum class home {
   panel,
   state,
-  matrialised_state,
+  view_model,
 
   //  events
   set_popular_vids,

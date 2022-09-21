@@ -1,30 +1,15 @@
 package com.github.whyrising.vancetube.home
 
-import androidx.compose.runtime.Immutable
+import com.github.whyrising.y.core.l
 
-sealed interface Error
-
-sealed interface HomePanelState {
-  @JvmInline
-  @Immutable
-  value class Loaded(val popularVideos: List<VideoData>) : HomePanelState
-
-  // TODO: Rework this by implementing subs cofx to get their values in event
-  //  handlers
-  @JvmInline
-  @Immutable
-  value class Refreshing(val currentPopularVideos: List<VideoViewModel>) :
-    HomePanelState
-
-  @JvmInline
-  @Immutable
-  value class Materialised(val popularVideos: List<VideoViewModel>) :
-    HomePanelState
-
-  object Loading : HomePanelState
-
-  @JvmInline
-  value class Failed(val error: Error) : HomePanelState
+enum class States {
+  Loading,
+  Refreshing,
+  Loaded,
+  Failed,
 }
 
-val HOME_STATE: HomePanelState = HomePanelState.Loading
+data class HomeDb(
+  val state: States = States.Loading,
+  val popularVideos: List<VideoData> = l()
+)

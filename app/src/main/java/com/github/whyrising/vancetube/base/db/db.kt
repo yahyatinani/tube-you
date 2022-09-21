@@ -5,7 +5,7 @@ import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.base.init_db
-import com.github.whyrising.vancetube.home.HOME_STATE
+import com.github.whyrising.vancetube.home.HomeDb
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
@@ -22,7 +22,7 @@ val initialDb = m(
   base.is_backstack_available to false,
   base.api to "https://$DEFAULT_BASE_ADDRESS/api/v1",
   base.current_bottom_nav_panel to NavigationItemState.Home.route,
-  home.panel to HOME_STATE
+  home.panel to HomeDb()
 )
 
 fun initAppDb() {

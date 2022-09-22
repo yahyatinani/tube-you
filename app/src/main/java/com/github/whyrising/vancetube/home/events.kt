@@ -12,6 +12,7 @@ import com.github.whyrising.vancetube.home.home.load_popular_videos
 import com.github.whyrising.vancetube.home.home.refresh
 import com.github.whyrising.vancetube.home.home.set_popular_vids
 import com.github.whyrising.y.core.assocIn
+import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
@@ -54,28 +55,30 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
 fun getAppDb(cofx: Coeffects): AppDb = cofx[db] as AppDb
 
 val regHomeEvents by lazy {
-  regEventFx(load_popular_videos) { cofx, _ ->
+  regEventFx(id = load_popular_videos) { cofx, event ->
     val appDb = getAppDb(cofx)
-    if ((appDb[home.panel] as HomeDb).state == States.Loaded) {
-      return@regEventFx m()
+    val newDb = handleNextState(appDb, event)
+    val ret: PersistentArrayMap<Any, Any?> = m(db to newDb)
+
+    if ((newDb[home.panel] as HomeDb).state == States.Loaded) {
+      return@regEventFx ret
     }
-    m(
-      db to assocIn(appDb, l(home.panel), HomeDb()),
-      fx to v(v(load_popular_videos, get(appDb, base.api)))
+
+    ret.assoc(fx, v(v(load_popular_videos, get(appDb, base.api))))
+  }
+
+  regEventDb<AppDb>(id = set_popular_vids) { db, (id, vids) ->
+    val homeDb = (db[home.panel] as HomeDb).copy(
+      popularVideos = vids as List<VideoData>
     )
+    updateToNextState(db.assoc(home.panel, homeDb), id)
   }
 
-  regEventDb<AppDb>(id = set_popular_vids) { db, (_, vids) ->
-    assocIn(db, l(home.panel), HomeDb(States.Loaded, vids as List<VideoData>))
-  }
-
-  regEventFx(refresh) { cofx, _ ->
+  regEventFx(id = refresh) { cofx, event ->
     val appDb = getAppDb(cofx)
-    val api = get(appDb, base.api)
-    val homeDb = (appDb[home.panel] as HomeDb).copy(state = States.Refreshing)
     m(
-      db to assocIn(appDb, l(home.panel), homeDb),
-      fx to v(v(load_popular_videos, api))
+      db to handleNextState(appDb, event),
+      fx to v(v(load_popular_videos, get(appDb, base.api)))
     )
   }
 

@@ -7,6 +7,7 @@ import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.vancetube.base.base.init_db
 import com.github.whyrising.vancetube.home.HomeDb
 import com.github.whyrising.vancetube.home.home
+import com.github.whyrising.vancetube.home.updateToNextState
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
@@ -26,6 +27,8 @@ val initialDb = m(
 )
 
 fun initAppDb() {
-  regEventDb<AppDb>(init_db) { _, _ -> initialDb }
+  regEventDb<AppDb>(init_db) { _, _ ->
+    updateToNextState(initialDb, home.load_popular_videos)
+  }
   dispatchSync(v(init_db))
 }

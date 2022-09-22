@@ -10,6 +10,6 @@ enum class States {
 }
 
 data class HomeDb(
-  val state: States = States.Loading,
+  val state: States? = null,
   val popularVideos: List<VideoData> = l()
 )

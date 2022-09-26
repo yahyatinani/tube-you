@@ -11,5 +11,7 @@ enum class base {
   bottom_nav_items,
   current_bottom_nav_panel,
   on_bottom_nav_click,
-  expand_top_app_bar
+  expand_top_app_bar;
+
+  override fun toString(): String = "${javaClass.simpleName}:$name"
 }

@@ -75,7 +75,6 @@ fun formatViews(viewsCount: Long): String = when {
   else -> "${viewsCount / 1_000_000_000}$BillionsSign"
 }
 
-
 @Stable
 data class PopularVideos(val value: List<VideoViewModel>)
 
@@ -91,19 +90,18 @@ data class HomeViewModel(
  * @return [Unit]
  */
 val regHomeSubs by lazy {
-  regSub<AppDb, HomeDb>(queryId = home.state) { db, _ ->
-    db[home.panel] as HomeDb
+  regSub<AppDb, Any?>(queryId = home.state) { db, _ ->
+    db[home.panel]
   }
 
-  regSub<HomeDb, HomeViewModel>(
+  regSub<AppDb, HomeViewModel>(
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.state)) },
-    initial = HomeViewModel(isLoading = true),
     computationFn = { homeDb, (_, viewsLabel) ->
-      when (homeDb.state) {
+      when (homeDb[home.state]) {
         States.Loading -> HomeViewModel(isLoading = true)
         States.Loaded -> {
-          val formatted = homeDb.popularVideos
+          val formatted = (homeDb[home.popular_vids] as List<VideoData>)
             .fold(v<VideoViewModel>()) { acc, videoMetadata ->
               acc.conj(
                 VideoViewModel(
@@ -129,7 +127,7 @@ val regHomeSubs by lazy {
         }
         else -> {
           // TODO: use previous computation to save CPU cycles.
-          val formatted = homeDb.popularVideos
+          val formatted = (homeDb[home.popular_vids] as List<VideoData>)
             .fold(v<VideoViewModel>()) { acc, videoMetadata ->
               acc.conj(
                 VideoViewModel(

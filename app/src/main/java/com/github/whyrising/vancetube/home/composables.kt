@@ -38,7 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -460,13 +459,18 @@ private val designTimeData = v(
 @Composable
 fun HomePreview() {
   VanceTheme {
-//    Home(homeState = Materialised(designTimeData)) { videos ->
-//      VideosList(
-//        orientation = 1,
-//        listState = rememberLazyListState(),
-//        videos = videos
-//      )
-//    }
+    Home(
+      viewModel = HomeViewModel(
+        popularVideos = PopularVideos(designTimeData),
+        showList = true
+      )
+    ) { videos ->
+      VideosList(
+        orientation = 1,
+        listState = rememberLazyListState(),
+        videos = videos
+      )
+    }
   }
 }
 

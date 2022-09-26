@@ -1,12 +1,15 @@
 package com.github.whyrising.vancetube.home
 
-import com.github.whyrising.vancetube.base.db.initialDb
+import com.github.whyrising.vancetube.base.AppDb
 import com.github.whyrising.vancetube.home.States.Loaded
 import com.github.whyrising.vancetube.home.States.Loading
 import com.github.whyrising.vancetube.home.States.Refreshing
 import com.github.whyrising.vancetube.home.home.load_popular_videos
 import com.github.whyrising.vancetube.home.home.refresh
 import com.github.whyrising.vancetube.home.home.set_popular_vids
+import com.github.whyrising.y.core.assocIn
+import com.github.whyrising.y.core.l
+import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
@@ -21,20 +24,22 @@ class FsmTest : FreeSpec({
   }
 
   "updateToNextState() should update AppDb to next state" {
-    updateToNextState(initialDb, load_popular_videos) shouldBe initialDb
+    updateToNextState(m(), load_popular_videos) shouldBe
+      assocIn(m<Any, Any>(), l(home.panel, home.state), Loading)
 
-    updateToNextState(initialDb, set_popular_vids) shouldBe initialDb.assoc(
-      home.panel,
-      HomeDb(Loaded)
-    )
+    updateToNextState(
+      assocIn(m<Any, Any>(), l(home.panel, home.state), Loading) as AppDb,
+      set_popular_vids
+    ) shouldBe assocIn(m<Any, Any>(), l(home.panel, home.state), Loaded)
   }
 
   "handleNextState() should update AppDb to next state" {
-    handleNextState(initialDb, v(load_popular_videos)) shouldBe initialDb
+    handleNextState(m(), v(load_popular_videos)) shouldBe
+      assocIn(m<Any, Any>(), l(home.panel, home.state), Loading)
 
-    handleNextState(initialDb, v(set_popular_vids)) shouldBe initialDb.assoc(
-      home.panel,
-      HomeDb(Loaded)
-    )
+    handleNextState(
+      m(home.panel to m(home.state to Loaded)),
+      v(set_popular_vids)
+    ) shouldBe assocIn(m<Any, Any>(), l(home.panel, home.state), Loaded)
   }
 })

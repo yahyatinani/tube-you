@@ -57,8 +57,6 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.base.bottom_nav_items
 import com.github.whyrising.vancetube.base.base.expand_top_app_bar
-import com.github.whyrising.vancetube.base.db.NavigationItemState
-import com.github.whyrising.vancetube.base.db.initAppDb
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.library.library
@@ -67,6 +65,7 @@ import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
 import com.github.whyrising.vancetube.ui.theme.isCompact
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -157,7 +156,7 @@ fun VanceApp(
             IconButton(onClick = { /*TODO*/ }) {
               Icon(
                 imageVector = Icons.Outlined.Search,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(26.dp),
                 contentDescription = "Search a video"
               )
             }
@@ -195,29 +194,30 @@ fun VanceApp(
                 WindowInsets.safeDrawing.only(Horizontal + Bottom)
               )
             ) {
-              val navItems =
-                subscribe<List<NavigationItemState>>(v(bottom_nav_items)).w()
-              navItems.forEach {
-                NavigationBarItem(
-                  selected = it.isSelected,
-                  icon = {
-                    Icon(
-                      imageVector = it.icon,
-                      contentDescription = stringResource(
-                        it.iconContentDescTextId
-                      ),
-                      tint = MaterialTheme.colorScheme.onBackground
-                    )
-                  },
-                  label = {
-                    Text(
-                      text = stringResource(it.labelTextId),
-                      style = MaterialTheme.typography.labelSmall
-                    )
-                  },
-                  onClick = { dispatch(v(base.navigate_to, it)) }
-                )
-              }
+              subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
+                .forEach { (route, navItem) ->
+                  NavigationBarItem(
+                    selected = getFrom(navItem, base.is_selected)!!,
+                    icon = {
+                      Icon(
+                        imageVector = getFrom(navItem, base.icon)!!,
+                        contentDescription = stringResource(
+                          getFrom(navItem, base.icon_content_desc_text_id)!!
+                        ),
+                        tint = MaterialTheme.colorScheme.onBackground
+                      )
+                    },
+                    label = {
+                      Text(
+                        text = stringResource(
+                          getFrom(navItem, base.label_text_id)!!
+                        ),
+                        style = MaterialTheme.typography.labelSmall
+                      )
+                    },
+                    onClick = { dispatch(v(base.navigate_to, route)) }
+                  )
+                }
             }
           }
         }
@@ -226,7 +226,7 @@ fun VanceApp(
       val orientation = LocalConfiguration.current.orientation
       AnimatedNavHost(
         navController = navController,
-        startDestination = NavigationItemState.Home.route,
+        startDestination = subscribe<String>(v(base.start_route)).w(),
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)

@@ -62,11 +62,9 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.base
-import com.github.whyrising.vancetube.base.db.NavigationItemState
 import com.github.whyrising.vancetube.home.home.view_model
 import com.github.whyrising.vancetube.ui.anim.enterAnimation
 import com.github.whyrising.vancetube.ui.anim.exitAnimation
-import com.github.whyrising.vancetube.ui.recomposeHighlighter
 import com.github.whyrising.vancetube.ui.theme.Blue300
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.y.core.v
@@ -255,7 +253,6 @@ fun VideosList(
   LazyColumn(
     state = listState,
     modifier = Modifier
-      .recomposeHighlighter()
       .testTag("popular_videos_list")
       .fillMaxSize()
       .then(
@@ -357,7 +354,7 @@ private fun NavGraphBuilder.setupHome(
   content: @Composable (videos: PopularVideos) -> Unit
 ) {
   composable(
-    route = NavigationItemState.Home.route,
+    route = "${home.route}",
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {

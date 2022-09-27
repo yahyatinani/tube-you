@@ -28,7 +28,7 @@ val regBaseEventHandlers by lazy {
   regEventFx(base.on_bottom_nav_click) { cofx, (_, destination) ->
     // TODO: make sure this is a bottom navigation else skip
     val appDb = getAppDb(cofx)
-    val currentNavPanel = appDb[current_bottom_nav_panel] as String
+    val currentNavPanel = appDb[current_bottom_nav_panel]
 
     if (currentNavPanel == "$destination") {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx

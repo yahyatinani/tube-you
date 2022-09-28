@@ -3,13 +3,17 @@ package com.github.whyrising.vancetube.base
 import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.consumedWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -38,28 +42,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode.Companion.Color
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.IntrinsicMeasurable
-import androidx.compose.ui.layout.IntrinsicMeasureScope
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.layout.MeasureResult
-import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -78,14 +74,15 @@ import com.github.whyrising.vancetube.library.library
 import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
+import com.github.whyrising.vancetube.ui.theme.composables.BOTTOM_BAR_HEIGHT
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
+import com.github.whyrising.vancetube.ui.theme.composables.VanceLargeBottomNavBar
 import com.github.whyrising.vancetube.ui.theme.isCompact
 import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import kotlin.math.roundToInt
 
 const val ANIM_OFFSET_X = 300
 
@@ -199,193 +196,74 @@ fun VanceApp(
         Surface(
           color = MaterialTheme.colorScheme.surface,
           modifier = Modifier
+            .windowInsetsPadding(
+              WindowInsets.safeDrawing.only(Horizontal + Bottom)
+            )
             .drawWithCache {
               onDrawWithContent {
+                val strokeWidth = 1.7.dp.toPx()
+                val y = strokeWidth / 2
                 drawContent()
-                val strokeWidth = 2.dp.value
                 drawLine(
                   color = color,
-                  start = Offset(0f, strokeWidth / 2),
-                  end = Offset(size.width, strokeWidth / 2),
+                  start = Offset(0f, y),
+                  end = Offset(size.width, y),
                   strokeWidth = strokeWidth
                 )
               }
             }
-            .windowInsetsPadding(
-              WindowInsets.safeDrawing.only(Horizontal + Bottom)
-            ),
         ) {
-          Layout(
-            modifier = Modifier,
-            content = {
-              subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
-                .forEach { (route, navItem) ->
-                  val interactionSource = remember {
-                    MutableInteractionSource()
-                  }
-                  val ripple = rememberRipple(
-                    bounded = false,
-                    color = LocalContentColor.current
-                  )
-                  Column(
-                    horizontalAlignment = CenterHorizontally,
-                    modifier = Modifier
-                      .selectable(
-                        enabled = true,
-                        selected = getFrom(navItem, base.is_selected)!!,
-                        indication = ripple,
-                        role = Role.Tab,
-                        onClick = { dispatch(v(base.navigate_to, route)) },
-                        interactionSource = interactionSource,
-                      )
-                      .padding(horizontal = 8.dp)
-                  ) {
-                    Icon(
-                      imageVector = getFrom(navItem, base.icon)!!,
-                      contentDescription = stringResource(
-                        getFrom(navItem, base.icon_content_desc_text_id)!!
-                      ),
-                      tint = MaterialTheme.colorScheme.onBackground
+          val content: @Composable (modifier: Modifier) -> Unit = {
+            subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
+              .forEach { (route, navItem) ->
+                val interactionSource = remember { MutableInteractionSource() }
+                val ripple = rememberRipple(
+                  bounded = false,
+                  color = LocalContentColor.current
+                )
+                Column(
+                  horizontalAlignment = CenterHorizontally,
+                  modifier = it
+                    .selectable(
+                      enabled = true,
+                      selected = getFrom(navItem, base.is_selected)!!,
+                      indication = ripple,
+                      role = Role.Tab,
+                      onClick = { dispatch(v(base.navigate_to, route)) },
+                      interactionSource = interactionSource
                     )
-                    Text(
-                      text = stringResource(
-                        getFrom(navItem, base.label_text_id)!!
-                      ),
-                      style = MaterialTheme.typography.labelSmall
-                    )
-                  }
-                }
-            },
-            measurePolicy = object : MeasurePolicy {
-              override fun MeasureScope.measure(
-                measurables: List<Measurable>,
-                constraints: Constraints
-              ): MeasureResult {
-                // Don't constrain child views further, measure them with given
-                // constraints.
-                // List of measured children
-
-                val placeables = measurables.map { measurable ->
-                  measurable.measure(
-                    constraints.copy(
-                      minWidth = maxIntrinsicWidth(
-                        measurables,
-                        constraints.minHeight
-                      )
-                    )
-                  )
-                }
-                val placeable1 = placeables[0]
-                val BottomAppBarHeight = 48.dp
-                val height = BottomAppBarHeight.toPx().roundToInt()
-                val offset = 10.dp.roundToPx()
-                val itemY = (height - placeable1.height) / 2
-                return layout(
-                  width = constraints.maxWidth,
-                  height = height,
-                  alignmentLines = emptyMap(),
+                    .padding(horizontal = 8.dp)
                 ) {
-                  var itemX =
-                    constraints.maxWidth / 2 - ((placeable1.width + offset) * placeables.size) / 2
-                  placeables.forEach { placeable ->
-                    placeable.placeRelative(x = itemX, y = itemY)
-                    itemX += placeable.width + offset
-                  }
+                  Icon(
+                    imageVector = getFrom(navItem, base.icon)!!,
+                    contentDescription = stringResource(
+                      getFrom(navItem, base.icon_content_desc_text_id)!!
+                    ),
+                    tint = MaterialTheme.colorScheme.onBackground
+                  )
+                  Text(
+                    text = stringResource(
+                      getFrom(navItem, base.label_text_id)!!
+                    ),
+                    style = MaterialTheme.typography.labelSmall
+                  )
                 }
               }
+          }
 
-              override fun IntrinsicMeasureScope.maxIntrinsicWidth(
-                measurables: List<IntrinsicMeasurable>,
-                height: Int
-              ): Int {
-                return measurables.maxOf { it.maxIntrinsicWidth(height) }
-              }
+          if (isCompact(windowSizeClass = windowSizeClass)) {
+            Row(
+              horizontalArrangement = Arrangement.SpaceAround,
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier
+                .height(BOTTOM_BAR_HEIGHT)
+                .fillMaxWidth()
+            ) {
+              content(Modifier.weight(1f))
             }
-          )
-
-          //            Row(
-//              horizontalArrangement = Arrangement.Center,
-//              modifier = Modifier
-//                .height(48.dp)
-//                .padding(top = 4.dp)
-//                .fillMaxWidth()
-//                .then(
-//                  object : LayoutModifier {
-//                    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
-//                      measurable: IntrinsicMeasurable,
-//                      height: Int
-//                    ): Int {
-//                      return measurable.maxIntrinsicWidth(height)
-//                    }
-//                    override fun MeasureScope.measure(
-//                      measurable: Measurable,
-//                      constraints: Constraints
-//                    ): MeasureResult {
-//                      // Don't constrain child views further, measure them with given
-//                      // constraints.
-//                      // List of measured children
-//
-//                      val placeable = measurable.measure(
-//                        constraints.copy(
-//                          minWidth = maxIntrinsicWidth(
-//                            measurable,
-//                            constraints.minHeight
-//                          )
-//                        )
-//                      )
-//
-//                      // Set the size of the layout as big as it can
-//                      return layout(
-//                        width = placeable.width,
-//                        height = placeable.height,
-//                      ) {
-//                        // Track the y co-ord we have placed children up to
-//
-//                        placeable.placeRelative(x = 0, y = 0)
-//                      }
-//                    }
-//                  }
-//                )
-//            ) {
-//              subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
-//                .forEach { (route, navItem) ->
-//                  val interactionSource = remember {
-//                    MutableInteractionSource()
-//                  }
-//                  val ripple = rememberRipple(
-//                    bounded = false,
-//                    color = LocalContentColor.current
-//                  )
-//                  Column(
-//                    horizontalAlignment = CenterHorizontally,
-//                    modifier = Modifier
-//                      .padding(horizontal = 8.dp)
-//                      .selectable(
-//                        enabled = true,
-//                        selected = getFrom(navItem, base.is_selected)!!,
-//                        indication = ripple,
-//                        role = Role.Tab,
-//                        onClick = { dispatch(v(base.navigate_to, route)) },
-//                        interactionSource = interactionSource,
-//                      )
-//                  ) {
-//                    Icon(
-//                      imageVector = getFrom(navItem, base.icon)!!,
-//                      contentDescription = stringResource(
-//                        getFrom(navItem, base.icon_content_desc_text_id)!!
-//                      ),
-//                      tint = MaterialTheme.colorScheme.onBackground
-//                    )
-//                    Text(
-//                      text = stringResource(
-//                        getFrom(navItem, base.label_text_id)!!
-//                      ),
-//                      style = MaterialTheme.typography.labelSmall
-//                    )
-//                  }
-//                }
-//            }
-
+          } else VanceLargeBottomNavBar {
+            content(Modifier)
+          }
         }
       }
     ) {

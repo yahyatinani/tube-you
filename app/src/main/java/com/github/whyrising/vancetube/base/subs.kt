@@ -1,12 +1,12 @@
 package com.github.whyrising.vancetube.base
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.material.icons.outlined.TrendingUp
 import com.github.whyrising.recompose.regSub
@@ -56,8 +56,8 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
     base.label_text_id, R.string.nav_item_label_library,
     base.icon_content_desc_text_id, R.string.nav_item_desc_library,
     base.is_selected, false,
-    base.icon_variant, Icons.Filled.PlaylistPlay,
-    base.icon, Icons.Outlined.PlaylistPlay
+    base.icon_variant, Icons.Filled.Bookmarks,
+    base.icon, Icons.Outlined.Bookmarks
   )
 )
 

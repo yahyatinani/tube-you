@@ -1,10 +1,16 @@
 package com.github.whyrising.vancetube.ui.theme.composables
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
@@ -37,14 +43,30 @@ fun BackArrow() {
 
 val BOTTOM_BAR_HEIGHT = 48.dp
 
+val BOTTOM_BAR_TOP_PADDING = 2.dp
+
+@Composable
+fun VanceCompactBottomNavBar(navItems: @Composable (Modifier) -> Unit) {
+  Row(
+    horizontalArrangement = Arrangement.SpaceAround,
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = Modifier
+      .padding(top = BOTTOM_BAR_TOP_PADDING)
+      .height(BOTTOM_BAR_HEIGHT)
+      .fillMaxWidth()
+  ) {
+    navItems(Modifier.weight(1f))
+  }
+}
+
 @Composable
 fun VanceLargeBottomNavBar(
   modifier: Modifier = Modifier,
-  content: @Composable () -> Unit
+  navItems: @Composable () -> Unit
 ) {
   Layout(
-    modifier = modifier,
-    content = content,
+    modifier = modifier.padding(top = BOTTOM_BAR_TOP_PADDING),
+    content = navItems,
     measurePolicy = object : MeasurePolicy {
       override fun MeasureScope.measure(
         measurables: List<Measurable>,

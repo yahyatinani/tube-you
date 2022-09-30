@@ -3,17 +3,15 @@ package com.github.whyrising.vancetube.base
 import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.consumedWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -24,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,13 +41,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -74,8 +70,8 @@ import com.github.whyrising.vancetube.library.library
 import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
-import com.github.whyrising.vancetube.ui.theme.composables.BOTTOM_BAR_HEIGHT
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
+import com.github.whyrising.vancetube.ui.theme.composables.VanceCompactBottomNavBar
 import com.github.whyrising.vancetube.ui.theme.composables.VanceLargeBottomNavBar
 import com.github.whyrising.vancetube.ui.theme.isCompact
 import com.github.whyrising.y.core.getFrom
@@ -191,78 +187,64 @@ fun VanceApp(
         )
       },
       bottomBar = {
-//        val color = MaterialTheme.colorScheme.onSurface.copy(.15f)
-        val color = Color(0xFF3A3A3A)
         Surface(
-          color = MaterialTheme.colorScheme.surface,
-          modifier = Modifier
-            .windowInsetsPadding(
-              WindowInsets.safeDrawing.only(Horizontal + Bottom)
-            )
-            .drawWithCache {
-              onDrawWithContent {
-                val strokeWidth = 1.7.dp.toPx()
-                val y = strokeWidth / 2
-                drawContent()
-                drawLine(
-                  color = color,
-                  start = Offset(0f, y),
-                  end = Offset(size.width, y),
-                  strokeWidth = strokeWidth
-                )
-              }
-            }
+          modifier = Modifier.windowInsetsPadding(
+            WindowInsets.safeDrawing.only(Horizontal + Bottom)
+          )
         ) {
-          val content: @Composable (modifier: Modifier) -> Unit = {
-            subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
-              .forEach { (route, navItem) ->
-                val interactionSource = remember { MutableInteractionSource() }
-                val ripple = rememberRipple(
-                  bounded = false,
-                  color = LocalContentColor.current
-                )
-                Column(
-                  horizontalAlignment = CenterHorizontally,
-                  modifier = it
-                    .selectable(
-                      enabled = true,
-                      selected = getFrom(navItem, base.is_selected)!!,
-                      indication = ripple,
-                      role = Role.Tab,
-                      onClick = { dispatch(v(base.navigate_to, route)) },
-                      interactionSource = interactionSource
+          Box(contentAlignment = TopCenter) {
+            val colorScheme = MaterialTheme.colorScheme
+            Divider(
+              modifier = Modifier.fillMaxWidth(),
+              thickness = 1.dp,
+              color = colorScheme.onSurface.copy(.12f)
+            )
+            val content: @Composable (Modifier) -> Unit = { modifier ->
+              subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
+                .forEach { (route, navItem) ->
+                  val interactionSource =
+                    remember { MutableInteractionSource() }
+                  val ripple = rememberRipple(
+                    bounded = false,
+                    color = LocalContentColor.current
+                  )
+                  Column(
+                    horizontalAlignment = CenterHorizontally,
+                    modifier = modifier
+                      .selectable(
+                        enabled = true,
+                        selected = getFrom(navItem, base.is_selected)!!,
+                        indication = ripple,
+                        role = Role.Tab,
+                        onClick = { dispatch(v(base.navigate_to, route)) },
+                        interactionSource = interactionSource
+                      )
+                      .padding(horizontal = 8.dp)
+                  ) {
+                    Icon(
+                      imageVector = getFrom(navItem, base.icon)!!,
+                      contentDescription = stringResource(
+                        getFrom(navItem, base.icon_content_desc_text_id)!!
+                      ),
+                      tint = colorScheme.onBackground
                     )
-                    .padding(horizontal = 8.dp)
-                ) {
-                  Icon(
-                    imageVector = getFrom(navItem, base.icon)!!,
-                    contentDescription = stringResource(
-                      getFrom(navItem, base.icon_content_desc_text_id)!!
-                    ),
-                    tint = MaterialTheme.colorScheme.onBackground
-                  )
-                  Text(
-                    text = stringResource(
-                      getFrom(navItem, base.label_text_id)!!
-                    ),
-                    style = MaterialTheme.typography.labelSmall
-                  )
+                    Text(
+                      text = stringResource(
+                        getFrom(navItem, base.label_text_id)!!
+                      ),
+                      style = MaterialTheme.typography.labelSmall
+                    )
+                  }
                 }
-              }
-          }
-
-          if (isCompact(windowSizeClass = windowSizeClass)) {
-            Row(
-              horizontalArrangement = Arrangement.SpaceAround,
-              verticalAlignment = Alignment.CenterVertically,
-              modifier = Modifier
-                .height(BOTTOM_BAR_HEIGHT)
-                .fillMaxWidth()
-            ) {
-              content(Modifier.weight(1f))
             }
-          } else VanceLargeBottomNavBar {
-            content(Modifier)
+
+            if (isCompact(windowSizeClass = windowSizeClass)) {
+              VanceCompactBottomNavBar(navItems = content)
+            } else {
+              VanceLargeBottomNavBar {
+                content(Modifier)
+              }
+            }
           }
         }
       }

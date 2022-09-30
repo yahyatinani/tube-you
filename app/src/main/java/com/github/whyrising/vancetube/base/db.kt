@@ -1,10 +1,8 @@
-package com.github.whyrising.vancetube.base.db
+package com.github.whyrising.vancetube.base
 
 import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.regEventDb
-import com.github.whyrising.vancetube.base.AppDb
-import com.github.whyrising.vancetube.base.base
-import com.github.whyrising.vancetube.base.base.init_db
+import com.github.whyrising.vancetube.base.base.init_app_db
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.updateToNextState
 import com.github.whyrising.y.core.m
@@ -19,15 +17,15 @@ const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
 // const val DEFAULT_BASE_ADDRESS = "invidious.slipfox.xyz"
 
 fun initAppDb() {
-  regEventDb<AppDb>(init_db) { _, _ ->
+  regEventDb<AppDb>(init_app_db) { _, _ ->
     updateToNextState(
-      m<base, Any>(
+      db = m<base, Any>(
         base.is_backstack_available to false,
         base.api to "https://$DEFAULT_BASE_ADDRESS/api/v1",
-        base.current_bottom_nav_panel to NavigationItemState.Home.route
+        base.start_route to home.route.toString()
       ),
-      home.load_popular_videos
+      event = home.load_popular_videos
     )
   }
-  dispatchSync(v(init_db))
+  dispatchSync(v(init_app_db))
 }

@@ -2,13 +2,14 @@ package com.github.whyrising.vancetube.base
 
 import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.consumedWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -22,11 +23,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
@@ -36,12 +34,11 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,8 +54,7 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.base.bottom_nav_items
 import com.github.whyrising.vancetube.base.base.expand_top_app_bar
-import com.github.whyrising.vancetube.base.db.NavigationItemState
-import com.github.whyrising.vancetube.base.db.initAppDb
+import com.github.whyrising.vancetube.base.base.icon_content_desc_text_id
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.library.library
@@ -66,7 +62,11 @@ import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
+import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavItem
+import com.github.whyrising.vancetube.ui.theme.composables.VanceCompactBottomNavBar
+import com.github.whyrising.vancetube.ui.theme.composables.VanceLargeBottomNavBar
 import com.github.whyrising.vancetube.ui.theme.isCompact
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -157,7 +157,7 @@ fun VanceApp(
             IconButton(onClick = { /*TODO*/ }) {
               Icon(
                 imageVector = Icons.Outlined.Search,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(26.dp),
                 contentDescription = "Search a video"
               )
             }
@@ -179,44 +179,36 @@ fun VanceApp(
         )
       },
       bottomBar = {
-        Surface(color = MaterialTheme.colorScheme.surface) {
-          Column(
-            modifier = Modifier.windowInsetsPadding(
-              WindowInsets.safeDrawing.only(Horizontal + Bottom)
-            )
-          ) {
+        Surface(
+          modifier = Modifier.windowInsetsPadding(
+            WindowInsets.safeDrawing.only(Horizontal + Bottom)
+          )
+        ) {
+          Box(contentAlignment = TopCenter) {
             Divider(
-              color = MaterialTheme.colorScheme.onSurface.copy(.15f),
-              thickness = .6.dp
+              modifier = Modifier.fillMaxWidth(),
+              thickness = 1.dp,
+              color = MaterialTheme.colorScheme.onSurface.copy(.12f)
             )
-            NavigationBar(
-              containerColor = Color.Transparent,
-              modifier = Modifier.windowInsetsPadding(
-                WindowInsets.safeDrawing.only(Horizontal + Bottom)
-              )
-            ) {
-              val navItems =
-                subscribe<List<NavigationItemState>>(v(bottom_nav_items)).w()
-              navItems.forEach {
-                NavigationBarItem(
-                  selected = it.isSelected,
-                  icon = {
-                    Icon(
-                      imageVector = it.icon,
-                      contentDescription = stringResource(
-                        it.iconContentDescTextId
-                      ),
-                      tint = MaterialTheme.colorScheme.onBackground
-                    )
-                  },
-                  label = {
-                    Text(
-                      text = stringResource(it.labelTextId),
-                      style = MaterialTheme.typography.labelSmall
-                    )
-                  },
-                  onClick = { dispatch(v(base.navigate_to, it)) }
-                )
+            val content: @Composable (Modifier) -> Unit = { modifier ->
+              subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
+                .forEach { (route, navItem) ->
+                  VanceBottomNavItem(
+                    modifier = modifier,
+                    selected = getFrom(navItem, base.is_selected)!!,
+                    labelTxtId = getFrom(navItem, base.label_text_id)!!,
+                    itemRoute = route,
+                    icon = getFrom(navItem, base.icon)!!,
+                    icDescId = getFrom(navItem, icon_content_desc_text_id)!!
+                  )
+                }
+            }
+
+            if (isCompact(windowSizeClass = windowSizeClass)) {
+              VanceCompactBottomNavBar(navItems = content)
+            } else {
+              VanceLargeBottomNavBar {
+                content(Modifier)
               }
             }
           }
@@ -226,7 +218,7 @@ fun VanceApp(
       val orientation = LocalConfiguration.current.orientation
       AnimatedNavHost(
         navController = navController,
-        startDestination = NavigationItemState.Home.route,
+        startDestination = subscribe<String>(v(base.start_route)).w(),
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)

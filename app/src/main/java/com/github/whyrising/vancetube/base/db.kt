@@ -22,7 +22,7 @@ fun initAppDb() {
       db = m<base, Any>(
         base.is_backstack_available to false,
         base.api to "https://$DEFAULT_BASE_ADDRESS/api/v1",
-        base.start_route to "${home.route}"
+        base.start_route to home.route.toString()
       ),
       event = home.load_popular_videos
     )

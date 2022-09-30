@@ -13,7 +13,7 @@ import com.google.accompanist.navigation.animation.composable
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.subscriptions(animOffsetX: Int, orientation: Int) {
   composable(
-    route = "${subscriptions.route}",
+    route = subscriptions.route.toString(),
     exitTransition = { exitAnimation(targetOffsetX = -animOffsetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffsetX) }
   ) {

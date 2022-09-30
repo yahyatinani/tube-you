@@ -354,7 +354,7 @@ private fun NavGraphBuilder.setupHome(
   content: @Composable (videos: PopularVideos) -> Unit
 ) {
   composable(
-    route = "${home.route}",
+    route = home.route.toString(),
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {

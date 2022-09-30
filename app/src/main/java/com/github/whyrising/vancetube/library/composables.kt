@@ -13,7 +13,7 @@ import com.google.accompanist.navigation.animation.composable
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.library(animOffSetX: Int, orientation: Int) {
   composable(
-    route = "${library.route}", // FIXME:
+    route = library.route.toString(),
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {

@@ -13,7 +13,7 @@ import com.google.accompanist.navigation.animation.composable
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.trending(animOffSetX: Int, orientation: Int) {
   composable(
-    route = "${trends.route}",
+    route = trends.route.toString(),
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {

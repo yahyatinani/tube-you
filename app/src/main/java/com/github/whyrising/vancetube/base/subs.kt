@@ -31,28 +31,28 @@ import com.github.whyrising.y.core.util.m as m2
 
 // TODO: decouple type from map?
 val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
-  "${home.route}" to m2(
+  home.route.toString() to m2(
     base.label_text_id, R.string.nav_item_label_home,
     base.icon_content_desc_text_id, R.string.nav_item_desc_home,
     base.is_selected, false,
     base.icon_variant, Icons.Filled.Home,
     base.icon, Icons.Outlined.Home
   ),
-  "${trends.route}" to m2(
+  trends.route.toString() to m2(
     base.label_text_id, R.string.nav_item_label_trend,
     base.icon_content_desc_text_id, R.string.nav_item_desc_trends,
     base.is_selected, false,
     base.icon_variant, Icons.Filled.TrendingUp,
     base.icon, Icons.Outlined.TrendingUp
   ),
-  "${subscriptions.route}" to m2(
+  subscriptions.route.toString() to m2(
     base.label_text_id, R.string.nav_item_label_subs,
     base.icon_content_desc_text_id, R.string.nav_item_desc_subs,
     base.is_selected, false,
     base.icon_variant, Icons.Filled.Subscriptions,
     base.icon, Icons.Outlined.Subscriptions
   ),
-  "${library.route}" to m2(
+  library.route.toString() to m2(
     base.label_text_id, R.string.nav_item_label_library,
     base.icon_content_desc_text_id, R.string.nav_item_desc_library,
     base.is_selected, false,

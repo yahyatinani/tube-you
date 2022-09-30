@@ -9,4 +9,4 @@ _N.B.: this project is still in early stages of development._
 
 
 ## Screenshots:
-<img src="docs/Screenshot_1.png" width="256" /> <img src="docs/Screenshot_2.png" width="256" />
+<img src="docs/Screenshot_1.png" height="375" /> <img src="docs/Screenshot_2.png" width="500" />

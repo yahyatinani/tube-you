@@ -2,9 +2,7 @@ package com.github.whyrising.vancetube.base
 
 import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -17,20 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
@@ -40,15 +34,11 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,6 +54,7 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.base.bottom_nav_items
 import com.github.whyrising.vancetube.base.base.expand_top_app_bar
+import com.github.whyrising.vancetube.base.base.icon_content_desc_text_id
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.library.library
@@ -71,6 +62,7 @@ import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
+import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavItem
 import com.github.whyrising.vancetube.ui.theme.composables.VanceCompactBottomNavBar
 import com.github.whyrising.vancetube.ui.theme.composables.VanceLargeBottomNavBar
 import com.github.whyrising.vancetube.ui.theme.isCompact
@@ -193,48 +185,22 @@ fun VanceApp(
           )
         ) {
           Box(contentAlignment = TopCenter) {
-            val colorScheme = MaterialTheme.colorScheme
             Divider(
               modifier = Modifier.fillMaxWidth(),
               thickness = 1.dp,
-              color = colorScheme.onSurface.copy(.12f)
+              color = MaterialTheme.colorScheme.onSurface.copy(.12f)
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
               subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
                 .forEach { (route, navItem) ->
-                  val interactionSource =
-                    remember { MutableInteractionSource() }
-                  val ripple = rememberRipple(
-                    bounded = false,
-                    color = LocalContentColor.current
+                  VanceBottomNavItem(
+                    modifier = modifier,
+                    selected = getFrom(navItem, base.is_selected)!!,
+                    labelTxtId = getFrom(navItem, base.label_text_id)!!,
+                    itemRoute = route,
+                    icon = getFrom(navItem, base.icon)!!,
+                    icDescId = getFrom(navItem, icon_content_desc_text_id)!!
                   )
-                  Column(
-                    horizontalAlignment = CenterHorizontally,
-                    modifier = modifier
-                      .selectable(
-                        enabled = true,
-                        selected = getFrom(navItem, base.is_selected)!!,
-                        indication = ripple,
-                        role = Role.Tab,
-                        onClick = { dispatch(v(base.navigate_to, route)) },
-                        interactionSource = interactionSource
-                      )
-                      .padding(horizontal = 8.dp)
-                  ) {
-                    Icon(
-                      imageVector = getFrom(navItem, base.icon)!!,
-                      contentDescription = stringResource(
-                        getFrom(navItem, base.icon_content_desc_text_id)!!
-                      ),
-                      tint = colorScheme.onBackground
-                    )
-                    Text(
-                      text = stringResource(
-                        getFrom(navItem, base.label_text_id)!!
-                      ),
-                      style = MaterialTheme.typography.labelSmall
-                    )
-                  }
                 }
             }
 

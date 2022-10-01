@@ -1,25 +1,32 @@
 package com.github.whyrising.vancetube.ui.theme.composables
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
@@ -28,6 +35,7 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
@@ -60,7 +68,6 @@ val BOTTOM_BAR_TOP_PADDING = 2.dp
 fun VanceCompactBottomNavBar(navItems: @Composable (Modifier) -> Unit) {
   Row(
     horizontalArrangement = Arrangement.SpaceAround,
-    verticalAlignment = Alignment.CenterVertically,
     modifier = Modifier
       .padding(top = BOTTOM_BAR_TOP_PADDING)
       .height(BOTTOM_BAR_HEIGHT)
@@ -111,7 +118,7 @@ fun VanceLargeBottomNavBar(
         ) {
           placeables.forEach { placeable ->
             placeable.placeRelative(x = nextItemX, y = itemY)
-            nextItemX += placeable.width + offset
+            nextItemX += placeable.width
           }
         }
       }
@@ -126,6 +133,7 @@ fun VanceLargeBottomNavBar(
   )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun VanceBottomNavItem(
   modifier: Modifier,
@@ -136,31 +144,53 @@ fun VanceBottomNavItem(
   labelTxtId: Int
 ) {
   val interactionSource = remember { MutableInteractionSource() }
-  val ripple = rememberRipple(
-    bounded = false,
-    color = LocalContentColor.current
-  )
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
+  val isPressed by interactionSource.collectIsPressedAsState()
+  var isLongPressed by remember { mutableStateOf(false) }
+  val colorScheme = MaterialTheme.colorScheme
+  Box(
+    contentAlignment = Alignment.Center,
     modifier = modifier
+      .background(
+        color = when {
+          isPressed -> {
+            colorScheme.onSurface.copy(.08f)
+          }
+          else -> Color.Transparent
+        },
+        shape = CircleShape
+      )
+      .layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val h = placeable.height
+        val w = placeable.width
+        val d = maxOf(h, w)
+
+        layout(d, d) {
+          placeable.placeRelative((d - w) / 2, (d - h) / 2)
+        }
+      }
       .selectable(
-        enabled = true,
         selected = selected,
-        indication = ripple,
+        interactionSource = interactionSource,
+        indication = null,
         role = Role.Tab,
-        onClick = { dispatch(v(base.navigate_to, itemRoute)) },
-        interactionSource = interactionSource
+        onClick = { dispatch(v(base.navigate_to, itemRoute)) }
       )
       .padding(horizontal = 8.dp)
   ) {
-    Icon(
-      imageVector = icon,
-      contentDescription = stringResource(icDescId),
-      tint = MaterialTheme.colorScheme.onBackground
-    )
-    Text(
-      text = stringResource(labelTxtId),
-      style = MaterialTheme.typography.labelSmall
-    )
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
+    ) {
+      Icon(
+        imageVector = icon,
+        contentDescription = stringResource(icDescId),
+        tint = colorScheme.onBackground
+      )
+      Text(
+        text = stringResource(labelTxtId),
+        style = MaterialTheme.typography.labelSmall
+      )
+    }
   }
 }

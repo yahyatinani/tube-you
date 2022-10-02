@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
   <style name="NightAdjusted.Theme.Vance" parent="android:Theme.Material.NoActionBar">
     <item name="android:windowLightStatusBar">false</item>
-    <item name="android:windowLightNavigationBar" tools:targetApi="27">false
-    </item>
   </style>
 
   <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
     <item name="android:windowBackground">@color/neutral_10</item>
     <item name="android:windowLightStatusBar">false</item>
-    <item name="android:windowLightNavigationBar" tools:targetApi="27">false
-    </item>
   </style>
 </resources>

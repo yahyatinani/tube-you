@@ -8,13 +8,13 @@
   </style>
 
   <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
-    <item name="android:windowBackground">@color/white</item>
-    <item name="android:windowLightStatusBar">true</item>
-    <item name="android:windowLightNavigationBar">true</item>
+    <item name="android:windowBackground">@color/neutral_10</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar">false</item>
   </style>
 
-  <style name="NightAdjusted.Theme.Vance" parent="android:Theme.Material.Light.NoActionBar">
-    <item name="android:windowLightStatusBar">true</item>
-    <item name="android:windowLightNavigationBar">true</item>
+  <style name="NightAdjusted.Theme.Vance" parent="android:Theme.Material.NoActionBar">
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar">false</item>
   </style>
 </resources>

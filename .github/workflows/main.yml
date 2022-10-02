@@ -30,6 +30,8 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
 
+      - run: rm -rf .gradle/configuration-cache
+
       - name: Spotless check
         run: ./gradlew spotlessCheck lintDebug --stacktrace
 

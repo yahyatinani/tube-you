@@ -1,26 +1,34 @@
 package com.github.whyrising.vancetube.ui.theme.composables
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
 import androidx.compose.ui.layout.Layout
@@ -28,15 +36,13 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastMap
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.y.core.v
-import kotlin.math.roundToInt
 
 @Composable
 fun BackArrow() {
@@ -54,113 +60,152 @@ fun BackArrow() {
 
 val BOTTOM_BAR_HEIGHT = 48.dp
 
-val BOTTOM_BAR_TOP_PADDING = 2.dp
-
 @Composable
-fun VanceCompactBottomNavBar(navItems: @Composable (Modifier) -> Unit) {
+fun VanceBottomNavBarCompact(
+  modifier: Modifier = Modifier,
+  content: @Composable (Modifier) -> Unit
+) {
   Row(
     horizontalArrangement = Arrangement.SpaceAround,
-    verticalAlignment = Alignment.CenterVertically,
-    modifier = Modifier
-      .padding(top = BOTTOM_BAR_TOP_PADDING)
+    modifier = modifier
       .height(BOTTOM_BAR_HEIGHT)
       .fillMaxWidth()
+      .selectableGroup()
   ) {
-    navItems(Modifier.weight(1f))
+    content(Modifier.weight(1f))
   }
 }
 
+val BOTTOM_BAR_TOP_BORDER_THICKNESS = 1.dp
+
 @Composable
-fun VanceLargeBottomNavBar(
+fun VanceBottomNavBarLarge(
   modifier: Modifier = Modifier,
-  navItems: @Composable () -> Unit
-) {
-  Layout(
-    modifier = modifier.padding(top = BOTTOM_BAR_TOP_PADDING),
-    content = navItems,
-    measurePolicy = object : MeasurePolicy {
-      override fun MeasureScope.measure(
-        measurables: List<Measurable>,
-        constraints: Constraints
-      ): MeasureResult {
-        // Don't constrain child views further, measure them with given
-        // constraints.
-        // List of measured children
+  content: @Composable () -> Unit
+) = Layout(
+  modifier = modifier.selectableGroup(),
+  content = content,
+  measurePolicy = object : MeasurePolicy {
+    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
+      measurables: List<IntrinsicMeasurable>,
+      height: Int
+    ): Int = measurables.maxOf { it.maxIntrinsicWidth(height) }
 
-        val placeables = measurables.fastMap { measurable ->
-          measurable.measure(
-            constraints.copy(
-              minWidth = maxIntrinsicWidth(
-                measurables,
-                constraints.minHeight
-              )
-            )
+    override fun MeasureScope.measure(
+      measurables: List<Measurable>,
+      constraints: Constraints
+    ): MeasureResult {
+      val placeables = measurables.map { measurable ->
+        measurable.measure(
+          constraints.copy(
+            minWidth = maxIntrinsicWidth(measurables, constraints.minHeight)
           )
-        }
-        val navItem = placeables[0]
-        val height = BOTTOM_BAR_HEIGHT.toPx().roundToInt()
-        val offset = 10.dp.roundToPx()
-        val firstX = constraints.maxWidth / 2 -
-          ((navItem.width + offset) * placeables.size) / 2
-        var nextItemX = firstX
-        val itemY = (height - navItem.height) / 2
-
-        return layout(
-          width = constraints.maxWidth,
-          height = height
-        ) {
-          placeables.forEach { placeable ->
-            placeable.placeRelative(x = nextItemX, y = itemY)
-            nextItemX += placeable.width + offset
-          }
-        }
+        )
       }
+      val maxWidth = constraints.maxWidth
+      val navItem = placeables[0]
+      val itemY = (BOTTOM_BAR_HEIGHT.roundToPx() - navItem.height) / 2 +
+        BOTTOM_BAR_TOP_BORDER_THICKNESS.roundToPx()
 
-      override fun IntrinsicMeasureScope.maxIntrinsicWidth(
-        measurables: List<IntrinsicMeasurable>,
-        height: Int
-      ): Int {
-        return measurables.maxOf { it.maxIntrinsicWidth(height) }
+      var nextItemX = maxWidth / 2 - (navItem.width * placeables.size) / 2
+
+      return layout(width = maxWidth, height = BOTTOM_BAR_HEIGHT.roundToPx()) {
+        placeables.forEach { placeable ->
+          placeable.placeRelative(x = nextItemX, y = itemY)
+          nextItemX += placeable.width
+        }
       }
     }
-  )
-}
+  }
+)
 
 @Composable
 fun VanceBottomNavItem(
-  modifier: Modifier,
   selected: Boolean,
-  itemRoute: Any,
-  icon: ImageVector,
-  icDescId: Int,
-  labelTxtId: Int
+  icon: @Composable () -> Unit,
+  modifier: Modifier = Modifier,
+  label: @Composable (() -> Unit),
+  onPressColor: Color,
+  onClick: () -> Unit
 ) {
   val interactionSource = remember { MutableInteractionSource() }
-  val ripple = rememberRipple(
-    bounded = false,
-    color = LocalContentColor.current
+  val isPressed by interactionSource.collectIsPressedAsState()
+  val transition = updateTransition(
+    targetState = isPressed,
+    label = "Bottom navItem onPress color transition"
   )
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
+  val backgroundColor by transition.animateColor(
+    transitionSpec = {
+      if (true isTransitioningTo false) {
+        tween(
+          durationMillis = 0,
+          easing = LinearEasing
+        )
+      } else {
+        tween(
+          durationMillis = 10,
+          delayMillis = 50,
+          easing = LinearEasing
+        )
+      }
+    },
+    label = "Bottom navItem onPress color animation"
+  ) { state ->
+    if (state) onPressColor else Transparent
+  }
+  val borderColor by transition.animateColor(
+    transitionSpec = {
+      if (true isTransitioningTo false) {
+        tween(
+          durationMillis = 500,
+          easing = LinearEasing
+        )
+      } else {
+        tween(
+          durationMillis = 10,
+          delayMillis = 50,
+          easing = LinearEasing
+        )
+      }
+    },
+    label = "Bottom navItem onPress color2 animation"
+  ) { state ->
+    if (state) onPressColor else Transparent
+  }
+  Box(
+    contentAlignment = Alignment.Center,
     modifier = modifier
-      .selectable(
-        enabled = true,
-        selected = selected,
-        indication = ripple,
-        role = Role.Tab,
-        onClick = { dispatch(v(base.navigate_to, itemRoute)) },
-        interactionSource = interactionSource
+      .background(
+        shape = CircleShape,
+        color = backgroundColor
       )
-      .padding(horizontal = 8.dp)
+      .border(
+        width = 1.dp,
+        color = if (isPressed) Transparent else borderColor,
+        shape = CircleShape
+      )
+      .layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val h = placeable.height
+        val w = placeable.width
+        val d = maxOf(h, w)
+
+        layout(d, d) {
+          placeable.placeRelative((d - w) / 2, (d - h) / 2)
+        }
+      }
+      .selectable(
+        selected = selected,
+        interactionSource = interactionSource,
+        indication = null,
+        role = Role.Tab,
+        onClick = onClick
+      )
+      .padding(horizontal = 12.dp)
   ) {
-    Icon(
-      imageVector = icon,
-      contentDescription = stringResource(icDescId),
-      tint = MaterialTheme.colorScheme.onBackground
-    )
-    Text(
-      text = stringResource(labelTxtId),
-      style = MaterialTheme.typography.labelSmall
-    )
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      icon()
+      label()
+    }
   }
 }

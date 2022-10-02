@@ -1,6 +1,7 @@
 package com.github.whyrising.vancetube.ui.theme.composables
 
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -138,8 +139,8 @@ fun VanceBottomNavItem(
     transitionSpec = {
       if (true isTransitioningTo false) {
         tween(
-          durationMillis = 0,
-          easing = LinearEasing
+          durationMillis = 100,
+          easing = FastOutLinearInEasing
         )
       } else {
         tween(
@@ -157,7 +158,7 @@ fun VanceBottomNavItem(
     transitionSpec = {
       if (true isTransitioningTo false) {
         tween(
-          durationMillis = 500,
+          durationMillis = 700,
           easing = LinearEasing
         )
       } else {

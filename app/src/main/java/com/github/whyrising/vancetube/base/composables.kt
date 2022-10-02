@@ -191,10 +191,11 @@ fun VanceApp(
         ) {
           Box(contentAlignment = TopCenter) {
             val colorScheme = MaterialTheme.colorScheme
+            val lightGray = colorScheme.onSurface.copy(.12f)
             Divider(
               modifier = Modifier.fillMaxWidth(),
               thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS,
-              color = colorScheme.onSurface.copy(.12f)
+              color = lightGray
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
               subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
@@ -218,7 +219,8 @@ fun VanceApp(
                         text = text,
                         style = MaterialTheme.typography.labelSmall
                       )
-                    }
+                    },
+                    onPressColor = lightGray
                   ) {
                     dispatch(v(base.navigate_to, route))
                   }

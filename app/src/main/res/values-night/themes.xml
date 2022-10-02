@@ -8,6 +8,7 @@
   </style>
 
   <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
+    <item name="android:windowBackground">@color/neutral_10</item>
     <item name="android:windowLightStatusBar">false</item>
     <item name="android:windowLightNavigationBar" tools:targetApi="27">false
     </item>

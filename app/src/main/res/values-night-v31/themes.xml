@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
+    <item name="android:windowSplashScreenBackground">@color/neutral_10</item>
+    <item name="android:windowLightStatusBar">false</item>
+  </style>
+</resources>

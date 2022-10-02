@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
@@ -39,6 +40,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,6 +57,7 @@ import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.base.base.bottom_nav_items
 import com.github.whyrising.vancetube.base.base.expand_top_app_bar
 import com.github.whyrising.vancetube.base.base.icon_content_desc_text_id
+import com.github.whyrising.vancetube.base.base.label_text_id
 import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.library.library
@@ -187,22 +190,38 @@ fun VanceApp(
           )
         ) {
           Box(contentAlignment = TopCenter) {
+            val colorScheme = MaterialTheme.colorScheme
             Divider(
               modifier = Modifier.fillMaxWidth(),
               thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS,
-              color = MaterialTheme.colorScheme.onSurface.copy(.12f)
+              color = colorScheme.onSurface.copy(.12f)
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
               subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
                 .forEach { (route, navItem) ->
-                  VanceBottomNavItem(
-                    modifier = modifier,
-                    selected = getFrom(navItem, base.is_selected)!!,
-                    labelTxtId = getFrom(navItem, base.label_text_id)!!,
-                    itemRoute = route,
-                    icon = getFrom(navItem, base.icon)!!,
-                    icDescId = getFrom(navItem, icon_content_desc_text_id)!!
+                  val contentDescription = stringResource(
+                    getFrom(navItem, icon_content_desc_text_id)!!
                   )
+                  val text = stringResource(getFrom(navItem, label_text_id)!!)
+                  VanceBottomNavItem(
+                    selected = getFrom(navItem, base.is_selected)!!,
+                    modifier = modifier,
+                    icon = {
+                      Icon(
+                        imageVector = getFrom(navItem, base.icon)!!,
+                        contentDescription = contentDescription,
+                        tint = colorScheme.onBackground
+                      )
+                    },
+                    label = {
+                      Text(
+                        text = text,
+                        style = MaterialTheme.typography.labelSmall
+                      )
+                    },
+                  ) {
+                    dispatch(v(base.navigate_to, route))
+                  }
                 }
             }
 

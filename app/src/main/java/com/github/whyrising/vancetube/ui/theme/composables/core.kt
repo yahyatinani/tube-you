@@ -116,12 +116,11 @@ fun VanceLargeBottomNavBar(
 
 @Composable
 fun VanceBottomNavItem(
-  modifier: Modifier,
   selected: Boolean,
-  itemRoute: Any,
-  icon: ImageVector,
-  icDescId: Int,
-  labelTxtId: Int
+  icon: @Composable () -> Unit,
+  modifier: Modifier = Modifier,
+  label: @Composable (() -> Unit),
+  onClick: () -> Unit
 ) {
   val interactionSource = remember { MutableInteractionSource() }
   val isPressed by interactionSource.collectIsPressedAsState()
@@ -130,13 +129,13 @@ fun VanceBottomNavItem(
     contentAlignment = Alignment.Center,
     modifier = modifier
       .background(
+        shape = CircleShape,
         color = when {
           isPressed -> {
             colorScheme.onSurface.copy(.08f)
           }
           else -> Color.Transparent
-        },
-        shape = CircleShape
+        }
       )
       .layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
@@ -153,20 +152,13 @@ fun VanceBottomNavItem(
         interactionSource = interactionSource,
         indication = null,
         role = Role.Tab,
-        onClick = { dispatch(v(base.navigate_to, itemRoute)) }
+        onClick = onClick
       )
       .padding(horizontal = 12.dp)
   ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Icon(
-        imageVector = icon,
-        contentDescription = stringResource(icDescId),
-        tint = colorScheme.onBackground
-      )
-      Text(
-        text = stringResource(labelTxtId),
-        style = MaterialTheme.typography.labelSmall
-      )
+      icon()
+      label()
     }
   }
 }

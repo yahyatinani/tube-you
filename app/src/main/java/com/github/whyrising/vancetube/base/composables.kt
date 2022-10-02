@@ -66,9 +66,9 @@ import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
+import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavBarCompact
+import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavBarLarge
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavItem
-import com.github.whyrising.vancetube.ui.theme.composables.VanceCompactBottomNavBar
-import com.github.whyrising.vancetube.ui.theme.composables.VanceLargeBottomNavBar
 import com.github.whyrising.vancetube.ui.theme.isCompact
 import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
@@ -218,7 +218,7 @@ fun VanceApp(
                         text = text,
                         style = MaterialTheme.typography.labelSmall
                       )
-                    },
+                    }
                   ) {
                     dispatch(v(base.navigate_to, route))
                   }
@@ -226,11 +226,9 @@ fun VanceApp(
             }
 
             if (isCompact(windowSizeClass = windowSizeClass)) {
-              VanceCompactBottomNavBar(navItems = content)
+              VanceBottomNavBarCompact(content = content)
             } else {
-              VanceLargeBottomNavBar {
-                content(Modifier)
-              }
+              VanceBottomNavBarLarge { content(Modifier) }
             }
           }
         }

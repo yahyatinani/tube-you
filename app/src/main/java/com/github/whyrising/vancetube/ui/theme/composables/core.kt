@@ -18,14 +18,12 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
 import androidx.compose.ui.layout.Layout
@@ -34,7 +32,6 @@ import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
@@ -59,27 +56,30 @@ fun BackArrow() {
 val BOTTOM_BAR_HEIGHT = 48.dp
 
 @Composable
-fun VanceCompactBottomNavBar(navItems: @Composable (Modifier) -> Unit) {
+fun VanceBottomNavBarCompact(
+  modifier: Modifier = Modifier,
+  content: @Composable (Modifier) -> Unit
+) {
   Row(
     horizontalArrangement = Arrangement.SpaceAround,
-    modifier = Modifier
+    modifier = modifier
       .height(BOTTOM_BAR_HEIGHT)
       .fillMaxWidth()
       .selectableGroup()
   ) {
-    navItems(Modifier.weight(1f))
+    content(Modifier.weight(1f))
   }
 }
 
 val BOTTOM_BAR_TOP_BORDER_THICKNESS = 1.dp
 
 @Composable
-fun VanceLargeBottomNavBar(
+fun VanceBottomNavBarLarge(
   modifier: Modifier = Modifier,
-  navItems: @Composable () -> Unit
+  content: @Composable () -> Unit
 ) = Layout(
   modifier = modifier.selectableGroup(),
-  content = navItems,
+  content = content,
   measurePolicy = object : MeasurePolicy {
     override fun IntrinsicMeasureScope.maxIntrinsicWidth(
       measurables: List<IntrinsicMeasurable>,

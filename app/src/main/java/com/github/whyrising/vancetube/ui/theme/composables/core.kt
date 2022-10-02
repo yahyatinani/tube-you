@@ -1,6 +1,5 @@
 package com.github.whyrising.vancetube.ui.theme.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -21,9 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,11 +38,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastMap
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.base.base
 import com.github.whyrising.y.core.v
-import kotlin.math.roundToInt
 
 @Composable
 fun BackArrow() {
@@ -62,78 +58,62 @@ fun BackArrow() {
 
 val BOTTOM_BAR_HEIGHT = 48.dp
 
-val BOTTOM_BAR_TOP_PADDING = 2.dp
-
 @Composable
 fun VanceCompactBottomNavBar(navItems: @Composable (Modifier) -> Unit) {
   Row(
     horizontalArrangement = Arrangement.SpaceAround,
     modifier = Modifier
-      .padding(top = BOTTOM_BAR_TOP_PADDING)
       .height(BOTTOM_BAR_HEIGHT)
       .fillMaxWidth()
+      .selectableGroup()
   ) {
     navItems(Modifier.weight(1f))
   }
 }
 
+val BOTTOM_BAR_TOP_BORDER_THICKNESS = 1.dp
+
 @Composable
 fun VanceLargeBottomNavBar(
   modifier: Modifier = Modifier,
   navItems: @Composable () -> Unit
-) {
-  Layout(
-    modifier = modifier.padding(top = BOTTOM_BAR_TOP_PADDING),
-    content = navItems,
-    measurePolicy = object : MeasurePolicy {
-      override fun MeasureScope.measure(
-        measurables: List<Measurable>,
-        constraints: Constraints
-      ): MeasureResult {
-        // Don't constrain child views further, measure them with given
-        // constraints.
-        // List of measured children
+) = Layout(
+  modifier = modifier.selectableGroup(),
+  content = navItems,
+  measurePolicy = object : MeasurePolicy {
+    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
+      measurables: List<IntrinsicMeasurable>,
+      height: Int
+    ): Int = measurables.maxOf { it.maxIntrinsicWidth(height) }
 
-        val placeables = measurables.fastMap { measurable ->
-          measurable.measure(
-            constraints.copy(
-              minWidth = maxIntrinsicWidth(
-                measurables,
-                constraints.minHeight
-              )
-            )
+    override fun MeasureScope.measure(
+      measurables: List<Measurable>,
+      constraints: Constraints
+    ): MeasureResult {
+      val placeables = measurables.map { measurable ->
+        measurable.measure(
+          constraints.copy(
+            minWidth = maxIntrinsicWidth(measurables, constraints.minHeight)
           )
-        }
-        val navItem = placeables[0]
-        val height = BOTTOM_BAR_HEIGHT.toPx().roundToInt()
-        val offset = 10.dp.roundToPx()
-        val firstX = constraints.maxWidth / 2 -
-          ((navItem.width + offset) * placeables.size) / 2
-        var nextItemX = firstX
-        val itemY = (height - navItem.height) / 2
-
-        return layout(
-          width = constraints.maxWidth,
-          height = height
-        ) {
-          placeables.forEach { placeable ->
-            placeable.placeRelative(x = nextItemX, y = itemY)
-            nextItemX += placeable.width
-          }
-        }
+        )
       }
+      val maxWidth = constraints.maxWidth
+      val navItem = placeables[0]
+      val itemY = (BOTTOM_BAR_HEIGHT.roundToPx() - navItem.height) / 2 +
+        BOTTOM_BAR_TOP_BORDER_THICKNESS.roundToPx()
 
-      override fun IntrinsicMeasureScope.maxIntrinsicWidth(
-        measurables: List<IntrinsicMeasurable>,
-        height: Int
-      ): Int {
-        return measurables.maxOf { it.maxIntrinsicWidth(height) }
+      var nextItemX = maxWidth / 2 - (navItem.width * placeables.size) / 2
+
+      return layout(width = maxWidth, height = BOTTOM_BAR_HEIGHT.roundToPx()) {
+        placeables.forEach { placeable ->
+          placeable.placeRelative(x = nextItemX, y = itemY)
+          nextItemX += placeable.width
+        }
       }
     }
-  )
-}
+  }
+)
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun VanceBottomNavItem(
   modifier: Modifier,
@@ -145,7 +125,6 @@ fun VanceBottomNavItem(
 ) {
   val interactionSource = remember { MutableInteractionSource() }
   val isPressed by interactionSource.collectIsPressedAsState()
-  var isLongPressed by remember { mutableStateOf(false) }
   val colorScheme = MaterialTheme.colorScheme
   Box(
     contentAlignment = Alignment.Center,
@@ -176,12 +155,9 @@ fun VanceBottomNavItem(
         role = Role.Tab,
         onClick = { dispatch(v(base.navigate_to, itemRoute)) }
       )
-      .padding(horizontal = 8.dp)
+      .padding(horizontal = 12.dp)
   ) {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
       Icon(
         imageVector = icon,
         contentDescription = stringResource(icDescId),

@@ -61,6 +61,7 @@ import com.github.whyrising.vancetube.library.library
 import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
+import com.github.whyrising.vancetube.ui.theme.composables.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavItem
 import com.github.whyrising.vancetube.ui.theme.composables.VanceCompactBottomNavBar
@@ -121,6 +122,7 @@ fun VanceApp(
   regBaseSubs
 
   val isCompactDisplay = isCompact(windowSizeClass)
+
   VanceTheme(isCompact = isCompactDisplay) {
     val scrollBehavior = when {
       isCompactDisplay -> {
@@ -187,7 +189,7 @@ fun VanceApp(
           Box(contentAlignment = TopCenter) {
             Divider(
               modifier = Modifier.fillMaxWidth(),
-              thickness = 1.dp,
+              thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS,
               color = MaterialTheme.colorScheme.onSurface.copy(.12f)
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->

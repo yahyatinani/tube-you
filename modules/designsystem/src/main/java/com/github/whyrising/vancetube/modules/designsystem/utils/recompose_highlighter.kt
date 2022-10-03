@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package com.github.whyrising.vancetube.designsystem.utils
+package com.github.whyrising.vancetube.modules.designsystem.utils
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable

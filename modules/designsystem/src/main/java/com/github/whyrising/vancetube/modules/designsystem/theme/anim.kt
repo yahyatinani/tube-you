@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.designsystem.theme
+package com.github.whyrising.vancetube.modules.designsystem.theme
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn

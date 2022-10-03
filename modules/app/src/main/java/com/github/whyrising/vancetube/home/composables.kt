@@ -64,10 +64,10 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.base.base
-import com.github.whyrising.vancetube.designsystem.theme.Blue300
-import com.github.whyrising.vancetube.designsystem.theme.VanceTheme
-import com.github.whyrising.vancetube.designsystem.theme.enterAnimation
-import com.github.whyrising.vancetube.designsystem.theme.exitAnimation
+import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
+import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
+import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
+import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.github.whyrising.vancetube.home.home.view_model
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable

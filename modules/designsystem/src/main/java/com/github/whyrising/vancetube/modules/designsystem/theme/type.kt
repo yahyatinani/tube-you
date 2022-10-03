@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.designsystem.theme
+package com.github.whyrising.vancetube.modules.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

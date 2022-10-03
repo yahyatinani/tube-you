@@ -6,8 +6,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
-import com.github.whyrising.vancetube.designsystem.theme.enterAnimation
-import com.github.whyrising.vancetube.designsystem.theme.exitAnimation
+import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
+import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.google.accompanist.navigation.animation.composable
 
 @OptIn(ExperimentalAnimationApi::class)

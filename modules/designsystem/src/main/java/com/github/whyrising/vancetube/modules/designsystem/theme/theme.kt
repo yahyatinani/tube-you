@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.designsystem.theme
+package com.github.whyrising.vancetube.modules.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

@@ -1,38 +1,31 @@
-@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-
 package com.github.whyrising.vancetube.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColorScheme(
   primary = Purple200,
-  primaryContainer = Purple700,
+  primaryContainer = Color.Black,
   secondary = Teal200,
   surface = Grey900,
-  background = Grey900
+  background = Grey900,
+  onBackground = Color.White
 )
 
 private val LightColorPalette = lightColorScheme(
   primary = Purple500,
-  primaryContainer = Purple700,
-  secondary = Teal200
-
-  /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
+  primaryContainer = Color.White,
+  secondary = Teal200,
+  surface = Color.White,
+  background = Color.White,
+  onBackground = Color.Black
 )
 
 @Composable

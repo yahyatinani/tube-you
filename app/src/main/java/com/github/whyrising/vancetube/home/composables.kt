@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -337,9 +338,9 @@ fun Home(
           SwipeRefreshIndicator(
             state = state,
             refreshTriggerDistance = refreshTrigger,
-            scale = true,
-            backgroundColor = colorScheme.background,
-            contentColor = colorScheme.onSurface
+            backgroundColor = colorScheme.primaryContainer,
+            contentColor = colorScheme.onBackground,
+            elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
           )
         }
       ) {

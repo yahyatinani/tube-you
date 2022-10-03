@@ -73,7 +73,6 @@ import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.library.library
 import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
-import com.github.whyrising.vancetube.ui.theme.Grey900
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavBarCompact
@@ -188,7 +187,7 @@ fun VanceApp(
               modifier = Modifier
                 .background(shape = CircleShape, color = Color.Transparent)
                 .clickable(role = Role.Image) { /*TODO*/ }
-                .padding(8.dp),
+                .padding(8.dp)
             ) {
               Box(
                 modifier = Modifier

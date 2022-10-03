@@ -7,9 +7,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
+import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Top
 import androidx.compose.foundation.layout.consumedWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
@@ -72,9 +73,9 @@ import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.library.library
 import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
+import com.github.whyrising.vancetube.ui.theme.Grey900
 import com.github.whyrising.vancetube.ui.theme.VanceTheme
 import com.github.whyrising.vancetube.ui.theme.composables.BOTTOM_BAR_TOP_BORDER_THICKNESS
-import com.github.whyrising.vancetube.ui.theme.composables.BackArrow
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavBarCompact
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavBarLarge
 import com.github.whyrising.vancetube.ui.theme.composables.VanceBottomNavItem
@@ -164,10 +165,9 @@ fun VanceApp(
         },
       topBar = {
         TopAppBar(
-          modifier = Modifier
-            .windowInsetsPadding(
-              WindowInsets.safeDrawing.only(WindowInsetsSides.Top + Horizontal)
-            ),
+          modifier = Modifier.windowInsetsPadding(
+            insets = WindowInsets.safeDrawing.only(Top + Horizontal)
+          ),
           title = {
             IconButton(onClick = { /*TODO*/ }) {
               Icon(
@@ -179,9 +179,9 @@ fun VanceApp(
           },
           scrollBehavior = scrollBehavior,
           navigationIcon = {
-            if (subscribe<Boolean>(v(base.is_backstack_available)).w()) {
-              BackArrow()
-            }
+//            if (subscribe<Boolean>(v(base.is_backstack_available)).w()) {
+//              BackArrow()
+//            }
           },
           actions = {
             Box(
@@ -208,7 +208,10 @@ fun VanceApp(
                 )
               }
             }
-          }
+          },
+          colors = TopAppBarDefaults.smallTopAppBarColors(
+            scrolledContainerColor = MaterialTheme.colorScheme.background
+          )
         )
       },
       bottomBar = {

@@ -21,6 +21,7 @@ android {
 }
 
 dependencies {
+  implementation project(':modules:designsystem')
   implementation deps.androidx.core.ktx
   implementation deps.bundles.compose
   implementation deps.androidx.appcompat

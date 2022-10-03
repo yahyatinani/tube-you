@@ -7,7 +7,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.base.AppDb
-import com.github.whyrising.vancetube.ui.theme.Blue300
+import com.github.whyrising.vancetube.designsystem.theme.Blue300
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v

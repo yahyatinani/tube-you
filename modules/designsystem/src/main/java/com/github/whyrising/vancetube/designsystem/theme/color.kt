@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.ui.theme
+package com.github.whyrising.vancetube.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

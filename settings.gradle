@@ -20,5 +20,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "VanceTube"
 
-include ':app'
-include ':benchmark'
+include ':modules:app'
+include ':modules:benchmark'

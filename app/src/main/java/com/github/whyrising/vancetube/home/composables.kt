@@ -106,9 +106,7 @@ fun VideoItemTitle(modifier: Modifier = Modifier, viewModel: VideoViewModel) {
     maxLines = 2,
     softWrap = true,
     overflow = TextOverflow.Ellipsis,
-    style = MaterialTheme.typography.titleMedium.copy(
-      fontWeight = FontWeight.W700
-    )
+    style = MaterialTheme.typography.titleSmall
   )
 }
 

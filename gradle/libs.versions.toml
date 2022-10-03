@@ -18,8 +18,8 @@ constraintlayout = "1.0.1"
 lifecycle = "2.5.1"
 profileinstaller = "1.2.0"
 
-core-ktx = "1.8.0"
-appcompat = "1.5.0"
+core-ktx = "1.9.0"
+appcompat = "1.5.1"
 desugar = "1.1.6"
 coroutines = "1.6.4"
 

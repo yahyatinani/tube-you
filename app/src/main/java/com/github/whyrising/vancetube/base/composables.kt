@@ -2,6 +2,8 @@ package com.github.whyrising.vancetube.base
 
 import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
@@ -10,13 +12,15 @@ import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.consumedWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,17 +39,22 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.dispatch
@@ -155,9 +164,10 @@ fun VanceApp(
         },
       topBar = {
         TopAppBar(
-          modifier = Modifier.windowInsetsPadding(
-            WindowInsets.safeDrawing.only(WindowInsetsSides.Top + Horizontal)
-          ),
+          modifier = Modifier
+            .windowInsetsPadding(
+              WindowInsets.safeDrawing.only(WindowInsetsSides.Top + Horizontal)
+            ),
           title = {
             IconButton(onClick = { /*TODO*/ }) {
               Icon(
@@ -174,11 +184,29 @@ fun VanceApp(
             }
           },
           actions = {
-            IconButton(onClick = { /*TODO*/ }) {
-              Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "more"
-              )
+            Box(
+              modifier = Modifier
+                .background(shape = CircleShape, color = Color.Transparent)
+                .clickable(role = Role.Image) { /*TODO*/ }
+                .padding(8.dp),
+            ) {
+              Box(
+                modifier = Modifier
+                  .background(
+                    shape = CircleShape,
+                    color = Color(0xFFEB3F7A)
+                  )
+                  .width(24.dp)
+                  .height(24.dp),
+                contentAlignment = Center
+              ) {
+                Text(
+                  text = "U",
+                  color = Color.White,
+                  fontSize = 14.sp,
+                  textAlign = TextAlign.Center
+                )
+              }
             }
           }
         )

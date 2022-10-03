@@ -1,0 +1,11 @@
+plugins {
+  id 'vancetube.android-lib-conventions'
+}
+
+dependencies {
+  implementation deps.androidx.core.ktx
+  implementation deps.bundles.compose
+  testImplementation deps.kotlin.reflect
+  testImplementation deps.kotest.jvm.runner
+  testImplementation deps.kotest.assertions
+}

@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,11 +52,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.dispatch
@@ -151,6 +150,7 @@ fun VanceApp(
       }
       else -> pinnedScrollBehavior()
     }
+    val colorScheme = MaterialTheme.colorScheme
     Scaffold(
       modifier = Modifier
         .then(
@@ -164,9 +164,11 @@ fun VanceApp(
         },
       topBar = {
         TopAppBar(
-          modifier = Modifier.windowInsetsPadding(
-            insets = WindowInsets.safeDrawing.only(Top + Horizontal)
-          ),
+          modifier = Modifier
+            .windowInsetsPadding(
+              insets = WindowInsets.safeDrawing.only(Top + Horizontal)
+            )
+            .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
           title = {
             IconButton(onClick = { /*TODO*/ }) {
               Icon(
@@ -185,7 +187,10 @@ fun VanceApp(
           actions = {
             Box(
               modifier = Modifier
-                .background(shape = CircleShape, color = Color.Transparent)
+                .background(
+                  shape = CircleShape,
+                  color = Color.Transparent
+                )
                 .clickable(role = Role.Image) { /*TODO*/ }
                 .padding(8.dp)
             ) {
@@ -193,23 +198,27 @@ fun VanceApp(
                 modifier = Modifier
                   .background(
                     shape = CircleShape,
-                    color = Color(0xFFEB3F7A)
+//                    color = Color(0xFFEB3F7A),
+                    color = colorScheme.onBackground
                   )
                   .width(24.dp)
-                  .height(24.dp),
+                  .height(24.dp)
+                  .padding(3.dp),
                 contentAlignment = Center
               ) {
-                Text(
-                  text = "U",
-                  color = Color.White,
-                  fontSize = 14.sp,
-                  textAlign = TextAlign.Center
+                Icon(
+                  imageVector = Icons.Filled.Person,
+                  modifier = Modifier,
+//                    .clip(CircleShape)
+//                    .size(20.dp),
+                  contentDescription = "profile picture",
+                  tint = colorScheme.background
                 )
               }
             }
           },
           colors = TopAppBarDefaults.smallTopAppBarColors(
-            scrolledContainerColor = MaterialTheme.colorScheme.background
+            scrolledContainerColor = colorScheme.background
           )
         )
       },
@@ -220,7 +229,7 @@ fun VanceApp(
           )
         ) {
           Box(contentAlignment = TopCenter) {
-            val colorScheme = MaterialTheme.colorScheme
+            val colorScheme = colorScheme
             val lightGray = colorScheme.onSurface.copy(.12f)
             Divider(
               modifier = Modifier.fillMaxWidth(),

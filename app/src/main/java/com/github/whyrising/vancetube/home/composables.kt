@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -285,11 +286,12 @@ fun VideosGrid(
 ) {
   LazyVerticalGrid(
     horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalArrangement = Arrangement.spacedBy(50.dp),
+    verticalArrangement = Arrangement.spacedBy(40.dp),
     state = gridState,
     columns = GridCells.Fixed(
       count = if (orientation == ORIENTATION_PORTRAIT) 2 else 3
     ),
+    contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp),
     modifier = Modifier
       .testTag("popular_videos_list")
       .padding(start = 16.dp, end = 16.dp)
@@ -301,7 +303,7 @@ fun VideosGrid(
       VideoItemPortrait(
         modifier = Modifier
           .testTag("video")
-          .padding(bottom = 24.dp),
+          .padding(bottom = 0.dp),
         videoInfoTextStyle = TextStyle.Default.copy(
           fontSize = 14.sp
         ),

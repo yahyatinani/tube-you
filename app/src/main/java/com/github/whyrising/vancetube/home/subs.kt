@@ -108,7 +108,7 @@ val regHomeSubs by lazy {
                   id = videoMetadata.videoId,
                   authorId = videoMetadata.authorId,
                   title = videoMetadata.title,
-                  thumbnail = videoMetadata.videoThumbnails[1].url,
+                  thumbnail = videoMetadata.videoThumbnails[4].url,
                   length = formatSeconds(videoMetadata.lengthSeconds),
                   info = formatVideoInfo(
                     author = videoMetadata.author,

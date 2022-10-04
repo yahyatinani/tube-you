@@ -7,9 +7,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v
 import kotlinx.datetime.LocalTime
@@ -76,6 +78,37 @@ fun formatViews(viewsCount: Long): String = when {
   else -> "${viewsCount / 1_000_000_000}$BillionsSign"
 }
 
+data class VideoViewModel(
+  val id: String,
+  val authorId: String,
+  val title: String,
+  val thumbnail: String,
+  val length: String,
+  val info: AnnotatedString
+)
+
+fun toVms(
+  videoDataList: List<VideoData>,
+  viewsLabel: Any
+): List<VideoViewModel> = videoDataList.fold(v()) { acc, videoMetadata ->
+  acc.conj(
+    VideoViewModel(
+      id = videoMetadata.videoId,
+      authorId = videoMetadata.authorId,
+      title = videoMetadata.title,
+      thumbnail = videoMetadata.videoThumbnails[4].url,
+      length = formatSeconds(videoMetadata.lengthSeconds),
+      info = formatVideoInfo(
+        author = videoMetadata.author,
+        authorId = videoMetadata.authorId,
+        viewCount = formatViews(videoMetadata.viewCount),
+        viewsLabel = viewsLabel as String,
+        publishedText = videoMetadata.publishedText
+      )
+    )
+  )
+}
+
 @Stable
 data class PopularVideos(val value: List<VideoViewModel>)
 
@@ -83,8 +116,14 @@ data class HomeViewModel(
   val isLoading: Boolean = false,
   val isRefreshing: Boolean = false,
   val showList: Boolean = false,
-  val popularVideos: PopularVideos = PopularVideos(l())
-)
+  val popularVideos: PopularVideos = default
+) {
+  companion object {
+    val default = PopularVideos(l())
+  }
+}
+
+// -- Subs ---------------------------------------------------------------------
 
 /**
  * Call this lazy global property to initialise all [Home] page subscriptions.
@@ -102,25 +141,8 @@ val regHomeSubs by lazy {
       when (homeDb[home.state]) {
         States.Loading -> HomeViewModel(isLoading = true)
         States.Loaded -> {
-          val formatted = (homeDb[home.popular_vids] as List<VideoData>)
-            .fold(v<VideoViewModel>()) { acc, videoMetadata ->
-              acc.conj(
-                VideoViewModel(
-                  id = videoMetadata.videoId,
-                  authorId = videoMetadata.authorId,
-                  title = videoMetadata.title,
-                  thumbnail = videoMetadata.videoThumbnails[4].url,
-                  length = formatSeconds(videoMetadata.lengthSeconds),
-                  info = formatVideoInfo(
-                    author = videoMetadata.author,
-                    authorId = videoMetadata.authorId,
-                    viewCount = formatViews(videoMetadata.viewCount),
-                    viewsLabel = viewsLabel as String,
-                    publishedText = videoMetadata.publishedText
-                  )
-                )
-              )
-            }
+          val videoDataList: List<VideoData> = getFrom(homeDb, popular_vids)!!
+          val formatted = toVms(videoDataList, viewsLabel)
           HomeViewModel(
             showList = true,
             popularVideos = PopularVideos(formatted)
@@ -128,25 +150,8 @@ val regHomeSubs by lazy {
         }
         else -> {
           // TODO: use previous computation to save CPU cycles.
-          val formatted = (homeDb[home.popular_vids] as List<VideoData>)
-            .fold(v<VideoViewModel>()) { acc, videoMetadata ->
-              acc.conj(
-                VideoViewModel(
-                  id = videoMetadata.videoId,
-                  authorId = videoMetadata.authorId,
-                  title = videoMetadata.title,
-                  thumbnail = videoMetadata.videoThumbnails[4].url,
-                  length = formatSeconds(videoMetadata.lengthSeconds),
-                  info = formatVideoInfo(
-                    author = videoMetadata.author,
-                    authorId = videoMetadata.authorId,
-                    viewCount = formatViews(videoMetadata.viewCount),
-                    viewsLabel = viewsLabel as String,
-                    publishedText = videoMetadata.publishedText
-                  )
-                )
-              )
-            }
+          val videoDataList: List<VideoData> = getFrom(homeDb, popular_vids)!!
+          val formatted = toVms(videoDataList, viewsLabel)
           HomeViewModel(
             isRefreshing = true,
             showList = true,

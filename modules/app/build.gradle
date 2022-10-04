@@ -1,38 +1,19 @@
 plugins {
   id 'vancetube.android-app-conventions'
-  alias deps.plugins.serialization
-}
-
-android {
-  testOptions {
-    unitTests.all {
-      if (name == "testDebugUnitTest") {
-        kover {
-          disabled = false
-          binaryReportFile.set(file("$buildDir/custom/debug-report.bin"))
-          includes = [
-            'com.github.whyrising.vancetube.*'
-          ]
-          // excludes = ['com.example.subpackage.*']
-        }
-      }
-    }
-  }
 }
 
 dependencies {
   implementation project(':modules:designsystem')
-  implementation deps.androidx.core.ktx
-  implementation deps.bundles.compose
+  implementation project(':modules:panel:home')
+  implementation project(':modules:core:keywords')
+  //  implementation deps.androidx.core.ktx
   implementation deps.androidx.appcompat
-  implementation deps.androidx.navigation.compose
-  implementation deps.accompanist.nav.anim
+  //  implementation deps.bundles.compose
+  //  implementation deps.androidx.navigation.compose
+  //  implementation deps.accompanist.nav.anim
+  //  implementation deps.recompose
   implementation deps.androidx.core.splashscreen
   implementation deps.androidx.datastore.prefrences
-  implementation deps.recompose
-  implementation deps.coil
-  implementation deps.bundles.ktor
-  implementation deps.kotlinx.datetime
   androidTestImplementation deps.androidx.compose.ui.test
 
   testImplementation deps.bundles.kotest

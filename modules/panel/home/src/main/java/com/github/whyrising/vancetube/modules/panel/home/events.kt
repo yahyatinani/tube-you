@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.home
+package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.recompose.cofx.Coeffects
 import com.github.whyrising.recompose.events.Event
@@ -6,11 +6,14 @@ import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
-import com.github.whyrising.vancetube.base.AppDb
-import com.github.whyrising.vancetube.base.base
-import com.github.whyrising.vancetube.home.home.load_popular_videos
-import com.github.whyrising.vancetube.home.home.refresh
-import com.github.whyrising.vancetube.home.home.set_popular_vids
+import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.home.go_top_list
+import com.github.whyrising.vancetube.modules.core.keywords.home.load_popular_videos
+import com.github.whyrising.vancetube.modules.core.keywords.home.panel
+import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
+import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
+import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
+import com.github.whyrising.vancetube.modules.core.keywords.home.state
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.get
@@ -53,7 +56,7 @@ fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = homeCurrentState(db)
   val nextState = nextState(homeStateMachine, currentState, event)
   return if (nextState != null) {
-    assocIn(db, l(home.panel, home.state), nextState) as AppDb
+    assocIn(db, l(panel, state), nextState) as AppDb
   } else db
 }
 
@@ -64,7 +67,7 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
 fun getAppDb(cofx: Coeffects): AppDb = cofx[db] as AppDb
 
 fun homeCurrentState(appDb: AppDb) =
-  getIn<States>(appDb, l(home.panel, home.state))
+  getIn<States>(appDb, l(panel, state))
 
 val regHomeEvents by lazy {
   regEventFx(id = load_popular_videos) { cofx, event ->
@@ -80,7 +83,7 @@ val regHomeEvents by lazy {
   }
 
   regEventDb<AppDb>(id = set_popular_vids) { db, (id, vids) ->
-    val newDb = assocIn(db, l(home.panel, home.popular_vids), vids)
+    val newDb = assocIn(db, l(panel, popular_vids), vids)
     updateToNextState(newDb as AppDb, id)
   }
 
@@ -92,12 +95,12 @@ val regHomeEvents by lazy {
     )
   }
 
-  regEventFx(home.go_top_list) { cofx, _ ->
+  regEventFx(go_top_list) { cofx, _ ->
     val appDb = getAppDb(cofx)
     if (homeCurrentState(appDb) == States.Loaded) {
       return@regEventFx m()
     }
 
-    m(fx to v(v(home.go_top_list)))
+    m(fx to v(v(go_top_list)))
   }
 }

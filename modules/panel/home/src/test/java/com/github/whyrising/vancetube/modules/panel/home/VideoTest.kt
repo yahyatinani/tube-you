@@ -1,7 +1,5 @@
-package com.github.whyrising.vancetube
+package com.github.whyrising.vancetube.modules.panel.home
 
-import com.github.whyrising.vancetube.home.formatSeconds
-import com.github.whyrising.vancetube.home.formatViews
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 

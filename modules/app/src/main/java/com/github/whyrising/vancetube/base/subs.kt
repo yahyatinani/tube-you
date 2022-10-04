@@ -13,12 +13,17 @@ import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.regSubM
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.R
-import com.github.whyrising.vancetube.base.base.bottom_nav_items
-import com.github.whyrising.vancetube.base.base.current_bottom_nav_panel
-import com.github.whyrising.vancetube.base.base.is_backstack_available
-import com.github.whyrising.vancetube.base.base.start_route
-import com.github.whyrising.vancetube.home.home
 import com.github.whyrising.vancetube.library.library
+import com.github.whyrising.vancetube.modules.core.keywords.base.bottom_nav_items
+import com.github.whyrising.vancetube.modules.core.keywords.base.current_bottom_nav_panel
+import com.github.whyrising.vancetube.modules.core.keywords.base.icon
+import com.github.whyrising.vancetube.modules.core.keywords.base.icon_content_desc_text_id
+import com.github.whyrising.vancetube.modules.core.keywords.base.icon_variant
+import com.github.whyrising.vancetube.modules.core.keywords.base.is_backstack_available
+import com.github.whyrising.vancetube.modules.core.keywords.base.is_selected
+import com.github.whyrising.vancetube.modules.core.keywords.base.label_text_id
+import com.github.whyrising.vancetube.modules.core.keywords.base.start_route
+import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trends
 import com.github.whyrising.y.core.assoc
@@ -32,32 +37,32 @@ import com.github.whyrising.y.core.util.m as m2
 // TODO: decouple type from map?
 val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
   home.route.toString() to m2(
-    base.label_text_id, R.string.nav_item_label_home,
-    base.icon_content_desc_text_id, R.string.nav_item_desc_home,
-    base.is_selected, false,
-    base.icon_variant, Icons.Filled.Home,
-    base.icon, Icons.Outlined.Home
+    label_text_id, R.string.nav_item_label_home,
+    icon_content_desc_text_id, R.string.nav_item_desc_home,
+    is_selected, false,
+    icon_variant, Icons.Filled.Home,
+    icon, Icons.Outlined.Home
   ),
   trends.route.toString() to m2(
-    base.label_text_id, R.string.nav_item_label_trend,
-    base.icon_content_desc_text_id, R.string.nav_item_desc_trends,
-    base.is_selected, false,
-    base.icon_variant, Icons.Filled.TrendingUp,
-    base.icon, Icons.Outlined.TrendingUp
+    label_text_id, R.string.nav_item_label_trend,
+    icon_content_desc_text_id, R.string.nav_item_desc_trends,
+    is_selected, false,
+    icon_variant, Icons.Filled.TrendingUp,
+    icon, Icons.Outlined.TrendingUp
   ),
   subscriptions.route.toString() to m2(
-    base.label_text_id, R.string.nav_item_label_subs,
-    base.icon_content_desc_text_id, R.string.nav_item_desc_subs,
-    base.is_selected, false,
-    base.icon_variant, Icons.Filled.Subscriptions,
-    base.icon, Icons.Outlined.Subscriptions
+    label_text_id, R.string.nav_item_label_subs,
+    icon_content_desc_text_id, R.string.nav_item_desc_subs,
+    is_selected, false,
+    icon_variant, Icons.Filled.Subscriptions,
+    icon, Icons.Outlined.Subscriptions
   ),
   library.route.toString() to m2(
-    base.label_text_id, R.string.nav_item_label_library,
-    base.icon_content_desc_text_id, R.string.nav_item_desc_library,
-    base.is_selected, false,
-    base.icon_variant, Icons.Filled.Bookmarks,
-    base.icon, Icons.Outlined.Bookmarks
+    label_text_id, R.string.nav_item_label_library,
+    icon_content_desc_text_id, R.string.nav_item_desc_library,
+    is_selected, false,
+    icon_variant, Icons.Filled.Bookmarks,
+    icon, Icons.Outlined.Bookmarks
   )
 )
 
@@ -88,8 +93,8 @@ val regBaseSubs by lazy {
         navItems,
         (currentRoute ?: startRoute) to assoc(
           selectedItem,
-          base.icon to selectedItem[base.icon_variant],
-          base.is_selected to true
+          icon to selectedItem[icon_variant],
+          is_selected to true
         )
       )
     }

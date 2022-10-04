@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.home
+package com.github.whyrising.vancetube.modules.panel.home
 
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -62,13 +62,12 @@ import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.R
-import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
 import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
-import com.github.whyrising.vancetube.home.home.view_model
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -369,7 +368,7 @@ private fun NavGraphBuilder.setupHome(
 
     Home(
       viewModel = subscribe<HomeViewModel>(
-        qvec = v(view_model, stringResource(R.string.views_label))
+        qvec = v(home.view_model, stringResource(R.string.views_label))
       ).w(),
       content = content
     )

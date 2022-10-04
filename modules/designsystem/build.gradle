@@ -1,5 +1,13 @@
+import static com.github.whyrising.vancetube.Build.APP_ID
+
 plugins {
   id 'vancetube.android-lib-conventions'
+}
+
+group APP_ID
+
+android {
+  namespace APP_ID + ".modules.designsystem"
 }
 
 dependencies {

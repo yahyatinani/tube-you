@@ -6,10 +6,10 @@ plugins {
   id("com.android.library")
 }
 
-group = APP_ID
+//group = APP_ID
 
 android {
-  namespace = APP_ID
+//  namespace = APP_ID
   compileSdk = 33
 
   buildFeatures {

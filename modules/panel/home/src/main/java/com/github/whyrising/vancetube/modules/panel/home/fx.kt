@@ -1,9 +1,10 @@
-package com.github.whyrising.vancetube.home
+package com.github.whyrising.vancetube.modules.panel.home
 
 import android.util.Log
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.regFx
-import com.github.whyrising.vancetube.base.base
+import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.v
 import io.ktor.client.HttpClient

@@ -1,5 +1,4 @@
 <resources>
-  <string name="views_label">views</string>
   <string name="nav_item_label_home">Home</string>
   <string name="nav_item_label_trend">Trending</string>
   <string name="nav_item_label_subs">Subscriptions</string>

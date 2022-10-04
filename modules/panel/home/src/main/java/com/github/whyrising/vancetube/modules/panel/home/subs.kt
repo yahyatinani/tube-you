@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.home
+package com.github.whyrising.vancetube.modules.panel.home
 
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.AnnotatedString
@@ -6,8 +6,9 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
-import com.github.whyrising.vancetube.base.AppDb
+import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
+import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v
@@ -90,11 +91,11 @@ data class HomeViewModel(
  * @return [Unit]
  */
 val regHomeSubs by lazy {
-  regSub<AppDb, Any?>(queryId = home.state) { db, _ ->
+  regSub<IPersistentMap<Any, Any>, Any?>(queryId = home.state) { db, _ ->
     db[home.panel]
   }
 
-  regSub<AppDb, HomeViewModel>(
+  regSub<IPersistentMap<Any, Any>, HomeViewModel>(
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.state)) },
     computationFn = { homeDb, (_, viewsLabel) ->

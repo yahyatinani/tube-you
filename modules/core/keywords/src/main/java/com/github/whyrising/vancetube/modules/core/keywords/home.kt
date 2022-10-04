@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube.modules.core.keywords
 
+@Suppress("ClassName", "EnumEntryName")
 enum class home {
   route,
   panel,

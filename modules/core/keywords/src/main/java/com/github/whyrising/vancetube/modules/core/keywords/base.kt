@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.base
+package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class base {

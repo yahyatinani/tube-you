@@ -4,11 +4,11 @@ import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
-import com.github.whyrising.vancetube.base.base.current_bottom_nav_panel
-import com.github.whyrising.vancetube.base.base.navigate_to
-import com.github.whyrising.vancetube.base.base.set_backstack_status
-import com.github.whyrising.vancetube.home.getAppDb
-import com.github.whyrising.vancetube.home.home
+import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.base.current_bottom_nav_panel
+import com.github.whyrising.vancetube.modules.core.keywords.base.navigate_to
+import com.github.whyrising.vancetube.modules.core.keywords.base.set_backstack_status
+import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.m
@@ -27,7 +27,7 @@ val regBaseEventHandlers by lazy {
 
   regEventFx(base.on_bottom_nav_click) { cofx, (_, destination) ->
     // TODO: make sure this is a bottom navigation else skip
-    val appDb = getAppDb(cofx)
+    val appDb = com.github.whyrising.vancetube.modules.panel.home.getAppDb(cofx)
     val currentNavPanel = appDb[current_bottom_nav_panel]
 
     if (currentNavPanel == "$destination") {

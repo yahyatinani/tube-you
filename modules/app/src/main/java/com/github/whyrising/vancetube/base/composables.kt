@@ -63,19 +63,19 @@ import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.base.base.bottom_nav_items
-import com.github.whyrising.vancetube.base.base.expand_top_app_bar
-import com.github.whyrising.vancetube.base.base.icon_content_desc_text_id
-import com.github.whyrising.vancetube.base.base.label_text_id
-import com.github.whyrising.vancetube.home.home
-import com.github.whyrising.vancetube.home.homeLarge
 import com.github.whyrising.vancetube.library.library
+import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.base.expand_top_app_bar
+import com.github.whyrising.vancetube.modules.core.keywords.base.is_selected
+import com.github.whyrising.vancetube.modules.core.keywords.base.label_text_id
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavItem
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
+import com.github.whyrising.vancetube.modules.panel.home.home
+import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.subscriptions.subscriptions
 import com.github.whyrising.vancetube.trends.trending
 import com.github.whyrising.y.core.getFrom
@@ -237,14 +237,14 @@ fun VanceApp(
               color = lightGray
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
-              subscribe<Map<Any, Any>>(v(bottom_nav_items)).w()
+              subscribe<Map<Any, Any>>(v(base.bottom_nav_items)).w()
                 .forEach { (route, navItem) ->
                   val contentDescription = stringResource(
-                    getFrom(navItem, icon_content_desc_text_id)!!
+                    getFrom(navItem, base.icon_content_desc_text_id)!!
                   )
                   val text = stringResource(getFrom(navItem, label_text_id)!!)
                   VanceBottomNavItem(
-                    selected = getFrom(navItem, base.is_selected)!!,
+                    selected = getFrom(navItem, is_selected)!!,
                     modifier = modifier,
                     icon = {
                       Icon(

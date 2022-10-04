@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.home
+package com.github.whyrising.vancetube.modules.panel.home
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable

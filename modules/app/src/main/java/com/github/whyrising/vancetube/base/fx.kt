@@ -3,13 +3,14 @@ package com.github.whyrising.vancetube.base
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.regFx
+import com.github.whyrising.vancetube.modules.core.keywords.base.navigate_to
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 fun isBottomNav(destination: Any?): Boolean = navItems[destination] != null
 
 fun regBaseFx(navController: NavHostController) =
-  regFx(base.navigate_to) { destination ->
+  regFx(navigate_to) { destination ->
     destination as String
     val navigationAction: () -> Unit = if (isBottomNav(destination)) {
       {

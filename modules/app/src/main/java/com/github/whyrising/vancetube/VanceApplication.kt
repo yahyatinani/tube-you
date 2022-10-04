@@ -3,7 +3,7 @@ package com.github.whyrising.vancetube
 import android.app.Application
 import com.github.whyrising.vancetube.base.initAppDb
 
-class App : Application() {
+class VanceApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 

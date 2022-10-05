@@ -1,0 +1,28 @@
+import static com.github.whyrising.vancetube.Build.APP_ID
+
+plugins {
+  id 'vancetube.android-lib-conventions'
+  alias deps.plugins.serialization
+}
+
+group APP_ID
+
+android {
+  namespace APP_ID + ".modules.panel.trending"
+}
+
+dependencies {
+  implementation project(':modules:core:designsystem')
+  implementation project(':modules:core:keywords')
+  api deps.androidx.core.ktx
+  api deps.bundles.compose
+  api deps.androidx.navigation.compose
+  api deps.accompanist.nav.anim
+  api deps.recompose
+  implementation deps.kotlinx.datetime
+  implementation deps.coil
+  implementation deps.bundles.ktor
+
+  testImplementation deps.kotlin.reflect
+  testImplementation deps.bundles.kotest
+}

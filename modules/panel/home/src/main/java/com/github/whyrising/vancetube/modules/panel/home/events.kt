@@ -14,9 +14,11 @@ import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.state
+import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
@@ -30,7 +32,7 @@ enum class States {
 }
 
 val homeStateMachine = m<Any?, Any>(
-  null to m(load_popular_videos to States.Loading),
+  null to m(base.initialise to States.Loading),
   States.Loading to m(
     set_popular_vids to States.Loaded,
     ":error" to States.Failed
@@ -52,6 +54,8 @@ fun nextState(
   transition: Any
 ): Any? = getIn(fsm, l(currentState, transition))
 
+fun homeCurrentState(appDb: AppDb) = getIn<States>(appDb, l(panel, state))
+
 fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = homeCurrentState(db)
   val nextState = nextState(homeStateMachine, currentState, event)
@@ -60,14 +64,20 @@ fun updateToNextState(db: AppDb, event: Any): AppDb {
   } else db
 }
 
+fun updateToNextState2(homeDb: AppDb?, event: Any): AppDb? {
+  val currentState = getFrom<Any, States>(homeDb, state)
+  val nextHomeState = nextState(homeStateMachine, currentState, event)
+  return when {
+    nextHomeState != null -> assoc(homeDb, state to nextHomeState) as AppDb
+    else -> homeDb
+  }
+}
+
 fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
   updateToNextState(db, id)
 }
 
 fun getAppDb(cofx: Coeffects): AppDb = cofx[db] as AppDb
-
-fun homeCurrentState(appDb: AppDb) =
-  getIn<States>(appDb, l(panel, state))
 
 val regHomeEvents by lazy {
   regEventFx(id = load_popular_videos) { cofx, event ->

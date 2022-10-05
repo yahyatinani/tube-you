@@ -2,7 +2,7 @@ package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class base {
-  init_app_db,
+  initialise,
   start_route,
   navigate_to,
   go_back,

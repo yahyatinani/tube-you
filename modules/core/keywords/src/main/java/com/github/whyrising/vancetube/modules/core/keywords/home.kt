@@ -10,7 +10,8 @@ enum class home {
   refresh,
   load_popular_videos,
   go_top_list,
-  popular_vids;
+  popular_vids,
+  fsm;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

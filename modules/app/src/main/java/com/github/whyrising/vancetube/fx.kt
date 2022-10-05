@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.base
+package com.github.whyrising.vancetube
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController

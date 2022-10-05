@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.base
+package com.github.whyrising.vancetube
 
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db

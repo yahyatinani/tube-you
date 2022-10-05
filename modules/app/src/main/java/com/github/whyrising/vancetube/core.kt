@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,9 +9,24 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.github.whyrising.recompose.dispatch
-import com.github.whyrising.vancetube.base.VanceApp
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.y.core.v
+
+// -- Application Implementation -----------------------------------------------
+
+class VanceApplication : Application() {
+  override fun onCreate() {
+    super.onCreate()
+
+    initAppDb()
+
+    // FIXME: remove this for release
+//    System.setProperty("kotlinx.coroutines.debug", "on")
+//    Log.i("currentThreadName", Thread.currentThread().name)
+  }
+}
+
+// -- Entry Point --------------------------------------------------------------
 
 class MainActivity : ComponentActivity() {
   @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)

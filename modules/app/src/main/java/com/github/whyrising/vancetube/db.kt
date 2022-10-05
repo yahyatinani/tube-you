@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.base
+package com.github.whyrising.vancetube
 
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.dispatchSync

@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.base
+package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi

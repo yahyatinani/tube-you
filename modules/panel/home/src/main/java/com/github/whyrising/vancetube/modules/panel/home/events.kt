@@ -25,50 +25,6 @@ import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
-enum class States {
-  Loading,
-  Refreshing,
-  Loaded,
-  Failed,
-}
-
-val homeStateMachine = m<Any?, Any>(
-  null to m(base.initialise to States.Loading),
-  States.Loading to m(
-    set_popular_vids to States.Loaded,
-    ":error" to States.Failed
-  ),
-  States.Loaded to m(
-    refresh to States.Refreshing,
-    load_popular_videos to States.Loaded
-  ),
-  States.Refreshing to m(
-    set_popular_vids to States.Loaded,
-    ":error" to States.Failed
-  ),
-  States.Failed to m(load_popular_videos to States.Loading)
-)
-
-fun nextState(
-  fsm: Map<Any?, Any>,
-  currentState: States?,
-  transition: Any
-): Any? = getIn(fsm, l(currentState, transition))
-
-fun homeCurrentState(appDb: AppDb) = getIn<States>(appDb, l(panel, state))
-
-fun updateToNextState(db: AppDb, event: Any): AppDb {
-  val currentState = homeCurrentState(db)
-  val nextState = nextState(homeStateMachine, currentState, event)
-  return if (nextState != null) {
-    assocIn(db, l(panel, state), nextState) as AppDb
-  } else db
-}
-
-fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
-  updateToNextState(db, id)
-}
-
 fun getAppDb(cofx: Coeffects): AppDb = cofx[db] as AppDb
 
 val regHomeEvents by lazy {

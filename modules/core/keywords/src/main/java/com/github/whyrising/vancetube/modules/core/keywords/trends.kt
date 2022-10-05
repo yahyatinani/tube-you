@@ -1,7 +1,7 @@
-package com.github.whyrising.vancetube.library
+package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName")
-enum class library {
+enum class trends {
   route;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"

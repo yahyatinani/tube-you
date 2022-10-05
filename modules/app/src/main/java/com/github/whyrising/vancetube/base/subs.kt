@@ -13,7 +13,6 @@ import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.regSubM
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.R
-import com.github.whyrising.vancetube.library.library
 import com.github.whyrising.vancetube.modules.core.keywords.common.bottom_nav_items
 import com.github.whyrising.vancetube.modules.core.keywords.common.current_bottom_nav_panel
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
@@ -24,8 +23,9 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.start_route
 import com.github.whyrising.vancetube.modules.core.keywords.home
-import com.github.whyrising.vancetube.subscriptions.subscriptions
-import com.github.whyrising.vancetube.trends.trends
+import com.github.whyrising.vancetube.modules.core.keywords.library
+import com.github.whyrising.vancetube.modules.core.keywords.subscriptions
+import com.github.whyrising.vancetube.modules.core.keywords.trends
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap

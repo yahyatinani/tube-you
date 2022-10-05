@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube.subscriptions
+package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName")
 enum class subscriptions {

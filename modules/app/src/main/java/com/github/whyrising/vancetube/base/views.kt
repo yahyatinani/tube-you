@@ -63,7 +63,6 @@ import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.library.library
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
@@ -76,8 +75,9 @@ import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
-import com.github.whyrising.vancetube.subscriptions.subscriptions
-import com.github.whyrising.vancetube.trends.trending
+import com.github.whyrising.vancetube.modules.panel.library.library
+import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
+import com.github.whyrising.vancetube.modules.panel.trending.trending
 import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v

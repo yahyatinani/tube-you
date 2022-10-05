@@ -22,6 +22,6 @@ rootProject.name = "VanceTube"
 
 include ':modules:app'
 include ':modules:benchmark'
-include ':modules:designsystem'
 include ':modules:panel:home'
 include ':modules:core:keywords'
+include ':modules:core:designsystem'

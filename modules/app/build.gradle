@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-  implementation project(':modules:designsystem')
   implementation project(':modules:panel:home')
+  implementation project(':modules:core:designsystem')
   implementation project(':modules:core:keywords')
   //  implementation deps.androidx.core.ktx
   implementation deps.androidx.appcompat

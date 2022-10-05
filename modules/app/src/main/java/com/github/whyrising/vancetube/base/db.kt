@@ -7,6 +7,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.base
 import com.github.whyrising.vancetube.modules.core.keywords.base.initialise
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.panel.home.regCofx
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
@@ -27,19 +28,12 @@ val defaultDb = m<Any, Any>(
 fun initAppDb() {
   regCofx
 
-//  regEventFx(
-//    id = initialise_db,
-//    interceptors = v(injectCofx(home.fsm))
-//  ) { cofx, _ ->
-//    val homeDb = cofx[home.panel]!!
-//    m(recompose.db to defaultDb.assoc(home.panel, homeDb))
-//  }
-
   regEventDb<Any>(
     id = initialise,
-    interceptors = v(injectCofx(home.fsm, defaultDb))
+    interceptors = v(injectCofx(home.fsm))
   ) { db, _ ->
-    db
+    // FIXME: Use merge(m1,m2) after implementing it in y library.
+    defaultDb.assoc(home.panel, getFrom(db, home.panel)!!)
   }
 
   dispatchSync(v(initialise))

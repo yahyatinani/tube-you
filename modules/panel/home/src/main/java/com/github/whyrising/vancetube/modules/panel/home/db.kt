@@ -2,10 +2,12 @@ package com.github.whyrising.vancetube.modules.panel.home
 
 import androidx.compose.runtime.Immutable
 import com.github.whyrising.recompose.cofx.regCofx
+import com.github.whyrising.recompose.ids.coeffects
 import com.github.whyrising.recompose.ids.recompose
-import com.github.whyrising.vancetube.modules.core.keywords.base
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.y.core.collections.IPersistentMap
+import com.github.whyrising.y.core.collections.PersistentVector
+import com.github.whyrising.y.core.get
 import kotlinx.serialization.Serializable
 
 typealias AppDb = IPersistentMap<Any, Any>
@@ -37,20 +39,9 @@ data class VideoData(
 // -- cofx Registrations -------------------------------------------------------
 
 val regCofx by lazy {
-//  regCofx(home.fsm) { cofx ->
-//    val nextHomeDb = updateToNextState2(
-//      homeDb = getFrom(getAppDb(cofx), home.panel),
-//      event = home.load_popular_videos
-//    )
-//    if (nextHomeDb != null) cofx.assoc(home.panel, nextHomeDb)
-//    else cofx
-//  }
-
-  regCofx(home.fsm) { cofx, defaultDb ->
-    val nextDb = updateToNextState(
-      defaultDb as AppDb,
-      event = base.initialise
-    )
+  regCofx(home.fsm) { cofx ->
+    val (eventId) = cofx[coeffects.originalEvent] as PersistentVector<Any>
+    val nextDb = updateToNextState(getAppDb(cofx), eventId)
     cofx.assoc(recompose.db, nextDb)
   }
 }

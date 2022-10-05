@@ -1,7 +1,7 @@
 package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
-enum class base {
+enum class common {
   initialise,
   start_route,
   navigate_to,

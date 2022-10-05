@@ -3,7 +3,7 @@ package com.github.whyrising.vancetube.base
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.regFx
-import com.github.whyrising.vancetube.modules.core.keywords.base.navigate_to
+import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 

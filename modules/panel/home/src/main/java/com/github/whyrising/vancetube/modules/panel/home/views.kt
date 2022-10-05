@@ -62,7 +62,7 @@ import coil.compose.AsyncImage
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
-import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
@@ -380,7 +380,7 @@ fun NavGraphBuilder.home(animOffSetX: Int, orientation: Int) {
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     LaunchedEffect(Unit) {
-      dispatch(v(base.expand_top_app_bar))
+      dispatch(v(common.expand_top_app_bar))
       regScrollToTopListFx(scope) {
         listState.animateScrollToItem(0)
       }

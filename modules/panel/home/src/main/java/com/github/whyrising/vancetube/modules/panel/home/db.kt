@@ -5,7 +5,7 @@ import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.events.Event
 import com.github.whyrising.recompose.ids.coeffects
 import com.github.whyrising.recompose.ids.recompose
-import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
@@ -46,7 +46,7 @@ data class VideoData(
 enum class States { Loading, Refreshing, Loaded, Failed }
 
 val homeStateMachine = m<Any?, Any>(
-  null to m(base.initialise to States.Loading),
+  null to m(common.initialise to States.Loading),
   States.Loading to m(
     home.set_popular_vids to States.Loaded,
     ":error" to States.Failed

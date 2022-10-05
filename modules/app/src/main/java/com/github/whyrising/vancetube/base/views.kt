@@ -64,10 +64,10 @@ import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.library.library
-import com.github.whyrising.vancetube.modules.core.keywords.base
-import com.github.whyrising.vancetube.modules.core.keywords.base.expand_top_app_bar
-import com.github.whyrising.vancetube.modules.core.keywords.base.is_selected
-import com.github.whyrising.vancetube.modules.core.keywords.base.label_text_id
+import com.github.whyrising.vancetube.modules.core.keywords.common
+import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
+import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
+import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavBarLarge
@@ -93,7 +93,7 @@ private fun DestinationTrackingSideEffect(navController: NavHostController) {
       .OnDestinationChangedListener { _, navDestination, _ ->
         navDestination.route.let {
           if (it != null) {
-            dispatch(v(base.on_bottom_nav_click, it))
+            dispatch(v(common.on_bottom_nav_click, it))
           }
         }
         // FIXME: use this when a new activity on top
@@ -237,10 +237,10 @@ fun VanceApp(
               color = lightGray
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
-              subscribe<Map<Any, Any>>(v(base.bottom_nav_items)).w()
+              subscribe<Map<Any, Any>>(v(common.bottom_nav_items)).w()
                 .forEach { (route, navItem) ->
                   val contentDescription = stringResource(
-                    getFrom(navItem, base.icon_content_desc_text_id)!!
+                    getFrom(navItem, common.icon_content_desc_text_id)!!
                   )
                   val text = stringResource(getFrom(navItem, label_text_id)!!)
                   VanceBottomNavItem(
@@ -248,7 +248,7 @@ fun VanceApp(
                     modifier = modifier,
                     icon = {
                       Icon(
-                        imageVector = getFrom(navItem, base.icon)!!,
+                        imageVector = getFrom(navItem, common.icon)!!,
                         contentDescription = contentDescription,
                         tint = colorScheme.onBackground
                       )
@@ -261,7 +261,7 @@ fun VanceApp(
                     },
                     onPressColor = lightGray
                   ) {
-                    dispatch(v(base.navigate_to, route))
+                    dispatch(v(common.navigate_to, route))
                   }
                 }
             }
@@ -278,7 +278,7 @@ fun VanceApp(
       val orientation = LocalConfiguration.current.orientation
       AnimatedNavHost(
         navController = navController,
-        startDestination = subscribe<String>(v(base.start_route)).w(),
+        startDestination = subscribe<String>(v(common.start_route)).w(),
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)

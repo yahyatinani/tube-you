@@ -9,7 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.vancetube.base.VanceApp
-import com.github.whyrising.vancetube.modules.core.keywords.base
+import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.y.core.v
 
 class MainActivity : ComponentActivity() {
@@ -30,6 +30,6 @@ class MainActivity : ComponentActivity() {
   override fun onResume() {
     super.onResume()
 
-    dispatch(v(base.expand_top_app_bar))
+    dispatch(v(common.expand_top_app_bar))
   }
 }

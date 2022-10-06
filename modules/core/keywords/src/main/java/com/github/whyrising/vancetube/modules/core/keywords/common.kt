@@ -10,8 +10,8 @@ enum class common {
   is_backstack_available,
   api,
   bottom_nav_items,
-  current_bottom_nav_panel,
-  on_bottom_nav_click,
+  active_navigation_item,
+  on_nav_item_click,
   expand_top_app_bar,
 
   label_text_id,

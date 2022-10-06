@@ -92,11 +92,9 @@ const val ANIM_OFFSET_X = 300
 private fun DestinationTrackingSideEffect(navController: NavHostController) {
   DisposableEffect(navController) {
     val listener = NavController
-      .OnDestinationChangedListener { _, navDestination, _ ->
-        navDestination.route.let {
-          if (it != null) {
-            dispatch(v(common.on_bottom_nav_click, it))
-          }
+      .OnDestinationChangedListener { _, destination, _ ->
+        destination.route?.let {
+          dispatch(v(common.on_nav_item_click, it))
         }
         // FIXME: use this when a new activity on top
 //        val previousBackStackEntry = navCtrl.previousBackStackEntry

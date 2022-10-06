@@ -12,8 +12,8 @@ import androidx.compose.material.icons.outlined.TrendingUp
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.regSubM
 import com.github.whyrising.recompose.subscribe
+import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.bottom_nav_items
-import com.github.whyrising.vancetube.modules.core.keywords.common.current_bottom_nav_panel
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_content_desc_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_variant
@@ -70,8 +70,8 @@ val regCommonSubs = run {
     db[is_backstack_available] as Boolean
   }
 
-  regSub<AppDb, Any?>(current_bottom_nav_panel) { db, _ ->
-    db[current_bottom_nav_panel]
+  regSub<AppDb, Any?>(active_navigation_item) { db, _ ->
+    db[active_navigation_item]
   }
 
   regSub<AppDb, Any?>(start_route) { db, _ ->
@@ -83,14 +83,14 @@ val regCommonSubs = run {
     signalsFn = {
       v(
         subscribe(v(start_route)),
-        subscribe(v(current_bottom_nav_panel))
+        subscribe(v(active_navigation_item))
       )
     },
-    computationFn = { (startRoute, currentRoute), _ ->
-      val selectedItem = navItems[currentRoute ?: startRoute]!!
+    computationFn = { (startRoute, activeNavigationItem), _ ->
+      val selectedItem = navItems[activeNavigationItem ?: startRoute]!!
       assoc(
         navItems,
-        (currentRoute ?: startRoute) to assoc(
+        (activeNavigationItem ?: startRoute) to assoc(
           selectedItem,
           icon to selectedItem[icon_variant],
           is_selected to true

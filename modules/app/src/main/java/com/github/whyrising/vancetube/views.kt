@@ -69,9 +69,9 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_ap
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
-import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavBarCompact
-import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavBarLarge
-import com.github.whyrising.vancetube.modules.designsystem.component.VanceBottomNavItem
+import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
+import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
+import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.home
@@ -243,7 +243,7 @@ fun VanceApp(
                     getFrom(navItem, common.icon_content_desc_text_id)!!
                   )
                   val text = stringResource(getFrom(navItem, label_text_id)!!)
-                  VanceBottomNavItem(
+                  VanceNavigationItem(
                     selected = getFrom(navItem, is_selected)!!,
                     modifier = modifier,
                     icon = {
@@ -267,9 +267,9 @@ fun VanceApp(
             }
 
             if (isCompact(windowSizeClass = windowSizeClass)) {
-              VanceBottomNavBarCompact(content = content)
+              VanceNavigationBarCompact(content = content)
             } else {
-              VanceBottomNavBarLarge { content(Modifier) }
+              VanceNavigationBarLarge { content(Modifier) }
             }
           }
         }

@@ -229,7 +229,6 @@ fun VanceApp(
           )
         ) {
           Box(contentAlignment = TopCenter) {
-            val colorScheme = colorScheme
             val lightGray = colorScheme.onSurface.copy(.12f)
             Divider(
               modifier = Modifier.fillMaxWidth(),

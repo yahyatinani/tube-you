@@ -1,6 +1,10 @@
 package com.github.whyrising.vancetube
 
+import android.content.Context
+import android.net.ConnectivityManager
+import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.vancetube.modules.core.keywords.common
+import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.y.core.m
 
@@ -17,3 +21,17 @@ val defaultDb = m<Any, Any>(
   common.api to "https://$DEFAULT_BASE_ADDRESS/api/v1",
   common.start_route to home.route.toString()
 )
+
+// -- Cofx ---------------------------------------------------------------------
+fun isDeviceOnline(context: Context): Boolean {
+  val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE)
+    as ConnectivityManager
+  return cm.activeNetwork != null &&
+    cm.getNetworkCapabilities(cm.activeNetwork) != null
+}
+
+fun regCommonCofx(context: Context) {
+  regCofx(is_online) { coeffects ->
+    coeffects.assoc(is_online, isDeviceOnline(context))
+  }
+}

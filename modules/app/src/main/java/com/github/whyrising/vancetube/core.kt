@@ -20,6 +20,7 @@ class VanceApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
+    regCommonCofx(this)
     regHomeCofx
     regCommonEvents
     regCommonSubs

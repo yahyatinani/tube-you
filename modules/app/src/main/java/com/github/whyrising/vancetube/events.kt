@@ -8,9 +8,11 @@ import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
+import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.vancetube.modules.core.keywords.library
 import com.github.whyrising.vancetube.modules.panel.home.getAppDb
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
@@ -23,10 +25,23 @@ typealias AppDb = IPersistentMap<Any, Any>
 val regCommonEvents = run {
   regEventDb<Any>(
     id = common.initialise,
-    interceptors = v(injectCofx(home.fsm))
+    interceptors = v(injectCofx(home.fsm), injectCofx(":is_online"))
   ) { db, _ ->
     // FIXME: Use merge(m1,m2) after implementing it in y library.
     defaultDb.assoc(home.panel, getFrom(db, home.panel)!!)
+  }
+
+  regEventFx(
+    id = common.initialise,
+    interceptors = v(injectCofx(home.fsm), injectCofx(is_online))
+  ) { cofx, _ ->
+    val isOnline = cofx[is_online]!!
+    val new = defaultDb.let {
+      if (isOnline == false) {
+        it.assoc(common.start_route, library.route.toString())
+      } else it
+    }.assoc(home.panel, getFrom(cofx[db], home.panel)!!)
+    m<Any, Any>(db to new)
   }
 
   regEventDb<AppDb>(set_backstack_status) { db, (_, flag) ->
@@ -35,9 +50,9 @@ val regCommonEvents = run {
 
   // TODO: rethink this event handler
   regEventDb<AppDb>(active_navigation_item) { db, (_, destination) ->
-    if (navItems[destination] != null)
+    if (navItems[destination] != null) {
       db.assoc(active_navigation_item, destination)
-    else db
+    } else db
   }
 
   regEventFx(navigate_to) { _, (_, destination) ->
@@ -55,7 +70,8 @@ val regCommonEvents = run {
         db to appDb.assoc(active_navigation_item, destination),
         fx to v(
           v(
-            navigate_to, m(
+            navigate_to,
+            m(
               common.destination to destination,
               common.navOptions to navOptions {
                 // Pop up to the start destination of the graph to avoid

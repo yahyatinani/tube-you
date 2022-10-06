@@ -9,7 +9,7 @@ enum class common {
   set_backstack_status,
   is_backstack_available,
   api,
-  bottom_nav_items,
+  navigation_items,
   active_navigation_item,
   on_nav_item_click,
   expand_top_app_bar,
@@ -18,7 +18,9 @@ enum class common {
   icon_content_desc_text_id,
   is_selected,
   icon_variant,
-  icon;
+  icon,
+  destination,
+  navOptions;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

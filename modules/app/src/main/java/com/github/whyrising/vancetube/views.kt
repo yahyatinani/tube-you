@@ -55,7 +55,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
@@ -91,19 +91,14 @@ const val ANIM_OFFSET_X = 300
 @Composable
 private fun DestinationTrackingSideEffect(navController: NavHostController) {
   DisposableEffect(navController) {
-    val listener = NavController
-      .OnDestinationChangedListener { _, destination, _ ->
+    val listener = OnDestinationChangedListener { _, destination, _ ->
+      if (navController.previousBackStackEntry == null) {
         destination.route?.let {
-          dispatch(v(common.on_nav_item_click, it))
+          dispatch(v(common.active_navigation_item, it))
         }
-        // FIXME: use this when a new activity on top
-//        val previousBackStackEntry = navCtrl.previousBackStackEntry
-//        if (previousBackStackEntry != null) {
-//          val route = previousBackStackEntry.destination.route
-//          if (route != null) dispatch(v(base.current_bottom_nav_panel, route))
-//        }
-//        dispatch(v(base.set_backstack_status, flag))
       }
+      // dispatch(v(base.set_backstack_status, flag))
+    }
 
     navController.addOnDestinationChangedListener(listener)
 
@@ -125,7 +120,6 @@ fun VanceApp(
   navController: NavHostController = rememberAnimatedNavController()
 ) {
   DestinationTrackingSideEffect(navController)
-
   LaunchedEffect(Unit) {
     regCommonFx(navController)
   }
@@ -234,7 +228,7 @@ fun VanceApp(
               color = lightGray
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
-              subscribe<Map<Any, Any>>(v(common.bottom_nav_items)).w()
+              subscribe<Map<Any, Any>>(v(common.navigation_items)).w()
                 .forEach { (route, navItem) ->
                   val contentDescription = stringResource(
                     getFrom(navItem, common.icon_content_desc_text_id)!!
@@ -258,7 +252,7 @@ fun VanceApp(
                     },
                     onPressColor = lightGray
                   ) {
-                    dispatch(v(common.navigate_to, route))
+                    dispatch(v(common.on_nav_item_click, route))
                   }
                 }
             }

@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube
 
+import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
@@ -28,24 +29,51 @@ val regCommonEvents = run {
     defaultDb.assoc(home.panel, getFrom(db, home.panel)!!)
   }
 
-  regEventFx(navigate_to) { _, (_, destination) ->
-    m<Any, Any>(fx to v(v(navigate_to, destination)))
-  }
-
   regEventDb<AppDb>(set_backstack_status) { db, (_, flag) ->
     db.assoc(common.is_backstack_available, flag)
   }
 
-  regEventFx(common.on_nav_item_click) { cofx, (_, destination) ->
-    // TODO: make sure this is a bottom navigation else skip
-    val appDb = getAppDb(cofx)
-    val currentNavPanel = appDb[active_navigation_item]
+  // TODO: rethink this event handler
+  regEventDb<AppDb>(active_navigation_item) { db, (_, destination) ->
+    if (navItems[destination] != null)
+      db.assoc(active_navigation_item, destination)
+    else db
+  }
 
-    if (currentNavPanel == "$destination") {
+  regEventFx(navigate_to) { _, (_, destination) ->
+    m<Any, Any>(fx to v(v(navigate_to, m(common.destination to destination))))
+  }
+
+  regEventFx(common.on_nav_item_click) { cofx, (_, destination) ->
+    val appDb = getAppDb(cofx)
+    if (appDb[active_navigation_item] == destination) {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx
       m(fx to v(v(home.go_top_list)))
     } else {
-      m<Any, Any>(db to appDb.assoc(active_navigation_item, "$destination"))
+      // TODO: Set active_panel to active_navigation_item
+      m<Any, Any>(
+        db to appDb.assoc(active_navigation_item, destination),
+        fx to v(
+          v(
+            navigate_to, m(
+              common.destination to destination,
+              common.navOptions to navOptions {
+                // Pop up to the start destination of the graph to avoid
+                // building up a large stack of destinations on the back stack
+                // as users select items.
+                popUpTo("${appDb[common.start_route]}") {
+                  saveState = true
+                }
+                // Avoid multiple copies of the same destination when
+                // re-selecting the same item
+                launchSingleTop = true
+                // Restore state when re-selecting a previously selected item
+                // restoreState = true // Fixme: this flag breaks go_top_list
+              }
+            )
+          )
+        )
+      )
     }
   }
 }

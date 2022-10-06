@@ -13,13 +13,13 @@ import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.regSubM
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
-import com.github.whyrising.vancetube.modules.core.keywords.common.bottom_nav_items
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_content_desc_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_variant
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_available
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
+import com.github.whyrising.vancetube.modules.core.keywords.common.navigation_items
 import com.github.whyrising.vancetube.modules.core.keywords.common.start_route
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
@@ -79,7 +79,7 @@ val regCommonSubs = run {
   }
 
   regSubM(
-    queryId = bottom_nav_items,
+    queryId = navigation_items,
     signalsFn = {
       v(
         subscribe(v(start_route)),

@@ -65,7 +65,7 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
   )
 )
 
-val regBaseSubs by lazy {
+val regCommonSubs = run {
   regSub<AppDb, Boolean>(is_backstack_available) { db, _ ->
     db[is_backstack_available] as Boolean
   }

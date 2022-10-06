@@ -43,6 +43,7 @@ data class VideoData(
 )
 
 // -- Home FSM -----------------------------------------------------------------
+
 enum class States { Loading, Refreshing, Loaded, Failed }
 
 val homeStateMachine = m<Any?, Any>(
@@ -84,10 +85,9 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
 }
 
 // -- cofx Registrations -------------------------------------------------------
-val regCofx by lazy {
-  regCofx(home.fsm) { cofx ->
-    val (eventId) = cofx[coeffects.originalEvent] as PersistentVector<Any>
-    val nextDb = updateToNextState(getAppDb(cofx), eventId)
-    cofx.assoc(recompose.db, nextDb)
-  }
+
+val regHomeCofx = regCofx(home.fsm) { cofx ->
+  val (eventId) = cofx[coeffects.originalEvent] as PersistentVector<Any>
+  val nextDb = updateToNextState(getAppDb(cofx), eventId)
+  cofx.assoc(recompose.db, nextDb)
 }

@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.dispatch
+import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
@@ -75,6 +76,7 @@ import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
+import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.vancetube.modules.panel.trending.trending
@@ -127,10 +129,8 @@ fun VanceApp(
   DestinationTrackingSideEffect(navController)
 
   LaunchedEffect(Unit) {
-    regBaseFx(navController)
-    regBaseEventHandlers
+    regCommonFx(navController)
   }
-  regBaseSubs
 
   val isCompactDisplay = isCompact(windowSizeClass)
 
@@ -305,7 +305,11 @@ fun VanceApp(
 @Preview(showBackground = true)
 @Composable
 fun BasePanelPreview() {
-  initAppDb()
+  regHomeCofx
+  regCommonEvents
+  regCommonSubs
+  dispatchSync(v(common.initialise))
+
   VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))
 }
 

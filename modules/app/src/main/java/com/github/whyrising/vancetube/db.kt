@@ -1,15 +1,8 @@
 package com.github.whyrising.vancetube
 
-import com.github.whyrising.recompose.cofx.injectCofx
-import com.github.whyrising.recompose.dispatchSync
-import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.vancetube.modules.core.keywords.common
-import com.github.whyrising.vancetube.modules.core.keywords.common.initialise
 import com.github.whyrising.vancetube.modules.core.keywords.home
-import com.github.whyrising.vancetube.modules.panel.home.regCofx
-import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 
 // TODO: Move this!
 // const val DEFAULT_BASE_ADDRESS = "invidious.namazso.eu" // empty
@@ -24,17 +17,3 @@ val defaultDb = m<Any, Any>(
   common.api to "https://$DEFAULT_BASE_ADDRESS/api/v1",
   common.start_route to home.route.toString()
 )
-
-fun initAppDb() {
-  regCofx
-
-  regEventDb<Any>(
-    id = initialise,
-    interceptors = v(injectCofx(home.fsm))
-  ) { db, _ ->
-    // FIXME: Use merge(m1,m2) after implementing it in y library.
-    defaultDb.assoc(home.panel, getFrom(db, home.panel)!!)
-  }
-
-  dispatchSync(v(initialise))
-}

@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 
 fun isBottomNav(destination: Any?): Boolean = navItems[destination] != null
 
-fun regBaseFx(navController: NavHostController) =
+fun regCommonFx(navController: NavHostController) =
   regFx(navigate_to) { destination ->
     destination as String
     val navigationAction: () -> Unit = if (isBottomNav(destination)) {

@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube
 
+import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
@@ -11,12 +12,21 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
 typealias AppDb = IPersistentMap<Any, Any>
 
-val regBaseEventHandlers by lazy {
+val regCommonEvents = run {
+  regEventDb<Any>(
+    id = common.initialise,
+    interceptors = v(injectCofx(home.fsm))
+  ) { db, _ ->
+    // FIXME: Use merge(m1,m2) after implementing it in y library.
+    defaultDb.assoc(home.panel, getFrom(db, home.panel)!!)
+  }
+
   regEventFx(navigate_to) { _, (_, destination) ->
     m<Any, Any>(fx to v(v(navigate_to, destination)))
   }

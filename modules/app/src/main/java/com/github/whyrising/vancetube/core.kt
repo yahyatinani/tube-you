@@ -9,7 +9,9 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.github.whyrising.recompose.dispatch
+import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.vancetube.modules.core.keywords.common
+import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.y.core.v
 
 // -- Application Implementation -----------------------------------------------
@@ -18,7 +20,11 @@ class VanceApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    initAppDb()
+    regHomeCofx
+    regCommonEvents
+    regCommonSubs
+
+    dispatchSync(v(common.initialise))
 
     // FIXME: remove this for release
 //    System.setProperty("kotlinx.coroutines.debug", "on")

@@ -5,7 +5,6 @@ import android.net.ConnectivityManager
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
-import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.y.core.m
 
 // TODO: Move this!
@@ -18,8 +17,7 @@ const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
 
 val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
-  common.api to "https://$DEFAULT_BASE_ADDRESS/api/v1",
-  common.start_route to home.route.toString()
+  common.api to "https://$DEFAULT_BASE_ADDRESS/api/v1"
 )
 
 // -- Cofx ---------------------------------------------------------------------

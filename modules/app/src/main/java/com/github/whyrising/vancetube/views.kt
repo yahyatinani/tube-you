@@ -67,6 +67,7 @@ import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
 import com.github.whyrising.vancetube.modules.core.keywords.common
+import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
@@ -118,7 +119,7 @@ fun destinationChangeListener() =
         distinctBackStackEntries()
       }
       destination.route?.let {
-        dispatch(v(common.active_navigation_item, it))
+        dispatch(v(active_navigation_item, it))
       }
     }
     // dispatch(v(base.set_backstack_status, flag))
@@ -134,6 +135,12 @@ private fun DestinationTrackingSideEffect(navController: NavHostController) {
       )
     }
   }
+}
+
+fun startDestination(): String {
+  // Careful!! We only need the first value so we don't need to watch this
+  // subscription.
+  return subscribe<String>(v(active_navigation_item)).deref()
 }
 
 @OptIn(
@@ -298,7 +305,7 @@ fun VanceApp(
       val orientation = LocalConfiguration.current.orientation
       AnimatedNavHost(
         navController = navController,
-        startDestination = subscribe<String>(v(common.start_route)).w(),
+        startDestination = startDestination(),
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)

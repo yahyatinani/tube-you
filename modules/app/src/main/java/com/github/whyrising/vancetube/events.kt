@@ -36,13 +36,13 @@ val regCommonEvents = run {
     id = common.initialise,
     interceptors = v(injectCofx(home.fsm), injectCofx(is_online))
   ) { cofx, _ ->
-    val isOnline = cofx[is_online]!!
-    val new = defaultDb.let {
-      if (isOnline == false) {
-        it.assoc(common.start_route, library.route.toString())
-      } else it
-    }.assoc(home.panel, getFrom(cofx[db], home.panel)!!)
-    m<Any, Any>(db to new)
+    val isOnline = cofx[is_online]!! as Boolean
+    val startingRoute = if (isOnline) home.route else library.route
+    m<Any, Any>(
+      db to defaultDb
+        .assoc(active_navigation_item, startingRoute.toString())
+        .assoc(home.panel, getFrom(cofx[db], home.panel)!!)
+    )
   }
 
   regEventDb<AppDb>(set_backstack_status) { db, (_, flag) ->

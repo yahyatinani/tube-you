@@ -10,7 +10,6 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.material.icons.outlined.TrendingUp
 import com.github.whyrising.recompose.regSub
-import com.github.whyrising.recompose.regSubM
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
@@ -20,7 +19,6 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigation_items
-import com.github.whyrising.vancetube.modules.core.keywords.common.start_route
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
 import com.github.whyrising.vancetube.modules.core.keywords.subscriptions
@@ -74,23 +72,14 @@ val regCommonSubs = run {
     db[active_navigation_item]
   }
 
-  regSub<AppDb, Any?>(start_route) { db, _ ->
-    db[start_route]
-  }
-
-  regSubM(
+  regSub<String, Any>(
     queryId = navigation_items,
-    signalsFn = {
-      v(
-        subscribe(v(start_route)),
-        subscribe(v(active_navigation_item))
-      )
-    },
-    computationFn = { (startRoute, activeNavigationItem), _ ->
-      val selectedItem = navItems[activeNavigationItem ?: startRoute]!!
+    signalsFn = { subscribe(v(active_navigation_item)) },
+    computationFn = { activeNavigationItem, _ ->
+      val selectedItem = navItems[activeNavigationItem]!!
       assoc(
         navItems,
-        (activeNavigationItem ?: startRoute) to assoc(
+        activeNavigationItem to assoc(
           selectedItem,
           icon to selectedItem[icon_variant],
           is_selected to true

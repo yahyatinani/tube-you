@@ -78,17 +78,10 @@ val regCommonEvents = run {
             m(
               common.destination to destination,
               common.navOptions to navOptions {
-                // Pop up to the start destination of the graph to avoid
-                // building up a large stack of destinations on the back stack
-                // as users select items.
                 popUpTo(cofx[current_back_stack_id] as Int) {
                   saveState = true
                 }
-                // Avoid multiple copies of the same destination when
-                // re-selecting the same item
                 launchSingleTop = true
-                // Restore state when re-selecting a previously selected item
-                // restoreState = true // Fixme: this flag breaks go_top_list
               }
             )
           )

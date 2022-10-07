@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
+import com.github.whyrising.vancetube.modules.core.keywords.common.initialise
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.load_popular_videos
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
@@ -15,88 +16,30 @@ import io.kotest.matchers.shouldBe
 
 class FsmTest : FreeSpec({
   "nextState() should return next state" {
-    nextState(
-      homeStateMachine,
-      null,
-      load_popular_videos
-    ) shouldBe Loading
-    nextState(
-      homeStateMachine,
-      Loading,
-      set_popular_vids
-    ) shouldBe Loaded
-    nextState(
-      homeStateMachine,
-      Loaded,
-      home.refresh
-    ) shouldBe Refreshing
-    nextState(
-      homeStateMachine,
-      Refreshing,
-      set_popular_vids
-    ) shouldBe Loaded
-    nextState(
-      homeStateMachine,
-      Loaded,
-      load_popular_videos
-    ) shouldBe Loaded
+    nextState(homeStateMachine, null, initialise) shouldBe Loading
+    nextState(homeStateMachine, Loading, set_popular_vids) shouldBe Loaded
+    nextState(homeStateMachine, Loaded, home.refresh) shouldBe Refreshing
+    nextState(homeStateMachine, Refreshing, set_popular_vids) shouldBe Loaded
+    nextState(homeStateMachine, Loaded, load_popular_videos) shouldBe Loaded
   }
 
   "updateToNextState() should update AppDb to next state" {
-    updateToNextState(
-      m(),
-      load_popular_videos
-    ) shouldBe
-      assocIn(
-        m<Any, Any>(),
-        l(
-          home.panel,
-          home.state
-        ),
-        Loading
-      )
+    updateToNextState(m(), initialise) shouldBe
+      assocIn(m<Any, Any>(), l(home.panel, home.state), Loading)
 
     updateToNextState(
-      assocIn(
-        m<Any, Any>(),
-        l(
-          home.panel,
-          home.state
-        ),
-        Loading
-      ) as AppDb,
-      set_popular_vids
-    ) shouldBe assocIn(
-      m<Any, Any>(),
-      l(
-        home.panel,
-        home.state
-      ),
-      Loaded
-    )
+      db = assocIn(m(), l(home.panel, home.state), Loading) as AppDb,
+      event = set_popular_vids
+    ) shouldBe assocIn(m<Any, Any>(), l(home.panel, home.state), Loaded)
   }
 
   "handleNextState() should update AppDb to next state" {
-    handleNextState(
-      m(),
-      v(load_popular_videos)
-    ) shouldBe
-      assocIn(
-        m<Any, Any>(),
-        l(
-          home.panel,
-          home.state
-        ),
-        Loading
-      )
+    handleNextState(m(), v(initialise)) shouldBe
+      assocIn(m<Any, Any>(), l(home.panel, home.state), Loading)
 
     handleNextState(
-      m(home.panel to m(home.state to Loaded)),
+      db = m(home.panel to m(home.state to Loaded)),
       v(set_popular_vids)
-    ) shouldBe assocIn(
-      m<Any, Any>(),
-      l(home.panel, home.state),
-      Loaded
-    )
+    ) shouldBe assocIn(m<Any, Any>(), l(home.panel, home.state), Loaded)
   }
 })

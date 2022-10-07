@@ -24,14 +24,6 @@ import com.github.whyrising.y.core.v
 typealias AppDb = IPersistentMap<Any, Any>
 
 val regCommonEvents = run {
-  regEventDb<Any>(
-    id = common.initialise,
-    interceptors = v(injectCofx(home.fsm), injectCofx(":is_online"))
-  ) { db, _ ->
-    // FIXME: Use merge(m1,m2) after implementing it in y library.
-    defaultDb.assoc(home.panel, getFrom(db, home.panel)!!)
-  }
-
   regEventFx(
     id = common.initialise,
     interceptors = v(injectCofx(home.fsm), injectCofx(is_online))

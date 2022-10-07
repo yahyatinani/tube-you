@@ -55,6 +55,8 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.dispatch
@@ -81,6 +83,7 @@ import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.vancetube.modules.panel.trending.trending
 import com.github.whyrising.y.core.getFrom
+import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -88,22 +91,47 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 const val ANIM_OFFSET_X = 300
 
+fun NavController.resetBackQueue(backStackEntries: List<NavBackStackEntry>) {
+  backQueue.clear()
+  backQueue.addAll(backStackEntries)
+}
+
+inline fun <T, K> ArrayDeque<T>.distinctRightBy(selector: (T) -> K): List<T> {
+  val set = HashSet<K>()
+  return foldRight(l()) { e, acc ->
+    if (set.add(selector(e))) acc.conj(e)
+    else acc
+  }
+}
+
+/**
+ * Removes all duplicate entries in the backStack of this [NavController].
+ */
+fun NavController.distinctBackStackEntries() {
+  resetBackQueue(backQueue.distinctRightBy { it.destination.id })
+}
+
+fun destinationChangeListener() =
+  OnDestinationChangedListener { navCtrl, destination, _ ->
+    navCtrl.apply {
+      if (previousBackStackEntry != null) {
+        distinctBackStackEntries()
+      }
+      destination.route?.let {
+        dispatch(v(common.active_navigation_item, it))
+      }
+    }
+    // dispatch(v(base.set_backstack_status, flag))
+  }
+
 @Composable
 private fun DestinationTrackingSideEffect(navController: NavHostController) {
   DisposableEffect(navController) {
-    val listener = OnDestinationChangedListener { _, destination, _ ->
-      if (navController.previousBackStackEntry == null) {
-        destination.route?.let {
-          dispatch(v(common.active_navigation_item, it))
-        }
-      }
-      // dispatch(v(base.set_backstack_status, flag))
-    }
-
-    navController.addOnDestinationChangedListener(listener)
-
+    navController.addOnDestinationChangedListener(destinationChangeListener())
     onDispose {
-      navController.removeOnDestinationChangedListener(listener)
+      navController.removeOnDestinationChangedListener(
+        destinationChangeListener()
+      )
     }
   }
 }
@@ -140,6 +168,7 @@ fun VanceApp(
         }
         enterAlwaysScrollBehavior(topAppBarState)
       }
+
       else -> pinnedScrollBehavior()
     }
     val colorScheme = MaterialTheme.colorScheme

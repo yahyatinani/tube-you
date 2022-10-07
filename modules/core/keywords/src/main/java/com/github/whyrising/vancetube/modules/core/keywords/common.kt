@@ -21,7 +21,8 @@ enum class common {
   icon,
   destination,
   navOptions,
-  is_online;
+  is_online,
+  current_back_stack_id;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

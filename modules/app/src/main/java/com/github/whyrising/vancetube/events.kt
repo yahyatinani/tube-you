@@ -8,6 +8,7 @@ import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
+import com.github.whyrising.vancetube.modules.core.keywords.common.current_back_stack_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
@@ -59,7 +60,10 @@ val regCommonEvents = run {
     m<Any, Any>(fx to v(v(navigate_to, m(common.destination to destination))))
   }
 
-  regEventFx(common.on_nav_item_click) { cofx, (_, destination) ->
+  regEventFx(
+    id = common.on_nav_item_click,
+    interceptors = v(injectCofx(current_back_stack_id))
+  ) { cofx, (_, destination) ->
     val appDb = getAppDb(cofx)
     if (appDb[active_navigation_item] == destination) {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx
@@ -77,7 +81,7 @@ val regCommonEvents = run {
                 // Pop up to the start destination of the graph to avoid
                 // building up a large stack of destinations on the back stack
                 // as users select items.
-                popUpTo("${appDb[common.start_route]}") {
+                popUpTo(cofx[current_back_stack_id] as Int) {
                   saveState = true
                 }
                 // Avoid multiple copies of the same destination when

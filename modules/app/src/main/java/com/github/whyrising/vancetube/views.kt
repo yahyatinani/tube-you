@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
@@ -331,7 +332,8 @@ fun VanceApp(
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(showBackground = true)
 @Composable
-fun BasePanelPreview() {
+fun AppPreview() {
+  regCommonCofx(LocalContext.current)
   regHomeCofx
   regCommonEvents
   regCommonSubs
@@ -342,6 +344,6 @@ fun BasePanelPreview() {
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun BasePanelDarkPreview() {
-  BasePanelPreview()
+fun AppDarkPreview() {
+  AppPreview()
 }

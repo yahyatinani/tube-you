@@ -20,5 +20,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "VanceTube"
 
-include ':app'
-include ':benchmark'
+include ':modules:app'
+include ':modules:benchmark'
+include ':modules:panel:home'
+include ':modules:core:keywords'
+include ':modules:core:designsystem'
+include ':modules:panel:trending'

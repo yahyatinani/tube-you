@@ -1,0 +1,33 @@
+plugins {
+  id 'vancetube.android-app-conventions'
+}
+
+dependencies {
+  implementation project(':modules:core:designsystem')
+  implementation project(':modules:core:keywords')
+  implementation project(':modules:panel:home')
+  implementation project(':modules:panel:trending')
+  //  implementation deps.androidx.core.ktx
+  implementation deps.androidx.appcompat
+  //  implementation deps.bundles.compose
+  //  implementation deps.androidx.navigation.compose
+  //  implementation deps.accompanist.nav.anim
+  //  implementation deps.recompose
+  implementation deps.androidx.core.splashscreen
+  implementation deps.androidx.datastore.prefrences
+  androidTestImplementation deps.androidx.compose.ui.test
+
+  testImplementation deps.bundles.kotest
+
+  debugImplementation deps.androidx.compose.ui.tooling
+  coreLibraryDesugaring deps.android.tools.desugar
+
+  // androidx.test is forcing JUnit, 4.12. This forces it to use 4.13
+  configurations.configureEach {
+    resolutionStrategy {
+      force(deps.junit4)
+      // Temporary workaround for https://issuetracker.google.com/174733673
+      force("org.objenesis:objenesis:2.6")
+    }
+  }
+}

@@ -65,7 +65,7 @@ val regCommonEvents = run {
     interceptors = v(injectCofx(current_back_stack_id))
   ) { cofx, (_, destination) ->
     val appDb = getAppDb(cofx)
-    if (appDb[active_navigation_item] == destination) {
+    if (destination == appDb[active_navigation_item]) {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx
       m(fx to v(v(home.go_top_list)))
     } else {

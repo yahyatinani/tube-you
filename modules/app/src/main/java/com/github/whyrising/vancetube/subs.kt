@@ -75,7 +75,7 @@ val regCommonSubs = run {
   regSub<String, Any>(
     queryId = navigation_items,
     signalsFn = { subscribe(v(active_navigation_item)) },
-    computationFn = { activeNavigationItem, _ ->
+    computationFn = { activeNavigationItem, _, _ ->
       val selectedItem = navItems[activeNavigationItem]!!
       assoc(
         navItems,

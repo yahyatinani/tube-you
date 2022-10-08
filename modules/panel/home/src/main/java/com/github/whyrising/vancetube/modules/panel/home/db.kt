@@ -83,7 +83,6 @@ fun updateToNextState(db: AppDb, event: Any): AppDb {
 fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
   updateToNextState(db, id)
 }
-
 // -- cofx Registrations -------------------------------------------------------
 
 val regHomeCofx = regCofx(home.fsm) { cofx ->

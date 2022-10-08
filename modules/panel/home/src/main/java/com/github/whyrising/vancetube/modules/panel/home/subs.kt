@@ -9,7 +9,6 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
-import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.l
@@ -72,6 +71,7 @@ fun formatViews(viewsCount: Long): String = when {
     val x = viewsCount / 1000f
     "${OneDigitDecimalFormat.format(x)}$thousandsSign".replace(".0", "")
   }
+
   viewsCount < 100_000 -> "${viewsCount / 1000}$thousandsSign"
   viewsCount < 1_000_000 -> "${viewsCount / 1000}$thousandsSign"
   viewsCount < 1_000_000_000 -> "${viewsCount / 1_000_000}$MillionsSign"
@@ -87,7 +87,7 @@ data class VideoViewModel(
   val info: AnnotatedString
 )
 
-fun toVms(
+fun formatVideos(
   videoDataList: List<VideoData>,
   viewsLabel: Any
 ): List<VideoViewModel> = videoDataList.fold(v()) { acc, videoMetadata ->
@@ -130,34 +130,31 @@ data class HomeViewModel(
  * @return [Unit]
  */
 val regHomeSubs by lazy {
-  regSub<IPersistentMap<Any, Any>, Any?>(queryId = home.state) { db, _ ->
+  regSub<AppDb, Any?>(home.state) { db, _ ->
     db[home.panel]
   }
 
-  regSub<IPersistentMap<Any, Any>, HomeViewModel>(
+  regSub<AppDb, HomeViewModel>(
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.state)) },
-    computationFn = { homeDb, (_, viewsLabel) ->
-      when (homeDb[home.state]) {
+    computationFn = { homeDb, previousVal, (_, viewsLabel) ->
+      when (homeDb[home.state] as States) {
         States.Loading -> HomeViewModel(isLoading = true)
+        States.Refreshing -> HomeViewModel(
+          isRefreshing = true,
+          showList = true,
+          popularVideos = previousVal!!.popularVideos
+        )
+
         States.Loaded -> {
-          val videoDataList: List<VideoData> = getFrom(homeDb, popular_vids)!!
-          val formatted = toVms(videoDataList, viewsLabel)
+          val videos: List<VideoData> = getFrom(homeDb, popular_vids)!!
           HomeViewModel(
             showList = true,
-            popularVideos = PopularVideos(formatted)
+            popularVideos = PopularVideos(formatVideos(videos, viewsLabel))
           )
         }
-        else -> {
-          // TODO: use previous computation to save CPU cycles.
-          val videoDataList: List<VideoData> = getFrom(homeDb, popular_vids)!!
-          val formatted = toVms(videoDataList, viewsLabel)
-          HomeViewModel(
-            isRefreshing = true,
-            showList = true,
-            popularVideos = PopularVideos(formatted)
-          )
-        }
+
+        States.Failed -> TODO()
       }
     }
   )

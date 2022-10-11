@@ -1,7 +1,7 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
-import com.github.whyrising.recompose.cofx.Coeffects
 import com.github.whyrising.recompose.cofx.injectCofx
+import com.github.whyrising.recompose.events.Event
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
@@ -14,20 +14,58 @@ import com.github.whyrising.vancetube.modules.core.keywords.home.panel
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
+import com.github.whyrising.vancetube.modules.panel.common.AppDb
+import com.github.whyrising.vancetube.modules.panel.common.States
+import com.github.whyrising.vancetube.modules.panel.common.appDbBy
+import com.github.whyrising.vancetube.modules.panel.common.nextState
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
-fun getAppDb(cofx: Coeffects): AppDb = cofx[db] as AppDb
+// -- Home FSM -----------------------------------------------------------------
+
+val homeStateMachine = m<Any?, Any>(
+  null to m(common.initialise to States.Loading),
+  States.Loading to m(
+    set_popular_vids to States.Loaded,
+    ":error" to States.Failed
+  ),
+  States.Loaded to m(
+    refresh to States.Refreshing,
+    load_popular_videos to States.Loaded
+  ),
+  States.Refreshing to m(
+    set_popular_vids to States.Loaded,
+    ":error" to States.Failed
+  ),
+  States.Failed to m(load_popular_videos to States.Loading)
+)
+
+fun homeCurrentState(appDb: AppDb) = getIn<States>(appDb, l(panel, home.state))
+
+fun updateToNextState(db: AppDb, event: Any): AppDb {
+  val currentState = homeCurrentState(db)
+  val nextState = nextState(homeStateMachine, currentState, event)
+  return if (nextState != null) {
+    assocIn(db, l(panel, home.state), nextState) as AppDb
+  } else db
+}
+
+fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
+  updateToNextState(db, id)
+}
+
+// -- Registration -------------------------------------------------------------
 
 val regHomeEvents by lazy {
   regEventFx(
     id = load_popular_videos,
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
-    val appDb = getAppDb(cofx)
+    val appDb = appDbBy(cofx)
     val effects = m<Any, Any>(db to appDb)
     if (homeCurrentState(appDb) == States.Loaded) {
       return@regEventFx effects
@@ -47,7 +85,7 @@ val regHomeEvents by lazy {
     id = refresh,
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
-    val appDb = getAppDb(cofx)
+    val appDb = appDbBy(cofx)
     m(
       db to appDb,
       fx to v(v(load_popular_videos, get(appDb, common.api)))
@@ -55,7 +93,7 @@ val regHomeEvents by lazy {
   }
 
   regEventFx(go_top_list) { cofx, _ ->
-    val appDb = getAppDb(cofx)
+    val appDb = appDbBy(cofx)
     if (homeCurrentState(appDb) != States.Loaded) {
       return@regEventFx m()
     }

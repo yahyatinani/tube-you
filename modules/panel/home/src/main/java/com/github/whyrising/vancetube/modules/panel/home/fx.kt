@@ -5,46 +5,17 @@ import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.vancetube.modules.panel.common.VideoData
+import com.github.whyrising.vancetube.modules.panel.common.client
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.v
-import io.ktor.client.HttpClient
 import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
-import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpRequestTimeoutException
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.DEFAULT
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import java.net.UnknownHostException
-
-val client = HttpClient(Android) {
-  install(Logging) {
-    logger = Logger.DEFAULT
-    level = LogLevel.ALL
-    filter { request ->
-      request.url.host.contains("invidious.tiekoetter.com") ||
-        request.url.host.contains("invidious.namazso.eu") ||
-        request.url.host.contains("y.com.sb")
-    }
-  }
-  install(HttpTimeout)
-  install(ContentNegotiation) {
-    json(
-      Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-      }
-    )
-  }
-}
 
 fun regHomeFx(scope: CoroutineScope) {
   Log.i("regHomeFx", "init")

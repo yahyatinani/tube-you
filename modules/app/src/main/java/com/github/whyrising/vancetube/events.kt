@@ -14,7 +14,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
-import com.github.whyrising.vancetube.modules.panel.home.getAppDb
+import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getFrom
@@ -56,7 +56,7 @@ val regCommonEvents = run {
     id = common.on_nav_item_click,
     interceptors = v(injectCofx(current_back_stack_id))
   ) { cofx, (_, destination) ->
-    val appDb = getAppDb(cofx)
+    val appDb = appDbBy(cofx)
     if (destination == appDb[active_navigation_item]) {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx
       m(fx to v(v(home.go_top_list)))

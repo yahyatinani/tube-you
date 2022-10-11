@@ -8,13 +8,12 @@ plugins {
 group APP_ID
 
 android {
-  namespace APP_ID + ".modules.panel.home"
+  namespace APP_ID + ".modules.panel.common"
 }
 
 dependencies {
   implementation project(':modules:core:designsystem')
   implementation project(':modules:core:keywords')
-  implementation project(':modules:panel:common')
   api deps.androidx.core.ktx
   api deps.bundles.compose
   api deps.androidx.navigation.compose

@@ -20,6 +20,7 @@ import java.net.UnknownHostException
 fun regHomeFx(scope: CoroutineScope) {
   Log.i("regHomeFx", "init")
 
+  // TODO: abstract http effect handler
   regFx(home.load_popular_videos) { api ->
     scope.launch {
       val endpoint = "$api/popular?fields=videoId,title,videoThumbnails," +

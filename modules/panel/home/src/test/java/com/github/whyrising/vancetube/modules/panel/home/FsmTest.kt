@@ -2,11 +2,10 @@ package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.vancetube.modules.core.keywords.common.initialise
 import com.github.whyrising.vancetube.modules.core.keywords.home
-import com.github.whyrising.vancetube.modules.core.keywords.home.load_popular_videos
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
-import com.github.whyrising.vancetube.modules.panel.home.States.Loaded
-import com.github.whyrising.vancetube.modules.panel.home.States.Loading
-import com.github.whyrising.vancetube.modules.panel.home.States.Refreshing
+import com.github.whyrising.vancetube.modules.panel.common.AppDb
+import com.github.whyrising.vancetube.modules.panel.common.States.Loaded
+import com.github.whyrising.vancetube.modules.panel.common.States.Loading
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
@@ -15,14 +14,6 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 
 class FsmTest : FreeSpec({
-  "nextState() should return next state" {
-    nextState(homeStateMachine, null, initialise) shouldBe Loading
-    nextState(homeStateMachine, Loading, set_popular_vids) shouldBe Loaded
-    nextState(homeStateMachine, Loaded, home.refresh) shouldBe Refreshing
-    nextState(homeStateMachine, Refreshing, set_popular_vids) shouldBe Loaded
-    nextState(homeStateMachine, Loaded, load_popular_videos) shouldBe Loaded
-  }
-
   "updateToNextState() should update AppDb to next state" {
     updateToNextState(m(), initialise) shouldBe
       assocIn(m<Any, Any>(), l(home.panel, home.state), Loading)

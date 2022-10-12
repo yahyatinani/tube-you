@@ -10,13 +10,13 @@ import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.go_top_list
 import com.github.whyrising.vancetube.modules.core.keywords.home.load_popular_videos
-import com.github.whyrising.vancetube.modules.core.keywords.home.panel
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
+import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.vancetube.modules.panel.common.nextState
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.get
@@ -44,14 +44,15 @@ val homeStateMachine = m<Any?, Any>(
   States.Failed to m(load_popular_videos to States.Loading)
 )
 
-fun homeCurrentState(appDb: AppDb) = getIn<States>(appDb, l(panel, home.state))
+fun homeCurrentState(appDb: AppDb): States? =
+  getIn<States>(appDb, l(home.panel, home.state))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = homeCurrentState(db)
   val nextState = nextState(homeStateMachine, currentState, event)
-  return if (nextState != null) {
-    assocIn(db, l(panel, home.state), nextState) as AppDb
-  } else db
+  return db.letIf(nextState != null) {
+    assocIn(it, l(home.panel, home.state), nextState) as AppDb
+  }
 }
 
 fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
@@ -78,7 +79,7 @@ val regHomeEvents by lazy {
     id = set_popular_vids,
     interceptors = v(injectCofx(home.fsm))
   ) { db, (_, videos) ->
-    assocIn(db, l(panel, popular_vids), videos)
+    assocIn(db, l(home.panel, popular_vids), videos)
   }
 
   regEventFx(

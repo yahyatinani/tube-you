@@ -27,7 +27,7 @@ import com.github.whyrising.y.core.v
 
 // -- Home FSM -----------------------------------------------------------------
 
-val homeStateMachine = m<Any?, Any>(
+val Home_State_Machine = m<Any?, Any>(
   null to m(common.initialise to States.Loading),
   States.Loading to m(
     set_popular_vids to States.Loaded,
@@ -48,8 +48,7 @@ fun homeCurrentState(appDb: AppDb): States? =
   getIn<States>(appDb, l(home.panel, home.state))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
-  val currentState = homeCurrentState(db)
-  val nextState = nextState(homeStateMachine, currentState, event)
+  val nextState = nextState(Home_State_Machine, homeCurrentState(db), event)
   return db.letIf(nextState != null) {
     assocIn(it, l(home.panel, home.state), nextState) as AppDb
   }

@@ -15,6 +15,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
+import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getFrom
@@ -43,9 +44,9 @@ val regCommonEvents = run {
 
   // TODO: rethink this event handler
   regEventDb<AppDb>(active_navigation_item) { db, (_, destination) ->
-    if (navItems[destination] != null) {
-      db.assoc(active_navigation_item, destination)
-    } else db
+    db.letIf(navItems[destination] != null) {
+      it.assoc(active_navigation_item, destination)
+    }
   }
 
   regEventFx(navigate_to) { _, (_, destination) ->

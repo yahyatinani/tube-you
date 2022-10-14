@@ -86,7 +86,7 @@ import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.vancetube.modules.panel.trending.trending
-import com.github.whyrising.y.core.getFrom
+import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
@@ -270,15 +270,15 @@ fun VanceApp(
               subscribe<Map<Any, Any>>(v(common.navigation_items)).w()
                 .forEach { (route, navItem) ->
                   val contentDescription = stringResource(
-                    getFrom(navItem, common.icon_content_desc_text_id)!!
+                    get(navItem, common.icon_content_desc_text_id)!!
                   )
-                  val text = stringResource(getFrom(navItem, label_text_id)!!)
+                  val text = stringResource(get(navItem, label_text_id)!!)
                   VanceNavigationItem(
-                    selected = getFrom(navItem, is_selected)!!,
+                    selected = get(navItem, is_selected)!!,
                     modifier = modifier,
                     icon = {
                       Icon(
-                        painter = painterResource(getFrom(navItem, icon)!!),
+                        painter = painterResource(get(navItem, icon)!!),
                         contentDescription = contentDescription,
                         tint = colorScheme.onBackground
                       )

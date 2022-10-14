@@ -18,7 +18,6 @@ import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
@@ -34,7 +33,7 @@ val regCommonEvents = run {
     m<Any, Any>(
       db to defaultDb
         .assoc(active_navigation_item, startingRoute.toString())
-        .assoc(home.panel, getFrom(cofx[db], home.panel)!!)
+        .assoc(home.panel, get(cofx[db], home.panel)!!)
     )
   }
 

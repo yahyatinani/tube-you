@@ -15,15 +15,19 @@ import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
+import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
+import com.github.whyrising.vancetube.modules.panel.common.ktor
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.vancetube.modules.panel.common.nextState
 import com.github.whyrising.y.core.assocIn
+import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
+import io.ktor.util.reflect.typeInfo
 
 // -- Home FSM -----------------------------------------------------------------
 
@@ -71,7 +75,23 @@ val regHomeEvents by lazy {
       return@regEventFx effects
     }
 
-    effects.assoc(fx, v(v(load_popular_videos, appDb[common.api])))
+    effects.assoc(
+      fx,
+      v(
+        v(
+          ktor.http_fx,
+          m(
+            ktor.method to ktor.get,
+            ktor.uri to "${appDb[common.api]}/popular?fields=videoId,title,videoThumbnails," +
+              "lengthSeconds,viewCount,author,publishedText,authorId",
+            ktor.timeout to 8000,
+            ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
+            ktor.on_success to v(set_popular_vids),
+            ktor.on_failure to v(":to-do") // TODO:
+          )
+        )
+      )
+    )
   }
 
   regEventDb<AppDb>(

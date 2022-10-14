@@ -11,7 +11,6 @@ import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.formatVideos
 import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.v
 
 // -- Subs ---------------------------------------------------------------------
@@ -38,7 +37,7 @@ val regHomeSubs by lazy {
         )
 
         States.Loaded -> {
-          val videos: List<VideoData> = getFrom(homeDb, popular_vids)!!
+          val videos: List<VideoData> = get(homeDb, popular_vids)!!
           VideosPanelState(
             showList = true,
             videos = Videos(formatVideos(videos, viewsLabel))

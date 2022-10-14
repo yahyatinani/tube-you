@@ -20,7 +20,6 @@ import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelState
 import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
 import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
-import com.github.whyrising.vancetube.modules.panel.common.regHttpKtor
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 
@@ -38,8 +37,7 @@ private fun NavGraphBuilder.homeCommon(
   ) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-      regHttpKtor(scope)
-      regHomeEvents
+      regHomeEvents(scope)
       dispatch(v(home.load_popular_videos))
     }
     regHomeSubs

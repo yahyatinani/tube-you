@@ -2,6 +2,7 @@ package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.events.Event
+import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.fx.FxIds.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
@@ -28,6 +29,7 @@ import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import io.ktor.util.reflect.typeInfo
+import kotlinx.coroutines.CoroutineScope
 
 // -- Home FSM -----------------------------------------------------------------
 
@@ -64,18 +66,24 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
 
 // -- Registration -------------------------------------------------------------
 
-val regHomeEvents by lazy {
+fun regHomeEvents(scope: CoroutineScope) {
+  regEventDb<AppDb>(
+    id = set_popular_vids,
+    interceptors = v(injectCofx(home.fsm))
+  ) { db, (_, videos) ->
+    assocIn(db, l(home.panel, popular_vids), videos)
+  }
+
   regEventFx(
     id = load_popular_videos,
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    val effects = m<Any, Any>(db to appDb)
     if (homeCurrentState(appDb) == States.Loaded) {
-      return@regEventFx effects
+      return@regEventFx m()
     }
 
-    effects.assoc(
+    m<Any, Any>(db to appDb).assoc(
       fx,
       v(
         v(
@@ -84,7 +92,8 @@ val regHomeEvents by lazy {
             ktor.method to ktor.get,
             ktor.uri to "${appDb[common.api]}/popular?fields=videoId,title,videoThumbnails," +
               "lengthSeconds,viewCount,author,publishedText,authorId",
-            ktor.timeout to 8000,
+//            ktor.timeout to 8000,
+            ktor.exec_scope to scope,
             ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
             ktor.on_success to v(set_popular_vids),
             ktor.on_failure to v(":to-do") // TODO:
@@ -94,21 +103,13 @@ val regHomeEvents by lazy {
     )
   }
 
-  regEventDb<AppDb>(
-    id = set_popular_vids,
-    interceptors = v(injectCofx(home.fsm))
-  ) { db, (_, videos) ->
-    assocIn(db, l(home.panel, popular_vids), videos)
-  }
-
   regEventFx(
     id = refresh,
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
-    val appDb = appDbBy(cofx)
     m(
-      db to appDb,
-      fx to v(v(load_popular_videos, get(appDb, common.api)))
+      db to appDbBy(cofx),
+      fx to v(v(FxIds.dispatch, v(load_popular_videos)))
     )
   }
 

@@ -8,9 +8,11 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.vancetube.modules.core.keywords.common
+import com.github.whyrising.vancetube.modules.panel.common.regHttpKtor
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.y.core.v
 
@@ -44,6 +46,8 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     WindowCompat.setDecorFitsSystemWindows(window, false)
+
+    regHttpKtor(lifecycleScope)
 
     setContent {
       VanceApp(calculateWindowSizeClass(this))

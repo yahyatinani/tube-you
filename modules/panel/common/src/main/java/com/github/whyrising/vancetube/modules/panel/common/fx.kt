@@ -82,14 +82,15 @@ enum class ktor {
   method,
   get,
   response_type_info,
-  http_fx;
+  http_fx,
+  exec_scope;
 
   override fun toString(): String = name
 }
 
-fun regHttpKtor(scope: CoroutineScope) {
+fun regHttpKtor(globalScope: CoroutineScope) {
   regFx(ktor.http_fx) { request ->
-    scope.launch {
+    (get<CoroutineScope>(request, ktor.exec_scope) ?: globalScope).launch {
       request as IPersistentMap<Any, Any>
       // TODO: 1. validate(request).
 
@@ -104,7 +105,7 @@ fun regHttpKtor(scope: CoroutineScope) {
         val httpResponse = client.get {
           url(uri)
           timeout {
-            requestTimeoutMillis = (timeout as Number).toLong()
+            requestTimeoutMillis = (timeout as Number?)?.toLong()
           }
         }
 

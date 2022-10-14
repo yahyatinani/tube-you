@@ -1,6 +1,6 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
-import com.github.whyrising.vancetube.modules.core.keywords.common.initialise
+import com.github.whyrising.vancetube.modules.core.keywords.common.initialize
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
@@ -15,7 +15,7 @@ import io.kotest.matchers.shouldBe
 
 class FsmTest : FreeSpec({
   "updateToNextState() should update AppDb to next state" {
-    updateToNextState(m(), initialise) shouldBe
+    updateToNextState(m(), initialize) shouldBe
       assocIn(m<Any, Any>(), l(home.panel, home.state), Loading)
 
     updateToNextState(
@@ -25,7 +25,7 @@ class FsmTest : FreeSpec({
   }
 
   "handleNextState() should update AppDb to next state" {
-    handleNextState(m(), v(initialise)) shouldBe
+    handleNextState(m(), v(initialize)) shouldBe
       assocIn(m<Any, Any>(), l(home.panel, home.state), Loading)
 
     handleNextState(

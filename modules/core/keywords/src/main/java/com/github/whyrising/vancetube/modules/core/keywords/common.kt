@@ -2,7 +2,7 @@ package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class common {
-  initialise,
+  initialize,
   navigate_to,
   go_back,
   set_backstack_status,

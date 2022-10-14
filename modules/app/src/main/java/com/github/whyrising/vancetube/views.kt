@@ -339,7 +339,7 @@ fun AppPreview() {
   regHomeCofx
   regCommonEvents
   regCommonSubs
-  dispatchSync(v(common.initialise))
+  dispatchSync(v(common.initialize))
 
   VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))
 }

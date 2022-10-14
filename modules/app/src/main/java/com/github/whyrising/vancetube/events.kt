@@ -25,7 +25,7 @@ typealias AppDb = IPersistentMap<Any, Any>
 
 val regCommonEvents = run {
   regEventFx(
-    id = common.initialise,
+    id = common.initialize,
     interceptors = v(injectCofx(home.fsm), injectCofx(is_online))
   ) { cofx, _ ->
     val isOnline = cofx[is_online]!! as Boolean

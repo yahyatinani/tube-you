@@ -27,7 +27,7 @@ class VanceApplication : Application() {
     regCommonEvents
     regCommonSubs
 
-    dispatchSync(v(common.initialise))
+    dispatchSync(v(common.initialize))
 
     // FIXME: remove this for release
 //    System.setProperty("kotlinx.coroutines.debug", "on")

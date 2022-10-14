@@ -34,7 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 // -- Home FSM -----------------------------------------------------------------
 
 val Home_State_Machine = m<Any?, Any>(
-  null to m(common.initialise to States.Loading),
+  null to m(common.initialize to States.Loading),
   States.Loading to m(
     set_popular_vids to States.Loaded,
     ":error" to States.Failed

@@ -1,6 +1,6 @@
 package com.github.whyrising.vancetube.modules.panel.common
 
-import com.github.whyrising.vancetube.modules.core.keywords.common.initialise
+import com.github.whyrising.vancetube.modules.core.keywords.common.initialize
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.load_popular_videos
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
@@ -15,7 +15,7 @@ import io.kotest.matchers.shouldBe
 class FsmTest : FreeSpec({
   "nextState() should return next state" {
     val fsm = m<Any?, Any>(
-      null to m(initialise to Loading),
+      null to m(initialize to Loading),
       Loading to m(
         set_popular_vids to Loaded,
         ":error" to Failed
@@ -31,7 +31,7 @@ class FsmTest : FreeSpec({
       Failed to m(load_popular_videos to Loading)
     )
 
-    nextState(fsm, null, initialise) shouldBe Loading
+    nextState(fsm, null, initialize) shouldBe Loading
     nextState(fsm, Loading, set_popular_vids) shouldBe Loaded
     nextState(fsm, Loaded, home.refresh) shouldBe Refreshing
     nextState(fsm, Refreshing, set_popular_vids) shouldBe Loaded

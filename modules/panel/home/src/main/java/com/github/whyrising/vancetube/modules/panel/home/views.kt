@@ -38,7 +38,7 @@ private fun NavGraphBuilder.homeCommon(
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
       regHomeEvents(scope)
-      dispatch(v(home.load_popular_videos))
+      dispatch(v(home.load))
     }
     regHomeSubs
 

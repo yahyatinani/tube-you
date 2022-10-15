@@ -8,7 +8,7 @@ enum class home {
   view_model,
   set_popular_vids,
   refresh,
-  load_popular_videos,
+  load,
   go_top_list,
   popular_vids,
   fsm;

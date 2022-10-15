@@ -10,7 +10,7 @@ import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.go_top_list
-import com.github.whyrising.vancetube.modules.core.keywords.home.load_popular_videos
+import com.github.whyrising.vancetube.modules.core.keywords.home.load
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
@@ -41,13 +41,13 @@ val Home_State_Machine = m<Any?, Any>(
   ),
   States.Loaded to m(
     refresh to States.Refreshing,
-    load_popular_videos to States.Loaded
+    load to States.Loaded
   ),
   States.Refreshing to m(
     set_popular_vids to States.Loaded,
     ":error" to States.Failed
   ),
-  States.Failed to m(load_popular_videos to States.Loading)
+  States.Failed to m(load to States.Loading)
 )
 
 fun homeCurrentState(appDb: AppDb): States? =
@@ -75,7 +75,7 @@ fun regHomeEvents(scope: CoroutineScope) {
   }
 
   regEventFx(
-    id = load_popular_videos,
+    id = load,
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
@@ -109,7 +109,7 @@ fun regHomeEvents(scope: CoroutineScope) {
   ) { cofx, _ ->
     m(
       db to appDbBy(cofx),
-      fx to v(v(FxIds.dispatch, v(load_popular_videos)))
+      fx to v(v(FxIds.dispatch, v(load)))
     )
   }
 

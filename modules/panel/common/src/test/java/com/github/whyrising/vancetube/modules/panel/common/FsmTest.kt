@@ -2,7 +2,7 @@ package com.github.whyrising.vancetube.modules.panel.common
 
 import com.github.whyrising.vancetube.modules.core.keywords.common.initialize
 import com.github.whyrising.vancetube.modules.core.keywords.home
-import com.github.whyrising.vancetube.modules.core.keywords.home.load_popular_videos
+import com.github.whyrising.vancetube.modules.core.keywords.home.load
 import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
 import com.github.whyrising.vancetube.modules.panel.common.States.Failed
 import com.github.whyrising.vancetube.modules.panel.common.States.Loaded
@@ -22,19 +22,19 @@ class FsmTest : FreeSpec({
       ),
       Loaded to m(
         home.refresh to Refreshing,
-        load_popular_videos to Loaded
+        load to Loaded
       ),
       Refreshing to m(
         set_popular_vids to Loaded,
         ":error" to Failed
       ),
-      Failed to m(load_popular_videos to Loading)
+      Failed to m(load to Loading)
     )
 
     nextState(fsm, null, initialize) shouldBe Loading
     nextState(fsm, Loading, set_popular_vids) shouldBe Loaded
     nextState(fsm, Loaded, home.refresh) shouldBe Refreshing
     nextState(fsm, Refreshing, set_popular_vids) shouldBe Loaded
-    nextState(fsm, Loaded, load_popular_videos) shouldBe Loaded
+    nextState(fsm, Loaded, load) shouldBe Loaded
   }
 })

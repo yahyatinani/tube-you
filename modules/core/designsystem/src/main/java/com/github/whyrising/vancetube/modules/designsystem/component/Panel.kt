@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +58,9 @@ fun VideosPanel(
       ) {
         content(state.videos)
       }
+    } else if (state.error != null) {
+      // TODO: Implement proper UI for errors.
+      Text(text = "Request failed! Error: ${state.error}")
     }
   }
 }

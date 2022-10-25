@@ -11,6 +11,7 @@ enum class home {
   load,
   go_top_list,
   popular_vids,
+  error,
   fsm,
   coroutine_scope;
 

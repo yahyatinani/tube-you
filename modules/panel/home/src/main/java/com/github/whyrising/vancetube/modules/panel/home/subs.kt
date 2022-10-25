@@ -44,7 +44,7 @@ val regHomeSubs by lazy {
           )
         }
 
-        States.Failed -> TODO()
+        States.Failed -> VideosPanelState(error = get(homeDb, home.error)!!)
       }
     }
   )

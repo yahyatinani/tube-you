@@ -6,7 +6,8 @@ data class VideosPanelState(
   val isLoading: Boolean = false,
   val isRefreshing: Boolean = false,
   val showList: Boolean = false,
-  val videos: Videos = default
+  val videos: Videos = default,
+  val error: Int? = null
 ) {
   companion object {
     val default = Videos(l())

@@ -9,6 +9,7 @@ import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.vancetube.modules.core.keywords.home.error
 import com.github.whyrising.vancetube.modules.core.keywords.home.go_top_list
 import com.github.whyrising.vancetube.modules.core.keywords.home.load
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
@@ -37,7 +38,7 @@ val Home_State_Machine = m<Any?, Any>(
   null to m(common.initialize to States.Loading),
   States.Loading to m(
     set_popular_vids to States.Loaded,
-    ":error" to States.Failed
+    error to States.Failed
   ),
   States.Loaded to m(
     refresh to States.Refreshing,
@@ -45,7 +46,7 @@ val Home_State_Machine = m<Any?, Any>(
   ),
   States.Refreshing to m(
     set_popular_vids to States.Loaded,
-    ":error" to States.Failed
+    error to States.Failed
   ),
   States.Failed to m(load to States.Loading)
 )
@@ -74,6 +75,13 @@ val regHomeEvents = run {
     assocIn(db, l(home.panel, popular_vids), videos)
   }
 
+  regEventDb<AppDb>(
+    id = error,
+    interceptors = v(injectCofx(home.fsm))
+  ) { db, (_, e) ->
+    assocIn(db, l(home.panel, error), e)
+  }
+
   regEventFx(
     id = load,
     interceptors = v(injectCofx(home.fsm), injectCofx(home.coroutine_scope))
@@ -94,11 +102,11 @@ val regHomeEvents = run {
           m(
             ktor.method to HttpMethod.Get,
             ktor.url to popularVideosEndpoint,
-//            ktor.timeout to 8000,
+            ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
             ktor.on_success to v(set_popular_vids),
-            ktor.on_failure to v(":to-do") // TODO:
+            ktor.on_failure to v(error)
           )
         )
       )

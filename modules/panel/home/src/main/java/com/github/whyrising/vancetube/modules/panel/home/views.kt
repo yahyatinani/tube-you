@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
+import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.w
@@ -22,6 +23,7 @@ import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
 import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
+import kotlinx.coroutines.CoroutineScope
 
 // -- navigation ---------------------------------------------------------------
 
@@ -35,9 +37,12 @@ private fun NavGraphBuilder.homeCommon(
     exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
     popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
   ) {
-    val scope = rememberCoroutineScope()
+    val scope: CoroutineScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-      regHomeEvents(scope)
+      regCofx(home.coroutine_scope) { cofx ->
+        cofx.assoc(home.coroutine_scope, scope)
+      }
+      regHomeEvents
       dispatch(v(home.load))
     }
     regHomeSubs

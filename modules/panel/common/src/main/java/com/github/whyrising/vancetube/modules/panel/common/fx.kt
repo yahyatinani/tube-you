@@ -21,6 +21,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.url
+import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.CoroutineScope
@@ -75,35 +76,33 @@ fun httpEffect(requestMap: Any?) {
 
 @Suppress("EnumEntryName", "ClassName")
 enum class ktor {
-  uri,
+  url,
   timeout,
   on_success,
   on_failure,
   method,
-  get,
   response_type_info,
   http_fx,
-  exec_scope;
+  coroutine_scope;
 
   override fun toString(): String = name
 }
 
-fun regHttpKtor(globalScope: CoroutineScope) {
+fun regHttpKtor() {
   regFx(ktor.http_fx) { request ->
-    (get<CoroutineScope>(request, ktor.exec_scope) ?: globalScope).launch {
-      request as IPersistentMap<Any, Any>
-      // TODO: 1. validate(request).
-
-      val method = request[ktor.method] as ktor
-      val uri = get<String>(request, ktor.uri)!!
-      val responseTypeInfo = get<TypeInfo>(request, ktor.response_type_info)!!
-      val timeout = request[ktor.timeout]
-      val onSuccess = get<Event>(request, ktor.on_success)!!
-      val onFailure = get<Event>(request, ktor.on_failure)!!
-
+    get<CoroutineScope>(request, ktor.coroutine_scope)!!.launch {
       try {
+        // TODO: 1. validate(request).
+        request as IPersistentMap<Any, Any>
+        val method = request[ktor.method] as HttpMethod // TODO:
+        val url = get<String>(request, ktor.url)!!
+        val responseTypeInfo = get<TypeInfo>(request, ktor.response_type_info)!!
+        val timeout = request[ktor.timeout]
+        val onSuccess = get<Event>(request, ktor.on_success)!!
+        val onFailure = get<Event>(request, ktor.on_failure)!!
+
         val httpResponse = client.get {
-          url(uri)
+          url(url)
           timeout {
             requestTimeoutMillis = (timeout as Number?)?.toLong()
           }

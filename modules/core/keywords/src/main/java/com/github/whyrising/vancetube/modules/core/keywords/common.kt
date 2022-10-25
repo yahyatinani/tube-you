@@ -7,7 +7,7 @@ enum class common {
   go_back,
   set_backstack_status,
   is_backstack_available,
-  api,
+  api_endpoint,
   navigation_items,
   active_navigation_item,
   on_nav_item_click,

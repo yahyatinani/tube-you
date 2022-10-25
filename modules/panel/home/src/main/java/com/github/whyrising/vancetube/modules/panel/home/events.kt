@@ -28,8 +28,8 @@ import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
+import io.ktor.http.HttpMethod
 import io.ktor.util.reflect.typeInfo
-import kotlinx.coroutines.CoroutineScope
 
 // -- Home FSM -----------------------------------------------------------------
 
@@ -66,7 +66,7 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
 
 // -- Registration -------------------------------------------------------------
 
-fun regHomeEvents(scope: CoroutineScope) {
+val regHomeEvents = run {
   regEventDb<AppDb>(
     id = set_popular_vids,
     interceptors = v(injectCofx(home.fsm))
@@ -76,24 +76,26 @@ fun regHomeEvents(scope: CoroutineScope) {
 
   regEventFx(
     id = load,
-    interceptors = v(injectCofx(home.fsm))
+    interceptors = v(injectCofx(home.fsm), injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
     if (homeCurrentState(appDb) == States.Loaded) {
       return@regEventFx m()
     }
 
+    val popularVideosEndpoint = "${appDb[common.api_endpoint]}/popular?" +
+      "fields=videoId,title,videoThumbnails,lengthSeconds,viewCount,author," +
+      "publishedText,authorId"
     m<Any, Any>(db to appDb).assoc(
       fx,
       v(
         v(
           ktor.http_fx,
           m(
-            ktor.method to ktor.get,
-            ktor.uri to "${appDb[common.api]}/popular?fields=videoId,title,videoThumbnails," +
-              "lengthSeconds,viewCount,author,publishedText,authorId",
+            ktor.method to HttpMethod.Get,
+            ktor.url to popularVideosEndpoint,
 //            ktor.timeout to 8000,
-            ktor.exec_scope to scope,
+            ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
             ktor.on_success to v(set_popular_vids),
             ktor.on_failure to v(":to-do") // TODO:

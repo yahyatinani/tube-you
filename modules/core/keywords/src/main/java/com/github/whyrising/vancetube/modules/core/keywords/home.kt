@@ -11,7 +11,8 @@ enum class home {
   load,
   go_top_list,
   popular_vids,
-  fsm;
+  fsm,
+  coroutine_scope;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

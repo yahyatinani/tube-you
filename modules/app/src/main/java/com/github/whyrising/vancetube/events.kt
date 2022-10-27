@@ -14,10 +14,10 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
-import com.github.whyrising.vancetube.modules.panel.home.getAppDb
+import com.github.whyrising.vancetube.modules.panel.common.appDbBy
+import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getFrom
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
@@ -25,15 +25,13 @@ typealias AppDb = IPersistentMap<Any, Any>
 
 val regCommonEvents = run {
   regEventFx(
-    id = common.initialise,
-    interceptors = v(injectCofx(home.fsm), injectCofx(is_online))
+    id = common.initialize,
+    interceptors = v(injectCofx(is_online))
   ) { cofx, _ ->
     val isOnline = cofx[is_online]!! as Boolean
     val startingRoute = if (isOnline) home.route else library.route
     m<Any, Any>(
-      db to defaultDb
-        .assoc(active_navigation_item, startingRoute.toString())
-        .assoc(home.panel, getFrom(cofx[db], home.panel)!!)
+      db to defaultDb.assoc(active_navigation_item, startingRoute.toString())
     )
   }
 
@@ -43,9 +41,9 @@ val regCommonEvents = run {
 
   // TODO: rethink this event handler
   regEventDb<AppDb>(active_navigation_item) { db, (_, destination) ->
-    if (navItems[destination] != null) {
-      db.assoc(active_navigation_item, destination)
-    } else db
+    db.letIf(navItems[destination] != null) {
+      it.assoc(active_navigation_item, destination)
+    }
   }
 
   regEventFx(navigate_to) { _, (_, destination) ->
@@ -56,7 +54,7 @@ val regCommonEvents = run {
     id = common.on_nav_item_click,
     interceptors = v(injectCofx(current_back_stack_id))
   ) { cofx, (_, destination) ->
-    val appDb = getAppDb(cofx)
+    val appDb = appDbBy(cofx)
     if (destination == appDb[active_navigation_item]) {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx
       m(fx to v(v(home.go_top_list)))

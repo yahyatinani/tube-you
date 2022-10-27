@@ -13,6 +13,10 @@ android {
 dependencies {
   implementation deps.androidx.core.ktx
   implementation deps.bundles.compose
+  implementation deps.coil
+  implementation deps.y.core
+  implementation deps.kotlinx.datetime
+
   testImplementation deps.kotlin.reflect
   testImplementation deps.kotest.jvm.runner
   testImplementation deps.kotest.assertions

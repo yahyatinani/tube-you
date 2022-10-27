@@ -11,6 +11,7 @@ import androidx.core.view.WindowCompat
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.vancetube.modules.core.keywords.common
+import com.github.whyrising.vancetube.modules.panel.common.regHttpKtor
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.y.core.v
 
@@ -25,7 +26,7 @@ class VanceApplication : Application() {
     regCommonEvents
     regCommonSubs
 
-    dispatchSync(v(common.initialise))
+    dispatchSync(v(common.initialize))
 
     // FIXME: remove this for release
 //    System.setProperty("kotlinx.coroutines.debug", "on")
@@ -44,6 +45,8 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     WindowCompat.setDecorFitsSystemWindows(window, false)
+
+    regHttpKtor()
 
     setContent {
       VanceApp(calculateWindowSizeClass(this))

@@ -2,12 +2,12 @@ package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class common {
-  initialise,
+  initialize,
   navigate_to,
   go_back,
   set_backstack_status,
   is_backstack_available,
-  api,
+  api_endpoint,
   navigation_items,
   active_navigation_item,
   on_nav_item_click,

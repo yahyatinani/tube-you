@@ -5,6 +5,7 @@ plugins {
 dependencies {
   implementation project(':modules:core:designsystem')
   implementation project(':modules:core:keywords')
+  implementation project(':modules:panel:common')
   implementation project(':modules:panel:home')
   implementation project(':modules:panel:trending')
   //  implementation deps.androidx.core.ktx

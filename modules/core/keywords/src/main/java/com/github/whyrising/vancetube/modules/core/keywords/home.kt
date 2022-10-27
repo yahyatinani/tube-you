@@ -6,12 +6,13 @@ enum class home {
   panel,
   state,
   view_model,
-  set_popular_vids,
   refresh,
   load,
   go_top_list,
   popular_vids,
   error,
+  initialize,
+  loading_is_done,
   fsm,
   coroutine_scope;
 

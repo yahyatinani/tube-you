@@ -43,7 +43,7 @@ private fun NavGraphBuilder.homeCommon(
         cofx.assoc(home.coroutine_scope, scope)
       }
       regHomeEvents
-      dispatch(v(home.load))
+      dispatch(v(home.initialize))
     }
     regHomeSubs
 

@@ -14,7 +14,6 @@ import com.github.whyrising.vancetube.modules.core.keywords.home.go_top_list
 import com.github.whyrising.vancetube.modules.core.keywords.home.load
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
-import com.github.whyrising.vancetube.modules.core.keywords.home.set_popular_vids
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
@@ -35,27 +34,36 @@ import io.ktor.util.reflect.typeInfo
 // -- Home FSM -----------------------------------------------------------------
 
 val Home_Transitions = m<Any?, Any>(
-  null to m(common.initialize to States.Loading),
+  null to m(
+    home.initialize to v(
+      States.Loading,
+      v(v(FxIds.dispatch, v(load)))
+    )
+  ),
   States.Loading to m(
-    set_popular_vids to States.Loaded,
-    error to States.Failed
+    home.loading_is_done to v(States.Loaded),
+    error to v(States.Failed)
   ),
   States.Loaded to m(
-    refresh to States.Refreshing,
-    load to States.Loaded
+    refresh to v(
+      States.Refreshing,
+      v(v(FxIds.dispatch, v(load)))
+    )
   ),
   States.Refreshing to m(
-    set_popular_vids to States.Loaded,
-    error to States.Failed
+    home.loading_is_done to v(States.Loaded),
+    error to v(States.Failed)
   ),
-  States.Failed to m(load to States.Loading)
+  States.Failed to m(load to v(States.Loading, v(v(FxIds.dispatch, v(load)))))
 )
 
-fun homeCurrentState(appDb: AppDb): States? =
-  getIn<States>(appDb, l(home.panel, home.state))
+fun homeCurrentState(appDb: AppDb): Any? =
+  getIn<Any>(appDb, l(home.panel, home.state))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
-  val nextState = nextState(Home_Transitions, homeCurrentState(db), event)
+  val currentState = get<States?>(homeCurrentState(db), 0)
+  val nextState =
+    nextState(Home_Transitions, currentState, event)
   return db.letIf(nextState != null) {
     assocIn(it, l(home.panel, home.state), nextState) as AppDb
   }
@@ -65,11 +73,21 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
   updateToNextState(db, id)
 }
 
+fun effectsByState(state: Any?) = get<Any>(state, 1)
+
 // -- Registration -------------------------------------------------------------
 
 val regHomeEvents = run {
+  regEventFx(
+    id = home.initialize,
+    interceptors = v(injectCofx(home.fsm))
+  ) { cofx, _ ->
+    val appDb = appDbBy(cofx)
+    m<Any, Any?>(db to appDb).assoc(fx, effectsByState(homeCurrentState(appDb)))
+  }
+
   regEventDb<AppDb>(
-    id = set_popular_vids,
+    id = home.loading_is_done,
     interceptors = v(injectCofx(home.fsm))
   ) { db, (_, videos) ->
     assocIn(db, l(home.panel, popular_vids), videos)
@@ -87,10 +105,6 @@ val regHomeEvents = run {
     interceptors = v(injectCofx(home.fsm), injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    if (homeCurrentState(appDb) == States.Loaded) {
-      return@regEventFx m()
-    }
-
     val popularVideosEndpoint = "${appDb[common.api_endpoint]}/popular?" +
       "fields=videoId,title,videoThumbnails,lengthSeconds,viewCount,author," +
       "publishedText,authorId"
@@ -105,7 +119,7 @@ val regHomeEvents = run {
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
-            ktor.on_success to v(set_popular_vids),
+            ktor.on_success to v(home.loading_is_done),
             ktor.on_failure to v(error)
           )
         )
@@ -117,18 +131,11 @@ val regHomeEvents = run {
     id = refresh,
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
-    m(
-      db to appDbBy(cofx),
-      fx to v(v(FxIds.dispatch, v(load)))
-    )
+    val appDb = appDbBy(cofx)
+    m(db to appDb, fx to effectsByState(homeCurrentState(appDb)))
   }
 
-  regEventFx(go_top_list) { cofx, _ ->
-    val appDb = appDbBy(cofx)
-    if (homeCurrentState(appDb) != States.Loaded) {
-      return@regEventFx m()
-    }
-
+  regEventFx(go_top_list) { _, _ ->
     m(fx to v(v(go_top_list)))
   }
 }

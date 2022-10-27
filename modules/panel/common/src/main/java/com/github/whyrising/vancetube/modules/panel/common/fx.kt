@@ -18,10 +18,8 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.url
-import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.CoroutineScope

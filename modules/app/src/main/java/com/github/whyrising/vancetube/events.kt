@@ -26,14 +26,12 @@ typealias AppDb = IPersistentMap<Any, Any>
 val regCommonEvents = run {
   regEventFx(
     id = common.initialize,
-    interceptors = v(injectCofx(home.fsm), injectCofx(is_online))
+    interceptors = v(injectCofx(is_online))
   ) { cofx, _ ->
     val isOnline = cofx[is_online]!! as Boolean
     val startingRoute = if (isOnline) home.route else library.route
     m<Any, Any>(
-      db to defaultDb
-        .assoc(active_navigation_item, startingRoute.toString())
-        .assoc(home.panel, get(cofx[db], home.panel)!!)
+      db to defaultDb.assoc(active_navigation_item, startingRoute.toString())
     )
   }
 

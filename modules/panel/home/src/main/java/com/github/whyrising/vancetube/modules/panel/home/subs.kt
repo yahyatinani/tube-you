@@ -24,12 +24,12 @@ val regHomeSubs by lazy {
     db[home.panel]
   }
 
-  regSub<AppDb, VideosPanelState>(
+  regSub<AppDb?, VideosPanelState>(
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.state)) },
     computationFn = { homeDb, previousVal, (_, viewsLabel) ->
-      when (homeDb[home.state] as States) {
-        States.Loading -> VideosPanelState(isLoading = true)
+      when (get<States>(homeDb?.get(home.state), 0)) {
+        null, States.Loading -> VideosPanelState(isLoading = true)
         States.Refreshing -> VideosPanelState(
           isRefreshing = true,
           showList = true,

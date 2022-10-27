@@ -7,17 +7,11 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import com.github.whyrising.vancetube.modules.core.keywords.trends
-import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
-import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.google.accompanist.navigation.animation.composable
 
 @OptIn(ExperimentalAnimationApi::class)
-fun NavGraphBuilder.trending(animOffSetX: Int, orientation: Int) {
-  composable(
-    route = trends.route.toString(),
-    exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
-    popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
-  ) {
+fun NavGraphBuilder.trending(orientation: Int) {
+  composable(route = trends.route.toString()) {
     Surface(modifier = Modifier.fillMaxSize()) {
       Text(text = "TODO: trends")
     }

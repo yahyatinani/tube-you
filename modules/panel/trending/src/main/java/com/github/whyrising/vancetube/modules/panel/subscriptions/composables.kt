@@ -7,17 +7,11 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import com.github.whyrising.vancetube.modules.core.keywords.subscriptions
-import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
-import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.google.accompanist.navigation.animation.composable
 
 @OptIn(ExperimentalAnimationApi::class)
-fun NavGraphBuilder.subscriptions(animOffsetX: Int, orientation: Int) {
-  composable(
-    route = subscriptions.route.toString(),
-    exitTransition = { exitAnimation(targetOffsetX = -animOffsetX) },
-    popEnterTransition = { enterAnimation(initialOffsetX = -animOffsetX) }
-  ) {
+fun NavGraphBuilder.subscriptions(orientation: Int) {
+  composable(route = subscriptions.route.toString()) {
     Surface(modifier = Modifier.fillMaxSize()) {
       Text(text = "TODO: subscriptions")
     }

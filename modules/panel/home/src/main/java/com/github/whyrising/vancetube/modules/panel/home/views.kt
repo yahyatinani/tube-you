@@ -19,8 +19,6 @@ import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosPanel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelState
-import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
-import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import kotlinx.coroutines.CoroutineScope
@@ -29,13 +27,10 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.homeCommon(
-  animOffSetX: Int,
   content: @Composable (videos: Videos) -> Unit
 ) {
   composable(
-    route = home.route.toString(),
-    exitTransition = { exitAnimation(targetOffsetX = -animOffSetX) },
-    popEnterTransition = { enterAnimation(initialOffsetX = -animOffSetX) }
+    route = home.route.toString()
   ) {
     val scope: CoroutineScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
@@ -57,8 +52,8 @@ private fun NavGraphBuilder.homeCommon(
   }
 }
 
-fun NavGraphBuilder.home(animOffSetX: Int, orientation: Int) {
-  homeCommon(animOffSetX) { videos ->
+fun NavGraphBuilder.home(orientation: Int) {
+  homeCommon { videos ->
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     LaunchedEffect(Unit) {
@@ -76,8 +71,8 @@ fun NavGraphBuilder.home(animOffSetX: Int, orientation: Int) {
   }
 }
 
-fun NavGraphBuilder.homeLarge(animOffSetX: Int, orientation: Int) {
-  homeCommon(animOffSetX) { videos ->
+fun NavGraphBuilder.homeLarge(orientation: Int) {
+  homeCommon { videos ->
     val scope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
     LaunchedEffect(Unit) {

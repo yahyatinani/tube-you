@@ -79,6 +79,8 @@ import com.github.whyrising.vancetube.modules.designsystem.component.VanceNaviga
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
+import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
+import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
@@ -92,8 +94,6 @@ import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-
-const val ANIM_OFFSET_X = 300
 
 fun NavController.resetBackQueue(backStackEntries: List<NavBackStackEntry>) {
   backQueue.clear()
@@ -309,21 +309,23 @@ fun VanceApp(
       AnimatedNavHost(
         navController = navController,
         startDestination = startDestination(),
+        exitTransition = { exitAnimation(targetOffsetX = -300) },
+        enterTransition = { enterAnimation(initialOffsetX = -300) },
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)
           .consumedWindowInsets(it)
       ) {
         if (isCompactDisplay) {
-          home(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
-          trending(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
-          subscriptions(animOffsetX = ANIM_OFFSET_X, orientation = orientation)
-          library(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
+          home(orientation = orientation)
+          trending(orientation = orientation)
+          subscriptions(orientation = orientation)
+          library(orientation = orientation)
         } else {
-          homeLarge(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
-          trending(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
-          subscriptions(animOffsetX = ANIM_OFFSET_X, orientation = orientation)
-          library(animOffSetX = ANIM_OFFSET_X, orientation = orientation)
+          homeLarge(orientation = orientation)
+          trending(orientation = orientation)
+          subscriptions(orientation = orientation)
+          library(orientation = orientation)
         }
       }
     }

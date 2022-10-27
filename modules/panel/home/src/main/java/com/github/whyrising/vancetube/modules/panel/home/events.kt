@@ -54,7 +54,9 @@ val Home_Transitions = m<Any?, Any>(
     home.loading_is_done to v(States.Loaded),
     error to v(States.Failed)
   ),
-  States.Failed to m(load to v(States.Loading, v(v(FxIds.dispatch, v(load)))))
+  States.Failed to m(
+    home.initialize to v(States.Loading, v(v(FxIds.dispatch, v(load))))
+  )
 )
 
 fun homeCurrentState(appDb: AppDb): Any? =

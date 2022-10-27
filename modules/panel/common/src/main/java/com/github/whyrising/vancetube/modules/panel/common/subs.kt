@@ -15,7 +15,7 @@ fun formatVideos(
       id = video.videoId,
       authorId = video.authorId,
       title = video.title,
-      thumbnail = video.videoThumbnails[4].url,
+      thumbnail = video.videoThumbnails[1].url,
       length = formatSeconds(video.lengthSeconds),
       info = formatVideoInfo(
         author = video.author,

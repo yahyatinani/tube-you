@@ -30,10 +30,13 @@ val regHomeSubs by lazy {
     computationFn = { homeDb, previousVal, (_, viewsLabel) ->
       when (get<States>(homeDb?.get(home.state), 0)) {
         null, States.Loading -> VideosPanelState(isLoading = true)
+
         States.Refreshing -> VideosPanelState(
           isRefreshing = true,
           showList = true,
-          videos = previousVal!!.videos
+          videos = previousVal?.videos ?: Videos(
+            formatVideos(get(homeDb, popular_vids)!!, viewsLabel)
+          )
         )
 
         States.Loaded -> {

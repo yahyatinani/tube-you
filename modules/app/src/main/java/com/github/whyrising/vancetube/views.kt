@@ -67,7 +67,7 @@ import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
-import com.github.whyrising.recompose.w
+import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
@@ -267,7 +267,7 @@ fun VanceApp(
               color = lightGray
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
-              subscribe<Map<Any, Any>>(v(common.navigation_items)).w()
+              watch<Map<Any, Any>>(v(common.navigation_items))
                 .forEach { (route, navItem) ->
                   val contentDescription = stringResource(
                     get(navItem, common.icon_content_desc_text_id)!!

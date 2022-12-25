@@ -10,15 +10,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
-import com.github.whyrising.recompose.subscribe
-import com.github.whyrising.recompose.w
+import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosGrid
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosPanel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
-import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelState
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
 import kotlinx.coroutines.CoroutineScope
@@ -43,9 +41,7 @@ private fun NavGraphBuilder.homeCommon(
     regHomeSubs
 
     VideosPanel(
-      state = subscribe<VideosPanelState>(
-        qvec = v(home.view_model, stringResource(R.string.views_label))
-      ).w(),
+      state = watch(v(home.view_model, stringResource(R.string.views_label))),
       onRefresh = { dispatch(v(home.refresh)) },
       content = content
     )

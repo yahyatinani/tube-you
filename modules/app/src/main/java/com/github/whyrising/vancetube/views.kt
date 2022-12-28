@@ -88,7 +88,6 @@ import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
-import com.github.whyrising.vancetube.modules.panel.trending.trending
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
@@ -337,12 +336,10 @@ fun VanceApp(
       ) {
         if (isCompactDisplay) {
           home(orientation = orientation)
-          trending(orientation = orientation)
           subscriptions(orientation = orientation)
           library(orientation = orientation)
         } else {
           homeLarge(orientation = orientation)
-          trending(orientation = orientation)
           subscriptions(orientation = orientation)
           library(orientation = orientation)
         }

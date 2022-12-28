@@ -7,7 +7,7 @@ dependencies {
   implementation project(':modules:core:keywords')
   implementation project(':modules:panel:common')
   implementation project(':modules:panel:home')
-  implementation project(':modules:panel:trending')
+  implementation project(':modules:panel:library')
   //  implementation deps.androidx.core.ktx
   implementation deps.androidx.appcompat
   //  implementation deps.bundles.compose

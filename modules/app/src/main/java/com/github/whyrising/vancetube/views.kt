@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -273,20 +274,38 @@ fun VanceApp(
                     get(navItem, common.icon_content_desc_text_id)!!
                   )
                   val text = stringResource(get(navItem, label_text_id)!!)
+                  val selected: Boolean = get(navItem, is_selected)!!
                   VanceNavigationItem(
-                    selected = get(navItem, is_selected)!!,
+                    selected = selected,
                     modifier = modifier,
                     icon = {
-                      Icon(
-                        painter = painterResource(get(navItem, icon)!!),
-                        contentDescription = contentDescription,
-                        tint = colorScheme.onBackground
-                      )
+                      val id = get<Any>(navItem, icon)!!
+
+                      if (id is Int)
+                        Icon(
+                          painter = painterResource(id),
+                          contentDescription = contentDescription,
+                          tint = colorScheme.onBackground,
+                          modifier = Modifier.then(
+                            if (selected) Modifier.size(32.dp) else Modifier
+                          )
+                        )
+                      else if (id is ImageVector) {
+                        Icon(
+                          imageVector = id,
+                          contentDescription = contentDescription,
+                          tint = colorScheme.onBackground,
+                          modifier = Modifier.then(
+                            if (selected) Modifier.size(32.dp) else Modifier
+                          )
+                        )
+                      }
                     },
                     label = {
+                      val t = MaterialTheme.typography
                       Text(
                         text = text,
-                        style = MaterialTheme.typography.labelSmall
+                        style = if (selected) t.labelMedium else t.labelSmall
                       )
                     },
                     onPressColor = lightGray

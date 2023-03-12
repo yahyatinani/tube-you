@@ -5,7 +5,7 @@ import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
-import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelState
+import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelVm
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
@@ -24,30 +24,29 @@ val regHomeSubs by lazy {
     db[home.panel]
   }
 
-  regSub<AppDb?, VideosPanelState>(
+  regSub<AppDb?, VideosPanelVm>(
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.state)) },
-    computationFn = { homeDb, previousVal, (_, viewsLabel) ->
+    initialValue = VideosPanelVm(),
+    computationFn = { homeDb, currentValue, (_, viewsLabel) ->
       when (get<States>(homeDb?.get(home.state), 0)) {
-        null, States.Loading -> VideosPanelState(isLoading = true)
+        null, States.Loading -> VideosPanelVm(isLoading = true)
 
-        States.Refreshing -> VideosPanelState(
+        States.Refreshing -> VideosPanelVm(
           isRefreshing = true,
           showList = true,
-          videos = previousVal?.videos ?: Videos(
-            formatVideos(get(homeDb, popular_vids)!!, viewsLabel)
-          )
+          videos = currentValue.videos
         )
 
         States.Loaded -> {
           val videos: List<VideoData> = get(homeDb, popular_vids)!!
-          VideosPanelState(
+          VideosPanelVm(
             showList = true,
             videos = Videos(formatVideos(videos, viewsLabel))
           )
         }
 
-        States.Failed -> VideosPanelState(error = get(homeDb, home.error)!!)
+        States.Failed -> VideosPanelVm(error = get(homeDb, home.error)!!)
       }
     }
   )

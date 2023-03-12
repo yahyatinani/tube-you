@@ -1,5 +1,7 @@
 package com.github.whyrising.vancetube
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RssFeed
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
@@ -13,7 +15,6 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.navigation_it
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
 import com.github.whyrising.vancetube.modules.core.keywords.subscriptions
-import com.github.whyrising.vancetube.modules.core.keywords.trends
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
@@ -28,16 +29,16 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
     label_text_id, R.string.nav_item_label_home,
     icon_content_desc_text_id, R.string.nav_item_desc_home,
     is_selected, false,
-    icon_variant, R.drawable.ic_filled_home,
-    icon, R.drawable.ic_outlined_home
+    icon_variant, Icons.Default.RssFeed,
+    icon, Icons.Default.RssFeed
   ),
-  trends.route.toString() to m2(
-    label_text_id, R.string.nav_item_label_trend,
-    icon_content_desc_text_id, R.string.nav_item_desc_trends,
-    is_selected, false,
-    icon_variant, R.drawable.ic_filled_trend,
-    icon, R.drawable.ic_outlined_trend
-  ),
+//  trends.route.toString() to m2(
+//    label_text_id, R.string.nav_item_label_trend,
+//    icon_content_desc_text_id, R.string.nav_item_desc_trends,
+//    is_selected, false,
+//    icon_variant, R.drawable.ic_filled_trend,
+//    icon, R.drawable.ic_outlined_trend
+//  ),
   subscriptions.route.toString() to m2(
     label_text_id, R.string.nav_item_label_subs,
     icon_content_desc_text_id, R.string.nav_item_desc_subs,
@@ -66,6 +67,7 @@ val regCommonSubs = run {
   regSub<String, Any>(
     queryId = navigation_items,
     signalsFn = { subscribe(v(active_navigation_item)) },
+    initialValue = m<Any, Any>(),
     computationFn = { activeNavigationItem, _, _ ->
       val selectedItem = navItems[activeNavigationItem]!!
       assoc(

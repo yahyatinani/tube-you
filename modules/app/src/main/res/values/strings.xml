@@ -1,5 +1,5 @@
 <resources>
-  <string name="nav_item_label_home">Home</string>
+  <string name="nav_item_label_home">Feed</string>
   <string name="nav_item_label_trend">Trending</string>
   <string name="nav_item_label_subs">Subscriptions</string>
   <string name="nav_item_label_library">Library</string>

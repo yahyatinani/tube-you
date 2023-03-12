@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.github.whyrising.vancetube.modules.designsystem.core.formatVideoInfo
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
-import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelState
+import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelVm
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.y.core.v
@@ -28,7 +28,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 @Composable
 fun VideosPanel(
   modifier: Modifier = Modifier,
-  state: VideosPanelState,
+  state: VideosPanelVm,
   onRefresh: () -> Unit = {},
   content: @Composable (videos: Videos) -> Unit
 ) {
@@ -104,7 +104,7 @@ private val designTimeData = v(
 fun HomePreview() {
   VanceTheme {
     VideosPanel(
-      state = VideosPanelState(
+      state = VideosPanelVm(
         videos = Videos(designTimeData),
         showList = true
       )

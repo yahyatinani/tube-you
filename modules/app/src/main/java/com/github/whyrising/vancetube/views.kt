@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -67,7 +68,7 @@ import com.github.whyrising.recompose.fx.FxIds
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
-import com.github.whyrising.recompose.w
+import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
@@ -87,7 +88,6 @@ import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
-import com.github.whyrising.vancetube.modules.panel.trending.trending
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
@@ -267,26 +267,44 @@ fun VanceApp(
               color = lightGray
             )
             val content: @Composable (Modifier) -> Unit = { modifier ->
-              subscribe<Map<Any, Any>>(v(common.navigation_items)).w()
+              watch<Map<Any, Any>>(v(common.navigation_items))
                 .forEach { (route, navItem) ->
                   val contentDescription = stringResource(
                     get(navItem, common.icon_content_desc_text_id)!!
                   )
                   val text = stringResource(get(navItem, label_text_id)!!)
+                  val selected: Boolean = get(navItem, is_selected)!!
                   VanceNavigationItem(
-                    selected = get(navItem, is_selected)!!,
+                    selected = selected,
                     modifier = modifier,
                     icon = {
-                      Icon(
-                        painter = painterResource(get(navItem, icon)!!),
-                        contentDescription = contentDescription,
-                        tint = colorScheme.onBackground
-                      )
+                      val id = get<Any>(navItem, icon)!!
+
+                      if (id is Int) {
+                        Icon(
+                          painter = painterResource(id),
+                          contentDescription = contentDescription,
+                          tint = colorScheme.onBackground,
+                          modifier = Modifier.then(
+                            if (selected) Modifier.size(32.dp) else Modifier
+                          )
+                        )
+                      } else if (id is ImageVector) {
+                        Icon(
+                          imageVector = id,
+                          contentDescription = contentDescription,
+                          tint = colorScheme.onBackground,
+                          modifier = Modifier.then(
+                            if (selected) Modifier.size(32.dp) else Modifier
+                          )
+                        )
+                      }
                     },
                     label = {
+                      val t = MaterialTheme.typography
                       Text(
                         text = text,
-                        style = MaterialTheme.typography.labelSmall
+                        style = if (selected) t.labelMedium else t.labelSmall
                       )
                     },
                     onPressColor = lightGray
@@ -318,12 +336,10 @@ fun VanceApp(
       ) {
         if (isCompactDisplay) {
           home(orientation = orientation)
-          trending(orientation = orientation)
           subscriptions(orientation = orientation)
           library(orientation = orientation)
         } else {
           homeLarge(orientation = orientation)
-          trending(orientation = orientation)
           subscriptions(orientation = orientation)
           library(orientation = orientation)
         }

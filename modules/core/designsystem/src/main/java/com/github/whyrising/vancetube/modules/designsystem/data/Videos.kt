@@ -1,6 +1,6 @@
 package com.github.whyrising.vancetube.modules.designsystem.data
 
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 
-@Stable
+@Immutable
 data class Videos(val value: List<VideoViewModel>)

@@ -18,12 +18,12 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "VanceTube"
+rootProject.name = "TubeYou"
 
 include ':modules:app'
 include ':modules:benchmark'
 include ':modules:panel:home'
 include ':modules:core:keywords'
 include ':modules:core:designsystem'
-include ':modules:panel:trending'
+include ':modules:panel:library'
 include ':modules:panel:common'

@@ -280,7 +280,7 @@ fun VanceApp(
                     icon = {
                       val id = get<Any>(navItem, icon)!!
 
-                      if (id is Int)
+                      if (id is Int) {
                         Icon(
                           painter = painterResource(id),
                           contentDescription = contentDescription,
@@ -289,7 +289,7 @@ fun VanceApp(
                             if (selected) Modifier.size(32.dp) else Modifier
                           )
                         )
-                      else if (id is ImageVector) {
+                      } else if (id is ImageVector) {
                         Icon(
                           imageVector = id,
                           contentDescription = contentDescription,

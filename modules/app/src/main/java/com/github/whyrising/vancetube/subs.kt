@@ -15,7 +15,6 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.navigation_it
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
 import com.github.whyrising.vancetube.modules.core.keywords.subscriptions
-import com.github.whyrising.vancetube.modules.core.keywords.trends
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap

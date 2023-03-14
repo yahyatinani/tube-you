@@ -36,6 +36,7 @@ android {
   }
 
   buildTypes {
+    val appName = "TubeYou"
     val debug by getting {
       isMinifyEnabled = false
       versionNameSuffix = "-debug"
@@ -47,7 +48,7 @@ android {
       resValue(
         type = "string",
         name = "app_name",
-        value = "VanceTube-debug"
+        value = "$appName-debug"
       )
       if (System.getenv("SIGNING_KEY_BASE64") != null)
         signingConfig = signingConfigs.getByName("debug")
@@ -69,7 +70,7 @@ android {
       resValue(
         type = "string",
         name = "app_name",
-        value = "VanceTube"
+        value = "$appName"
       )
       signingConfig = signingConfigs.getByName("release")
     }

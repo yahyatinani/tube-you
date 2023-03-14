@@ -36,8 +36,8 @@ import io.ktor.util.reflect.typeInfo
 val Home_Transitions = m<Any?, Any>(
   null to m(
     home.initialize to v(
-      States.Loading,
-      v(v(FxIds.dispatch, v(load)))
+      States.Loaded,
+//      v(v(FxIds.dispatch, v(load)))
     )
   ),
   States.Loading to m(

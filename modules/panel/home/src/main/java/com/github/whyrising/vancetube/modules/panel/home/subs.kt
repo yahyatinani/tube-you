@@ -39,7 +39,7 @@ val regHomeSubs by lazy {
         )
 
         States.Loaded -> {
-          val videos: List<VideoData> = get(homeDb, popular_vids)!!
+          val videos: List<VideoData> = get(homeDb, popular_vids) ?: v()
           VideosPanelVm(
             showList = true,
             videos = Videos(formatVideos(videos, viewsLabel))

@@ -1,7 +1,5 @@
 package com.github.whyrising.vancetube
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.RssFeed
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
@@ -29,8 +27,8 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
     label_text_id, R.string.nav_item_label_home,
     icon_content_desc_text_id, R.string.nav_item_desc_home,
     is_selected, false,
-    icon_variant, Icons.Default.RssFeed,
-    icon, Icons.Default.RssFeed
+    icon_variant, R.drawable.ic_filled_home,
+    icon, R.drawable.ic_outlined_home
   ),
 //  trends.route.toString() to m2(
 //    label_text_id, R.string.nav_item_label_trend,

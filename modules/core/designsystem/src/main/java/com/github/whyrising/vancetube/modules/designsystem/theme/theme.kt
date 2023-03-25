@@ -10,16 +10,17 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColorPalette = darkColorScheme(
+val DarkColorPalette = darkColorScheme(
   primary = Purple200,
   primaryContainer = Color.Black,
   secondary = Teal200,
   surface = Grey900,
   background = Grey900,
+  surfaceVariant = Color.Cyan,
   onBackground = Color.White
 )
 
-private val LightColorPalette = lightColorScheme(
+val LightColorPalette = lightColorScheme(
   primary = Purple500,
   primaryContainer = Color.White,
   secondary = Teal200,

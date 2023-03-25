@@ -170,9 +170,10 @@ fun getRegHomeEvents() {
     id = ":search",
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
+    val sq = (searchQuery as String).replace(" ", "%20")
     val appDb = appDbBy(cofx)
     val suggestionsEndpoint =
-      "${appDb[common.api_endpoint]}/search/suggestions?q=$searchQuery"
+      "${appDb[common.api_endpoint]}/search/suggestions?q=$sq"
 
     m<Any, Any>().assoc(
       BuiltInFx.fx,

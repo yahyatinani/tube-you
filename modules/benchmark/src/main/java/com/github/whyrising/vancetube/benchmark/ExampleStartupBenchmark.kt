@@ -27,7 +27,7 @@ class ExampleStartupBenchmark {
 
   @Test
   fun startup() = benchmarkRule.measureRepeated(
-    packageName = "com.github.whyrising.vancetube.debug",
+    packageName = "com.github.whyrising.vancetube",
     metrics = listOf(StartupTimingMetric()),
     iterations = 5,
     startupMode = StartupMode.COLD

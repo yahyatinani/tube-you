@@ -88,6 +88,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
+import com.github.whyrising.vancetube.modules.designsystem.component.SearchSuggestionItem
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
@@ -247,11 +248,8 @@ fun VanceApp(
           ) {
             val suggestions = watch<List<String>>(query = v(":suggestions"))
             LazyColumn {
-              items(
-                key = { it.hashCode() },
-                items = suggestions
-              ) {
-                Text(text = it)
+              items(key = { it.hashCode() }, items = suggestions) {
+                SearchSuggestionItem(text = it, onClick = { /* todo: */ })
               }
             }
           }

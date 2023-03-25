@@ -216,7 +216,7 @@ fun VanceApp(
             tonalElevation = 0.dp,
             shape = RoundedCornerShape(percent = 50),
             colors = SearchBarDefaults.colors(
-              containerColor = colorScheme.surface,
+              containerColor = colorScheme.surface
             ),
             placeholder = { Text(text = "Search YouTube") },
             leadingIcon = {
@@ -255,7 +255,7 @@ fun VanceApp(
               }
             }
           }
-        } else
+        } else {
           TopAppBar(
             modifier = Modifier
               .windowInsetsPadding(
@@ -319,6 +319,7 @@ fun VanceApp(
               scrolledContainerColor = colorScheme.background
             )
           )
+        }
       },
       bottomBar = {
         Surface(

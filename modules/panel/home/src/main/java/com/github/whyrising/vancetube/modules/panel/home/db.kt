@@ -30,7 +30,8 @@ val regHomeCofx = regCofx(home.fsm) { cofx ->
   val nextDb = updateToNextState(appDbBy(cofx), eventId)
 
   cofx.assoc(
-    recompose.db, assocIn(
+    recompose.db,
+    assocIn(
       nextDb,
       l(home.panel, ":home/search_bar"),
       m(

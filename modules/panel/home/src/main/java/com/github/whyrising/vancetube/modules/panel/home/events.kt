@@ -39,7 +39,7 @@ import kotlinx.serialization.Serializable
 val Home_Transitions = m<Any?, Any>(
   null to m(
     home.initialize to v(
-      States.Loaded,
+      States.Loaded
 //      v(v(FxIds.dispatch, v(load)))
     )
   ),

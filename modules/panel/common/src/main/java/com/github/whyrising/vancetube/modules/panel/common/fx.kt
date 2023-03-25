@@ -3,9 +3,13 @@ package com.github.whyrising.vancetube.modules.panel.common
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.events.Event
 import com.github.whyrising.recompose.regFx
+import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.panel.common.ktor.response_type_info
+import com.github.whyrising.y.concurrency.Atom
+import com.github.whyrising.y.concurrency.atom
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.m
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpRequestTimeoutException
@@ -23,7 +27,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import java.net.UnknownHostException
 
@@ -108,4 +115,42 @@ fun httpEffect(request: Any?) {
 
 fun regHttpKtor() {
   regFx(ktor.http_fx, ::httpEffect)
+}
+
+/*
+ * -- :dispatch_debounce -------------------------------------------------------
+ */
+
+private val debounceRecord: Atom<IPersistentMap<Any, Any>> = atom(m())
+
+@Suppress("EnumEntryName", "ClassName")
+enum class bounce_fx {
+  id,
+  event,
+  delay,
+  time_received;
+
+  override fun toString(): String = name
+}
+
+fun regBounceFx() {
+  fun dispatchLater(debounce: IPersistentMap<Any?, Any?>) {
+    GlobalScope.launch {
+      val delayPeriod = get<Any>(debounce, bounce_fx.delay)!!
+      delay((delayPeriod as Number).toLong())
+
+      val timeReceived = debounce[bounce_fx.time_received]
+      if (timeReceived == get<Any>(debounceRecord(), debounce[bounce_fx.id])) {
+        dispatch(debounce[bounce_fx.event] as Event)
+      }
+    }
+  }
+
+  regFx(id = common.dispatch_debounce) { debounce ->
+    debounce as IPersistentMap<*, *>
+    val now = Clock.System.now()
+    val id = get<Any>(debounce, bounce_fx.id)!!
+    debounceRecord.swap { it.assoc(id, now) }
+    dispatchLater(debounce.assoc(bounce_fx.time_received, now))
+  }
 }

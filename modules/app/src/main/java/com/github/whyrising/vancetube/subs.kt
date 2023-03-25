@@ -17,6 +17,8 @@ import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getIn
+import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.github.whyrising.y.core.util.m as m2
@@ -54,11 +56,11 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
 )
 
 val regCommonSubs = run {
-  regSub<AppDb, Boolean>(is_backstack_available) { db, _ ->
+  regSub<AppDb>(is_backstack_available) { db, _ ->
     db[is_backstack_available] as Boolean
   }
 
-  regSub<AppDb, Any?>(active_navigation_item) { db, _ ->
+  regSub<AppDb>(active_navigation_item) { db, _ ->
     db[active_navigation_item]
   }
 

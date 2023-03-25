@@ -64,7 +64,7 @@ import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavHostController
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
-import com.github.whyrising.recompose.fx.FxIds
+import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.subscribe
@@ -173,7 +173,7 @@ fun VanceApp(
             topAppBarState.heightOffset = 0f
           }
           regEventFx(expand_top_app_bar) { _, _ ->
-            m(FxIds.fx to v(v(expand_top_app_bar)))
+            m(fx to v(v(expand_top_app_bar)))
           }
         }
         enterAlwaysScrollBehavior(topAppBarState)

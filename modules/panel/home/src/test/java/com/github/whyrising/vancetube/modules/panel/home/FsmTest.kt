@@ -1,6 +1,7 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
-import com.github.whyrising.recompose.fx.FxIds
+
+import com.github.whyrising.recompose.fx.BuiltInFx
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.loading_is_done
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
@@ -20,7 +21,7 @@ class FsmTest : FreeSpec({
     updateToNextState(m(), home.initialize) shouldBe assocIn(
       map,
       l(home.panel, home.state),
-      v(Loading, v(v(FxIds.dispatch, v(home.load))))
+      v(Loading, v(v(BuiltInFx.dispatch, v(home.load))))
     )
 
     updateToNextState(
@@ -33,7 +34,7 @@ class FsmTest : FreeSpec({
     handleNextState(m(), v(home.initialize)) shouldBe assocIn(
       map,
       l(home.panel, home.state),
-      v(Loading, v(v(FxIds.dispatch, v(home.load))))
+      v(Loading, v(v(BuiltInFx.dispatch, v(home.load))))
     )
 
     handleNextState(

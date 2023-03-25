@@ -11,6 +11,8 @@ import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.formatVideos
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getIn
+import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v
 
 // -- Subs ---------------------------------------------------------------------
@@ -20,7 +22,7 @@ import com.github.whyrising.y.core.v
  * @return [Unit]
  */
 val regHomeSubs by lazy {
-  regSub<AppDb, Any?>(home.state) { db, _ ->
+  regSub<AppDb>(home.state) { db, _ ->
     db[home.panel]
   }
 

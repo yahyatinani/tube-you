@@ -2,7 +2,7 @@ package com.github.whyrising.vancetube
 
 import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.injectCofx
-import com.github.whyrising.recompose.fx.FxIds.fx
+import com.github.whyrising.recompose.fx.BuiltInFx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
@@ -16,8 +16,10 @@ import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.library
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.letIf
+import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
@@ -47,7 +49,9 @@ val regCommonEvents = run {
   }
 
   regEventFx(navigate_to) { _, (_, destination) ->
-    m<Any, Any>(fx to v(v(navigate_to, m(common.destination to destination))))
+    m<Any, Any>(
+      BuiltInFx.fx to v(v(navigate_to, m(common.destination to destination)))
+    )
   }
 
   regEventFx(
@@ -57,12 +61,12 @@ val regCommonEvents = run {
     val appDb = appDbBy(cofx)
     if (destination == appDb[active_navigation_item]) {
       // TODO: Use one fx for all panels to scroll up by overriding reg fx
-      m(fx to v(v(home.go_top_list)))
+      m(BuiltInFx.fx to v(v(home.go_top_list)))
     } else {
       // TODO: Set active_panel to active_navigation_item
       m<Any, Any>(
         db to appDb.assoc(active_navigation_item, destination),
-        fx to v(
+        BuiltInFx.fx to v(
           v(
             navigate_to,
             m(

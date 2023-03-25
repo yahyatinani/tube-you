@@ -2,8 +2,7 @@ package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.events.Event
-import com.github.whyrising.recompose.fx.FxIds
-import com.github.whyrising.recompose.fx.FxIds.fx
+import com.github.whyrising.recompose.fx.BuiltInFx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
@@ -47,7 +46,7 @@ val Home_Transitions = m<Any?, Any>(
   States.Loaded to m(
     refresh to v(
       States.Refreshing,
-      v(v(FxIds.dispatch, v(load)))
+      v(v(BuiltInFx.dispatch, v(load)))
     )
   ),
   States.Refreshing to m(
@@ -55,7 +54,7 @@ val Home_Transitions = m<Any?, Any>(
     error to v(States.Failed)
   ),
   States.Failed to m(
-    home.initialize to v(States.Loading, v(v(FxIds.dispatch, v(load))))
+    home.initialize to v(States.Loading, v(v(BuiltInFx.dispatch, v(load))))
   )
 )
 
@@ -64,8 +63,7 @@ fun homeCurrentState(appDb: AppDb): Any? =
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = get<States?>(homeCurrentState(db), 0)
-  val nextState =
-    nextState(Home_Transitions, currentState, event)
+  val nextState = nextState(Home_Transitions, currentState, event)
   return db.letIf(nextState != null) {
     assocIn(it, l(home.panel, home.state), nextState) as AppDb
   }
@@ -85,7 +83,10 @@ val regHomeEvents = run {
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    m<Any, Any?>(db to appDb).assoc(fx, effectsByState(homeCurrentState(appDb)))
+    m<Any, Any?>(db to appDb).assoc(
+      BuiltInFx.fx,
+      effectsByState(homeCurrentState(appDb))
+    )
   }
 
   regEventDb<AppDb>(
@@ -111,7 +112,7 @@ val regHomeEvents = run {
       "fields=videoId,title,videoThumbnails,lengthSeconds,viewCount,author," +
       "publishedText,authorId"
     m<Any, Any>(db to appDb).assoc(
-      fx,
+      BuiltInFx.fx,
       v(
         v(
           ktor.http_fx,
@@ -134,10 +135,10 @@ val regHomeEvents = run {
     interceptors = v(injectCofx(home.fsm))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    m(db to appDb, fx to effectsByState(homeCurrentState(appDb)))
+    m(db to appDb, BuiltInFx.fx to effectsByState(homeCurrentState(appDb)))
   }
 
   regEventFx(go_top_list) { _, _ ->
-    m(fx to v(v(go_top_list)))
+    m(BuiltInFx.fx to v(v(go_top_list)))
   }
 }

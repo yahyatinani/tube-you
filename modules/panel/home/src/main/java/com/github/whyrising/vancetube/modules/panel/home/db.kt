@@ -11,7 +11,6 @@ import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 
 // -- Spec ---------------------------------------------------------------------
 
@@ -34,11 +33,7 @@ val regHomeCofx = regCofx(home.fsm) { cofx ->
     assocIn(
       nextDb,
       l(home.panel, ":home/search_bar"),
-      m(
-        ":query" to "",
-        ":isActive" to true,
-        ":suggestions" to v("suggestion1", "suggestion2", "suggestion3")
-      )
+      m(":query" to "", ":isActive" to true)
     )
   )
 }

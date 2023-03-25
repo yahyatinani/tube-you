@@ -62,6 +62,6 @@ val regHomeSubs by lazy {
   }
 
   regSub<AppDb>(queryId = ":suggestions") { db, _ ->
-    getIn(db, l(home.panel, ":home/search_bar", ":suggestions"))
+    getIn(db, l(home.panel, ":home/search_bar", ":suggestions"), v<Any>())
   }
 }

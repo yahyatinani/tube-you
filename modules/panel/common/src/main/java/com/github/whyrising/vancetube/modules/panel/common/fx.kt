@@ -135,6 +135,7 @@ enum class bounce_fx {
 
 fun regBounceFx() {
   fun dispatchLater(debounce: IPersistentMap<Any?, Any?>) {
+    // TODO: pass a CoroutineScope?
     GlobalScope.launch {
       val delayPeriod = get<Any>(debounce, bounce_fx.delay)!!
       delay((delayPeriod as Number).toLong())

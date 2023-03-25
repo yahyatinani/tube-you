@@ -52,4 +52,16 @@ val regHomeSubs by lazy {
       }
     }
   )
+
+  regSub<AppDb>(queryId = ":isActive") { db, _ ->
+    getIn(db, l(home.panel, ":home/search_bar", ":isActive"))
+  }
+
+  regSub<AppDb>(queryId = ":query") { db, _ ->
+    getIn(db, l(home.panel, ":home/search_bar", ":query"))
+  }
+
+  regSub<AppDb>(queryId = ":suggestions") { db, _ ->
+    getIn(db, l(home.panel, ":home/search_bar", ":suggestions"))
+  }
 }

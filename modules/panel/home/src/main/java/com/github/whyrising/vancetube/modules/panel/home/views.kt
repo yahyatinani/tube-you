@@ -35,7 +35,7 @@ private fun NavGraphBuilder.homeCommon(
       regCofx(home.coroutine_scope) { cofx ->
         cofx.assoc(home.coroutine_scope, scope)
       }
-      regHomeEvents
+      getRegHomeEvents()
       dispatch(v(home.initialize))
     }
     regHomeSubs

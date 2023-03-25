@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Top
-import androidx.compose.foundation.layout.consumedWindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -19,8 +19,14 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
@@ -29,18 +35,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -194,64 +206,119 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        TopAppBar(
-          modifier = Modifier
-            .windowInsetsPadding(
-              insets = WindowInsets.safeDrawing.only(Top + Horizontal)
-            )
-            .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
-          title = {
-            IconButton(onClick = { /*TODO*/ }) {
-              Icon(
-                imageVector = Icons.Outlined.Search,
-                modifier = Modifier.size(26.dp),
-                contentDescription = "Search a video"
-              )
+        var s by remember { mutableStateOf(false) }
+
+        if (s) {
+          SearchBar(
+            modifier = Modifier.wrapContentSize(),
+            query = watch(v(":query")),
+            active = watch(v(":isActive")),
+            tonalElevation = 0.dp,
+            shape = RoundedCornerShape(percent = 50),
+            colors = SearchBarDefaults.colors(
+              containerColor = colorScheme.surface,
+            ),
+            placeholder = { Text(text = "Search YouTube") },
+            leadingIcon = {
+              IconButton(onClick = { /*todo*/ }) {
+                Icon(
+                  imageVector = Icons.Filled.ArrowBack,
+                  modifier = Modifier,
+                  contentDescription = ""
+                )
+              }
+            },
+            trailingIcon = {
+              IconButton(onClick = { }) {
+                Icon(
+                  imageVector = Icons.Filled.Close,
+                  modifier = Modifier,
+                  contentDescription = ""
+                )
+              }
+            },
+            onQueryChange = {
+              dispatchSync(v(":query", it))
+            },
+            onActiveChange = {
+              dispatch(v(":isActive", it))
+            },
+            onSearch = {}
+          ) {
+            val suggestions = watch<List<String>>(query = v(":suggestions"))
+            LazyColumn {
+              items(
+                key = { it.hashCode() },
+                items = suggestions
+              ) {
+                Text(text = it)
+              }
             }
-          },
-          scrollBehavior = scrollBehavior,
-          navigationIcon = {
+          }
+        } else
+          TopAppBar(
+            modifier = Modifier
+              .windowInsetsPadding(
+                insets = WindowInsets.safeDrawing.only(Top + Horizontal)
+              )
+              .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
+            title = {
+              IconButton(
+                onClick = {
+                  s = true
+//                  dispatch(v(common.navigate_to, search.route.toString()))
+                }
+              ) {
+                Icon(
+                  imageVector = Icons.Outlined.Search,
+                  modifier = Modifier.size(26.dp),
+                  contentDescription = "Search a video"
+                )
+              }
+            },
+            scrollBehavior = scrollBehavior,
+            navigationIcon = {
 //            if (subscribe<Boolean>(v(base.is_backstack_available)).w()) {
 //              BackArrow()
 //            }
-          },
-          actions = {
-            Box(
-              modifier = Modifier
-                .background(
-                  shape = CircleShape,
-                  color = Color.Transparent
-                )
-                .clickable(role = Role.Image) { /*TODO*/ }
-                .padding(8.dp)
-            ) {
+            },
+            actions = {
               Box(
                 modifier = Modifier
                   .background(
                     shape = CircleShape,
-//                    color = Color(0xFFEB3F7A),
-                    color = colorScheme.onBackground
+                    color = Color.Transparent
                   )
-                  .width(24.dp)
-                  .height(24.dp)
-                  .padding(3.dp),
-                contentAlignment = Center
+                  .clickable(role = Role.Image) { /*TODO*/ }
+                  .padding(8.dp)
               ) {
-                Icon(
-                  imageVector = Icons.Filled.Person,
-                  modifier = Modifier,
+                Box(
+                  modifier = Modifier
+                    .background(
+                      shape = CircleShape,
+//                    color = Color(0xFFEB3F7A),
+                      color = colorScheme.onBackground
+                    )
+                    .width(24.dp)
+                    .height(24.dp)
+                    .padding(3.dp),
+                  contentAlignment = Center
+                ) {
+                  Icon(
+                    imageVector = Icons.Filled.Person,
+                    modifier = Modifier,
 //                    .clip(CircleShape)
 //                    .size(20.dp),
-                  contentDescription = "profile picture",
-                  tint = colorScheme.background
-                )
+                    contentDescription = "profile picture",
+                    tint = colorScheme.background
+                  )
+                }
               }
-            }
-          },
-          colors = TopAppBarDefaults.smallTopAppBarColors(
-            scrolledContainerColor = colorScheme.background
+            },
+            colors = topAppBarColors(
+              scrolledContainerColor = colorScheme.background
+            )
           )
-        )
       },
       bottomBar = {
         Surface(
@@ -332,7 +399,7 @@ fun VanceApp(
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)
-          .consumedWindowInsets(it)
+          .consumeWindowInsets(it)
       ) {
         if (isCompactDisplay) {
           home(orientation = orientation)

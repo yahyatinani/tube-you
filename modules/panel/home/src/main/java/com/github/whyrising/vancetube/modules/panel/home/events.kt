@@ -1,5 +1,7 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.events.Event
 import com.github.whyrising.recompose.fx.BuiltInFx
@@ -17,6 +19,7 @@ import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
+import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
 import com.github.whyrising.vancetube.modules.panel.common.ktor
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.vancetube.modules.panel.common.nextState
@@ -29,6 +32,7 @@ import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import io.ktor.http.HttpMethod
 import io.ktor.util.reflect.typeInfo
+import kotlinx.serialization.Serializable
 
 // -- Home FSM -----------------------------------------------------------------
 
@@ -77,7 +81,7 @@ fun effectsByState(state: Any?) = get<Any>(state, 1)
 
 // -- Registration -------------------------------------------------------------
 
-val regHomeEvents = run {
+fun getRegHomeEvents() {
   regEventFx(
     id = home.initialize,
     interceptors = v(injectCofx(home.fsm))
@@ -140,5 +144,75 @@ val regHomeEvents = run {
 
   regEventFx(go_top_list) { _, _ ->
     m(BuiltInFx.fx to v(v(go_top_list)))
+  }
+
+  regEventDb<AppDb>(id = ":isActive") { db, (_, flag) ->
+    assocIn(db, l(home.panel, ":home/search_bar", ":isActive"), flag)
+  }
+
+  @Immutable
+  @Serializable
+  data class Suggestions(
+    val query: String,
+    @Stable
+    val suggestions: PersistentVector<String>
+  )
+
+  regEventDb<AppDb>(id = ":home/set-suggestions") { db, (_, suggestions) ->
+    assocIn(
+      db,
+      l(home.panel, ":home/search_bar", ":suggestions"),
+      (suggestions as Suggestions).suggestions
+    )
+  }
+
+  regEventFx(
+    id = ":search",
+    interceptors = v(injectCofx(home.coroutine_scope))
+  ) { cofx, (_, searchQuery) ->
+    val appDb = appDbBy(cofx)
+    val suggestionsEndpoint =
+      "${appDb[common.api_endpoint]}/search/suggestions?q=$searchQuery"
+
+    m<Any, Any>().assoc(
+      BuiltInFx.fx,
+      v(
+        v(
+          ktor.http_fx,
+          m(
+            ktor.method to HttpMethod.Get,
+            ktor.url to suggestionsEndpoint,
+            ktor.timeout to 8000,
+            ktor.coroutine_scope to cofx[home.coroutine_scope],
+            ktor.response_type_info to typeInfo<Suggestions>(),
+            ktor.on_success to v(":home/set-suggestions"),
+            ktor.on_failure to v(error)
+          )
+        )
+      )
+    )
+  }
+
+  regEventFx(
+    id = ":query",
+    interceptors = v(injectCofx(home.coroutine_scope))
+  ) { cofx, (_, searchQuery) ->
+    val appDb = appDbBy(cofx)
+    val newDb =
+      assocIn(appDb, l(home.panel, ":home/search_bar", ":query"), searchQuery)
+
+    m<Any, Any>(db to newDb).assoc(
+      BuiltInFx.fx,
+      v(
+        v(
+          common.dispatch_debounce,
+          m(
+            bounce_fx.id to ":search",
+            bounce_fx.event to v(":search", searchQuery),
+            bounce_fx.delay to 500
+          )
+        )
+      )
+    )
   }
 }

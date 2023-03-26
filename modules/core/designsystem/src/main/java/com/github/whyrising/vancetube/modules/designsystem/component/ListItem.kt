@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube.modules.designsystem.component
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,11 +13,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
@@ -85,8 +89,9 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
   Row(
     modifier = Modifier
       .fillMaxWidth()
-      .clickable(onClick = onClick)
-      .padding(8.dp)
+      .height(50.dp)
+      .clickable(onClick = onClick),
+    verticalAlignment = Alignment.CenterVertically
   ) {
     Icon(
       imageVector = Icons.Default.Search,
@@ -94,11 +99,25 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
       modifier = Modifier.weight(weight = .1f)
     )
     Spacer(modifier = Modifier.width(16.dp))
-    Text(text = text, modifier = Modifier.weight(weight = 1f))
+    Text(
+      text = text,
+      modifier = Modifier.weight(weight = 1f),
+      style = LocalTextStyle.current.copy(lineHeight = 18.sp)
+    )
+    Spacer(modifier = Modifier.width(16.dp))
     Icon(
       imageVector = Icons.Default.ArrowOutward,
       contentDescription = "Suggestion icon",
       modifier = Modifier.weight(weight = .1f)
     )
   }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun AppDarkPreview() {
+  SearchSuggestionItem(
+    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do" +
+      " eiusmod tempor "
+  ) {}
 }

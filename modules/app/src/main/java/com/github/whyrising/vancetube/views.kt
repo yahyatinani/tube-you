@@ -247,77 +247,76 @@ fun VanceApp(
             onSearch = {}
           ) {
             val suggestions = watch<List<String>>(query = v(":suggestions"))
-            LazyColumn {
+            LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
               items(key = { it.hashCode() }, items = suggestions) {
                 SearchSuggestionItem(text = it, onClick = { /* todo: */ })
               }
             }
           }
-        } else {
-          TopAppBar(
-            modifier = Modifier
-              .windowInsetsPadding(
-                insets = WindowInsets.safeDrawing.only(Top + Horizontal)
-              )
-              .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
-            title = {
-              IconButton(
-                onClick = {
-                  s = true
+        }
+        TopAppBar(
+          modifier = Modifier
+            .windowInsetsPadding(
+              insets = WindowInsets.safeDrawing.only(Top + Horizontal)
+            )
+            .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
+          title = {
+            IconButton(
+              onClick = {
+                s = true
 //                  dispatch(v(common.navigate_to, search.route.toString()))
-                }
-              ) {
-                Icon(
-                  imageVector = Icons.Outlined.Search,
-                  modifier = Modifier.size(26.dp),
-                  contentDescription = "Search a video"
-                )
               }
-            },
-            scrollBehavior = scrollBehavior,
-            navigationIcon = {
+            ) {
+              Icon(
+                imageVector = Icons.Outlined.Search,
+                modifier = Modifier.size(26.dp),
+                contentDescription = "Search a video"
+              )
+            }
+          },
+          scrollBehavior = scrollBehavior,
+          navigationIcon = {
 //            if (subscribe<Boolean>(v(base.is_backstack_available)).w()) {
 //              BackArrow()
 //            }
-            },
-            actions = {
+          },
+          actions = {
+            Box(
+              modifier = Modifier
+                .background(
+                  shape = CircleShape,
+                  color = Color.Transparent
+                )
+                .clickable(role = Role.Image) { /*TODO*/ }
+                .padding(8.dp)
+            ) {
               Box(
                 modifier = Modifier
                   .background(
                     shape = CircleShape,
-                    color = Color.Transparent
-                  )
-                  .clickable(role = Role.Image) { /*TODO*/ }
-                  .padding(8.dp)
-              ) {
-                Box(
-                  modifier = Modifier
-                    .background(
-                      shape = CircleShape,
 //                    color = Color(0xFFEB3F7A),
-                      color = colorScheme.onBackground
-                    )
-                    .width(24.dp)
-                    .height(24.dp)
-                    .padding(3.dp),
-                  contentAlignment = Center
-                ) {
-                  Icon(
-                    imageVector = Icons.Filled.Person,
-                    modifier = Modifier,
+                    color = colorScheme.onBackground
+                  )
+                  .width(24.dp)
+                  .height(24.dp)
+                  .padding(3.dp),
+                contentAlignment = Center
+              ) {
+                Icon(
+                  imageVector = Icons.Filled.Person,
+                  modifier = Modifier,
 //                    .clip(CircleShape)
 //                    .size(20.dp),
-                    contentDescription = "profile picture",
-                    tint = colorScheme.background
-                  )
-                }
+                  contentDescription = "profile picture",
+                  tint = colorScheme.background
+                )
               }
-            },
-            colors = topAppBarColors(
-              scrolledContainerColor = colorScheme.background
-            )
+            }
+          },
+          colors = topAppBarColors(
+            scrolledContainerColor = colorScheme.background
           )
-        }
+        )
       },
       bottomBar = {
         Surface(

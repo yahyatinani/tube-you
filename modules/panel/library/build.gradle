@@ -14,6 +14,7 @@ android {
 dependencies {
   implementation project(':modules:core:designsystem')
   implementation project(':modules:core:keywords')
+  implementation project(':modules:panel:common')
   api deps.androidx.core.ktx
   api deps.bundles.compose
   api deps.androidx.navigation.compose

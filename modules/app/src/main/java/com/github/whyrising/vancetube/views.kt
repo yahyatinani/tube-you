@@ -375,7 +375,7 @@ fun VanceApp(
                     },
                     onPressColor = lightGray
                   ) {
-                    dispatch(v(common.on_nav_item_click, route))
+                    dispatch(v(common.on_click_nav_item, route))
                   }
                 }
             }

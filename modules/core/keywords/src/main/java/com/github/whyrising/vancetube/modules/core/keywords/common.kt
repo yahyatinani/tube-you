@@ -10,7 +10,7 @@ enum class common {
   api_endpoint,
   navigation_items,
   active_navigation_item,
-  on_nav_item_click,
+  on_click_nav_item,
   expand_top_app_bar,
 
   label_text_id,

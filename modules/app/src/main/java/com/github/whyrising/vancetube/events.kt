@@ -1,6 +1,5 @@
 package com.github.whyrising.vancetube
 
-import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.fx.BuiltInFx
 import com.github.whyrising.recompose.ids.recompose.db
@@ -39,6 +38,10 @@ val regCommonEvents = run {
     db.assoc(common.is_backstack_available, flag)
   }
 
+  regEventDb<AppDb>(":is-search-bar-visible") { db, (_, flag) ->
+    db.assoc(":is-search-bar-visible", flag)
+  }
+
   // TODO: rethink this event handler
   regEventDb<AppDb>(active_navigation_item) { db, (_, destination) ->
     db.letIf(navItems[destination] != null) {
@@ -56,29 +59,16 @@ val regCommonEvents = run {
     id = common.on_nav_item_click,
     interceptors = v(injectCofx(current_back_stack_id))
   ) { cofx, (_, destination) ->
+    // TODO: Set active_panel to active_navigation_item
     val appDb = appDbBy(cofx)
-    if (destination == appDb[active_navigation_item]) {
-      // TODO: Use one fx for all panels to scroll up by overriding reg fx
-      m(BuiltInFx.fx to v(v(home.go_top_list)))
-    } else {
-      // TODO: Set active_panel to active_navigation_item
-      m<Any, Any>(
-        db to appDb.assoc(active_navigation_item, destination),
-        BuiltInFx.fx to v(
-          v(
-            navigate_to,
-            m(
-              common.destination to destination,
-              common.navOptions to navOptions {
-                popUpTo(cofx[current_back_stack_id] as Int) {
-                  saveState = true
-                }
-                launchSingleTop = true
-              }
-            )
-          )
-        )
+    m<Any, Any>(
+      db to appDb.assoc(active_navigation_item, destination),
+      BuiltInFx.fx to v(
+        if (destination == appDb[active_navigation_item]) {
+          // TODO: Use one fx for all panels to scroll up by overriding reg fx
+          v(home.go_top_list)
+        } else v(navigate_to, m(common.destination to destination))
       )
-    }
+    )
   }
 }

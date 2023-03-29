@@ -8,7 +8,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
-import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common
@@ -19,7 +18,6 @@ import com.github.whyrising.vancetube.modules.designsystem.component.VideosPanel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.composable
-import kotlinx.coroutines.CoroutineScope
 
 // -- navigation ---------------------------------------------------------------
 
@@ -30,16 +28,6 @@ private fun NavGraphBuilder.homeCommon(
   composable(
     route = home.route.toString()
   ) {
-    val scope: CoroutineScope = rememberCoroutineScope()
-    LaunchedEffect(Unit) {
-      regCofx(home.coroutine_scope) { cofx ->
-        cofx.assoc(home.coroutine_scope, scope)
-      }
-      getRegHomeEvents()
-      dispatch(v(home.initialize))
-    }
-    regHomeSubs
-
     VideosPanel(
       state = watch(v(home.view_model, stringResource(R.string.views_label))),
       onRefresh = { dispatch(v(home.refresh)) },

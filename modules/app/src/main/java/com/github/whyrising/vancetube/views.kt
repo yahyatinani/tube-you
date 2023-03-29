@@ -1,13 +1,13 @@
 package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
+import android.os.Bundle
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Bottom
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Top
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -50,10 +50,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -71,10 +68,10 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.NavController.OnDestinationChangedListener
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
+import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.fx.BuiltInFx.fx
@@ -88,6 +85,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_ap
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
+import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.modules.designsystem.component.SearchSuggestionItem
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
@@ -97,59 +95,38 @@ import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
 import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
+import com.github.whyrising.vancetube.modules.panel.home.getRegHomeEvents
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
+import com.github.whyrising.vancetube.modules.panel.home.regHomeSubs
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import kotlinx.coroutines.CoroutineScope
 
-fun NavController.resetBackQueue(backStackEntries: List<NavBackStackEntry>) {
-  backQueue.clear()
-  backQueue.addAll(backStackEntries)
-}
-
-inline fun <T, K> ArrayDeque<T>.distinctRightBy(selector: (T) -> K): List<T> {
-  val set = HashSet<K>()
-  return foldRight(l()) { e, acc ->
-    if (set.add(selector(e))) acc.conj(e)
-    else acc
+private val navChangedListener: (
+  controller: NavController,
+  destination: NavDestination,
+  arguments: Bundle?
+) -> Unit = { navCtrl, destination, _ ->
+  navCtrl.apply {
+    destination.route?.let { dispatch(v(active_navigation_item, it)) }
   }
+  // dispatch(v(base.set_backstack_status, flag))
 }
-
-/**
- * Removes all duplicate entries in the backStack of this [NavController].
- */
-fun NavController.distinctBackStackEntries() {
-  resetBackQueue(backQueue.distinctRightBy { it.destination.id })
-}
-
-fun destinationChangeListener() =
-  OnDestinationChangedListener { navCtrl, destination, _ ->
-    navCtrl.apply {
-      if (previousBackStackEntry != null) {
-        distinctBackStackEntries()
-      }
-      destination.route?.let {
-        dispatch(v(active_navigation_item, it))
-      }
-    }
-    // dispatch(v(base.set_backstack_status, flag))
-  }
 
 @Composable
-private fun DestinationTrackingSideEffect(navController: NavHostController) {
+private fun NavigationChangedListenerEffect(navController: NavHostController) {
   DisposableEffect(navController) {
-    navController.addOnDestinationChangedListener(destinationChangeListener())
+    navController.addOnDestinationChangedListener(navChangedListener)
+
     onDispose {
-      navController.removeOnDestinationChangedListener(
-        destinationChangeListener()
-      )
+      navController.removeOnDestinationChangedListener(navChangedListener)
     }
   }
 }
@@ -171,13 +148,21 @@ fun VanceApp(
   windowSizeClass: WindowSizeClass,
   navController: NavHostController = rememberAnimatedNavController()
 ) {
-  DestinationTrackingSideEffect(navController)
+  NavigationChangedListenerEffect(navController)
+
+  val scope: CoroutineScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
     regCommonFx(navController)
+
+    regCofx(home.coroutine_scope) { cofx ->
+      cofx.assoc(home.coroutine_scope, scope)
+    }
+    getRegHomeEvents()
+    dispatch(v(home.initialize))
   }
+  regHomeSubs
 
   val isCompactDisplay = isCompact(windowSizeClass)
-
   VanceTheme(isCompact = isCompactDisplay) {
     val scrollBehavior = when {
       isCompactDisplay -> {
@@ -208,50 +193,49 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        var s by remember { mutableStateOf(false) }
-
-        if (s) {
-          SearchBar(
-            modifier = Modifier.wrapContentSize(),
-            query = watch(v(":query")),
-            active = watch(v(":isActive")),
-            tonalElevation = 0.dp,
-            shape = RoundedCornerShape(percent = 50),
-            colors = SearchBarDefaults.colors(
-              containerColor = colorScheme.surface
-            ),
-            placeholder = { Text(text = "Search YouTube") },
-            leadingIcon = {
-              IconButton(onClick = { /*todo*/ }) {
-                Icon(
-                  imageVector = Icons.Filled.ArrowBack,
-                  modifier = Modifier,
-                  contentDescription = ""
-                )
-              }
-            },
-            trailingIcon = {
-              IconButton(onClick = { }) {
-                Icon(
-                  imageVector = Icons.Filled.Close,
-                  modifier = Modifier,
-                  contentDescription = ""
-                )
-              }
-            },
-            onQueryChange = {
-              dispatchSync(v(":query", it))
-            },
-            onActiveChange = {
-              dispatch(v(":isActive", it))
-            },
-            onSearch = {}
-          ) {
-            val suggestions = watch<List<String>>(query = v(":suggestions"))
-            LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
-              items(key = { it.hashCode() }, items = suggestions) {
-                SearchSuggestionItem(text = it, onClick = { /* todo: */ })
-              }
+        SearchBar(
+          modifier = Modifier.wrapContentSize(),
+          query = watch(v(":query")),
+//          active = watch(v(":isActive")),
+          active = false,
+          tonalElevation = 0.dp,
+          shape = RoundedCornerShape(percent = 50),
+          colors = SearchBarDefaults.colors(
+            containerColor = colorScheme.surface
+          ),
+          placeholder = { Text(text = "Search YouTube") },
+          leadingIcon = {
+            IconButton(onClick = { /*todo*/ }) {
+              Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                modifier = Modifier,
+                contentDescription = ""
+              )
+            }
+          },
+          trailingIcon = {
+            IconButton(onClick = { }) {
+              Icon(
+                imageVector = Icons.Filled.Close,
+                modifier = Modifier,
+                contentDescription = ""
+              )
+            }
+          },
+          onQueryChange = {
+            dispatchSync(v(":query", it))
+          },
+          onActiveChange = {
+            dispatch(v(":isActive", it))
+          },
+          onSearch = {
+            dispatch(v(common.navigate_to, startDestination()))
+          }
+        ) {
+          val suggestions = watch<List<String>>(query = v(":suggestions"))
+          LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
+            items(key = { it.hashCode() }, items = suggestions) {
+              SearchSuggestionItem(text = it, onClick = { /* todo: */ })
             }
           }
         }
@@ -263,10 +247,7 @@ fun VanceApp(
             .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
           title = {
             IconButton(
-              onClick = {
-                s = true
-//                  dispatch(v(common.navigate_to, search.route.toString()))
-              }
+              onClick = {}
             ) {
               Icon(
                 imageVector = Icons.Outlined.Search,

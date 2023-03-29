@@ -56,7 +56,7 @@ val regCommonEvents = run {
   }
 
   regEventFx(
-    id = common.on_nav_item_click,
+    id = common.on_click_nav_item,
     interceptors = v(injectCofx(current_back_stack_id))
   ) { cofx, (_, destination) ->
     // TODO: Set active_panel to active_navigation_item

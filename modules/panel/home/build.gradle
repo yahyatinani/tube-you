@@ -18,7 +18,6 @@ dependencies {
   api deps.androidx.core.ktx
   api deps.bundles.compose
   api deps.androidx.navigation.compose
-  api deps.accompanist.nav.anim
   api deps.recompose
   implementation deps.kotlinx.datetime
   implementation deps.bundles.ktor

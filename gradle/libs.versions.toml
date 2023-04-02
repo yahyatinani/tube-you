@@ -68,7 +68,6 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 android-tools-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
-accompanist-nav-anim = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanist" }
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -86,7 +85,7 @@ slf4j = { module = "ch.qos.logback:logback-classic", version.ref = "slf4j" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
 [bundles]
-compose = ["androidx-compose-ui-ui", "androidx-compose-ui-util", "androidx-compose-ui-tooling", "androidx-compose-material3", "androidx-constraintlayout-compose", "accompanist-swiperefresh", "androidx-compose-material3-windowssizeclass", "androidx-profileinstaller", "androidx-compose-material-icons-ext"]
+compose = ["androidx-compose-ui-ui", "androidx-compose-ui-util", "androidx-compose-ui-tooling", "androidx-compose-material3", "androidx-constraintlayout-compose", "accompanist-swiperefresh", "androidx-compose-material3-windowssizeclass", "androidx-profileinstaller", "androidx-compose-material-icons-ext", "androidx-navigation-compose"]
 kotest = ["kotest-jvm-runner", "kotest-assertions", "kotlin-reflect"]
 ktor = ["ktor-client-core", "ktor-client-android", "ktor-client-contentnegotiation", "ktor-serialization-json", "ktor-client-logging", "slf4j"]
 

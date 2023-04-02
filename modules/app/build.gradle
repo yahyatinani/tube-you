@@ -11,8 +11,6 @@ dependencies {
   //  implementation deps.androidx.core.ktx
   implementation deps.androidx.appcompat
   //  implementation deps.bundles.compose
-  //  implementation deps.androidx.navigation.compose
-  //  implementation deps.accompanist.nav.anim
   //  implementation deps.recompose
   implementation deps.androidx.core.splashscreen
   implementation deps.androidx.datastore.prefrences

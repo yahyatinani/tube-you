@@ -1,6 +1,5 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -8,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common
@@ -17,11 +17,9 @@ import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosPanel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.y.core.v
-import com.google.accompanist.navigation.animation.composable
 
 // -- navigation ---------------------------------------------------------------
 
-@OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.homeCommon(
   content: @Composable (videos: Videos) -> Unit
 ) {

@@ -2,7 +2,6 @@ package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
 import android.os.Bundle
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -71,6 +70,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
@@ -92,8 +93,6 @@ import com.github.whyrising.vancetube.modules.designsystem.component.VanceNaviga
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
-import com.github.whyrising.vancetube.modules.designsystem.theme.enterAnimation
-import com.github.whyrising.vancetube.modules.designsystem.theme.exitAnimation
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.getRegHomeEvents
 import com.github.whyrising.vancetube.modules.panel.home.home
@@ -105,8 +104,6 @@ import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.CoroutineScope
 
 private val navChangedListener: (
@@ -140,13 +137,12 @@ fun startDestination(): String {
 @OptIn(
   ExperimentalMaterial3Api::class,
   ExperimentalComposeUiApi::class,
-  ExperimentalAnimationApi::class,
   ExperimentalLayoutApi::class
 )
 @Composable
 fun VanceApp(
   windowSizeClass: WindowSizeClass,
-  navController: NavHostController = rememberAnimatedNavController()
+  navController: NavHostController = rememberNavController()
 ) {
   NavigationChangedListenerEffect(navController)
 
@@ -371,11 +367,9 @@ fun VanceApp(
       }
     ) {
       val orientation = LocalConfiguration.current.orientation
-      AnimatedNavHost(
+      NavHost(
         navController = navController,
         startDestination = startDestination(),
-        exitTransition = { exitAnimation(targetOffsetX = -300) },
-        enterTransition = { enterAnimation(initialOffsetX = -300) },
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)

@@ -13,11 +13,9 @@ fun popBackQueueNavOptions(
   destinationRoute: String
 ) = navOptions {
   val lastNavRoute = navController.currentBackStackEntry?.destination?.route
-  if (destinationRoute != lastNavRoute) { // clean duplicates in backQueue
-    val iterator = navController.backQueue.iterator().apply {
-      next() // skip null, index 0.
-      next() // skip home aka starting point, index 1.
-    }
+  if (destinationRoute != lastNavRoute) {
+    // skip first (null) and second (start route) indexes.
+    val iterator = navController.backQueue.listIterator(index = 2)
     while (iterator.hasNext()) {
       if (iterator.next().destination.route == destinationRoute) {
         iterator.remove()

@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube
 
+import android.os.Bundle
 import androidx.navigation.NavHostController
 import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.regCofx
@@ -24,6 +25,8 @@ fun popBackQueueNavOptions(
   }
 }
 
+private var navControllerState: Bundle? = null
+
 fun regCommonFx(navController: NavHostController) {
   regFx(navigate_to) { navigation ->
     val destination = get<String>(navigation, common.destination)!!
@@ -34,6 +37,16 @@ fun regCommonFx(navController: NavHostController) {
       navOptions = popBackQueueNavOptions(navController, destination)
     )
   }
+
+  regFx(id = ":save-nav-state") { _ ->
+    navControllerState = navController.saveState()
+  }
+
+  regFx(id = ":restore-nav-state") { _ ->
+    navController.restoreState(navControllerState)
+  }
+
+  // -- Co-effects
 
   regCofx(common.current_back_stack_id) { coeffects ->
     val id = navController.currentBackStackEntry?.destination?.id

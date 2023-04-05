@@ -38,8 +38,17 @@ val regCommonEvents = run {
     db.assoc(common.is_backstack_available, flag)
   }
 
-  regEventDb<AppDb>(":is-search-bar-visible") { db, (_, flag) ->
+  regEventDb<AppDb>(id = ":is-search-bar-visible") { db, (_, flag) ->
     db.assoc(":is-search-bar-visible", flag)
+  }
+
+  regEventFx(id = ":search-videos") { _, _ ->
+    m<Any, Any>(
+      BuiltInFx.fx to v(
+        v(":save-nav-state"),
+        v(BuiltInFx.dispatch, v(":is-search-bar-visible", true))
+      )
+    )
   }
 
   // TODO: rethink this event handler

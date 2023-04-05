@@ -62,6 +62,10 @@ val regCommonSubs = run {
     db[active_navigation_item]
   }
 
+  regSub<AppDb>(":is-search-bar-visible") { db, _ ->
+    db[":is-search-bar-visible"]
+  }
+
   regSub<String, Any>(
     queryId = navigation_items,
     signalsFn = { subscribe(v(active_navigation_item)) },

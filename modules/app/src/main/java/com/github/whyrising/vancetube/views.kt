@@ -2,6 +2,7 @@ package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,6 +56,8 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -62,11 +66,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.isContainer
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
@@ -134,6 +140,41 @@ fun startDestination(): String {
   return subscribe<String>(v(active_navigation_item)).deref()
 }
 
+@Composable
+private fun ProfileIcon(colorScheme: ColorScheme) {
+  Box(
+    modifier = Modifier
+      .background(
+        shape = CircleShape,
+        color = Color.Transparent
+      )
+      .clickable(role = Role.Image) { /*TODO*/ }
+      .padding(8.dp)
+  ) {
+    Box(
+      modifier = Modifier
+        .background(
+          shape = CircleShape,
+//                    color = Color(0xFFEB3F7A),
+          color = colorScheme.onBackground
+        )
+        .width(24.dp)
+        .height(24.dp)
+        .padding(3.dp),
+      contentAlignment = Center
+    ) {
+      Icon(
+        imageVector = Icons.Filled.Person,
+        modifier = Modifier,
+//                    .clip(CircleShape)
+//                    .size(20.dp),
+        contentDescription = "profile picture",
+        tint = colorScheme.background
+      )
+    }
+  }
+}
+
 @OptIn(
   ExperimentalMaterial3Api::class,
   ExperimentalComposeUiApi::class,
@@ -189,112 +230,110 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        SearchBar(
-          modifier = Modifier.wrapContentSize(),
-          query = watch(v(":query")),
-//          active = watch(v(":isActive")),
-          active = false,
-          tonalElevation = 0.dp,
-          shape = RoundedCornerShape(percent = 50),
-          colors = SearchBarDefaults.colors(
-            containerColor = colorScheme.surface
-          ),
-          placeholder = { Text(text = "Search YouTube") },
-          leadingIcon = {
-            IconButton(onClick = { /*todo*/ }) {
-              Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                modifier = Modifier,
-                contentDescription = ""
-              )
-            }
-          },
-          trailingIcon = {
-            IconButton(onClick = { }) {
-              Icon(
-                imageVector = Icons.Filled.Close,
-                modifier = Modifier,
-                contentDescription = ""
-              )
-            }
-          },
-          onQueryChange = {
-            dispatchSync(v(":query", it))
-          },
-          onActiveChange = {
-            dispatch(v(":isActive", it))
-          },
-          onSearch = {
-            dispatch(v(common.navigate_to, startDestination()))
+        if (watch(query = v(":is-search-bar-visible"))) {
+          BackHandler {
+            // TODO: back event
+            dispatch(v(":restore-nav-state"))
+            dispatch(v(":is-search-bar-visible", false))
           }
-        ) {
-          val suggestions = watch<List<String>>(query = v(":suggestions"))
-          LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
-            items(key = { it.hashCode() }, items = suggestions) {
-              SearchSuggestionItem(text = it, onClick = { /* todo: */ })
-            }
-          }
-        }
-        TopAppBar(
-          modifier = Modifier
-            .windowInsetsPadding(
-              insets = WindowInsets.safeDrawing.only(Top + Horizontal)
-            )
-            .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
-          title = {
-            IconButton(
-              onClick = {}
+          val focusRequester = FocusRequester()
+          Box(
+            Modifier
+              .semantics { isContainer = true }
+              .zIndex(1f)
+              .fillMaxWidth()
+          ) {
+            SearchBar(
+              modifier = Modifier
+                .align(TopCenter)
+                .focusRequester(focusRequester)
+                .wrapContentSize(),
+              query = watch(v(":query")),
+              active = watch(v(":isActive")),
+              tonalElevation = 0.dp,
+              shape = RoundedCornerShape(percent = 50),
+              colors = SearchBarDefaults.colors(
+                containerColor = colorScheme.surface
+              ),
+              placeholder = { Text(text = "Search YouTube") },
+              leadingIcon = {
+                IconButton(
+                  onClick = {
+                    // TODO:
+                    dispatch(v(":is-search-bar-visible", false))
+                  }
+                ) {
+                  Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    modifier = Modifier,
+                    contentDescription = ""
+                  )
+                }
+              },
+              trailingIcon = {
+                IconButton(onClick = { }) {
+                  Icon(
+                    imageVector = Icons.Filled.Close,
+                    modifier = Modifier,
+                    contentDescription = ""
+                  )
+                }
+              },
+              onQueryChange = {
+                dispatchSync(v(":query", it))
+              },
+              onActiveChange = {
+                dispatch(v(":isActive", it))
+              },
+              onSearch = {
+                dispatch(v(common.navigate_to, startDestination()))
+                dispatch(v(":isActive", false))
+              }
             ) {
-              Icon(
-                imageVector = Icons.Outlined.Search,
-                modifier = Modifier.size(26.dp),
-                contentDescription = "Search a video"
-              )
+              val suggestions = watch<List<String>>(query = v(":suggestions"))
+              LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
+                items(key = { it.hashCode() }, items = suggestions) {
+                  SearchSuggestionItem(text = it, onClick = { /* todo: */ })
+                }
+              }
             }
-          },
-          scrollBehavior = scrollBehavior,
-          navigationIcon = {
+          }
+          LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+          }
+        } else {
+          TopAppBar(
+            modifier = Modifier
+              .windowInsetsPadding(
+                insets = WindowInsets.safeDrawing.only(Top + Horizontal)
+              )
+              .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
+            title = {},
+            scrollBehavior = scrollBehavior,
+            navigationIcon = {
 //            if (subscribe<Boolean>(v(base.is_backstack_available)).w()) {
 //              BackArrow()
 //            }
-          },
-          actions = {
-            Box(
-              modifier = Modifier
-                .background(
-                  shape = CircleShape,
-                  color = Color.Transparent
-                )
-                .clickable(role = Role.Image) { /*TODO*/ }
-                .padding(8.dp)
-            ) {
-              Box(
-                modifier = Modifier
-                  .background(
-                    shape = CircleShape,
-//                    color = Color(0xFFEB3F7A),
-                    color = colorScheme.onBackground
-                  )
-                  .width(24.dp)
-                  .height(24.dp)
-                  .padding(3.dp),
-                contentAlignment = Center
+            },
+            actions = {
+              IconButton(
+                onClick = {
+                  dispatch(v(":search-videos"))
+                }
               ) {
                 Icon(
-                  imageVector = Icons.Filled.Person,
-                  modifier = Modifier,
-//                    .clip(CircleShape)
-//                    .size(20.dp),
-                  contentDescription = "profile picture",
-                  tint = colorScheme.background
+                  imageVector = Icons.Outlined.Search,
+                  modifier = Modifier.size(26.dp),
+                  contentDescription = "Search a video"
                 )
               }
-            }
-          },
-          colors = topAppBarColors(
-            scrolledContainerColor = colorScheme.background
+              ProfileIcon(colorScheme)
+            },
+            colors = topAppBarColors(
+              scrolledContainerColor = colorScheme.background
+            )
           )
-        )
+        }
       },
       bottomBar = {
         Surface(

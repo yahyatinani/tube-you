@@ -1,7 +1,7 @@
 package com.github.whyrising.vancetube
 
 import android.os.Bundle
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.regFx
@@ -9,25 +9,32 @@ import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.y.core.get
 
+private fun removeStartDestinationIfDuplicated(navController: NavController) {
+  if (navController.currentBackStackEntry?.destination?.id ==
+    navController.graph.startDestinationId
+  ) navController.backQueue.removeAt(navController.backQueue.size - 1)
+}
+
 fun popBackQueueNavOptions(
-  navController: NavHostController,
+  navController: NavController,
   destinationRoute: String
 ) = navOptions {
-  val lastNavRoute = navController.currentBackStackEntry?.destination?.route
-  if (destinationRoute != lastNavRoute) {
-    // skip first (null) and second (start route) indexes.
-    val iterator = navController.backQueue.listIterator(index = 2)
-    while (iterator.hasNext()) {
-      if (iterator.next().destination.route == destinationRoute) {
-        iterator.remove()
-      }
+  if (navController.backQueue.size <= 2) return@navOptions
+
+  removeStartDestinationIfDuplicated(navController)
+
+  // TODO: if(destinationRoute != search_route)
+  val iterator = navController.backQueue.listIterator(index = 2)
+  while (iterator.hasNext()) {
+    if (iterator.next().destination.route == destinationRoute) {
+      iterator.remove()
     }
   }
 }
 
 private var navControllerState: Bundle? = null
 
-fun regCommonFx(navController: NavHostController) {
+fun regCommonFx(navController: NavController) {
   regFx(navigate_to) { navigation ->
     val destination = get<String>(navigation, common.destination)!!
 //    val navOptions = get<NavOptions>(navigation, common.navOptions)

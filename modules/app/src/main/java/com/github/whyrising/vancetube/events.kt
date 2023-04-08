@@ -42,15 +42,6 @@ val regCommonEvents = run {
     db.assoc(":is-search-bar-visible", flag)
   }
 
-  regEventFx(id = ":search-videos") { _, _ ->
-    m<Any, Any>(
-      BuiltInFx.fx to v(
-        v(":save-nav-state"),
-        v(BuiltInFx.dispatch, v(":is-search-bar-visible", true))
-      )
-    )
-  }
-
   // TODO: rethink this event handler
   regEventDb<AppDb>(active_navigation_item) { db, (_, destination) ->
     db.letIf(navItems[destination] != null) {

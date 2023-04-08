@@ -225,8 +225,6 @@ fun VanceApp(
       topBar = {
         if (watch(query = v(":is-search-bar-visible"))) {
           BackHandler {
-            // TODO: back event
-            dispatch(v(":restore-nav-state"))
             dispatch(v(":is-search-bar-visible", false))
           }
           val focusRequester = FocusRequester()
@@ -303,15 +301,11 @@ fun VanceApp(
               .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
             title = {},
             scrollBehavior = scrollBehavior,
-            navigationIcon = {
-//            if (subscribe<Boolean>(v(base.is_backstack_available)).w()) {
-//              BackArrow()
-//            }
-            },
+            navigationIcon = {},
             actions = {
               IconButton(
                 onClick = {
-                  dispatch(v(":search-videos"))
+                  dispatch(v(":is-search-bar-visible", true))
                 }
               ) {
                 Icon(

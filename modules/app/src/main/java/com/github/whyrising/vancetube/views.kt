@@ -84,7 +84,6 @@ import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
-import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
@@ -132,12 +131,6 @@ private fun NavigationChangedListenerEffect(navController: NavHostController) {
       navController.removeOnDestinationChangedListener(navChangedListener)
     }
   }
-}
-
-fun startDestination(): String {
-  // Careful!! We only need the first value so we don't need to watch this
-  // subscription.
-  return subscribe<String>(v(active_navigation_item)).deref()
 }
 
 @Composable
@@ -286,7 +279,7 @@ fun VanceApp(
                 dispatch(v(":isActive", it))
               },
               onSearch = {
-                dispatch(v(common.navigate_to, startDestination()))
+                dispatch(v(common.navigate_to, home.route.toString()))
                 dispatch(v(":isActive", false))
               }
             ) {
@@ -408,7 +401,7 @@ fun VanceApp(
       val orientation = LocalConfiguration.current.orientation
       NavHost(
         navController = navController,
-        startDestination = startDestination(),
+        startDestination = home.route.toString(),
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)

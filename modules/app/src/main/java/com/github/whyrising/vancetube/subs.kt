@@ -95,19 +95,7 @@ val regCommonSubs = run {
       )
     }
   )
-
-//  regSub<AppDb>(queryId = ":query") { db, _ ->
-//    when (db[active_navigation_item]) {
-//      home.route.toString() -> {
-//        getIn(db, l<Any>(home.panel, ":home/search_bar", ":query"), "")
-//      }
-//
-//      else -> {
-//        TODO()
-//      }
-//    }
-//  }
-
+  
   regSub<AppDb>(queryId = ":home/search_bar") { db, _ ->
     getIn(db, l(home.panel, ":home/search_bar"))
   }

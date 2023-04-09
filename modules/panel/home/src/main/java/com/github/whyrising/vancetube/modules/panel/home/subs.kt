@@ -53,15 +53,23 @@ val regHomeSubs by lazy {
     }
   )
 
-  regSub<AppDb>(queryId = ":isActive") { db, _ ->
-    getIn(db, l(home.panel, ":home/search_bar", ":isActive"), false)
-  }
-
   regSub<AppDb>(queryId = ":query") { db, _ ->
     getIn(db, l(home.panel, ":home/search_bar", ":query"), "")
   }
 
   regSub<AppDb>(queryId = ":suggestions") { db, _ ->
     getIn(db, l(home.panel, ":home/search_bar", ":suggestions"), v<Any>())
+  }
+
+  regSub<AppDb>(queryId = ":home/search_bar") { db, _ ->
+    getIn(db, l(home.panel, ":home/search_bar"))
+  }
+
+  regSub<AppDb>(queryId = ":subs/search_bar") { db, _ ->
+    getIn(db, l(home.panel, ":subs/search_bar"))
+  }
+
+  regSub<AppDb>(queryId = ":library/search_bar") { db, _ ->
+    getIn(db, l(home.panel, ":library/search_bar"))
   }
 }

@@ -18,7 +18,7 @@ const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
 val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
   common.api_endpoint to "https://$DEFAULT_BASE_ADDRESS/api/v1",
-  ":is-search-bar-visible" to false
+  common.is_search_bar_active to true
 )
 
 // -- Cofx ---------------------------------------------------------------------

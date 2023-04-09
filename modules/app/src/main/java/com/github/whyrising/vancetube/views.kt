@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -66,17 +65,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.isContainer
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
@@ -223,74 +221,75 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        if (watch(query = v(":is-search-bar-visible"))) {
-          BackHandler {
-            dispatch(v(":is-search-bar-visible", false))
-          }
+        val searchBarState = watch<SearchBarState?>(query = v(":search_bar"))
+        if (searchBarState != null) {
           val focusRequester = FocusRequester()
-          Box(
-            Modifier
-              .semantics { isContainer = true }
-              .zIndex(1f)
-              .fillMaxWidth()
-          ) {
-            SearchBar(
-              modifier = Modifier
-                .align(TopCenter)
-                .focusRequester(focusRequester)
-                .wrapContentSize(),
-              query = watch(v(":query")),
-              active = watch(v(":isActive")),
-              tonalElevation = 0.dp,
-              shape = RoundedCornerShape(percent = 50),
-              colors = SearchBarDefaults.colors(
-                containerColor = colorScheme.surface
-              ),
-              placeholder = { Text(text = "Search YouTube") },
-              leadingIcon = {
-                IconButton(
-                  onClick = {
-                    // TODO:
-                    dispatch(v(":is-search-bar-visible", false))
-                  }
-                ) {
-                  Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    modifier = Modifier,
-                    contentDescription = ""
-                  )
+          val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
+
+          SearchBar(
+            modifier = Modifier
+              .focusRequester(focusRequester),
+            query = searchBarState.query,
+            active = searchBarState.isActive,
+            tonalElevation = 0.dp,
+            shape = RoundedCornerShape(30.dp),
+            colors = SearchBarDefaults.colors(
+              inputFieldColors = SearchBarDefaults.inputFieldColors(
+                focusedPlaceholderColor = placeHolderColor,
+                unfocusedPlaceholderColor = placeHolderColor
+              )
+            ),
+            placeholder = { Text(text = "Search YouTube") },
+            leadingIcon = {
+              IconButton(
+                onClick = {
+                  // TODO:
+                  dispatch(v(":hide_search_bar"))
                 }
-              },
-              trailingIcon = {
-                IconButton(onClick = { }) {
-                  Icon(
-                    imageVector = Icons.Filled.Close,
-                    modifier = Modifier,
-                    contentDescription = ""
-                  )
-                }
-              },
-              onQueryChange = {
-                dispatchSync(v(":query", it))
-              },
-              onActiveChange = {
-                dispatch(v(":isActive", it))
-              },
-              onSearch = {
-                dispatch(v(common.navigate_to, home.route.toString()))
-                dispatch(v(":isActive", false))
+              ) {
+                Icon(
+                  imageVector = Icons.Filled.ArrowBack,
+                  modifier = Modifier,
+                  contentDescription = ""
+                )
               }
-            ) {
-              val suggestions = watch<List<String>>(query = v(":suggestions"))
-              LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
-                items(key = { it.hashCode() }, items = suggestions) {
-                  SearchSuggestionItem(text = it, onClick = { /* todo: */ })
-                }
+            },
+            trailingIcon = {
+              IconButton(onClick = { }) {
+                Icon(
+                  imageVector = Icons.Filled.Close,
+                  modifier = Modifier,
+                  contentDescription = ""
+                )
+              }
+            },
+            onQueryChange = {
+              dispatchSync(v(":query", it))
+            },
+            onActiveChange = {
+              dispatch(v(common.is_search_bar_active, it))
+            },
+            onSearch = {
+              dispatch(v(common.navigate_to, "search_query"))
+              dispatch(v(common.is_search_bar_active, false))
+            }
+          ) {
+            LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
+              items(
+                key = { it.hashCode() },
+                items = searchBarState.suggestions.value
+              ) {
+                SearchSuggestionItem(text = it, onClick = { /* todo: */ })
               }
             }
           }
+
           LaunchedEffect(Unit) {
             focusRequester.requestFocus()
+          }
+
+          BackHandler {
+            dispatch(v(":hide_search_bar"))
           }
         } else {
           TopAppBar(
@@ -305,7 +304,7 @@ fun VanceApp(
             actions = {
               IconButton(
                 onClick = {
-                  dispatch(v(":is-search-bar-visible", true))
+                  dispatch(v(":show_search_bar"))
                 }
               ) {
                 Icon(
@@ -401,6 +400,9 @@ fun VanceApp(
           .padding(it)
           .consumeWindowInsets(it)
       ) {
+        composable("search_query") {
+          Text(text = "Search results...")
+        }
         if (isCompactDisplay) {
           home(orientation = orientation)
           subscriptions(orientation = orientation)

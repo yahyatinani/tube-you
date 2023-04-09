@@ -146,10 +146,6 @@ fun getRegHomeEvents() {
     m(BuiltInFx.fx to v(v(go_top_list)))
   }
 
-  regEventDb<AppDb>(id = ":isActive") { db, (_, flag) ->
-    assocIn(db, l(home.panel, ":home/search_bar", ":isActive"), flag)
-  }
-
   @Immutable
   @Serializable
   data class Suggestions(

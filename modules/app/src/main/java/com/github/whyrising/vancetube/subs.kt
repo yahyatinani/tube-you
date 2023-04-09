@@ -1,12 +1,15 @@
 package com.github.whyrising.vancetube
 
+import androidx.compose.runtime.Stable
 import com.github.whyrising.recompose.regSub
+import com.github.whyrising.recompose.regSubM
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_content_desc_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_variant
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_available
+import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigation_items
@@ -17,6 +20,7 @@ import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.github.whyrising.y.core.util.m as m2
@@ -53,6 +57,15 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
   )
 )
 
+@Stable
+data class SearchSuggestions(val value: List<String> = l())
+
+data class SearchBarState(
+  val query: String = "",
+  val isActive: Boolean = true,
+  val suggestions: SearchSuggestions = SearchSuggestions()
+)
+
 val regCommonSubs = run {
   regSub<AppDb>(is_backstack_available) { db, _ ->
     db[is_backstack_available] as Boolean
@@ -62,8 +75,8 @@ val regCommonSubs = run {
     db[active_navigation_item]
   }
 
-  regSub<AppDb>(":is-search-bar-visible") { db, _ ->
-    db[":is-search-bar-visible"]
+  regSub<AppDb>(queryId = is_search_bar_active) { db, _ ->
+    db[is_search_bar_active]
   }
 
   regSub<String, Any>(
@@ -82,4 +95,60 @@ val regCommonSubs = run {
       )
     }
   )
+
+  regSubM<SearchBarState?>(
+    queryId = ":search_bar",
+    signalsFn = {
+      v(
+        subscribe(v(active_navigation_item)),
+        subscribe(v(is_search_bar_active)),
+        subscribe(v(":home/search_bar")),
+        subscribe(v(":subs/search_bar")),
+        subscribe(v(":library/search_bar"))
+      )
+    },
+    initialValue = null
+  ) { (activeTab, isActive, hsb, ssb, lsb), _, _ ->
+    when (activeTab) {
+      home.route.toString() -> {
+        if (hsb != null) {
+          SearchBarState(
+            query = get<String>(hsb, ":query")!!,
+            isActive = isActive as Boolean,
+            suggestions = SearchSuggestions(
+              value = get<List<String>>(hsb, ":suggestions")!!
+            )
+          )
+        } else null
+      }
+
+      subscriptions.route.toString() -> {
+        if (ssb != null) {
+          SearchBarState(
+            query = get<String>(ssb, ":query")!!,
+            isActive = isActive as Boolean,
+            suggestions = SearchSuggestions(
+              value = get<List<String>>(ssb, ":suggestions")!!
+            )
+          )
+        } else null
+      }
+
+      library.route.toString() -> {
+        if (lsb != null) {
+          SearchBarState(
+            query = get<String>(lsb, ":query")!!,
+            isActive = isActive as Boolean,
+            suggestions = SearchSuggestions(
+              value = get<List<String>>(lsb, ":suggestions")!!
+            )
+          )
+        } else null
+      }
+
+      else -> {
+        TODO()
+      }
+    }
+  }
 }

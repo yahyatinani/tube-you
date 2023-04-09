@@ -22,7 +22,8 @@ fun popBackQueueNavOptions(
 
   removeStartDestinationIfDuplicated(navController)
 
-  // TODO: if(destinationRoute != search_route)
+  if (destinationRoute == "search_query") return@navOptions
+
   val iterator = navController.backQueue.listIterator(index = 2)
   while (iterator.hasNext()) {
     if (iterator.next().destination.route == destinationRoute) {

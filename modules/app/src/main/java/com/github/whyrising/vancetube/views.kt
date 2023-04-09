@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,6 +68,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
@@ -95,13 +97,15 @@ import com.github.whyrising.vancetube.modules.designsystem.component.SearchSugge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
+import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
+import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
+import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.getRegHomeEvents
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
-import com.github.whyrising.vancetube.modules.panel.home.getRegHomeSubs
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.y.core.get
@@ -398,8 +402,24 @@ fun VanceApp(
           .padding(it)
           .consumeWindowInsets(it)
       ) {
-        composable("search_query") {
-          Text(text = "Search results...")
+        composable(route = "search_query") {
+          val videos = Videos(
+            v(
+              VideoViewModel(
+                id = "0",
+                authorId = "author_id_0",
+                title = "Title 0",
+                thumbnail = "",
+                length = "1:00",
+                info = AnnotatedString("info")
+              )
+            )
+          )
+          VideosList(
+            orientation = orientation,
+            listState = LazyListState(),
+            videos = videos
+          )
         }
         if (isCompactDisplay) {
           home(orientation = orientation)

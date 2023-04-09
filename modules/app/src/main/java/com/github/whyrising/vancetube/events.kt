@@ -7,12 +7,14 @@ import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.current_back_stack_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
+import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
@@ -80,13 +82,10 @@ fun regAppEvents() {
   regEventDb<AppDb>(id = ":show_search_bar") { db, _ ->
     val sb = m(":query" to "", ":suggestions" to v<String>())
     when (db[active_navigation_item]) {
-      HOME_ROUTE -> {
-        assocIn(db, l(HOME_ROUTE, common.search_bar), sb)
-      }
-
-      else -> {
-        TODO()
-      }
+      HOME_ROUTE -> assocIn(db, l(HOME_ROUTE, search_bar), sb)
+      SUBSCRIPTION_ROUTE -> assocIn(db, l(SUBSCRIPTION_ROUTE, search_bar), sb)
+      LIBRARY_ROUTE -> assocIn(db, l(LIBRARY_ROUTE, search_bar), sb)
+      else -> TODO(":show_search_bar")
     }
   }
 
@@ -96,13 +95,27 @@ fun regAppEvents() {
         // TODO: use dissoc
         db.assoc(
           HOME_ROUTE,
-          (db[HOME_ROUTE] as IPersistentMap<Any?, *>).dissoc(common.search_bar)
+          (db[HOME_ROUTE] as IPersistentMap<Any?, *>).dissoc(search_bar)
         )
       }
 
-      else -> {
-        TODO()
+      SUBSCRIPTION_ROUTE -> {
+        // TODO: use dissoc
+        db.assoc(
+          SUBSCRIPTION_ROUTE,
+          (db[SUBSCRIPTION_ROUTE] as IPersistentMap<Any?, *>).dissoc(search_bar)
+        )
       }
+
+      LIBRARY_ROUTE -> {
+        // TODO: use dissoc
+        db.assoc(
+          LIBRARY_ROUTE,
+          (db[LIBRARY_ROUTE] as IPersistentMap<Any?, *>).dissoc(search_bar)
+        )
+      }
+
+      else -> TODO()
     }
   }
 
@@ -113,7 +126,7 @@ fun regAppEvents() {
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]
     val newDb =
-      assocIn(appDb, l(activeTab, common.search_bar, ":query"), searchQuery)
+      assocIn(appDb, l(activeTab, search_bar, ":query"), searchQuery)
 
     m<Any, Any>(db to newDb).assoc(
       BuiltInFx.fx,

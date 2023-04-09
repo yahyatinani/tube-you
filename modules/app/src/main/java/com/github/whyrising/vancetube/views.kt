@@ -101,7 +101,7 @@ import com.github.whyrising.vancetube.modules.panel.home.getRegHomeEvents
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
-import com.github.whyrising.vancetube.modules.panel.home.regHomeSubs
+import com.github.whyrising.vancetube.modules.panel.home.getRegHomeSubs
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.y.core.get
@@ -188,7 +188,6 @@ fun VanceApp(
     getRegHomeEvents()
     dispatch(v(home.initialize))
   }
-  regHomeSubs
 
   val isCompactDisplay = isCompact(windowSizeClass)
   VanceTheme(isCompact = isCompactDisplay) {
@@ -227,9 +226,8 @@ fun VanceApp(
           val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
 
           SearchBar(
-            modifier = Modifier
-              .focusRequester(focusRequester),
-            query = searchBarState.query,
+            query = watch(v(":query")),
+            modifier = Modifier.focusRequester(focusRequester),
             active = searchBarState.isActive,
             tonalElevation = 0.dp,
             shape = RoundedCornerShape(30.dp),

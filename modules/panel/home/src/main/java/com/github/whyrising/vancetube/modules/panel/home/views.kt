@@ -26,6 +26,7 @@ private fun NavGraphBuilder.homeCommon(
   composable(
     route = home.route.toString()
   ) {
+    getRegHomeSubs()
     VideosPanel(
       state = watch(v(home.view_model, stringResource(R.string.views_label))),
       onRefresh = { dispatch(v(home.refresh)) },

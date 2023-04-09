@@ -20,6 +20,7 @@ import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
@@ -61,7 +62,6 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
 data class SearchSuggestions(val value: List<String> = l())
 
 data class SearchBarState(
-  val query: String = "",
   val isActive: Boolean = true,
   val suggestions: SearchSuggestions = SearchSuggestions()
 )
@@ -96,6 +96,30 @@ val regCommonSubs = run {
     }
   )
 
+//  regSub<AppDb>(queryId = ":query") { db, _ ->
+//    when (db[active_navigation_item]) {
+//      home.route.toString() -> {
+//        getIn(db, l<Any>(home.panel, ":home/search_bar", ":query"), "")
+//      }
+//
+//      else -> {
+//        TODO()
+//      }
+//    }
+//  }
+
+  regSub<AppDb>(queryId = ":home/search_bar") { db, _ ->
+    getIn(db, l(home.panel, ":home/search_bar"))
+  }
+
+  regSub<AppDb>(queryId = ":subs/search_bar") { db, _ ->
+    getIn(db, l(home.panel, ":subs/search_bar"))
+  }
+
+  regSub<AppDb>(queryId = ":library/search_bar") { db, _ ->
+    getIn(db, l(home.panel, ":library/search_bar"))
+  }
+
   regSubM<SearchBarState?>(
     queryId = ":search_bar",
     signalsFn = {
@@ -113,7 +137,6 @@ val regCommonSubs = run {
       home.route.toString() -> {
         if (hsb != null) {
           SearchBarState(
-            query = get<String>(hsb, ":query")!!,
             isActive = isActive as Boolean,
             suggestions = SearchSuggestions(
               value = get<List<String>>(hsb, ":suggestions")!!
@@ -125,7 +148,6 @@ val regCommonSubs = run {
       subscriptions.route.toString() -> {
         if (ssb != null) {
           SearchBarState(
-            query = get<String>(ssb, ":query")!!,
             isActive = isActive as Boolean,
             suggestions = SearchSuggestions(
               value = get<List<String>>(ssb, ":suggestions")!!
@@ -137,7 +159,6 @@ val regCommonSubs = run {
       library.route.toString() -> {
         if (lsb != null) {
           SearchBarState(
-            query = get<String>(lsb, ":query")!!,
             isActive = isActive as Boolean,
             suggestions = SearchSuggestions(
               value = get<List<String>>(lsb, ":suggestions")!!

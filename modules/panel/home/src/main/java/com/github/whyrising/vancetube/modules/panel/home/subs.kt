@@ -21,7 +21,7 @@ import com.github.whyrising.y.core.v
  * Call this lazy global property to initialise all [Home] page subscriptions.
  * @return [Unit]
  */
-val regHomeSubs by lazy {
+fun getRegHomeSubs() {
   regSub<AppDb>(home.state) { db, _ ->
     db[home.panel]
   }
@@ -59,17 +59,5 @@ val regHomeSubs by lazy {
 
   regSub<AppDb>(queryId = ":suggestions") { db, _ ->
     getIn(db, l(home.panel, ":home/search_bar", ":suggestions"), v<Any>())
-  }
-
-  regSub<AppDb>(queryId = ":home/search_bar") { db, _ ->
-    getIn(db, l(home.panel, ":home/search_bar"))
-  }
-
-  regSub<AppDb>(queryId = ":subs/search_bar") { db, _ ->
-    getIn(db, l(home.panel, ":subs/search_bar"))
-  }
-
-  regSub<AppDb>(queryId = ":library/search_bar") { db, _ ->
-    getIn(db, l(home.panel, ":library/search_bar"))
   }
 }

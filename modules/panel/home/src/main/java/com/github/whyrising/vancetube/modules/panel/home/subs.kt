@@ -2,6 +2,8 @@ package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
@@ -23,7 +25,7 @@ import com.github.whyrising.y.core.v
  */
 fun getRegHomeSubs() {
   regSub<AppDb>(home.state) { db, _ ->
-    db[home.panel]
+    db[HOME_ROUTE]
   }
 
   regSub<AppDb?, VideosPanelVm>(
@@ -54,10 +56,10 @@ fun getRegHomeSubs() {
   )
 
   regSub<AppDb>(queryId = ":query") { db, _ ->
-    getIn(db, l(home.panel, ":home/search_bar", ":query"), "")
+    getIn(db, l(HOME_ROUTE, common.search_bar, ":query"), "")
   }
 
   regSub<AppDb>(queryId = ":suggestions") { db, _ ->
-    getIn(db, l(home.panel, ":home/search_bar", ":suggestions"), v<Any>())
+    getIn(db, l(HOME_ROUTE, common.search_bar, ":suggestions"), v<Any>())
   }
 }

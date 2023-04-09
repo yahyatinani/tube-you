@@ -18,7 +18,8 @@ const val DEFAULT_BASE_ADDRESS = "youtube.076.ne.jp"
 val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
   common.api_endpoint to "https://$DEFAULT_BASE_ADDRESS/api/v1",
-  common.is_search_bar_active to true
+  common.is_search_bar_active to true,
+  common.is_search_bar_visible to false
 )
 
 // -- Cofx ---------------------------------------------------------------------
@@ -29,7 +30,7 @@ fun isDeviceOnline(context: Context): Boolean {
     cm.getNetworkCapabilities(cm.activeNetwork) != null
 }
 
-fun regCommonCofx(context: Context) {
+fun regAppCofx(context: Context) {
   regCofx(is_online) { coeffects ->
     coeffects.assoc(is_online, isDeviceOnline(context))
   }

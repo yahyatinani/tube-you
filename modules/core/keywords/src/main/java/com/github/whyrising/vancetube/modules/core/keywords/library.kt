@@ -6,3 +6,5 @@ enum class library {
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }
+
+val LIBRARY_ROUTE = library.route.toString()

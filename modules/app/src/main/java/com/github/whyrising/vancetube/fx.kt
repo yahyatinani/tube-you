@@ -32,7 +32,7 @@ fun popBackQueueNavOptions(
   }
 }
 
-fun regCommonFx(navController: NavController) {
+fun regGlobalFx(navController: NavController) {
   regFx(navigate_to) { navigation ->
     val destination = get<String>(navigation, common.destination)!!
 //    val navOptions = get<NavOptions>(navigation, common.navOptions)

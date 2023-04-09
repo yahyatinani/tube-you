@@ -5,6 +5,8 @@ import com.github.whyrising.recompose.fx.BuiltInFx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.current_back_stack_id
@@ -13,8 +15,8 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
-import com.github.whyrising.vancetube.modules.core.keywords.library
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
+import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
@@ -25,53 +27,20 @@ import com.github.whyrising.y.core.v
 
 typealias AppDb = IPersistentMap<Any, Any>
 
-val regCommonEvents = run {
+fun regAppEvents() {
   regEventFx(
     id = common.initialize,
     interceptors = v(injectCofx(is_online))
   ) { cofx, _ ->
     val isOnline = cofx[is_online]!! as Boolean
-    val startingRoute = if (isOnline) home.route else library.route
+    val startingRoute = if (isOnline) HOME_ROUTE else LIBRARY_ROUTE
     m<Any, Any>(
-      db to defaultDb.assoc(active_navigation_item, startingRoute.toString())
+      db to defaultDb.assoc(active_navigation_item, startingRoute)
     )
   }
 
   regEventDb<AppDb>(set_backstack_status) { db, (_, flag) ->
     db.assoc(common.is_backstack_available, flag)
-  }
-
-  regEventDb<AppDb>(id = is_search_bar_active) { db, (_, flag) ->
-    db.assoc(is_search_bar_active, flag)
-  }
-
-  regEventDb<AppDb>(id = ":show_search_bar") { db, _ ->
-    val sb = m(":query" to "", ":suggestions" to v<String>())
-    when (db[active_navigation_item]) {
-      home.route.toString() -> {
-        assocIn(db, l(home.panel, ":home/search_bar"), sb)
-      }
-
-      else -> {
-        TODO()
-      }
-    }
-  }
-
-  regEventDb<AppDb>(id = ":hide_search_bar") { db, _ ->
-    when (db[active_navigation_item]) {
-      home.route.toString() -> {
-        // TODO: use dissoc
-        db.assoc(
-          home.panel,
-          (db[home.panel] as IPersistentMap<Any?, *>).dissoc(":home/search_bar")
-        )
-      }
-
-      else -> {
-        TODO()
-      }
-    }
   }
 
   // TODO: rethink this event handler
@@ -100,6 +69,63 @@ val regCommonEvents = run {
           // TODO: Use one fx for all panels to scroll up by overriding reg fx
           v(home.go_top_list)
         } else v(navigate_to, m(common.destination to destination))
+      )
+    )
+  }
+
+  regEventDb<AppDb>(id = is_search_bar_active) { db, (_, flag) ->
+    db.assoc(is_search_bar_active, flag)
+  }
+
+  regEventDb<AppDb>(id = ":show_search_bar") { db, _ ->
+    val sb = m(":query" to "", ":suggestions" to v<String>())
+    when (db[active_navigation_item]) {
+      HOME_ROUTE -> {
+        assocIn(db, l(HOME_ROUTE, common.search_bar), sb)
+      }
+
+      else -> {
+        TODO()
+      }
+    }
+  }
+
+  regEventDb<AppDb>(id = ":hide_search_bar") { db, _ ->
+    when (db[active_navigation_item]) {
+      HOME_ROUTE -> {
+        // TODO: use dissoc
+        db.assoc(
+          HOME_ROUTE,
+          (db[HOME_ROUTE] as IPersistentMap<Any?, *>).dissoc(common.search_bar)
+        )
+      }
+
+      else -> {
+        TODO()
+      }
+    }
+  }
+
+  regEventFx(
+    id = ":query",
+    interceptors = v(injectCofx(home.coroutine_scope))
+  ) { cofx, (_, searchQuery) ->
+    val appDb = appDbBy(cofx)
+    val activeTab = appDb[active_navigation_item]
+    val newDb =
+      assocIn(appDb, l(activeTab, common.search_bar, ":query"), searchQuery)
+
+    m<Any, Any>(db to newDb).assoc(
+      BuiltInFx.fx,
+      v(
+        v(
+          common.dispatch_debounce,
+          m(
+            bounce_fx.id to ":search",
+            bounce_fx.event to v(":search", searchQuery),
+            bounce_fx.delay to 500
+          )
+        )
       )
     )
   }

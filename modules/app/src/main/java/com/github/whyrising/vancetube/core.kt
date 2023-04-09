@@ -22,10 +22,10 @@ class VanceApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    regCommonCofx(this)
+    regAppCofx(this)
     regHomeCofx
-    regCommonEvents
-    regCommonSubs
+    regAppEvents()
+    regAppSubs()
 
     dispatchSync(v(common.initialize))
 

@@ -23,7 +23,9 @@ enum class common {
   is_online,
   current_back_stack_id,
   dispatch_debounce,
-  is_search_bar_active;
+  is_search_bar_active,
+  search_bar,
+  is_search_bar_visible;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

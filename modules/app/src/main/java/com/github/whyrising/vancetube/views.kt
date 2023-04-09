@@ -85,6 +85,7 @@ import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.watch
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
@@ -102,10 +103,11 @@ import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
-import com.github.whyrising.vancetube.modules.panel.home.getRegHomeEvents
+import com.github.whyrising.vancetube.modules.panel.common.regCommonEvents
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
+import com.github.whyrising.vancetube.modules.panel.home.regHomeEvents
 import com.github.whyrising.vancetube.modules.panel.library.library
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
 import com.github.whyrising.y.core.get
@@ -119,7 +121,9 @@ private val navChangedListener: (
   arguments: Bundle?
 ) -> Unit = { navCtrl, destination, _ ->
   navCtrl.apply {
-    destination.route?.let { dispatch(v(active_navigation_item, it)) }
+    destination.route?.let {
+      dispatch(v(active_navigation_item, it))
+    }
   }
   // dispatch(v(base.set_backstack_status, flag))
 }
@@ -184,12 +188,12 @@ fun VanceApp(
 
   val scope: CoroutineScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
-    regCommonFx(navController)
-
+    regGlobalFx(navController)
+    regCommonEvents()
     regCofx(home.coroutine_scope) { cofx ->
       cofx.assoc(home.coroutine_scope, scope)
     }
-    getRegHomeEvents()
+    regHomeEvents()
     dispatch(v(home.initialize))
   }
 
@@ -224,15 +228,13 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        val searchBarState = watch<SearchBarState?>(query = v(":search_bar"))
-        if (searchBarState != null) {
+        if (watch(query = v(common.is_search_bar_visible))) {
           val focusRequester = FocusRequester()
           val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
-
           SearchBar(
             query = watch(v(":query")),
             modifier = Modifier.focusRequester(focusRequester),
-            active = searchBarState.isActive,
+            active = watch(query = v(common.is_search_bar_active)),
             tonalElevation = 0.dp,
             shape = RoundedCornerShape(30.dp),
             colors = SearchBarDefaults.colors(
@@ -276,10 +278,11 @@ fun VanceApp(
               dispatch(v(common.is_search_bar_active, false))
             }
           ) {
+            val suggestions = watch<List<String>>(query = v(":suggestions"))
             LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
               items(
-                key = { it.hashCode() },
-                items = searchBarState.suggestions.value
+                key = { it },
+                items = suggestions
               ) {
                 SearchSuggestionItem(text = it, onClick = { /* todo: */ })
               }
@@ -396,7 +399,7 @@ fun VanceApp(
       val orientation = LocalConfiguration.current.orientation
       NavHost(
         navController = navController,
-        startDestination = home.route.toString(),
+        startDestination = HOME_ROUTE,
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)
@@ -440,10 +443,10 @@ fun VanceApp(
 @Preview(showBackground = true)
 @Composable
 fun AppPreview() {
-  regCommonCofx(LocalContext.current)
+  regAppCofx(LocalContext.current)
   regHomeCofx
-  regCommonEvents
-  regCommonSubs
+  regAppEvents()
+  regAppSubs()
   dispatchSync(v(common.initialize))
 
   VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))

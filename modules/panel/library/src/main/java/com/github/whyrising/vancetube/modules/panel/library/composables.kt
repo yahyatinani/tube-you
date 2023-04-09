@@ -6,11 +6,11 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.github.whyrising.vancetube.modules.core.keywords.library
+import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
 
 fun NavGraphBuilder.library(orientation: Int) {
   composable(
-    route = library.route.toString()
+    route = LIBRARY_ROUTE
   ) {
     Surface(modifier = Modifier.fillMaxSize()) {
       Text(text = "TODO: library")

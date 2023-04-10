@@ -59,7 +59,9 @@ fun regCommonEvents() {
     id = ":search_query",
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
-    val sq = (searchQuery as String).replace(" ", "%20")
+    if ((searchQuery as String).isEmpty()) return@regEventFx m()
+    
+    val sq = searchQuery.replace(" ", "%20")
     val appDb = appDbBy(cofx)
     // TODO: &type=video, support a all types?
     val searchEndpoint = "${appDb[common.api_endpoint]}/search?q=$sq&type=video"

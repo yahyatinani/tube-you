@@ -33,14 +33,18 @@ fun popBackQueueNavOptions(
 }
 
 fun regGlobalFx(navController: NavController) {
-  regFx(navigate_to) { navigation ->
-    val destination = get<String>(navigation, common.destination)!!
-//    val navOptions = get<NavOptions>(navigation, common.navOptions)
-
-    navController.navigate(
-      route = destination,
-      navOptions = popBackQueueNavOptions(navController, destination)
-    )
+  regFx(navigate_to) { destination ->
+    //    val navOptions = get<NavOptions>(navigation, common.navOptions)
+    when (destination) {
+      common.go_back -> {
+        println("sdfljsdlfjsdj")
+        navController.popBackStack()
+      }
+      else -> navController.navigate(
+        route = destination as String,
+        navOptions = popBackQueueNavOptions(navController, destination)
+      )
+    }
   }
 
   // -- Co-effects

@@ -3,7 +3,7 @@ package com.github.whyrising.vancetube.modules.panel.home
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.common
+import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
@@ -12,6 +12,7 @@ import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.formatVideos
+import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
@@ -56,10 +57,22 @@ fun getRegHomeSubs() {
   )
 
   regSub<AppDb>(queryId = ":query") { db, _ ->
-    getIn(db, l(HOME_ROUTE, common.search_bar, ":query"), "")
+    getIn(db, l(HOME_ROUTE, search_bar, ":query"), "")
   }
 
   regSub<AppDb>(queryId = ":suggestions") { db, _ ->
-    getIn(db, l(HOME_ROUTE, common.search_bar, ":suggestions"), v<Any>())
+    getIn(db, l(HOME_ROUTE, search_bar, ":suggestions"), v<Any>())
+  }
+
+  regSub<AppDb>(queryId = ":search_results") { db, (_, viewsLabel) ->
+    val videos = getIn(
+      db,
+      l(HOME_ROUTE, search_bar, ":results"),
+      l<PersistentVector<VideoData>>()
+    )!!
+    when {
+      videos.isEmpty() -> Videos(l())
+      else -> Videos(formatVideos(videos.first(), viewsLabel))
+    }
   }
 }

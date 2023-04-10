@@ -68,7 +68,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
@@ -89,6 +88,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
+import com.github.whyrising.vancetube.modules.core.keywords.common.go_back
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
@@ -99,11 +99,11 @@ import com.github.whyrising.vancetube.modules.designsystem.component.VanceNaviga
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
-import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.common.regCommonEvents
+import com.github.whyrising.vancetube.modules.panel.home.R
 import com.github.whyrising.vancetube.modules.panel.home.home
 import com.github.whyrising.vancetube.modules.panel.home.homeLarge
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
@@ -247,8 +247,7 @@ fun VanceApp(
             leadingIcon = {
               IconButton(
                 onClick = {
-                  // TODO:
-                  dispatch(v(":hide_search_bar"))
+                  dispatch(v(go_back))
                 }
               ) {
                 Icon(
@@ -274,6 +273,7 @@ fun VanceApp(
               dispatch(v(common.is_search_bar_active, it))
             },
             onSearch = {
+              dispatch(v(":search_query", it))
               dispatch(v(common.navigate_to, "search_query"))
               dispatch(v(common.is_search_bar_active, false))
             }
@@ -294,7 +294,7 @@ fun VanceApp(
           }
 
           BackHandler {
-            dispatch(v(":hide_search_bar"))
+            dispatch(v(go_back))
           }
         } else {
           TopAppBar(
@@ -406,22 +406,13 @@ fun VanceApp(
           .consumeWindowInsets(it)
       ) {
         composable(route = "search_query") {
-          val videos = Videos(
-            v(
-              VideoViewModel(
-                id = "0",
-                authorId = "author_id_0",
-                title = "Title 0",
-                thumbnail = "",
-                length = "1:00",
-                info = AnnotatedString("info")
-              )
-            )
+          val vm = watch<Videos>(
+            v(":search_results", stringResource(R.string.views_label))
           )
           VideosList(
             orientation = orientation,
             listState = LazyListState(),
-            videos = videos
+            videos = vm
           )
         }
         if (isCompactDisplay) {

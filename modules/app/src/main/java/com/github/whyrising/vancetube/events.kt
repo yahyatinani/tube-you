@@ -11,6 +11,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.current_back_stack_id
+import com.github.whyrising.vancetube.modules.core.keywords.common.go_back
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
@@ -22,7 +23,9 @@ import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
+import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
@@ -54,7 +57,7 @@ fun regAppEvents() {
 
   regEventFx(navigate_to) { _, (_, destination) ->
     m<Any, Any>(
-      BuiltInFx.fx to v(v(navigate_to, m(common.destination to destination)))
+      BuiltInFx.fx to v(v(navigate_to, destination))
     )
   }
 
@@ -70,7 +73,7 @@ fun regAppEvents() {
         if (destination == appDb[active_navigation_item]) {
           // TODO: Use one fx for all panels to scroll up by overriding reg fx
           v(home.go_top_list)
-        } else v(navigate_to, m(common.destination to destination))
+        } else v(navigate_to, destination)
       )
     )
   }
@@ -128,18 +131,39 @@ fun regAppEvents() {
     val newDb =
       assocIn(appDb, l(activeTab, search_bar, ":query"), searchQuery)
 
-    m<Any, Any>(db to newDb).assoc(
-      BuiltInFx.fx,
-      v(
+    m<Any, Any>(
+      db to newDb,
+      BuiltInFx.fx to v(
         v(
           common.dispatch_debounce,
           m(
-            bounce_fx.id to ":search",
-            bounce_fx.event to v(":search", searchQuery),
+            bounce_fx.id to ":search_suggestions",
+            bounce_fx.event to v(":search_suggestions", searchQuery),
             bounce_fx.delay to 500
           )
         )
       )
     )
+  }
+
+  regEventFx(id = go_back) { cofx, _ ->
+    val appDb = appDbBy(cofx)
+    val activeTab = appDb[active_navigation_item]
+    val searchResults = getIn<PersistentList<*>>(
+      appDb,
+      l(activeTab, search_bar, ":results")
+    )
+
+    val temp = searchResults?.rest() ?: l()
+
+    val newDb = if (temp.count > 0) {
+      assocIn(appDb, l(activeTab, search_bar, ":results"), temp)
+    } else {
+      val noSb = getIn<IPersistentMap<Any?, *>>(appDb, l(activeTab))!!
+        .dissoc(search_bar)
+      assocIn(appDb, l(activeTab), noSb)
+    }
+
+    m<Any, Any>(db to newDb, BuiltInFx.fx to v(v(navigate_to, go_back)))
   }
 }

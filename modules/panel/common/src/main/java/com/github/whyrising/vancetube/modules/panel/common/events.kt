@@ -7,6 +7,7 @@ import com.github.whyrising.recompose.ids.recompose
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
@@ -27,7 +28,7 @@ fun appDbBy(cofx: Coeffects): AppDb = cofx[recompose.db] as AppDb
 
 fun regCommonEvents() {
   regEventFx(
-    id = ":search",
+    id = ":search_suggestions",
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
     val sq = (searchQuery as String).replace(" ", "%20")
@@ -47,6 +48,34 @@ fun regCommonEvents() {
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<Suggestions>(),
             ktor.on_success to v(":set-suggestions"),
+            ktor.on_failure to v(home.error)
+          )
+        )
+      )
+    )
+  }
+
+  regEventFx(
+    id = ":search_query",
+    interceptors = v(injectCofx(home.coroutine_scope))
+  ) { cofx, (_, searchQuery) ->
+    val sq = (searchQuery as String).replace(" ", "%20")
+    val appDb = appDbBy(cofx)
+    // TODO: &type=video, support a all types?
+    val searchEndpoint = "${appDb[common.api_endpoint]}/search?q=$sq&type=video"
+
+    m<Any, Any>().assoc(
+      BuiltInFx.fx,
+      v(
+        v(
+          ktor.http_fx,
+          m(
+            ktor.method to HttpMethod.Get,
+            ktor.url to searchEndpoint,
+            ktor.timeout to 8000,
+            ktor.coroutine_scope to cofx[home.coroutine_scope],
+            ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
+            ktor.on_success to v(":set_search_results"),
             ktor.on_failure to v(home.error)
           )
         )

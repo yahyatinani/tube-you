@@ -17,7 +17,7 @@ data class VideoData(
   val videoId: String,
   val title: String,
   val videoThumbnails: List<ThumbnailData>,
-  val lengthSeconds: Int,
+  val lengthSeconds: Long,
   val author: String,
   val authorId: String,
   val viewCount: Long,

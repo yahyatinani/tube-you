@@ -4,20 +4,17 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
-import kotlinx.datetime.LocalTime
 import java.math.RoundingMode.FLOOR
 import java.text.DecimalFormat
+import java.util.concurrent.TimeUnit
 
-fun formatSeconds(seconds: Int): String {
-  val format = "%02d"
-  val localTime = LocalTime.fromSecondOfDay(seconds)
-  val s = format.format(localTime.second)
-  return when (localTime.hour) {
-    0 -> "${localTime.minute}:$s"
-    else -> {
-      val m = format.format(localTime.minute)
-      "${localTime.hour}:$m:$s"
-    }
+fun formatSeconds(durationInSeconds: Long): String {
+  val hours = TimeUnit.SECONDS.toHours(durationInSeconds)
+  val minutes = TimeUnit.SECONDS.toMinutes(durationInSeconds) % 60
+  val seconds = durationInSeconds % 60
+  return when {
+    hours > 0 -> String.format("%d:%02d:%02d", hours, minutes, seconds)
+    else -> String.format("%d:%02d", minutes, seconds)
   }
 }
 

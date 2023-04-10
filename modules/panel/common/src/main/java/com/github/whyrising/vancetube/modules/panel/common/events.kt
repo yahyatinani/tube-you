@@ -3,7 +3,7 @@ package com.github.whyrising.vancetube.modules.panel.common
 import com.github.whyrising.recompose.cofx.Coeffects
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.fx.BuiltInFx
-import com.github.whyrising.recompose.ids.recompose
+import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
@@ -24,7 +24,7 @@ fun nextState(
   transition: Any
 ): Any? = getIn(fsm, l(currentState, transition))
 
-fun appDbBy(cofx: Coeffects): AppDb = cofx[recompose.db] as AppDb
+fun appDbBy(cofx: Coeffects): AppDb = cofx[db] as AppDb
 
 fun regCommonEvents() {
   regEventFx(
@@ -66,9 +66,10 @@ fun regCommonEvents() {
     // TODO: &type=video, support a all types?
     val searchEndpoint = "${appDb[common.api_endpoint]}/search?q=$sq&type=video"
 
-    m<Any, Any>().assoc(
+    m<Any, Any>(db to appDb.assoc(common.is_search_bar_active, false)).assoc(
       BuiltInFx.fx,
       v(
+        v(common.navigate_to, "search_query"),
         v(
           ktor.http_fx,
           m(

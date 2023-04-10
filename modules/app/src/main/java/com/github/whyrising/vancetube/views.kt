@@ -275,8 +275,6 @@ fun VanceApp(
             },
             onSearch = {
               dispatch(v(":search_query", it))
-              dispatch(v(common.navigate_to, "search_query"))
-              dispatch(v(common.is_search_bar_active, false))
             }
           ) {
             val suggestions = watch<List<String>>(query = v(":suggestions"))

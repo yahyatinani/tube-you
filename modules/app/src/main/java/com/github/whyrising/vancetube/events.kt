@@ -89,7 +89,7 @@ fun regAppEvents() {
       SUBSCRIPTION_ROUTE -> assocIn(db, l(SUBSCRIPTION_ROUTE, search_bar), sb)
       LIBRARY_ROUTE -> assocIn(db, l(LIBRARY_ROUTE, search_bar), sb)
       else -> TODO(":show_search_bar")
-    }
+    }.assoc(is_search_bar_active, true)
   }
 
   regEventDb<AppDb>(id = ":hide_search_bar") { db, _ ->

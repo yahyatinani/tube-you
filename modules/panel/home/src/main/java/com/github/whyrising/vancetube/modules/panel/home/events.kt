@@ -17,6 +17,10 @@ import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
+import com.github.whyrising.vancetube.modules.panel.common.States.Failed
+import com.github.whyrising.vancetube.modules.panel.common.States.Loaded
+import com.github.whyrising.vancetube.modules.panel.common.States.Loading
+import com.github.whyrising.vancetube.modules.panel.common.States.Refreshing
 import com.github.whyrising.vancetube.modules.panel.common.Suggestions
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
@@ -36,29 +40,11 @@ import io.ktor.util.reflect.typeInfo
 // -- Home FSM -----------------------------------------------------------------
 
 val Home_Transitions = m<Any?, Any>(
-  null to m(
-    home.initialize to v(
-      States.Loaded,
-      v(v(BuiltInFx.dispatch, v(load)))
-    )
-  ),
-  States.Loading to m(
-    home.loading_is_done to v(States.Loaded),
-    error to v(States.Failed)
-  ),
-  States.Loaded to m(
-    refresh to v(
-      States.Refreshing,
-      v(v(BuiltInFx.dispatch, v(load)))
-    )
-  ),
-  States.Refreshing to m(
-    home.loading_is_done to v(States.Loaded),
-    error to v(States.Failed)
-  ),
-  States.Failed to m(
-    home.initialize to v(States.Loading, v(v(BuiltInFx.dispatch, v(load))))
-  )
+  null to m(home.initialize to v(Loading, v(v(BuiltInFx.dispatch, v(load))))),
+  Loading to m(home.loading_is_done to v(Loaded), error to v(Failed)),
+  Loaded to m(refresh to v(Refreshing, v(v(BuiltInFx.dispatch, v(load))))),
+  Refreshing to m(home.loading_is_done to v(Loaded), error to v(Failed)),
+  Failed to m(home.initialize to v(Loading, v(v(BuiltInFx.dispatch, v(load)))))
 )
 
 fun homeCurrentState(appDb: AppDb): Any? =

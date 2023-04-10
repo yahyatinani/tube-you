@@ -28,22 +28,22 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 @Composable
 fun VideosPanel(
   modifier: Modifier = Modifier,
-  state: VideosPanelVm,
+  panelVm: VideosPanelVm,
   onRefresh: () -> Unit = {},
   content: @Composable (videos: Videos) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    if (state.isLoading) {
+    if (panelVm.isLoading) {
       CircularProgressIndicator(
         modifier = Modifier.align(Alignment.Center),
         color = Blue300
       )
     }
 
-    if (state.showList) {
+    if (panelVm.showList) {
       SwipeRefresh(
         modifier = Modifier.testTag("swipe_refresh"),
-        state = rememberSwipeRefreshState(state.isRefreshing),
+        state = rememberSwipeRefreshState(panelVm.isRefreshing),
         onRefresh = onRefresh,
         indicator = { state, refreshTrigger ->
           val colorScheme = MaterialTheme.colorScheme
@@ -56,11 +56,11 @@ fun VideosPanel(
           )
         }
       ) {
-        content(state.videos)
+        content(panelVm.videos)
       }
-    } else if (state.error != null) {
+    } else if (panelVm.error != null) {
       // TODO: Implement proper UI for errors.
-      Text(text = "Request failed! Error: ${state.error}")
+      Text(text = "Request failed! Error: ${panelVm.error}")
     }
   }
 }
@@ -104,7 +104,7 @@ private val designTimeData = v(
 fun HomePreview() {
   VanceTheme {
     VideosPanel(
-      state = VideosPanelVm(
+      panelVm = VideosPanelVm(
         videos = Videos(designTimeData),
         showList = true
       )

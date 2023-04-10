@@ -13,7 +13,8 @@ enum class home {
   initialize,
   loading_is_done,
   fsm,
-  coroutine_scope;
+  coroutine_scope,
+  db;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

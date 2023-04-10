@@ -25,14 +25,14 @@ import com.github.whyrising.y.core.v
  * @return [Unit]
  */
 fun getRegHomeSubs() {
-  regSub<AppDb>(home.state) { db, _ ->
+  regSub<AppDb>(home.db) { db, _ ->
     db[HOME_ROUTE]
   }
 
   regSub<AppDb?, VideosPanelVm>(
     queryId = home.view_model,
-    signalsFn = { subscribe(v(home.state)) },
-    initialValue = VideosPanelVm(),
+    signalsFn = { subscribe(v(home.db)) },
+    initialValue = VideosPanelVm(isLoading = true),
     computationFn = { homeDb, currentValue, (_, viewsLabel) ->
       when (get<States>(homeDb?.get(home.state), 0)) {
         null, States.Loading -> VideosPanelVm(isLoading = true)

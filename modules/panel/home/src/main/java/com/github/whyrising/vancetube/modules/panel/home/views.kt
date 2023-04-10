@@ -29,7 +29,7 @@ private fun NavGraphBuilder.homeCommon(
   ) {
     getRegHomeSubs()
     VideosPanel(
-      state = watch(v(home.view_model, stringResource(R.string.views_label))),
+      panelVm = watch(v(home.view_model, stringResource(R.string.views_label))),
       onRefresh = { dispatch(v(home.refresh)) },
       content = content
     )

@@ -1,49 +1,75 @@
 package com.github.whyrising.vancetube
 
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.regFx
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
-import com.github.whyrising.y.core.get
 
-private fun removeStartDestinationIfDuplicated(navController: NavController) {
-  if (navController.currentBackStackEntry?.destination?.id ==
-    navController.graph.startDestinationId
-  ) navController.backQueue.removeAt(navController.backQueue.size - 1)
-}
+object BackStack {
+  val queue = ArrayDeque<String>().apply { add(HOME_ROUTE) }
 
-fun popBackQueueNavOptions(
-  navController: NavController,
-  destinationRoute: String
-) = navOptions {
-  if (navController.backQueue.size <= 2) return@navOptions
+  fun currentDestination(navController: NavController) = navController
+    .currentDestination!!.hierarchy.drop(1).first().route!!
 
-  removeStartDestinationIfDuplicated(navController)
+  fun contains(to: Any?) = queue.subList(1, queue.size).contains(to)
 
-  if (destinationRoute == "search_query") return@navOptions
-
-  val iterator = navController.backQueue.listIterator(index = 2)
-  while (iterator.hasNext()) {
-    if (iterator.next().destination.route == destinationRoute) {
-      iterator.remove()
+  fun addDistinct(currentDestination: String) {
+    if (!contains(currentDestination)) {
+      queue.add(currentDestination)
     }
+  }
+
+  fun remove(destination: String) {
+    if (contains(destination)) {
+      queue.removeAt(queue.lastIndexOf(destination))
+    }
+  }
+
+  /**
+   * Must be called before navigation to a new destination.
+   *
+   * @return the last backstack route that was removed.
+   */
+  fun pop(navController: NavController): String {
+    if (queue.size > 1) {
+      if (queue.last() == currentDestination(navController)) {
+        queue.removeLast()
+      }
+    }
+
+    val lastBackStackRoute = queue.last()
+    if (queue.size > 1) queue.removeLast()
+    return lastBackStackRoute
   }
 }
 
 fun regGlobalFx(navController: NavController) {
-  regFx(navigate_to) { destination ->
+  regFx(navigate_to) { toDestination ->
     //    val navOptions = get<NavOptions>(navigation, common.navOptions)
-    when (destination) {
-      common.go_back -> {
-        println("sdfljsdlfjsdj")
-        navController.popBackStack()
+    when (toDestination) {
+      common.go_back -> navController.popBackStack()
+
+      "search_query" -> navController.navigate(toDestination as String)
+
+      else -> {
+        navController.navigate(
+          route = toDestination as String,
+          navOptions = navOptions {
+            BackStack.addDistinct(BackStack.currentDestination(navController))
+            BackStack.remove(toDestination)
+
+            popUpTo(navController.graph.findStartDestination().id) {
+              saveState = true
+            }
+            restoreState = true
+          }
+        )
       }
-      else -> navController.navigate(
-        route = destination as String,
-        navOptions = popBackQueueNavOptions(navController, destination)
-      )
     }
   }
 

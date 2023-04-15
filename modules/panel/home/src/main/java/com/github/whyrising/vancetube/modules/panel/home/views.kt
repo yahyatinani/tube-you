@@ -10,7 +10,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.watch
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosGrid
@@ -25,7 +24,7 @@ private fun NavGraphBuilder.homeCommon(
   content: @Composable (videos: Videos) -> Unit
 ) {
   composable(
-    route = HOME_ROUTE
+    route = "HOME_ROUTE"
   ) {
     getRegHomeSubs()
     VideosPanel(

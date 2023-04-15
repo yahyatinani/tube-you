@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -73,10 +73,12 @@ import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
@@ -85,6 +87,8 @@ import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
@@ -121,11 +125,18 @@ private val navChangedListener: (
   arguments: Bundle?
 ) -> Unit = { navCtrl, destination, _ ->
   navCtrl.apply {
+    navCtrl.backQueue.forEach { println("sdfjlsdfjs: ${it.destination.route}") }
+    println("sdfjlsdfjs")
     destination.route?.let {
-      dispatch(v(active_navigation_item, it))
+      if (it == "HOME_ROUTE" || it == "search_query") {
+        dispatch(v(active_navigation_item, HOME_ROUTE))
+      } else if (it == "SUBSCRIPTION_ROUTE") {
+        dispatch(v(active_navigation_item, SUBSCRIPTION_ROUTE))
+      } else if (it == "LIBRARY_ROUTE") {
+        dispatch(v(active_navigation_item, LIBRARY_ROUTE))
+      }
     }
   }
-  // dispatch(v(base.set_backstack_status, flag))
 }
 
 @Composable
@@ -198,6 +209,7 @@ fun VanceApp(
   }
 
   val isCompactDisplay = isCompact(windowSizeClass)
+  val isSearchBar = watch<Boolean>(query = v(common.is_search_bar_visible))
   VanceTheme(isCompact = isCompactDisplay) {
     val scrollBehavior = when {
       isCompactDisplay -> {
@@ -219,7 +231,8 @@ fun VanceApp(
     Scaffold(
       modifier = Modifier
         .then(
-          if (isCompactDisplay) {
+          // topBar scrolls in other tabs too if search was scrolled.
+          if (isCompactDisplay && !isSearchBar) {
             Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
           } else Modifier
         )
@@ -228,7 +241,7 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        if (watch(query = v(common.is_search_bar_visible))) {
+        if (isSearchBar) {
           val focusRequester = FocusRequester()
           val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
           val isActive = watch<Boolean>(query = v(common.is_search_bar_active))
@@ -289,8 +302,9 @@ fun VanceApp(
           }
 
           LaunchedEffect(Unit) {
-            if (isActive)
+            if (isActive) {
               focusRequester.requestFocus()
+            }
           }
 
           BackHandler {
@@ -396,6 +410,14 @@ fun VanceApp(
         }
       }
     ) {
+      BackHandler {
+        navController.navigate(BackStack.pop(navController)) {
+          popUpTo(navController.graph.findStartDestination().id) {
+            saveState = true
+          }
+          restoreState = true
+        }
+      }
       val orientation = LocalConfiguration.current.orientation
       NavHost(
         navController = navController,
@@ -405,24 +427,39 @@ fun VanceApp(
           .padding(it)
           .consumeWindowInsets(it)
       ) {
-        composable(route = "search_query") {
-          val vm = watch<Videos>(
-            v(":search_results", stringResource(R.string.views_label))
-          )
-          VideosList(
-            orientation = orientation,
-            listState = LazyListState(),
-            videos = vm
-          )
+        navigation(route = HOME_ROUTE, startDestination = "HOME_ROUTE") {
+          if (isCompactDisplay) {
+            home(orientation = orientation)
+          } else {
+            homeLarge(orientation = orientation)
+          }
+          composable(route = "search_query") {
+            val vm = watch<Videos>(
+              v(":search_results", stringResource(R.string.views_label))
+            )
+            VideosList(
+              orientation = orientation,
+              listState = rememberLazyListState(),
+              videos = vm
+            )
+          }
         }
-        if (isCompactDisplay) {
-          home(orientation = orientation)
-          subscriptions(orientation = orientation)
-          library(orientation = orientation)
-        } else {
-          homeLarge(orientation = orientation)
-          subscriptions(orientation = orientation)
-          library(orientation = orientation)
+        navigation(
+          route = SUBSCRIPTION_ROUTE,
+          startDestination = "SUBSCRIPTION_ROUTE"
+        ) {
+          if (isCompactDisplay) {
+            subscriptions(orientation = orientation)
+          } else {
+            subscriptions(orientation = orientation)
+          }
+        }
+        navigation(route = LIBRARY_ROUTE, startDestination = "LIBRARY_ROUTE") {
+          if (isCompactDisplay) {
+            library(orientation = orientation)
+          } else {
+            library(orientation = orientation)
+          }
         }
       }
     }

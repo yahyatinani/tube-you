@@ -60,7 +60,7 @@ fun regCommonEvents() {
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
     if ((searchQuery as String).isEmpty()) return@regEventFx m()
-    
+
     val sq = searchQuery.replace(" ", "%20")
     val appDb = appDbBy(cofx)
     // TODO: &type=video, support a all types?

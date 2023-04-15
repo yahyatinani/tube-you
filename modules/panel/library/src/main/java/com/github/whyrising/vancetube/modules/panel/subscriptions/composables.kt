@@ -6,10 +6,9 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 
 fun NavGraphBuilder.subscriptions(orientation: Int) {
-  composable(route = SUBSCRIPTION_ROUTE) {
+  composable(route = "SUBSCRIPTION_ROUTE") {
     Surface(modifier = Modifier.fillMaxSize()) {
       Text(text = "TODO: subscriptions")
     }

@@ -1,6 +1,7 @@
 package com.github.whyrising.vancetube
 
 import com.github.whyrising.recompose.cofx.injectCofx
+import com.github.whyrising.recompose.fx.BuiltInFx.dispatch
 import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
@@ -41,7 +42,7 @@ private fun removeSearchBar(
 private fun popLastSearch(searchResultsSeq: PersistentList<*>?) =
   searchResultsSeq?.rest() ?: l()
 
-private fun atLeastOneSearch(searchResultsSeq: PersistentList<*>?) =
+private fun isSearchDone(searchResultsSeq: PersistentList<*>?) =
   searchResultsSeq != null
 
 fun regAppEvents() {
@@ -96,14 +97,13 @@ fun regAppEvents() {
     db.assoc(is_search_bar_active, flag)
   }
 
+  val defaultSb = m(":query" to "", ":suggestions" to v<String>())
   regEventDb<AppDb>(id = ":show_search_bar") { db, _ ->
-    val sb = m(":query" to "", ":suggestions" to v<String>())
-    when (db[active_navigation_item]) {
-      HOME_ROUTE -> assocIn(db, l(HOME_ROUTE, search_bar), sb)
-      SUBSCRIPTION_ROUTE -> assocIn(db, l(SUBSCRIPTION_ROUTE, search_bar), sb)
-      LIBRARY_ROUTE -> assocIn(db, l(LIBRARY_ROUTE, search_bar), sb)
-      else -> TODO(":show_search_bar")
-    }.assoc(is_search_bar_active, true)
+    val activeTab = db[active_navigation_item]
+    val sb = getIn<Any>(db, l(activeTab, search_bar), defaultSb)!!
+
+    assocIn(db, l(activeTab, search_bar), sb)
+      .assoc(is_search_bar_active, true)
   }
 
   regEventDb<AppDb>(id = ":hide_search_bar") { db, _ ->
@@ -162,11 +162,22 @@ fun regAppEvents() {
 
   regEventFx(id = common.search_back_press) { cofx, _ ->
     val appDb = appDbBy(cofx)
+    val isSearchBarActive = appDb[is_search_bar_active] as Boolean
     val activeTab = appDb[active_navigation_item]
     val searchResultsSeq = getIn<PersistentList<*>>(
       appDb,
       l(activeTab, search_bar, ":results")
     )
+
+    if (isSearchBarActive) {
+      if (searchResultsSeq == null) { // when query delete pressed.
+        val sbBak = appDb[common.search_bar_bak]!!
+        return@regEventFx m(
+          db to assocIn(appDb, l(activeTab, search_bar), sbBak)
+            .assoc(is_search_bar_active, false)
+        )
+      }
+    }
 
     val rest = popLastSearch(searchResultsSeq)
     val newDb = if (rest.count > 0) {
@@ -178,12 +189,30 @@ fun regAppEvents() {
     m<Any, Any>(
       db to newDb,
       fx to v(
-        if (atLeastOneSearch(searchResultsSeq)) v(pop_back_stack) else null
+        if (isSearchDone(searchResultsSeq)) v(pop_back_stack) else null
       )
     )
   }
 
   regEventFx(common.back_press) { _, _ ->
     m<Any, Any>(fx to v(v(common.back_press)))
+  }
+
+  regEventFx(id = common.delete_search_text) { cofx, _ ->
+    val appDb = appDbBy(cofx)
+    val activeTab = appDb[active_navigation_item]
+    val sbBak = getIn<Any>(appDb, l(activeTab, search_bar))!!
+
+    val newDb = assocIn(appDb, l(activeTab, search_bar), defaultSb)
+
+    m<Any, Any>(
+      db to newDb
+        .assoc(common.search_bar_bak, sbBak)
+        .assoc(is_search_bar_active, true),
+      fx to v(
+        v(dispatch, v(":query", "")),
+        v(dispatch, v(":show_search_bar"))
+      )
+    )
   }
 }

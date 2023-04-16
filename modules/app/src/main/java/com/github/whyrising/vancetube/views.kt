@@ -272,7 +272,11 @@ fun VanceApp(
               }
             },
             trailingIcon = {
-              IconButton(onClick = { }) {
+              IconButton(
+                onClick = {
+                  dispatchSync(v(common.delete_search_text))
+                }
+              ) {
                 Icon(
                   imageVector = Icons.Filled.Close,
                   modifier = Modifier,
@@ -304,10 +308,8 @@ fun VanceApp(
             }
           }
 
-          LaunchedEffect(Unit) {
-            if (isActive) {
-              focusRequester.requestFocus()
-            }
+          LaunchedEffect(isActive) {
+            focusRequester.requestFocus()
           }
 
           BackHandler {

@@ -27,7 +27,9 @@ enum class common {
   back_press,
   search_back_press,
   pop_back_stack,
-  is_backstack_empty;
+  is_backstack_empty,
+  delete_search_text,
+  search_bar_bak;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

@@ -244,7 +244,6 @@ fun VanceApp(
           val focusRequester = FocusRequester()
           val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
           val isActive = watch<Boolean>(query = v(common.is_search_bar_active))
-
           SearchBar(
             query = watch(v(":query")),
             modifier = Modifier.focusRequester(focusRequester),
@@ -309,7 +308,9 @@ fun VanceApp(
           }
 
           LaunchedEffect(isActive) {
-            focusRequester.requestFocus()
+            if (isActive) {
+              focusRequester.requestFocus()
+            }
           }
 
           BackHandler {

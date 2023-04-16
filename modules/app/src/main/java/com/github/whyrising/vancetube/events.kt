@@ -98,6 +98,7 @@ fun regAppEvents() {
   }
 
   val defaultSb = m(":query" to "", ":suggestions" to v<String>())
+
   regEventDb<AppDb>(id = ":show_search_bar") { db, _ ->
     val activeTab = db[active_navigation_item]
     val sb = getIn<Any>(db, l(activeTab, search_bar), defaultSb)!!

@@ -124,7 +124,7 @@ private val navChangedListener: (
   arguments: Bundle?
 ) -> Unit = { navCtrl, destination, _ ->
   navCtrl.apply {
-    navCtrl.backQueue.forEach { println("sdfjlsdfjs: ${it.destination.route}") }
+    BackStack.queue.forEach { println("sdfjlsdfjs: $it") }
     println("sdfjlsdfjs")
     destination.route?.let {
       if (it == "HOME_ROUTE" || it == "search_query") {
@@ -198,7 +198,7 @@ fun VanceApp(
 
   val scope: CoroutineScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
-    regGlobalFx(navController)
+    regAppFx(navController)
     regCommonEvents()
     regCofx(home.coroutine_scope) { cofx ->
       cofx.assoc(home.coroutine_scope, scope)
@@ -409,7 +409,9 @@ fun VanceApp(
         }
       }
     ) {
-      BackHandler {
+      BackHandler(
+        enabled = !watch<Boolean>(query = v(common.is_backstack_empty))
+      ) {
         dispatchSync(v(common.back_press))
       }
       val orientation = LocalConfiguration.current.orientation

@@ -20,14 +20,14 @@ enum class common {
   destination,
   navOptions,
   is_online,
-  current_back_stack_id,
   dispatch_debounce,
   is_search_bar_active,
   search_bar,
   is_search_bar_visible,
   back_press,
   search_back_press,
-  pop_back_stack;
+  pop_back_stack,
+  is_backstack_empty;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

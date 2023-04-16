@@ -10,7 +10,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
-import com.github.whyrising.vancetube.modules.core.keywords.common.current_back_stack_id
+import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_empty
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
@@ -61,20 +61,24 @@ fun regAppEvents() {
   }
 
   // TODO: rethink this event handler
-  regEventDb<AppDb>(active_navigation_item) { db, (_, destination) ->
-    db.letIf(navItems[destination] != null) {
-      it.assoc(active_navigation_item, destination)
-    }
+  regEventFx(
+    id = active_navigation_item,
+    interceptors = v(injectCofx(is_backstack_empty))
+  ) { cofx, (_, destination) ->
+    m(
+      db to appDbBy(cofx)
+        .assoc(is_backstack_empty, cofx[is_backstack_empty] as Boolean)
+        .letIf(navItems[destination] != null) {
+          it.assoc(active_navigation_item, destination)
+        }
+    )
   }
 
   regEventFx(navigate_to) { _, (_, destination) ->
     m<Any, Any>(fx to v(v(navigate_to, destination)))
   }
 
-  regEventFx(
-    id = common.on_click_nav_item,
-    interceptors = v(injectCofx(current_back_stack_id))
-  ) { cofx, (_, destination) ->
+  regEventFx(id = common.on_click_nav_item) { cofx, (_, destination) ->
     // TODO: Set active_panel to active_navigation_item
     val appDb = appDbBy(cofx)
     m<Any, Any>(

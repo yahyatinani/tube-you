@@ -4,7 +4,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
-import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
@@ -48,7 +47,7 @@ object BackStack {
   }
 }
 
-fun regGlobalFx(navController: NavController) {
+fun regAppFx(navController: NavController) {
   regFx(navigate_to) { toDestination ->
     //    val navOptions = get<NavOptions>(navigation, common.navOptions)
     when (toDestination) {
@@ -82,13 +81,5 @@ fun regGlobalFx(navController: NavController) {
 
   regFx(common.pop_back_stack) {
     navController.popBackStack()
-  }
-
-  // -- Co-effects
-
-  regCofx(common.current_back_stack_id) { coeffects ->
-    val id = navController.currentBackStackEntry?.destination?.id
-    if (id != null) coeffects.assoc(common.current_back_stack_id, id)
-    else coeffects
   }
 }

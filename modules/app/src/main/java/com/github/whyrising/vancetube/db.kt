@@ -3,6 +3,8 @@ package com.github.whyrising.vancetube
 import android.content.Context
 import android.net.ConnectivityManager
 import com.github.whyrising.recompose.cofx.regCofx
+import com.github.whyrising.vancetube.BackStack.queue
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.y.core.m
@@ -20,7 +22,8 @@ val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
   common.api_endpoint to "https://$DEFAULT_BASE_ADDRESS/api/v1",
   common.is_search_bar_active to true,
-  common.is_search_bar_visible to false
+  common.is_search_bar_visible to false,
+  common.is_backstack_empty to true
 )
 
 // -- Cofx ---------------------------------------------------------------------
@@ -34,5 +37,12 @@ fun isDeviceOnline(context: Context): Boolean {
 fun regAppCofx(context: Context) {
   regCofx(is_online) { coeffects ->
     coeffects.assoc(is_online, isDeviceOnline(context))
+  }
+
+  regCofx(common.is_backstack_empty) { coeffects ->
+    coeffects.assoc(
+      common.is_backstack_empty,
+      queue.size == 1 && queue.first() == HOME_ROUTE
+    )
   }
 }

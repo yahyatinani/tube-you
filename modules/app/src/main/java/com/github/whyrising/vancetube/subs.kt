@@ -12,6 +12,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_content_desc_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon_variant
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_available
+import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_empty
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
@@ -112,5 +113,9 @@ fun regAppSubs() {
       LIBRARY_ROUTE -> lsb != null
       else -> TODO("Unrecognized panel: $activePanel")
     }
+  }
+
+  regSub<AppDb>(queryId = is_backstack_empty) { db, _ ->
+    db[is_backstack_empty]
   }
 }

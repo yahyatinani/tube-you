@@ -244,6 +244,7 @@ fun VanceApp(
           val focusRequester = FocusRequester()
           val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
           val isActive = watch<Boolean>(query = v(common.is_search_bar_active))
+
           SearchBar(
             query = watch(v(":query")),
             modifier = Modifier.focusRequester(focusRequester),
@@ -295,7 +296,10 @@ fun VanceApp(
                 key = { it },
                 items = suggestions
               ) {
-                SearchSuggestionItem(text = it, onClick = { /* todo: */ })
+                SearchSuggestionItem(text = it) {
+                  // FIXME: Move cursor to the end of text.
+                  dispatch(v(":query", it))
+                }
               }
             }
           }

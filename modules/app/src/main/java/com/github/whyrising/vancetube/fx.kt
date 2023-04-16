@@ -14,12 +14,12 @@ object BackStack {
   val queue = ArrayDeque<String>().apply { add(HOME_ROUTE) }
 
   fun currentDestination(navController: NavController) = navController
-    .currentDestination!!.hierarchy.drop(1).first().route!!
+    .currentDestination?.hierarchy?.drop(1)?.first()?.route
 
-  fun contains(to: Any?) = queue.subList(1, queue.size).contains(to)
+  fun contains(to: String?) = queue.subList(1, queue.size).contains(to)
 
-  fun addDistinct(currentDestination: String) {
-    if (!contains(currentDestination)) {
+  fun addDistinct(currentDestination: String?) {
+    if (currentDestination != null && !contains(currentDestination)) {
       queue.add(currentDestination)
     }
   }
@@ -52,8 +52,6 @@ fun regGlobalFx(navController: NavController) {
   regFx(navigate_to) { toDestination ->
     //    val navOptions = get<NavOptions>(navigation, common.navOptions)
     when (toDestination) {
-      common.go_back -> navController.popBackStack()
-
       "search_query" -> navController.navigate(toDestination as String)
 
       else -> {
@@ -71,6 +69,19 @@ fun regGlobalFx(navController: NavController) {
         )
       }
     }
+  }
+
+  regFx(common.back_press) {
+    navController.navigate(BackStack.pop(navController)) {
+      popUpTo(navController.graph.findStartDestination().id) {
+        saveState = true
+      }
+      restoreState = true
+    }
+  }
+
+  regFx(common.pop_back_stack) {
+    navController.popBackStack()
   }
 
   // -- Co-effects

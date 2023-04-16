@@ -4,7 +4,6 @@ package com.github.whyrising.vancetube.modules.core.keywords
 enum class common {
   initialize,
   navigate_to,
-  go_back,
   set_backstack_status,
   is_backstack_available,
   api_endpoint,
@@ -25,7 +24,10 @@ enum class common {
   dispatch_debounce,
   is_search_bar_active,
   search_bar,
-  is_search_bar_visible;
+  is_search_bar_visible,
+  back_press,
+  search_back_press,
+  pop_back_stack;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

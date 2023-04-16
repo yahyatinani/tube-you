@@ -73,7 +73,6 @@ import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -92,10 +91,10 @@ import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
-import com.github.whyrising.vancetube.modules.core.keywords.common.go_back
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
+import com.github.whyrising.vancetube.modules.core.keywords.common.search_back_press
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.modules.designsystem.component.SearchSuggestionItem
@@ -261,7 +260,7 @@ fun VanceApp(
             leadingIcon = {
               IconButton(
                 onClick = {
-                  dispatch(v(go_back))
+                  dispatchSync(v(search_back_press))
                 }
               ) {
                 Icon(
@@ -308,7 +307,7 @@ fun VanceApp(
           }
 
           BackHandler {
-            dispatch(v(go_back))
+            dispatchSync(v(search_back_press))
           }
         } else {
           TopAppBar(
@@ -411,12 +410,7 @@ fun VanceApp(
       }
     ) {
       BackHandler {
-        navController.navigate(BackStack.pop(navController)) {
-          popUpTo(navController.graph.findStartDestination().id) {
-            saveState = true
-          }
-          restoreState = true
-        }
+        dispatchSync(v(common.back_press))
       }
       val orientation = LocalConfiguration.current.orientation
       NavHost(

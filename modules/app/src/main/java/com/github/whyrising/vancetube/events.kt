@@ -1,7 +1,7 @@
 package com.github.whyrising.vancetube
 
 import com.github.whyrising.recompose.cofx.injectCofx
-import com.github.whyrising.recompose.fx.BuiltInFx
+import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
@@ -11,13 +11,14 @@ import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.current_back_stack_id
-import com.github.whyrising.vancetube.modules.core.keywords.common.go_back
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
+import com.github.whyrising.vancetube.modules.core.keywords.common.pop_back_stack
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
 import com.github.whyrising.vancetube.modules.panel.common.letIf
@@ -31,6 +32,17 @@ import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 
 typealias AppDb = IPersistentMap<Any, Any>
+
+private fun removeSearchBar(
+  appDb: AppDb,
+  activeTab: Any?
+) = getIn<IPersistentMap<Any?, *>>(appDb, l(activeTab))!!.dissoc(search_bar)
+
+private fun popLastSearch(searchResultsSeq: PersistentList<*>?) =
+  searchResultsSeq?.rest() ?: l()
+
+private fun atLeastOneSearch(searchResultsSeq: PersistentList<*>?) =
+  searchResultsSeq != null
 
 fun regAppEvents() {
   regEventFx(
@@ -56,9 +68,7 @@ fun regAppEvents() {
   }
 
   regEventFx(navigate_to) { _, (_, destination) ->
-    m<Any, Any>(
-      BuiltInFx.fx to v(v(navigate_to, destination))
-    )
+    m<Any, Any>(fx to v(v(navigate_to, destination)))
   }
 
   regEventFx(
@@ -69,7 +79,7 @@ fun regAppEvents() {
     val appDb = appDbBy(cofx)
     m<Any, Any>(
       db to appDb.assoc(active_navigation_item, destination),
-      BuiltInFx.fx to v(
+      fx to v(
         if (destination == appDb[active_navigation_item]) {
           // TODO: Use one fx for all panels to scroll up by overriding reg fx
           v(home.go_top_list)
@@ -133,7 +143,7 @@ fun regAppEvents() {
 
     m<Any, Any>(
       db to newDb,
-      BuiltInFx.fx to v(
+      fx to v(
         v(
           common.dispatch_debounce,
           m(
@@ -146,24 +156,30 @@ fun regAppEvents() {
     )
   }
 
-  regEventFx(id = go_back) { cofx, _ ->
+  regEventFx(id = common.search_back_press) { cofx, _ ->
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]
-    val searchResults = getIn<PersistentList<*>>(
+    val searchResultsSeq = getIn<PersistentList<*>>(
       appDb,
       l(activeTab, search_bar, ":results")
     )
 
-    val temp = searchResults?.rest() ?: l()
-
-    val newDb = if (temp.count > 0) {
-      assocIn(appDb, l(activeTab, search_bar, ":results"), temp)
+    val rest = popLastSearch(searchResultsSeq)
+    val newDb = if (rest.count > 0) {
+      assocIn(appDb, l(activeTab, search_bar, ":results"), rest)
     } else {
-      val noSb = getIn<IPersistentMap<Any?, *>>(appDb, l(activeTab))!!
-        .dissoc(search_bar)
-      assocIn(appDb, l(activeTab), noSb)
+      assocIn(appDb, l(activeTab), removeSearchBar(appDb, activeTab))
     }
 
-    m<Any, Any>(db to newDb, BuiltInFx.fx to v(v(navigate_to, go_back)))
+    m<Any, Any>(
+      db to newDb,
+      fx to v(
+        if (atLeastOneSearch(searchResultsSeq)) v(pop_back_stack) else null
+      )
+    )
+  }
+
+  regEventFx(common.back_press) { _, _ ->
+    m<Any, Any>(fx to v(v(common.back_press)))
   }
 }

@@ -1,7 +1,6 @@
 package com.github.whyrising.vancetube
 
 import com.github.whyrising.recompose.regSub
-import com.github.whyrising.recompose.regSubM
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
@@ -21,6 +20,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
+import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
@@ -83,36 +83,19 @@ fun regAppSubs() {
     }
   )
 
-  regSub<AppDb>(queryId = ":home/search_bar") { db, _ ->
-    getIn(db, l(HOME_ROUTE, search_bar))
+  regSub<AppDb>(queryId = search_bar) { db, _ ->
+    getIn<PersistentList<IPersistentMap<Any, Any>>>(
+      db,
+      l(db[active_navigation_item], search_bar)
+    )
   }
 
-  regSub<AppDb>(queryId = ":subscriptions/search_bar") { db, _ ->
-    getIn(db, l(SUBSCRIPTION_ROUTE, search_bar))
-  }
-
-  regSub<AppDb>(queryId = ":library/search_bar") { db, _ ->
-    getIn(db, l(LIBRARY_ROUTE, search_bar))
-  }
-
-  regSubM(
+  regSub<Any?, Boolean>(
     queryId = common.is_search_bar_visible,
-    signalsFn = {
-      v(
-        subscribe(v(active_navigation_item)),
-        subscribe(v(":home/search_bar")),
-        subscribe(v(":subscriptions/search_bar")),
-        subscribe(v(":library/search_bar"))
-      )
-    },
+    signalsFn = { subscribe(v(search_bar)) },
     initialValue = false
-  ) { (activePanel, hsb, ssb, lsb), _, _ ->
-    when (activePanel) {
-      HOME_ROUTE -> hsb != null
-      SUBSCRIPTION_ROUTE -> ssb != null
-      LIBRARY_ROUTE -> lsb != null
-      else -> TODO("Unrecognized panel: $activePanel")
-    }
+  ) { sb, _, _ ->
+    sb != null
   }
 
   regSub<AppDb>(queryId = is_backstack_empty) { db, _ ->

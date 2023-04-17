@@ -15,7 +15,7 @@ import com.github.whyrising.y.core.get
  * {:state [States.Loading]
  * :home/popular_vids (
  * [com.github.whyrising.vancetube.modules.panel.common.VideoData])
- * :search_bar {:query "" :suggestions [] :results ()}
+ * :search_bar ({:query "" :suggestions [] :results []}, ...)
  * }
  */
 
@@ -23,7 +23,5 @@ import com.github.whyrising.y.core.get
 
 val regHomeCofx = regCofx(home.fsm) { cofx ->
   val (eventId) = cofx[coeffects.originalEvent] as Event
-  val nextDb = updateToNextState(appDbBy(cofx), eventId)
-
-  cofx.assoc(recompose.db, nextDb)
+  cofx.assoc(recompose.db, updateToNextState(appDbBy(cofx), eventId))
 }

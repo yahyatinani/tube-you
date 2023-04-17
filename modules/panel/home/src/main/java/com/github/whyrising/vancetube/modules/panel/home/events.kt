@@ -29,6 +29,8 @@ import com.github.whyrising.vancetube.modules.panel.common.ktor
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.vancetube.modules.panel.common.nextState
 import com.github.whyrising.y.core.assocIn
+import com.github.whyrising.y.core.collections.IPersistentMap
+import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
@@ -132,12 +134,16 @@ fun regHomeEvents() {
     m(BuiltInFx.fx to v(v(go_top_list)))
   }
 
-  regEventDb<AppDb>(id = ":set-suggestions") { db, (_, suggestions) ->
-    assocIn(
-      db,
-      l(HOME_ROUTE, search_bar, searchBar.suggestions),
-      (suggestions as Suggestions).suggestions
-    )
+  regEventDb<AppDb>(id = common.set_suggestions) { db, (_, suggestions) ->
+    val sbSeq =
+      getIn<PersistentList<IPersistentMap<Any, Any>>>(
+        db,
+        l(HOME_ROUTE, search_bar)
+      )
+    val sb = sbSeq!!
+      .first()
+      .assoc(searchBar.suggestions, (suggestions as Suggestions).suggestions)
+    assocIn(db, l(HOME_ROUTE, search_bar), sbSeq.rest().cons(sb))
   }
 
   regEventDb<AppDb>(id = ":set_search_results") { db, (_, searchResults) ->

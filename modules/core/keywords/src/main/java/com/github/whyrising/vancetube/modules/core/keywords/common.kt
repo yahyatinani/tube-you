@@ -30,7 +30,10 @@ enum class common {
   is_backstack_empty,
   clear_search_text,
   search_bar_bak,
-  show_search_bar;
+  show_search_bar,
+  search_suggestions,
+  set_suggestions,
+  search_query;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

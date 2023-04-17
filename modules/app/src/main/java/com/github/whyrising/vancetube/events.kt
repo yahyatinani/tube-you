@@ -18,12 +18,14 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.pop_back_stack
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar_bak
+import com.github.whyrising.vancetube.modules.core.keywords.common.search_suggestions
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
+import com.github.whyrising.vancetube.modules.panel.common.defaultSb
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
@@ -99,12 +101,9 @@ fun regAppEvents() {
     db.assoc(is_search_bar_active, flag)
   }
 
-  val defaultSb = m(searchBar.query to "", searchBar.suggestions to v<String>())
-
   regEventDb<AppDb>(id = common.show_search_bar) { db, _ ->
     val activeTab = db[active_navigation_item]
-    val sb = getIn<Any>(db, l(activeTab, search_bar), defaultSb)!!
-
+    val sb = getIn<Any>(db, l(activeTab, search_bar), l(defaultSb))
     assocIn(db, l(activeTab, search_bar), sb)
       .assoc(is_search_bar_active, true)
   }
@@ -149,8 +148,17 @@ fun regAppEvents() {
   ) { cofx, (_, searchQuery) ->
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]
-    val newDb =
-      assocIn(appDb, l(activeTab, search_bar, searchBar.query), searchQuery)
+    val sbSeq = getIn<PersistentList<Any>>(appDb, l(activeTab, search_bar))!!
+    val fsb = sbSeq.first() as IPersistentMap<Any, Any>
+    val sbResults = fsb[searchBar.results]
+
+    val newSbSeq = if (sbResults != null) {
+      sbSeq.cons(defaultSb.assoc(searchBar.query, searchQuery))
+    } else {
+      sbSeq.rest().cons(fsb.assoc(searchBar.query, searchQuery))
+    }
+
+    val newDb = assocIn(appDb, l(activeTab, search_bar), newSbSeq)
 
     m<Any, Any>(
       db to newDb,
@@ -158,8 +166,8 @@ fun regAppEvents() {
         v(
           common.dispatch_debounce,
           m(
-            bounce_fx.id to ":search_suggestions",
-            bounce_fx.event to v(":search_suggestions", searchQuery),
+            bounce_fx.id to search_suggestions,
+            bounce_fx.event to v(search_suggestions, searchQuery),
             bounce_fx.delay to 500
           )
         )

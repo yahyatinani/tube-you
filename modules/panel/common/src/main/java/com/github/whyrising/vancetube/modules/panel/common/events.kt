@@ -33,13 +33,12 @@ fun appDbBy(cofx: Coeffects): AppDb = cofx[db] as AppDb
 
 fun regCommonEvents() {
   regEventFx(
-    id = ":search_suggestions",
+    id = common.search_suggestions,
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
     val sq = (searchQuery as String).replace(" ", "%20")
     val appDb = appDbBy(cofx)
-    val suggestionsEndpoint =
-      "${appDb[api_endpoint]}/search/suggestions?q=$sq"
+    val suggestionsEndpoint = "${appDb[api_endpoint]}/search/suggestions?q=$sq"
 
     m<Any, Any>().assoc(
       fx,
@@ -52,7 +51,7 @@ fun regCommonEvents() {
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<Suggestions>(),
-            ktor.on_success to v(":set-suggestions"),
+            ktor.on_success to v(common.set_suggestions),
             ktor.on_failure to v(home.error)
           )
         )
@@ -61,7 +60,7 @@ fun regCommonEvents() {
   }
 
   regEventFx(
-    id = ":search_query",
+    id = common.search_query,
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
     if ((searchQuery as String).isEmpty()) return@regEventFx m()

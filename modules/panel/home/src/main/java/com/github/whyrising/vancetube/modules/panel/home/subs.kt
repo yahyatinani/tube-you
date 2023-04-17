@@ -13,6 +13,7 @@ import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.formatVideos
+import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
@@ -58,11 +59,17 @@ fun getRegHomeSubs() {
   )
 
   regSub<AppDb>(queryId = searchBar.query) { db, _ ->
-    getIn(db, l(HOME_ROUTE, search_bar, searchBar.query), "")
+    getIn<PersistentList<Map<Any, Any>>>(
+      db,
+      l(HOME_ROUTE, search_bar)
+    )!!.first()[searchBar.query]
   }
 
   regSub<AppDb>(queryId = searchBar.suggestions) { db, _ ->
-    getIn(db, l(HOME_ROUTE, search_bar, searchBar.suggestions), v<Any>())
+    getIn<PersistentList<Map<Any, Any>>>(
+      db,
+      l(HOME_ROUTE, search_bar)
+    )!!.first()[searchBar.suggestions]
   }
 
   regSub<AppDb>(queryId = ":search_results") { db, (_, viewsLabel) ->

@@ -33,7 +33,8 @@ enum class common {
   show_search_bar,
   search_suggestions,
   set_suggestions,
-  search_query;
+  search,
+  set_search_results;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }
@@ -42,7 +43,8 @@ enum class common {
 enum class searchBar {
   query,
   results,
-  suggestions;
+  suggestions,
+  search_id;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

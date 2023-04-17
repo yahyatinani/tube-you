@@ -30,6 +30,7 @@ import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentList
+import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
@@ -103,7 +104,7 @@ fun regAppEvents() {
 
   regEventDb<AppDb>(id = common.show_search_bar) { db, _ ->
     val activeTab = db[active_navigation_item]
-    val sb = getIn<Any>(db, l(activeTab, search_bar), l(defaultSb))
+    val sb = getIn<Any>(db, l(activeTab, search_bar), v(defaultSb))
     assocIn(db, l(activeTab, search_bar), sb)
       .assoc(is_search_bar_active, true)
   }
@@ -148,14 +149,14 @@ fun regAppEvents() {
   ) { cofx, (_, searchQuery) ->
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]
-    val sbSeq = getIn<PersistentList<Any>>(appDb, l(activeTab, search_bar))!!
-    val fsb = sbSeq.first() as IPersistentMap<Any, Any>
+    val sbSeq = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
+    val fsb = sbSeq.last() as IPersistentMap<Any, Any>
     val sbResults = fsb[searchBar.results]
 
     val newSbSeq = if (sbResults != null) {
-      sbSeq.cons(defaultSb.assoc(searchBar.query, searchQuery))
+      sbSeq.conj(defaultSb.assoc(searchBar.query, searchQuery))
     } else {
-      sbSeq.rest().cons(fsb.assoc(searchBar.query, searchQuery))
+      sbSeq.pop().conj(fsb.assoc(searchBar.query, searchQuery))
     }
 
     val newDb = assocIn(appDb, l(activeTab, search_bar), newSbSeq)

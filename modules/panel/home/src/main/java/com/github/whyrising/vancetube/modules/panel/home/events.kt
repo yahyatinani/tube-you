@@ -30,7 +30,6 @@ import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.vancetube.modules.panel.common.nextState
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
-import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
@@ -136,24 +135,26 @@ fun regHomeEvents() {
 
   regEventDb<AppDb>(id = common.set_suggestions) { db, (_, suggestions) ->
     val sbSeq =
-      getIn<PersistentList<IPersistentMap<Any, Any>>>(
+      getIn<PersistentVector<IPersistentMap<Any, Any>>>(
         db,
         l(HOME_ROUTE, search_bar)
       )
     val sb = sbSeq!!
-      .first()
+      .last()
       .assoc(searchBar.suggestions, (suggestions as Suggestions).suggestions)
-    assocIn(db, l(HOME_ROUTE, search_bar), sbSeq.rest().cons(sb))
+    assocIn(db, l(HOME_ROUTE, search_bar), sbSeq.pop().conj(sb))
   }
 
-  regEventDb<AppDb>(id = ":set_search_results") { db, (_, searchResults) ->
-    // TODO: use updateIn() to conj a new val to a seq in a map.
-    val l = getIn(db, l(HOME_ROUTE, search_bar, searchBar.results), l<Any?>())!!
-      .cons(searchResults)
+  regEventDb<AppDb>(
+    id = common.set_search_results
+  ) { db, (_, searchId, searchResults) ->
+    // TODO: verify that if searchBar was removed searchId doesn't cause
+    //  OutOfRangeException
+    val activeTab = db[common.active_navigation_item]
     assocIn(
       db,
-      l(HOME_ROUTE, search_bar, searchBar.results),
-      l // PersistentVector<VideoData>
+      l(activeTab, search_bar, searchId, searchBar.results),
+      searchResults
     )
   }
 }

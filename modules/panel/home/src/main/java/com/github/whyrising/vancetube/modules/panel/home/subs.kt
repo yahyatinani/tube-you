@@ -69,7 +69,7 @@ fun getRegHomeSubs() {
     getIn<PersistentVector<Map<Any, Any>>>(
       db,
       l(HOME_ROUTE, search_bar)
-    )!!.last()[searchBar.suggestions]
+    )!!.last()[searchBar.suggestions] ?: v<String>()
   }
 
   regSub<AppDb>(queryId = ":search_results") { db, (_, viewsLabel) ->

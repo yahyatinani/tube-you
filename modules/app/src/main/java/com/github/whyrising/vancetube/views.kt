@@ -286,7 +286,7 @@ fun VanceApp(
               }
             },
             onQueryChange = {
-              dispatchSync(v(searchBar.query, it))
+              dispatchSync(v(common.search_input, it))
             },
             onActiveChange = {
               dispatch(v(common.is_search_bar_active, it))

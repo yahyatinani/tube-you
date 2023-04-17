@@ -22,6 +22,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.search_sugges
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar.search_id
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
@@ -144,25 +145,21 @@ fun regAppEvents() {
   }
 
   regEventFx(
-    id = searchBar.query,
+    id = common.search_input,
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]
-    val sbSeq = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
-    val fsb = sbSeq.last() as IPersistentMap<Any, Any>
-    val sbResults = fsb[searchBar.results]
-
-    val newSbSeq = if (sbResults != null) {
-      sbSeq.conj(defaultSb.assoc(searchBar.query, searchQuery))
-    } else {
-      sbSeq.pop().conj(fsb.assoc(searchBar.query, searchQuery))
-    }
-
-    val newDb = assocIn(appDb, l(activeTab, search_bar), newSbSeq)
+    val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
+    val sb = sbVec.last() as IPersistentMap<Any, Any>
+    val i = if (sb[search_id] != null) sbVec.count else sbVec.count - 1
 
     m<Any, Any>(
-      db to newDb,
+      db to assocIn(
+        appDb,
+        l(activeTab, search_bar, i, searchBar.query),
+        searchQuery
+      ),
       fx to v(
         v(
           common.dispatch_debounce,
@@ -184,6 +181,7 @@ fun regAppEvents() {
     val appDb = appDbBy(cofx)
     val isSearchBarActive = appDb[is_search_bar_active] as Boolean
     val activeTab = appDb[active_navigation_item]
+    val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
     val searchResultsSeq = getIn<PersistentList<*>>(
       appDb,
       l(activeTab, search_bar, searchBar.results)

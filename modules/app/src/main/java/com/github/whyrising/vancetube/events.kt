@@ -17,6 +17,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.pop_back_stack
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
+import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar_bak
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
@@ -161,6 +162,10 @@ fun regAppEvents() {
     )
   }
 
+  regEventFx(common.back_press) { _, _ ->
+    m<Any, Any>(fx to v(v(common.back_press)))
+  }
+
   regEventFx(id = common.search_back_press) { cofx, _ ->
     val appDb = appDbBy(cofx)
     val isSearchBarActive = appDb[is_search_bar_active] as Boolean
@@ -172,7 +177,7 @@ fun regAppEvents() {
 
     if (isSearchBarActive) {
       if (searchResultsSeq == null) { // when query delete pressed.
-        val sbBak = appDb[common.search_bar_bak]!!
+        val sbBak = appDb[search_bar_bak]!!
         return@regEventFx m(
           db to assocIn(appDb, l(activeTab, search_bar), sbBak)
             .assoc(is_search_bar_active, false)
@@ -195,20 +200,13 @@ fun regAppEvents() {
     )
   }
 
-  regEventFx(common.back_press) { _, _ ->
-    m<Any, Any>(fx to v(v(common.back_press)))
-  }
-
   regEventFx(id = common.delete_search_text) { cofx, _ ->
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]
-    val sbBak = getIn<Any>(appDb, l(activeTab, search_bar))!!
-
-    val newDb = assocIn(appDb, l(activeTab, search_bar), defaultSb)
-
+    val searchBarBackup = getIn<Any>(appDb, l(activeTab, search_bar))!!
     m<Any, Any>(
-      db to newDb
-        .assoc(common.search_bar_bak, sbBak)
+      db to assocIn(appDb, l(activeTab, search_bar), defaultSb)
+        .assoc(search_bar_bak, searchBarBackup)
         .assoc(is_search_bar_active, true),
       fx to v(
         v(dispatch, v(":query", "")),

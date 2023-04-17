@@ -180,11 +180,11 @@ fun regAppEvents() {
       l(activeTab, search_bar, searchBar.results)
     )
 
-    if (isSearchBarActive) {
-      if (searchResultsSeq == null) { // when :clear_search_text pressed.
-        val sbBak = appDb[search_bar_bak]!!
+    if (isSearchBarActive && searchResultsSeq == null) {
+      val searchBarBackup = appDb[search_bar_bak]
+      if (searchBarBackup != null) { // when :clear_search_text pressed.
         return@regEventFx m(
-          db to assocIn(appDb, l(activeTab, search_bar), sbBak)
+          db to assocIn(appDb, l(activeTab, search_bar), searchBarBackup)
             .assoc(is_search_bar_active, false)
         )
       }

@@ -6,6 +6,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelVm
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
@@ -56,18 +57,18 @@ fun getRegHomeSubs() {
     }
   )
 
-  regSub<AppDb>(queryId = ":query") { db, _ ->
-    getIn(db, l(HOME_ROUTE, search_bar, ":query"), "")
+  regSub<AppDb>(queryId = searchBar.query) { db, _ ->
+    getIn(db, l(HOME_ROUTE, search_bar, searchBar.query), "")
   }
 
-  regSub<AppDb>(queryId = ":suggestions") { db, _ ->
-    getIn(db, l(HOME_ROUTE, search_bar, ":suggestions"), v<Any>())
+  regSub<AppDb>(queryId = searchBar.suggestions) { db, _ ->
+    getIn(db, l(HOME_ROUTE, search_bar, searchBar.suggestions), v<Any>())
   }
 
   regSub<AppDb>(queryId = ":search_results") { db, (_, viewsLabel) ->
     val videos = getIn(
       db,
-      l(HOME_ROUTE, search_bar, ":results"),
+      l(HOME_ROUTE, search_bar, searchBar.results),
       l<PersistentVector<VideoData>>()
     )!!
     when {

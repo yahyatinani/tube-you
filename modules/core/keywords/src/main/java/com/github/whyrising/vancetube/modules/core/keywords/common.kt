@@ -28,8 +28,18 @@ enum class common {
   search_back_press,
   pop_back_stack,
   is_backstack_empty,
-  delete_search_text,
-  search_bar_bak;
+  clear_search_text,
+  search_bar_bak,
+  show_search_bar;
+
+  override fun toString(): String = ":${javaClass.simpleName}/$name"
+}
+
+@Suppress("ClassName", "EnumEntryName")
+enum class searchBar {
+  query,
+  results,
+  suggestions;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

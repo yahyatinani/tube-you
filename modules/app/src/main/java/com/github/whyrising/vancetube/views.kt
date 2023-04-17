@@ -96,6 +96,8 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_back_press
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar.suggestions
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
 import com.github.whyrising.vancetube.modules.designsystem.component.SearchSuggestionItem
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
@@ -245,7 +247,7 @@ fun VanceApp(
           val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
           val isActive = watch<Boolean>(query = v(common.is_search_bar_active))
           SearchBar(
-            query = watch(v(":query")),
+            query = watch(v(searchBar.query)),
             modifier = Modifier.focusRequester(focusRequester),
             active = isActive,
             tonalElevation = 0.dp,
@@ -273,7 +275,7 @@ fun VanceApp(
             trailingIcon = {
               IconButton(
                 onClick = {
-                  dispatchSync(v(common.delete_search_text))
+                  dispatchSync(v(common.clear_search_text))
                 }
               ) {
                 Icon(
@@ -284,7 +286,7 @@ fun VanceApp(
               }
             },
             onQueryChange = {
-              dispatchSync(v(":query", it))
+              dispatchSync(v(searchBar.query, it))
             },
             onActiveChange = {
               dispatch(v(common.is_search_bar_active, it))
@@ -293,7 +295,7 @@ fun VanceApp(
               dispatch(v(":search_query", it))
             }
           ) {
-            val suggestions = watch<List<String>>(query = v(":suggestions"))
+            val suggestions = watch<List<String>>(query = v(suggestions))
             LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
               items(
                 key = { it },
@@ -301,7 +303,7 @@ fun VanceApp(
               ) {
                 SearchSuggestionItem(text = it) {
                   // FIXME: Move cursor to the end of text.
-                  dispatch(v(":query", it))
+                  dispatch(v(searchBar.query, it))
                 }
               }
             }
@@ -329,7 +331,7 @@ fun VanceApp(
             actions = {
               IconButton(
                 onClick = {
-                  dispatch(v(":show_search_bar"))
+                  dispatch(v(common.show_search_bar))
                 }
               ) {
                 Icon(

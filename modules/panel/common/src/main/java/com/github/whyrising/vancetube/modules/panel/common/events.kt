@@ -10,6 +10,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.api_endpoint
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar_bak
 import com.github.whyrising.vancetube.modules.core.keywords.home
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
@@ -80,7 +81,7 @@ fun regCommonEvents() {
 
       else -> appDb
     }.let {
-      assocIn(it, l(activeTab, search_bar, ":query"), trimmedQuery)
+      assocIn(it, l(activeTab, search_bar, searchBar.query), trimmedQuery)
     }
 
     val restSearchQuery = trimmedQuery.replace(" ", "%20")

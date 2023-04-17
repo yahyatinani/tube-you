@@ -15,6 +15,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.home.go_top_list
 import com.github.whyrising.vancetube.modules.core.keywords.home.load
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.States.Failed
@@ -134,18 +135,18 @@ fun regHomeEvents() {
   regEventDb<AppDb>(id = ":set-suggestions") { db, (_, suggestions) ->
     assocIn(
       db,
-      l(HOME_ROUTE, search_bar, ":suggestions"),
+      l(HOME_ROUTE, search_bar, searchBar.suggestions),
       (suggestions as Suggestions).suggestions
     )
   }
 
   regEventDb<AppDb>(id = ":set_search_results") { db, (_, searchResults) ->
     // TODO: use updateIn() to conj a new val to a seq in a map.
-    val l = getIn(db, l(HOME_ROUTE, search_bar, ":results"), l<Any?>())!!
+    val l = getIn(db, l(HOME_ROUTE, search_bar, searchBar.results), l<Any?>())!!
       .cons(searchResults)
     assocIn(
       db,
-      l(HOME_ROUTE, search_bar, ":results"),
+      l(HOME_ROUTE, search_bar, searchBar.results),
       l // PersistentVector<VideoData>
     )
   }

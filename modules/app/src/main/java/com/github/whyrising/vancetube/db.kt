@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.vancetube.BackStack.queue
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.y.core.m
@@ -42,7 +42,7 @@ fun regAppCofx(context: Context) {
   regCofx(common.is_backstack_empty) { coeffects ->
     coeffects.assoc(
       common.is_backstack_empty,
-      queue.size == 1 && queue.first() == HOME_ROUTE
+      queue.size == 1 && queue.first() == HOME_GRAPH_ROUTE
     )
   }
 }

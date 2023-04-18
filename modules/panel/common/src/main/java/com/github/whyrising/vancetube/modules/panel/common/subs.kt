@@ -1,5 +1,12 @@
 package com.github.whyrising.vancetube.modules.panel.common
 
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import com.github.whyrising.recompose.watch
+import com.github.whyrising.vancetube.modules.core.keywords.common.search_results
+import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
 import com.github.whyrising.vancetube.modules.designsystem.core.formatVideoInfo
 import com.github.whyrising.vancetube.modules.designsystem.core.formatViews
@@ -26,4 +33,16 @@ fun formatVideos(
       )
     )
   )
+}
+
+const val SEARCH_ROUTE = "search_results"
+
+fun NavGraphBuilder.searchResults(route: String) {
+  composable(route = "$route/$SEARCH_ROUTE") {
+    VideosList(
+      orientation = 1,
+      listState = rememberLazyListState(),
+      videos = watch(v(search_results, stringResource(R.string.views_label)))
+    )
+  }
 }

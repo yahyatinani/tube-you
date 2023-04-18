@@ -68,6 +68,7 @@ fun regCommonEvents() {
     val trimmedQuery = searchQuery.trim()
     val appDb = appDbBy(cofx)
     val activeTab = appDb[common.active_navigation_item]
+    println("sdlkfjlsdjfj $activeTab")
     val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
     val sbIndex = sbVec.size - 1
     val fsb = (sbVec.last() as IPersistentMap<Any, Any>)
@@ -85,7 +86,7 @@ fun regCommonEvents() {
     m<Any, Any>(
       db to newDb,
       fx to v(
-        v(common.navigate_to, "search_query"),
+        v(common.navigate_to, "$activeTab/$SEARCH_ROUTE"),
         v(
           ktor.http_fx,
           m(

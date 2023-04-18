@@ -7,4 +7,5 @@ enum class subscriptions {
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }
 
-val SUBSCRIPTION_ROUTE = subscriptions.route.toString()
+const val SUBSCRIPTIONS_GRAPH_ROUTE = "subscriptions_graph"
+const val SUBSCRIPTIONS_ROUTE = "subscriptions_route"

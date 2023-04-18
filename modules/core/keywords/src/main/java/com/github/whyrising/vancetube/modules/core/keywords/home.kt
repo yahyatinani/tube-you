@@ -2,7 +2,6 @@ package com.github.whyrising.vancetube.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class home {
-  route,
   state,
   view_model,
   refresh,
@@ -19,4 +18,5 @@ enum class home {
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }
 
-val HOME_ROUTE = home.route.toString()
+const val HOME_GRAPH_ROUTE = "home_graph"
+const val HOME_ROUTE = "home_route"

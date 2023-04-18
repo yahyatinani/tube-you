@@ -5,12 +5,13 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import com.github.whyrising.recompose.regFx
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
+import com.github.whyrising.vancetube.modules.panel.common.SEARCH_ROUTE
 
 object BackStack {
-  val queue = ArrayDeque<String>().apply { add(HOME_ROUTE) }
+  val queue = ArrayDeque<String>().apply { add(HOME_GRAPH_ROUTE) }
 
   fun currentDestination(navController: NavController) = navController
     .currentDestination?.hierarchy?.drop(1)?.first()?.route
@@ -49,24 +50,21 @@ object BackStack {
 
 fun regAppFx(navController: NavController) {
   regFx(navigate_to) { toDestination ->
-    //    val navOptions = get<NavOptions>(navigation, common.navOptions)
-    when (toDestination) {
-      "search_query" -> navController.navigate(toDestination as String)
+    if (toDestination is String && toDestination.contains(SEARCH_ROUTE)) {
+      navController.navigate(toDestination)
+    } else {
+      navController.navigate(
+        route = toDestination as String,
+        navOptions = navOptions {
+          BackStack.addDistinct(BackStack.currentDestination(navController))
+          BackStack.remove(toDestination)
 
-      else -> {
-        navController.navigate(
-          route = toDestination as String,
-          navOptions = navOptions {
-            BackStack.addDistinct(BackStack.currentDestination(navController))
-            BackStack.remove(toDestination)
-
-            popUpTo(navController.graph.findStartDestination().id) {
-              saveState = true
-            }
-            restoreState = true
+          popUpTo(navController.graph.findStartDestination().id) {
+            saveState = true
           }
-        )
-      }
+          restoreState = true
+        }
+      )
     }
   }
 

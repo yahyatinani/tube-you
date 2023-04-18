@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -73,11 +72,10 @@ import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
 import com.github.whyrising.recompose.cofx.regCofx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.dispatchSync
@@ -85,9 +83,7 @@ import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.watch
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
@@ -103,22 +99,21 @@ import com.github.whyrising.vancetube.modules.designsystem.component.SearchSugge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
-import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
-import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.common.regCommonEvents
-import com.github.whyrising.vancetube.modules.panel.home.R
-import com.github.whyrising.vancetube.modules.panel.home.home
-import com.github.whyrising.vancetube.modules.panel.home.homeLarge
+import com.github.whyrising.vancetube.modules.panel.home.homeGraph
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.home.regHomeEvents
-import com.github.whyrising.vancetube.modules.panel.library.library
-import com.github.whyrising.vancetube.modules.panel.subscriptions.subscriptions
+import com.github.whyrising.vancetube.modules.panel.library.libraryGraph
+import com.github.whyrising.vancetube.modules.panel.subscriptions.subsGraph
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import kotlinx.coroutines.CoroutineScope
+
+private fun navGraphRoute(destination: NavDestination) =
+  destination.hierarchy.toList().dropLast(1).last().route!!
 
 private val navChangedListener: (
   controller: NavController,
@@ -126,16 +121,8 @@ private val navChangedListener: (
   arguments: Bundle?
 ) -> Unit = { navCtrl, destination, _ ->
   navCtrl.apply {
-    BackStack.queue.forEach { println("sdfjlsdfjs: $it") }
-    println("sdfjlsdfjs")
     destination.route?.let {
-      if (it == "HOME_ROUTE" || it == "search_query") {
-        dispatch(v(active_navigation_item, HOME_ROUTE))
-      } else if (it == "SUBSCRIPTION_ROUTE") {
-        dispatch(v(active_navigation_item, SUBSCRIPTION_ROUTE))
-      } else if (it == "LIBRARY_ROUTE") {
-        dispatch(v(active_navigation_item, LIBRARY_ROUTE))
-      }
+      dispatch(v(active_navigation_item, navGraphRoute(destination)))
     }
   }
 }
@@ -423,49 +410,19 @@ fun VanceApp(
       ) {
         dispatchSync(v(common.back_press))
       }
+
       val orientation = LocalConfiguration.current.orientation
       NavHost(
         navController = navController,
-        startDestination = HOME_ROUTE,
+        startDestination = HOME_GRAPH_ROUTE,
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
           .padding(it)
           .consumeWindowInsets(it)
       ) {
-        navigation(route = HOME_ROUTE, startDestination = "HOME_ROUTE") {
-          if (isCompactDisplay) {
-            home(orientation = orientation)
-          } else {
-            homeLarge(orientation = orientation)
-          }
-          composable(route = "search_query") {
-            val vm = watch<Videos>(
-              v(common.search_results, stringResource(R.string.views_label))
-            )
-            VideosList(
-              orientation = orientation,
-              listState = rememberLazyListState(),
-              videos = vm
-            )
-          }
-        }
-        navigation(
-          route = SUBSCRIPTION_ROUTE,
-          startDestination = "SUBSCRIPTION_ROUTE"
-        ) {
-          if (isCompactDisplay) {
-            subscriptions(orientation = orientation)
-          } else {
-            subscriptions(orientation = orientation)
-          }
-        }
-        navigation(route = LIBRARY_ROUTE, startDestination = "LIBRARY_ROUTE") {
-          if (isCompactDisplay) {
-            library(orientation = orientation)
-          } else {
-            library(orientation = orientation)
-          }
-        }
+        homeGraph(isCompactDisplay, orientation)
+        subsGraph(isCompactDisplay, orientation)
+        libraryGraph(isCompactDisplay, orientation)
       }
     }
   }

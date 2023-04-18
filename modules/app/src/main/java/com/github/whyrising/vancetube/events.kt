@@ -6,8 +6,8 @@ import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_empty
@@ -49,7 +49,7 @@ fun regAppEvents() {
     interceptors = v(injectCofx(is_online))
   ) { cofx, _ ->
     val isOnline = cofx[is_online]!! as Boolean
-    val startingRoute = if (isOnline) HOME_ROUTE else LIBRARY_ROUTE
+    val startingRoute = if (isOnline) HOME_GRAPH_ROUTE else LIBRARY_GRAPH_ROUTE
     m<Any, Any>(
       db to defaultDb.assoc(active_navigation_item, startingRoute)
     )

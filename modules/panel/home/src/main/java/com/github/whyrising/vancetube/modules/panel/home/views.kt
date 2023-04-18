@@ -8,14 +8,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.watch
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosGrid
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosList
 import com.github.whyrising.vancetube.modules.designsystem.component.VideosPanel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
+import com.github.whyrising.vancetube.modules.panel.common.R
+import com.github.whyrising.vancetube.modules.panel.common.searchResults
 import com.github.whyrising.y.core.v
 
 // -- navigation ---------------------------------------------------------------
@@ -23,9 +28,7 @@ import com.github.whyrising.y.core.v
 private fun NavGraphBuilder.homeCommon(
   content: @Composable (videos: Videos) -> Unit
 ) {
-  composable(
-    route = "HOME_ROUTE"
-  ) {
+  composable(route = HOME_ROUTE) {
     getRegHomeSubs()
     VideosPanel(
       panelVm = watch(v(home.view_model, stringResource(R.string.views_label))),
@@ -68,5 +71,14 @@ fun NavGraphBuilder.homeLarge(orientation: Int) {
       gridState = gridState,
       videos = videos
     )
+  }
+}
+
+fun NavGraphBuilder.homeGraph(isCompactDisplay: Boolean, orientation: Int) {
+  navigation(route = HOME_GRAPH_ROUTE, startDestination = HOME_ROUTE) {
+    if (isCompactDisplay) home(orientation = orientation)
+    else homeLarge(orientation = orientation)
+
+    searchResults(route = HOME_GRAPH_ROUTE)
   }
 }

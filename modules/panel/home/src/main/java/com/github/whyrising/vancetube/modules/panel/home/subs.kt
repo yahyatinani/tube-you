@@ -2,7 +2,7 @@ package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
@@ -22,7 +22,7 @@ import com.github.whyrising.y.core.v
  */
 fun getRegHomeSubs() {
   regSub<AppDb>(home.db) { db, _ ->
-    db[HOME_ROUTE]
+    db[HOME_GRAPH_ROUTE]
   }
 
   regSub<AppDb?, VideosPanelVm>(

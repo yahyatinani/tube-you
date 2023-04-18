@@ -4,9 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_GRAPH_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTIONS_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.icon
@@ -37,21 +37,21 @@ import com.github.whyrising.y.core.util.m as m2
 
 // TODO: decouple type from map?
 val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
-  HOME_ROUTE to m2(
+  HOME_GRAPH_ROUTE to m2(
     label_text_id, R.string.nav_item_label_home,
     icon_content_desc_text_id, R.string.nav_item_desc_home,
     is_selected, false,
     icon_variant, R.drawable.ic_filled_home,
     icon, R.drawable.ic_outlined_home
   ),
-  SUBSCRIPTION_ROUTE to m2(
+  SUBSCRIPTIONS_GRAPH_ROUTE to m2(
     label_text_id, R.string.nav_item_label_subs,
     icon_content_desc_text_id, R.string.nav_item_desc_subs,
     is_selected, false,
     icon_variant, R.drawable.ic_filled_subs,
     icon, R.drawable.ic_outlined_subs
   ),
-  LIBRARY_ROUTE to m2(
+  LIBRARY_GRAPH_ROUTE to m2(
     label_text_id, R.string.nav_item_label_library,
     icon_content_desc_text_id, R.string.nav_item_desc_library,
     is_selected, false,

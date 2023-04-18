@@ -16,7 +16,6 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
-import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar_bak
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_suggestions
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
@@ -98,9 +97,7 @@ fun regAppEvents() {
   }
 
   regEventDb<AppDb>(id = common.show_search_bar) { db, _ ->
-    val activeTab = db[active_navigation_item]
-    val sb = getIn<Any>(db, l(activeTab, search_bar), v(defaultSb))
-    assocIn(db, l(activeTab, search_bar), sb)
+    assocIn(db, l(db[active_navigation_item], search_bar), v(defaultSb))
       .assoc(is_search_bar_active, true)
   }
 
@@ -226,18 +223,10 @@ fun regAppEvents() {
     }
   }
 
-  regEventFx(id = common.clear_search_text) { cofx, _ ->
-    val appDb = appDbBy(cofx)
-    val activeTab = appDb[active_navigation_item]
-    val searchBarBackup = getIn<Any>(appDb, l(activeTab, search_bar))!!
+  regEventFx(id = common.clear_search_input) { cofx, _ ->
     m<Any, Any>(
-      db to assocIn(appDb, l(activeTab, search_bar), defaultSb)
-        .assoc(search_bar_bak, searchBarBackup)
-        .assoc(is_search_bar_active, true),
-      fx to v(
-        v(dispatch, v(searchBar.query, "")),
-        v(dispatch, v(common.show_search_bar))
-      )
+      db to appDbBy(cofx).assoc(is_search_bar_active, true),
+      fx to v(v(dispatch, v(common.search_input, "")))
     )
   }
 }

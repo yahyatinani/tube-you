@@ -8,7 +8,6 @@ import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.api_endpoint
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
-import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar_bak
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.y.core.assocIn
@@ -69,26 +68,14 @@ fun regCommonEvents() {
     val trimmedQuery = searchQuery.trim()
     val appDb = appDbBy(cofx)
     val activeTab = appDb[common.active_navigation_item]
-    val searchBarBak = appDb[search_bar_bak]
     val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
     val sbIndex = sbVec.size - 1
     val fsb = (sbVec.last() as IPersistentMap<Any, Any>)
       .assoc(searchBar.query, trimmedQuery)
       .assoc(searchBar.search_id, sbIndex)
-    val newDb = when {
-      searchBarBak != null -> { // check for searchBar state backup.
-        assocIn(
-          appDb.dissoc(search_bar_bak),
-          l(activeTab, search_bar),
-          searchBarBak
-        )
-      }
 
-      else -> appDb
-    }
-
-    val newDb2 =
-      assocIn(newDb, l(activeTab, search_bar), sbVec.pop().conj(fsb))
+    val newDb =
+      assocIn(appDb, l(activeTab, search_bar), sbVec.pop().conj(fsb))
         .assoc(common.is_search_bar_active, false)
 
     val restSearchQuery = trimmedQuery.replace(" ", "%20")
@@ -96,7 +83,7 @@ fun regCommonEvents() {
     val searchEndpoint =
       "${appDb[api_endpoint]}/search?q=$restSearchQuery&type=video"
     m<Any, Any>(
-      db to newDb2,
+      db to newDb,
       fx to v(
         v(common.navigate_to, "search_query"),
         v(

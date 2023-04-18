@@ -275,7 +275,7 @@ fun VanceApp(
             trailingIcon = {
               IconButton(
                 onClick = {
-                  dispatchSync(v(common.clear_search_text))
+                  dispatchSync(v(common.clear_search_input))
                 }
               ) {
                 Icon(

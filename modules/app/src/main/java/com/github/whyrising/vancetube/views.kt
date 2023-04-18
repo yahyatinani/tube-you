@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -212,9 +211,9 @@ fun VanceApp(
 
   val isCompactDisplay = isCompact(windowSizeClass)
   VanceTheme(isCompact = isCompactDisplay) {
+    val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = when {
       isCompactDisplay -> {
-        val topAppBarState = rememberTopAppBarState()
         LaunchedEffect(Unit) {
           regFx(expand_top_app_bar) {
             topAppBarState.heightOffset = 0f
@@ -234,7 +233,7 @@ fun VanceApp(
       modifier = Modifier
         .then(
           // topBar scrolls in other tabs too if search was scrolled.
-          if (isCompactDisplay && searchQuery != null) {
+          if (isCompactDisplay && searchQuery == null) {
             Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
           } else Modifier
         )

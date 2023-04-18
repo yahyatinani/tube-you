@@ -12,6 +12,8 @@ plugins {
 }
 
 android {
+  namespace = APP_ID
+
   compileSdk = 33
 
   defaultConfig {

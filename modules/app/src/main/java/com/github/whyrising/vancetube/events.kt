@@ -8,7 +8,6 @@ import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTION_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_empty
@@ -99,40 +98,6 @@ fun regAppEvents() {
   regEventDb<AppDb>(id = common.show_search_bar) { db, _ ->
     assocIn(db, l(db[active_navigation_item], search_bar), v(defaultSb))
       .assoc(is_search_bar_active, true)
-  }
-
-  regEventDb<AppDb>(id = ":hide_search_bar") { db, _ ->
-    db.assoc(
-      HOME_ROUTE,
-      (db[HOME_ROUTE] as IPersistentMap<Any?, *>).dissoc(search_bar)
-    )
-    when (db[active_navigation_item]) {
-      HOME_ROUTE -> {
-        // TODO: use dissoc
-        db.assoc(
-          HOME_ROUTE,
-          (db[HOME_ROUTE] as IPersistentMap<Any?, *>).dissoc(search_bar)
-        )
-      }
-
-      SUBSCRIPTION_ROUTE -> {
-        // TODO: use dissoc
-        db.assoc(
-          SUBSCRIPTION_ROUTE,
-          (db[SUBSCRIPTION_ROUTE] as IPersistentMap<Any?, *>).dissoc(search_bar)
-        )
-      }
-
-      LIBRARY_ROUTE -> {
-        // TODO: use dissoc
-        db.assoc(
-          LIBRARY_ROUTE,
-          (db[LIBRARY_ROUTE] as IPersistentMap<Any?, *>).dissoc(search_bar)
-        )
-      }
-
-      else -> TODO()
-    }
   }
 
   regEventFx(

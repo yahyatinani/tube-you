@@ -8,28 +8,24 @@ import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
-import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.error
 import com.github.whyrising.vancetube.modules.core.keywords.home.go_top_list
 import com.github.whyrising.vancetube.modules.core.keywords.home.load
 import com.github.whyrising.vancetube.modules.core.keywords.home.popular_vids
 import com.github.whyrising.vancetube.modules.core.keywords.home.refresh
-import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
 import com.github.whyrising.vancetube.modules.panel.common.States.Failed
 import com.github.whyrising.vancetube.modules.panel.common.States.Loaded
 import com.github.whyrising.vancetube.modules.panel.common.States.Loading
 import com.github.whyrising.vancetube.modules.panel.common.States.Refreshing
-import com.github.whyrising.vancetube.modules.panel.common.Suggestions
 import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.ktor
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.vancetube.modules.panel.common.nextState
 import com.github.whyrising.y.core.assocIn
-import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
@@ -131,30 +127,5 @@ fun regHomeEvents() {
 
   regEventFx(go_top_list) { _, _ ->
     m(BuiltInFx.fx to v(v(go_top_list)))
-  }
-
-  regEventDb<AppDb>(id = common.set_suggestions) { db, (_, suggestions) ->
-    val sbSeq =
-      getIn<PersistentVector<IPersistentMap<Any, Any>>>(
-        db,
-        l(HOME_ROUTE, search_bar)
-      )
-    val sb = sbSeq!!
-      .last()
-      .assoc(searchBar.suggestions, (suggestions as Suggestions).suggestions)
-    assocIn(db, l(HOME_ROUTE, search_bar), sbSeq.pop().conj(sb))
-  }
-
-  regEventDb<AppDb>(
-    id = common.set_search_results
-  ) { db, (_, searchId, searchResults) ->
-    // TODO: verify that if searchBar was removed searchId doesn't cause
-    //  OutOfRangeException
-    val activeTab = db[common.active_navigation_item]
-    assocIn(
-      db,
-      l(activeTab, search_bar, searchId, searchBar.results),
-      searchResults
-    )
   }
 }

@@ -1,5 +1,7 @@
 package com.github.whyrising.vancetube
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
@@ -17,10 +19,15 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigation_items
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar.results
+import com.github.whyrising.vancetube.modules.designsystem.data.Videos
+import com.github.whyrising.vancetube.modules.panel.common.VideoData
+import com.github.whyrising.vancetube.modules.panel.common.formatVideos
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
-import com.github.whyrising.y.core.collections.PersistentList
+import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
@@ -53,6 +60,12 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
   )
 )
 
+@Immutable
+data class SearchBarUiState(
+  val query: String,
+  @Stable val suggestions: List<String> = l()
+)
+
 fun regAppSubs() {
   regSub<AppDb>(is_backstack_available) { db, _ ->
     db[is_backstack_available] as Boolean
@@ -83,22 +96,43 @@ fun regAppSubs() {
     }
   )
 
-  regSub<AppDb>(queryId = search_bar) { db, _ ->
-    getIn<PersistentList<IPersistentMap<Any, Any>>>(
+  regSub<AppDb>(queryId = is_backstack_empty) { db, _ ->
+    db[is_backstack_empty]
+  }
+
+  regSub<AppDb>(queryId = searchBar.query) { db, _ ->
+    val sbVec = getIn<PersistentVector<Map<Any, Any>>>(
       db,
       l(db[active_navigation_item], search_bar)
     )
+    if (sbVec != null) {
+      sbVec.last()[searchBar.query]
+    } else null
   }
 
-  regSub<Any?, Boolean>(
-    queryId = common.is_search_bar_visible,
+  regSub<AppDb>(queryId = search_bar) { db, _ ->
+    getIn<PersistentVector<Map<Any, Any>>>(
+      db,
+      l(db[active_navigation_item], search_bar)
+    )?.last()
+  }
+
+  regSub<Map<Any, Any>?, List<String>>(
+    queryId = searchBar.suggestions,
     signalsFn = { subscribe(v(search_bar)) },
-    initialValue = false
+    initialValue = v()
   ) { sb, _, _ ->
-    sb != null
+    if (sb != null) sb[searchBar.suggestions] as List<String>? ?: l() else l()
   }
 
-  regSub<AppDb>(queryId = is_backstack_empty) { db, _ ->
-    db[is_backstack_empty]
+  regSub<Any?, Videos>(
+    queryId = common.search_results,
+    signalsFn = { subscribe(v(search_bar)) },
+    initialValue = Videos()
+  ) { sb, _, (_, viewsLabel) ->
+    when (val videos = get<PersistentVector<VideoData>>(sb, results)) {
+      null -> Videos(l())
+      else -> Videos(formatVideos(videos, viewsLabel))
+    }
   }
 }

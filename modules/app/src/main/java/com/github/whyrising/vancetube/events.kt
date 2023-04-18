@@ -15,22 +15,22 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.is_backstack_
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_online
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_search_bar_active
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
-import com.github.whyrising.vancetube.modules.core.keywords.common.pop_back_stack
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar_bak
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_suggestions
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
+import com.github.whyrising.vancetube.modules.core.keywords.searchBar.results
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar.search_id
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
+import com.github.whyrising.vancetube.modules.panel.common.Suggestions
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
 import com.github.whyrising.vancetube.modules.panel.common.defaultSb
 import com.github.whyrising.vancetube.modules.panel.common.letIf
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.IPersistentMap
-import com.github.whyrising.y.core.collections.PersistentList
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
@@ -43,13 +43,7 @@ typealias AppDb = IPersistentMap<Any, Any>
 private fun removeSearchBar(
   appDb: AppDb,
   activeTab: Any?
-) = getIn<IPersistentMap<Any?, *>>(appDb, l(activeTab))!!.dissoc(search_bar)
-
-private fun popLastSearch(searchResultsSeq: PersistentList<*>?) =
-  searchResultsSeq?.rest() ?: l()
-
-private fun isSearchDone(searchResultsSeq: PersistentList<*>?) =
-  searchResultsSeq != null
+) = getIn<IPersistentMap<Any, Any>>(appDb, l(activeTab))!!.dissoc(search_bar)
 
 fun regAppEvents() {
   regEventFx(
@@ -177,39 +171,59 @@ fun regAppEvents() {
     m<Any, Any>(fx to v(v(common.back_press)))
   }
 
+  regEventDb<AppDb>(id = common.set_suggestions) { db, (_, suggestions) ->
+    val activeTab = db[active_navigation_item]
+    val sbVec = getIn<PersistentVector<IPersistentMap<Any, Any>>>(
+      db,
+      l(activeTab, search_bar)
+    ) ?: return@regEventDb db
+
+    val sb = sbVec
+      .last()
+      .assoc(searchBar.suggestions, (suggestions as Suggestions).value)
+
+    assocIn(db, l(activeTab, search_bar), sbVec.pop().conj(sb))
+  }
+
+  regEventDb<AppDb>(
+    id = common.set_search_results
+  ) { db, (_, searchId, searchResults) ->
+    val activeTab = db[active_navigation_item]
+    val vec = getIn<PersistentVector<Any>>(db, l(activeTab, search_bar))
+
+    if (vec == null || vec.count <= searchId as Int) return@regEventDb db
+
+    assocIn(db, l(activeTab, search_bar, searchId, results), searchResults)
+  }
+
   regEventFx(id = common.search_back_press) { cofx, _ ->
     val appDb = appDbBy(cofx)
     val isSearchBarActive = appDb[is_search_bar_active] as Boolean
     val activeTab = appDb[active_navigation_item]
     val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
-    val searchResultsSeq = getIn<PersistentList<*>>(
-      appDb,
-      l(activeTab, search_bar, searchBar.results)
-    )
+    val sb = sbVec.last() as IPersistentMap<Any, Any>
+    val searchDone = sb[search_id] != null
 
-    if (isSearchBarActive && searchResultsSeq == null) {
-      val searchBarBackup = appDb[search_bar_bak]
-      if (searchBarBackup != null) { // when :clear_search_text pressed.
-        return@regEventFx m(
-          db to assocIn(appDb, l(activeTab, search_bar), searchBarBackup)
-            .assoc(is_search_bar_active, false)
-        )
-      }
-    }
-
-    val rest = popLastSearch(searchResultsSeq)
-    val newDb = if (rest.count > 0) {
-      assocIn(appDb, l(activeTab, search_bar, searchBar.results), rest)
-    } else {
-      assocIn(appDb, l(activeTab), removeSearchBar(appDb, activeTab))
-    }
-
-    m<Any, Any>(
-      db to newDb,
-      fx to v(
-        if (isSearchDone(searchResultsSeq)) v(pop_back_stack) else null
+    if (isSearchBarActive && searchDone) {
+      return@regEventFx m<Any, Any>(
+        db to appDb.assoc(is_search_bar_active, false)
       )
-    )
+    }
+
+    val newSbVec = sbVec.pop()
+    val effects = if (searchDone) v(common.pop_back_stack) else null
+    if (newSbVec.isEmpty()) {
+      return@regEventFx m<Any, Any>(
+        db to assocIn(appDb, l(activeTab), removeSearchBar(appDb, activeTab)),
+        fx to v(effects)
+      )
+    } else {
+      m<Any, Any>(
+        db to assocIn(appDb, l(activeTab, search_bar), newSbVec)
+          .assoc(is_search_bar_active, false),
+        fx to v(effects)
+      )
+    }
   }
 
   regEventFx(id = common.clear_search_text) { cofx, _ ->

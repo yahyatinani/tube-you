@@ -210,7 +210,6 @@ fun VanceApp(
   }
 
   val isCompactDisplay = isCompact(windowSizeClass)
-  val isSearchBar = watch<Boolean>(query = v(common.is_search_bar_visible))
   VanceTheme(isCompact = isCompactDisplay) {
     val scrollBehavior = when {
       isCompactDisplay -> {
@@ -229,11 +228,12 @@ fun VanceApp(
       else -> pinnedScrollBehavior()
     }
     val colorScheme = MaterialTheme.colorScheme
+    val searchQuery = watch<String?>(v(searchBar.query))
     Scaffold(
       modifier = Modifier
         .then(
           // topBar scrolls in other tabs too if search was scrolled.
-          if (isCompactDisplay && !isSearchBar) {
+          if (isCompactDisplay && searchQuery != null) {
             Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
           } else Modifier
         )
@@ -242,12 +242,12 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        if (isSearchBar) {
+        if (searchQuery != null) {
           val focusRequester = FocusRequester()
           val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
           val isActive = watch<Boolean>(query = v(common.is_search_bar_active))
           SearchBar(
-            query = watch(v(searchBar.query)),
+            query = searchQuery,
             modifier = Modifier.focusRequester(focusRequester),
             active = isActive,
             tonalElevation = 0.dp,
@@ -440,7 +440,7 @@ fun VanceApp(
           }
           composable(route = "search_query") {
             val vm = watch<Videos>(
-              v(":search_results", stringResource(R.string.views_label))
+              v(common.search_results, stringResource(R.string.views_label))
             )
             VideosList(
               orientation = orientation,

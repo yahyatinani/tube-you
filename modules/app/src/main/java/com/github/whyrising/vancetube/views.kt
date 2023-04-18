@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -297,13 +298,13 @@ fun VanceApp(
           ) {
             val suggestions = watch<List<String>>(query = v(suggestions))
             LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
-              items(
-                key = { it },
+              itemsIndexed(
+                key = { i, _ -> i },
                 items = suggestions
-              ) {
-                SearchSuggestionItem(text = it) {
+              ) { _, str ->
+                SearchSuggestionItem(text = str) {
                   // FIXME: Move cursor to the end of text.
-                  dispatch(v(searchBar.query, it))
+                  dispatch(v(common.search_input, str))
                 }
               }
             }

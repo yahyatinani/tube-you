@@ -68,7 +68,6 @@ fun regCommonEvents() {
     val trimmedQuery = searchQuery.trim()
     val appDb = appDbBy(cofx)
     val activeTab = appDb[common.active_navigation_item]
-    println("sdlkfjlsdjfj $activeTab")
     val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
     val sbIndex = sbVec.size - 1
     val fsb = (sbVec.last() as IPersistentMap<Any, Any>)

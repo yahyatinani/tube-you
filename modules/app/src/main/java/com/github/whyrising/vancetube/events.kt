@@ -73,10 +73,6 @@ fun regAppEvents() {
     )
   }
 
-  regEventFx(navigate_to) { _, (_, destination) ->
-    m<Any, Any>(fx to v(v(navigate_to, destination)))
-  }
-
   regEventFx(id = common.on_click_nav_item) { cofx, (_, destination) ->
     // TODO: Set active_panel to active_navigation_item
     val appDb = appDbBy(cofx)

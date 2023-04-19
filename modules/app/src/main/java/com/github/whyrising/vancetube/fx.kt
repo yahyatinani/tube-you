@@ -53,12 +53,11 @@ fun regAppFx(navController: NavController) {
     if (toDestination is String && toDestination.contains(SEARCH_ROUTE)) {
       navController.navigate(toDestination)
     } else {
+      BackStack.addDistinct(BackStack.currentDestination(navController))
+      BackStack.remove(toDestination as String)
       navController.navigate(
-        route = toDestination as String,
+        route = toDestination,
         navOptions = navOptions {
-          BackStack.addDistinct(BackStack.currentDestination(navController))
-          BackStack.remove(toDestination)
-
           popUpTo(navController.graph.findStartDestination().id) {
             saveState = true
           }

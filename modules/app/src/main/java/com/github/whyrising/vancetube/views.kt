@@ -103,7 +103,6 @@ import com.github.whyrising.vancetube.modules.designsystem.component.VanceNaviga
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
-import com.github.whyrising.vancetube.modules.panel.common.regCommonEvents
 import com.github.whyrising.vancetube.modules.panel.home.homeGraph
 import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.home.regHomeEvents
@@ -190,7 +189,6 @@ fun VanceApp(
   val scope: CoroutineScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
     regAppFx(navController)
-    regCommonEvents()
     regCofx(home.coroutine_scope) { cofx ->
       cofx.assoc(home.coroutine_scope, scope)
     }

@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
     regBounceFx()
 
     setContent {
-      VanceApp(calculateWindowSizeClass(this))
+      VanceApp(windowSizeClass = calculateWindowSizeClass(this))
     }
   }
 

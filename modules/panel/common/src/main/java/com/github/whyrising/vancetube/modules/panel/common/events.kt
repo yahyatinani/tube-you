@@ -7,6 +7,7 @@ import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.api_endpoint
+import com.github.whyrising.vancetube.modules.core.keywords.common.destination
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
@@ -85,7 +86,7 @@ fun regCommonEvents() {
     m<Any, Any>(
       db to newDb,
       fx to v(
-        v(common.navigate_to, "$activeTab/$SEARCH_ROUTE"),
+        v(common.navigate_to, m(destination to "$activeTab/$SEARCH_ROUTE")),
         v(
           ktor.http_fx,
           m(

@@ -14,8 +14,8 @@ import com.github.whyrising.y.core.m
 // const val DEFAULT_BASE_ADDRESS = "invidious.snopyta.org" // 403
 // const val DEFAULT_BASE_ADDRESS = "invidious.tiekoetter.com"
 // const val DEFAULT_BASE_ADDRESS = "youtube.owacon.moe"
-//const val DEFAULT_BASE_ADDRESS = "y.com.sb"
-//const val DEFAULT_BASE_ADDRESS = "invidious.0011.lt"
+// const val DEFAULT_BASE_ADDRESS = "y.com.sb"
+// const val DEFAULT_BASE_ADDRESS = "invidious.0011.lt"
 const val DEFAULT_BASE_ADDRESS = "invidious.projectsegfau.lt"
 // const val DEFAULT_BASE_ADDRESS = "yewtu.be"
 // const val DEFAULT_BASE_ADDRESS = "invidious.slipfox.xyz"

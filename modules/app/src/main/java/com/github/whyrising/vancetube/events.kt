@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube
 
+import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.fx.BuiltInFx.dispatch
 import com.github.whyrising.recompose.fx.BuiltInFx.fx
@@ -17,6 +18,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_suggestions
 import com.github.whyrising.vancetube.modules.core.keywords.common.set_backstack_status
+import com.github.whyrising.vancetube.modules.core.keywords.common.start_destination
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar.results
@@ -73,7 +75,10 @@ fun regAppEvents() {
     )
   }
 
-  regEventFx(id = common.on_click_nav_item) { cofx, (_, destination) ->
+  regEventFx(
+    id = common.on_click_nav_item,
+    interceptors = v(injectCofx(start_destination))
+  ) { cofx, (_, destination) ->
     // TODO: Set active_panel to active_navigation_item
     val appDb = appDbBy(cofx)
     m<Any, Any>(
@@ -82,7 +87,16 @@ fun regAppEvents() {
         if (destination == appDb[active_navigation_item]) {
           // TODO: Use one fx for all panels to scroll up by overriding reg fx
           v(home.go_top_list)
-        } else v(navigate_to, destination)
+        } else v(
+          navigate_to,
+          m(
+            common.destination to destination,
+            common.navOptions to navOptions {
+              popUpTo(cofx[start_destination] as Int) { saveState = true }
+              restoreState = true
+            }
+          )
+        )
       )
     )
   }

@@ -3,12 +3,12 @@ package com.github.whyrising.vancetube
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.navOptions
+import androidx.navigation.NavOptions
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.navigate_to
-import com.github.whyrising.vancetube.modules.panel.common.SEARCH_ROUTE
+import com.github.whyrising.y.core.get
 
 object BackStack {
   val queue = ArrayDeque<String>().apply { add(HOME_GRAPH_ROUTE) }
@@ -49,22 +49,15 @@ object BackStack {
 }
 
 fun regAppFx(navController: NavController) {
-  regFx(navigate_to) { toDestination ->
-    if (toDestination is String && toDestination.contains(SEARCH_ROUTE)) {
-      navController.navigate(toDestination)
-    } else {
+  regFx(navigate_to) { destination ->
+    val toRoute = get<String>(destination, common.destination)!!
+    val navOptions = get<NavOptions>(destination, common.navOptions)
+
+    if (navOptions != null) {
       BackStack.addDistinct(BackStack.currentDestination(navController))
-      BackStack.remove(toDestination as String)
-      navController.navigate(
-        route = toDestination,
-        navOptions = navOptions {
-          popUpTo(navController.graph.findStartDestination().id) {
-            saveState = true
-          }
-          restoreState = true
-        }
-      )
+      BackStack.remove(toRoute)
     }
+    navController.navigate(toRoute, navOptions)
   }
 
   regFx(common.back_press) {

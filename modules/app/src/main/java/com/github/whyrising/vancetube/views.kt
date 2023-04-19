@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -91,6 +92,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.icon
 import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
 import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_back_press
+import com.github.whyrising.vancetube.modules.core.keywords.common.start_destination
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar.suggestions
@@ -191,6 +193,12 @@ fun VanceApp(
     regCommonEvents()
     regCofx(home.coroutine_scope) { cofx ->
       cofx.assoc(home.coroutine_scope, scope)
+    }
+    regCofx(start_destination) { cofx ->
+      cofx.assoc(
+        start_destination,
+        navController.graph.findStartDestination().id
+      )
     }
     regHomeEvents()
     dispatch(v(home.initialize))

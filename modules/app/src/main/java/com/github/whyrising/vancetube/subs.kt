@@ -21,9 +21,13 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.navigation_it
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_bar
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar.results
-import com.github.whyrising.vancetube.modules.designsystem.data.Videos
-import com.github.whyrising.vancetube.modules.panel.common.VideoData
-import com.github.whyrising.vancetube.modules.panel.common.formatVideos
+import com.github.whyrising.vancetube.modules.designsystem.data.SearchVm
+import com.github.whyrising.vancetube.modules.panel.common.Channel
+import com.github.whyrising.vancetube.modules.panel.common.Playlist
+import com.github.whyrising.vancetube.modules.panel.common.SearchResult
+import com.github.whyrising.vancetube.modules.panel.common.Video
+import com.github.whyrising.vancetube.modules.panel.common.formatChannel
+import com.github.whyrising.vancetube.modules.panel.common.formatVideo
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
@@ -125,14 +129,25 @@ fun regAppSubs() {
     if (sb != null) sb[searchBar.suggestions] as List<String>? ?: l() else l()
   }
 
-  regSub<Any?, Videos>(
+  regSub<Any?, SearchVm>(
     queryId = common.search_results,
     signalsFn = { subscribe(v(search_bar)) },
-    initialValue = Videos()
+    initialValue = SearchVm()
   ) { sb, _, (_, viewsLabel) ->
-    when (val videos = get<PersistentVector<VideoData>>(sb, results)) {
-      null -> Videos(l())
-      else -> Videos(formatVideos(videos, viewsLabel))
+    when (val search = get<PersistentVector<SearchResult>>(sb, results)) {
+      null -> SearchVm()
+      else -> {
+        val ret = search.fold(v<Any>()) { acc, r ->
+          val formatted = when (r) {
+            is Video -> formatVideo(r, viewsLabel)
+            is Channel -> formatChannel(r)
+
+            is Playlist -> TODO()
+          }
+          acc.conj(formatted)
+        }
+        SearchVm(ret)
+      }
     }
   }
 }

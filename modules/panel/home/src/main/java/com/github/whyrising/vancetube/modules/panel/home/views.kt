@@ -79,6 +79,6 @@ fun NavGraphBuilder.homeGraph(isCompactDisplay: Boolean, orientation: Int) {
     if (isCompactDisplay) home(orientation = orientation)
     else homeLarge(orientation = orientation)
 
-    searchResults(route = HOME_GRAPH_ROUTE)
+    searchResults(route = HOME_GRAPH_ROUTE, orientation = orientation)
   }
 }

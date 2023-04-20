@@ -63,3 +63,30 @@ fun formatViews(viewsCount: Long): String = when {
   viewsCount < 1_000_000_000 -> "${viewsCount / 1_000_000}$MillionsSign"
   else -> "${viewsCount / 1_000_000_000}$BillionsSign"
 }
+
+fun formatSubCount(subCount: Long): String {
+  val millionsSign = "M"
+  val billionsSign = "B"
+
+  return when {
+    subCount < 1000 -> subCount.toString()
+    subCount < 1_000_000 -> "${subCount / 1000}K"
+    subCount < 1_000_000_000 -> {
+      val x = subCount / 1_000_000f
+      if (x == x.toInt().toFloat()) {
+        "${x.toInt()}$millionsSign"
+      } else {
+        "${String.format("%.1f", x)}$millionsSign"
+      }
+    }
+
+    else -> {
+      val x = subCount / 1_000_000_000f
+      if (x == x.toInt().toFloat()) {
+        "${x.toInt()}$billionsSign"
+      } else {
+        "${String.format("%.1f", x)}$billionsSign"
+      }
+    }
+  }
+}

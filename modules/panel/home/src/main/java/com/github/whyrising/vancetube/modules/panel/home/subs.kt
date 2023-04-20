@@ -9,7 +9,7 @@ import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelVm
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
-import com.github.whyrising.vancetube.modules.panel.common.VideoData
+import com.github.whyrising.vancetube.modules.panel.common.Video
 import com.github.whyrising.vancetube.modules.panel.common.formatVideos
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
@@ -40,7 +40,7 @@ fun getRegHomeSubs() {
         )
 
         States.Loaded -> {
-          val videos: List<VideoData> = get(homeDb, popular_vids) ?: v()
+          val videos: List<Video> = get(homeDb, popular_vids) ?: v()
           VideosPanelVm(
             showList = true,
             videos = Videos(formatVideos(videos, viewsLabel))

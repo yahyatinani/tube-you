@@ -3,8 +3,10 @@ package com.github.whyrising.vancetube.modules.designsystem.component
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,17 +14,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.whyrising.vancetube.modules.designsystem.R
+import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 
 @Composable
@@ -113,11 +123,70 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
   }
 }
 
+@Composable
+fun ChannelItem(modifier: Modifier = Modifier, vm: ChannelVm) {
+  ListItem(
+    modifier = modifier
+      .clickable { /*TODO*/ }
+      .padding(vertical = 16.dp),
+    leadingContent = {
+      ChannelAvatar(
+        modifier = Modifier.padding(horizontal = 40.dp),
+        url = vm.authorThumbnail
+      )
+    },
+    headlineContent = {
+      Column {
+        Text(text = vm.author, style = MaterialTheme.typography.labelLarge)
+        val textStyle = MaterialTheme.typography.bodySmall.copy(
+          color = LocalContentColor.current.copy(alpha = .6f),
+          fontSize = 12.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = vm.handle, style = textStyle)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = "${vm.subCount} subscribers", style = textStyle)
+
+        val colorScheme = MaterialTheme.colorScheme
+        Button(
+          modifier = Modifier
+            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+          onClick = { /*TODO*/ },
+          colors = ButtonDefaults.buttonColors(
+            containerColor = colorScheme.onSurface,
+            contentColor = colorScheme.surface
+          ),
+          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
+        ) {
+          Text(
+            text = stringResource(R.string.subscribe),
+            style = MaterialTheme.typography.labelMedium
+          )
+        }
+      }
+    }
+  )
+}
+
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun AppDarkPreview() {
+fun SearchSuggestionItemDarkPreview() {
   SearchSuggestionItem(
     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do" +
       " eiusmod tempor "
   ) {}
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun ChannelItemDarkPreview() {
+  ChannelItem(
+    vm = ChannelVm(
+      id = "authorId",
+      author = "author",
+      subCount = "14.1M",
+      handle = "@authorId",
+      authorThumbnail = ""
+    )
+  )
 }

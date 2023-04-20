@@ -51,6 +51,7 @@ val client = HttpClient(Android) {
       Json {
         isLenient = true
         ignoreUnknownKeys = true
+        serializersModule = searchModule
       }
     )
   }

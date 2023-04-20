@@ -29,6 +29,6 @@ fun NavGraphBuilder.libraryGraph(isCompactDisplay: Boolean, orientation: Int) {
     if (isCompactDisplay) library(orientation = orientation)
     else library(orientation = orientation)
 
-    searchResults(route = LIBRARY_GRAPH_ROUTE)
+    searchResults(route = LIBRARY_GRAPH_ROUTE, orientation = orientation)
   }
 }

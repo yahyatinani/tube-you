@@ -22,7 +22,7 @@ const val DEFAULT_BASE_ADDRESS = "invidious.projectsegfau.lt"
 
 val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
-  common.api_endpoint to "https://$DEFAULT_BASE_ADDRESS/api/v1",
+  common.api_url to "https://$DEFAULT_BASE_ADDRESS/api/v1",
   common.is_search_bar_active to true,
   common.is_search_bar_visible to false,
   common.is_backstack_empty to true

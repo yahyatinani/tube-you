@@ -14,7 +14,7 @@ import com.github.whyrising.y.core.get
 /**
  * {:state [States.Loading]
  * :home/popular_vids (
- * [com.github.whyrising.vancetube.modules.panel.common.VideoData])
+ * [com.github.whyrising.vancetube.modules.panel.common.Video])
  * :search_bar ({:query "" :suggestions [] :results []}, ...)
  * }
  */

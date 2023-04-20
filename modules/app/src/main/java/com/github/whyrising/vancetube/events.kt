@@ -25,8 +25,8 @@ import com.github.whyrising.vancetube.modules.core.keywords.searchBar.results
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar.search_id
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.SEARCH_ROUTE
+import com.github.whyrising.vancetube.modules.panel.common.SearchResult
 import com.github.whyrising.vancetube.modules.panel.common.Suggestions
-import com.github.whyrising.vancetube.modules.panel.common.VideoData
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
 import com.github.whyrising.vancetube.modules.panel.common.defaultSb
@@ -122,7 +122,7 @@ fun regAppEvents() {
     val sq = (searchQuery as String).replace(" ", "%20")
     val appDb = appDbBy(cofx)
     val suggestionsEndpoint =
-      "${appDb[common.api_endpoint]}/search/suggestions?q=$sq"
+      "${appDb[common.api_url]}/search/suggestions?q=$sq"
 
     m<Any, Any>().assoc(
       fx,
@@ -158,21 +158,16 @@ fun regAppEvents() {
       .assoc(searchBar.query, trimmedQuery)
       .assoc(search_id, sbIndex)
 
-    val newDb =
-      assocIn(appDb, l(activeTab, search_bar), sbVec.pop().conj(fsb))
-        .assoc(is_search_bar_active, false)
+    val newDb = assocIn(appDb, l(activeTab, search_bar), sbVec.pop().conj(fsb))
+      .assoc(is_search_bar_active, false)
 
-    val restSearchQuery = trimmedQuery.replace(" ", "%20")
-    // TODO: &type=video, support a all types?
-    val searchEndpoint =
-      "${appDb[common.api_endpoint]}/search?q=$restSearchQuery&type=video"
+    val sq = trimmedQuery.replace(" ", "%20")
+    val searchEndpoint = "${appDb[common.api_url]}/search?q=$sq"
+    val typeInfo = typeInfo<PersistentVector<SearchResult>>()
     m<Any, Any>(
       db to newDb,
       fx to v(
-        v(
-          navigate_to,
-          m(common.destination to "$activeTab/$SEARCH_ROUTE")
-        ),
+        v(navigate_to, m(common.destination to "$activeTab/$SEARCH_ROUTE")),
         v(
           ktor.http_fx,
           m(
@@ -180,9 +175,9 @@ fun regAppEvents() {
             ktor.url to searchEndpoint,
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
-            ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
+            ktor.response_type_info to typeInfo,
             ktor.on_success to v(common.set_search_results, sbIndex),
-            ktor.on_failure to v(home.error)
+            ktor.on_failure to v(":error")
           )
         )
       )

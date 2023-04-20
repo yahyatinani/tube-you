@@ -20,7 +20,7 @@ import com.github.whyrising.vancetube.modules.panel.common.States.Failed
 import com.github.whyrising.vancetube.modules.panel.common.States.Loaded
 import com.github.whyrising.vancetube.modules.panel.common.States.Loading
 import com.github.whyrising.vancetube.modules.panel.common.States.Refreshing
-import com.github.whyrising.vancetube.modules.panel.common.VideoData
+import com.github.whyrising.vancetube.modules.panel.common.Video
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.ktor
 import com.github.whyrising.vancetube.modules.panel.common.letIf
@@ -95,7 +95,7 @@ fun regHomeEvents() {
     interceptors = v(injectCofx(home.fsm), injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    val popularVideosEndpoint = "${appDb[common.api_endpoint]}/popular?" +
+    val popularVideosEndpoint = "${appDb[common.api_url]}/popular?" +
       "fields=videoId,title,videoThumbnails,lengthSeconds,viewCount,author," +
       "publishedText,authorId"
     m<Any, Any>(db to appDb).assoc(
@@ -108,7 +108,7 @@ fun regHomeEvents() {
             ktor.url to popularVideosEndpoint,
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
-            ktor.response_type_info to typeInfo<PersistentVector<VideoData>>(),
+            ktor.response_type_info to typeInfo<PersistentVector<Video>>(),
             ktor.on_success to v(home.loading_is_done),
             ktor.on_failure to v(error)
           )

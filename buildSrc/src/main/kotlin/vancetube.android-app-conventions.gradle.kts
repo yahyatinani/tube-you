@@ -87,7 +87,7 @@ android {
     }
   }
 
-  packagingOptions {
+  packaging {
     resources {
       excludes += setOf(
         "/*.jar",

@@ -34,10 +34,9 @@ tasks.withType<KotlinCompile>().configureEach {
       "-P",
       "$composePlugin:reportsDestination=$buildDirAbsolutePath$out",
       "-P",
-      "$composePlugin:metricsDestination=$buildDirAbsolutePath$out"
+      "$composePlugin:metricsDestination=$buildDirAbsolutePath$out",
+      "-opt-in=kotlin.RequiresOptIn"
     )
-    freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
-
     jvmTarget = Build.Versions.JVM
     apiVersion = Build.Versions.KOTLIN
     languageVersion = Build.Versions.KOTLIN

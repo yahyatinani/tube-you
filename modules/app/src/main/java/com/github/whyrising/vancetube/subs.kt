@@ -27,6 +27,7 @@ import com.github.whyrising.vancetube.modules.panel.common.Playlist
 import com.github.whyrising.vancetube.modules.panel.common.SearchResult
 import com.github.whyrising.vancetube.modules.panel.common.Video
 import com.github.whyrising.vancetube.modules.panel.common.formatChannel
+import com.github.whyrising.vancetube.modules.panel.common.formatPlayList
 import com.github.whyrising.vancetube.modules.panel.common.formatVideo
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
@@ -141,8 +142,7 @@ fun regAppSubs() {
           val formatted = when (r) {
             is Video -> formatVideo(r, viewsLabel)
             is Channel -> formatChannel(r)
-
-            is Playlist -> TODO()
+            is Playlist -> formatPlayList(r)
           }
           acc.conj(formatted)
         }

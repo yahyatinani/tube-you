@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_results
 import com.github.whyrising.vancetube.modules.designsystem.component.ChannelItem
+import com.github.whyrising.vancetube.modules.designsystem.component.PlayListPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoItemPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoListItemLandscapeCompact
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
@@ -25,6 +26,7 @@ import com.github.whyrising.vancetube.modules.designsystem.core.formatSubCount
 import com.github.whyrising.vancetube.modules.designsystem.core.formatVideoInfo
 import com.github.whyrising.vancetube.modules.designsystem.core.formatViews
 import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
+import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.SearchVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.panel.common.R.string.views_label
@@ -63,13 +65,22 @@ fun formatChannel(channel: Channel) = ChannelVm(
   authorThumbnail = "https:${channel.authorThumbnails[1].url}"
 )
 
+fun formatPlayList(r: Playlist) = PlaylistVm(
+  title = r.title,
+  author = r.author,
+  authorId = r.authorId,
+  authorUrl = r.authorUrl,
+  playlistId = r.playlistId,
+  thumbnailUrl = r.videos[0].videoThumbnails[0].url,
+  videoCount = "${r.videoCount}"
+)
+
 const val SEARCH_ROUTE = "search_results"
 
 fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
   composable(route = "$route/$SEARCH_ROUTE") {
     val listState = rememberLazyListState()
     val videos = watch<SearchVm>(v(search_results, stringResource(views_label)))
-    val lastIndex = videos.value.size - 1
     LazyColumn(
       state = listState,
       modifier = Modifier
@@ -78,6 +89,9 @@ fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
     ) {
       itemsIndexed(videos.value, key = { index, _ -> index }) { index, vm ->
         if (vm is VideoViewModel) {
+          if (index > 1 && videos.value[index - 1] !is VideoViewModel) {
+            Divider(thickness = 6.dp, color = DarkGray)
+          }
           when (orientation) {
             Configuration.ORIENTATION_PORTRAIT -> {
               VideoItemPortrait(
@@ -88,10 +102,16 @@ fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
 
             else -> VideoListItemLandscapeCompact(vm)
           }
-        } else if (vm is ChannelVm) {
+        } else {
           if (index != 0) Divider(thickness = 6.dp, color = DarkGray)
-          ChannelItem(modifier = Modifier.fillMaxWidth(), vm = vm)
-          if (index != lastIndex) Divider(thickness = 6.dp, color = DarkGray)
+          if (vm is ChannelVm) {
+            ChannelItem(modifier = Modifier.fillMaxWidth(), vm = vm)
+          } else if (vm is PlaylistVm) {
+            PlayListPortrait(
+              modifier = Modifier.padding(start = 12.dp),
+              viewModel = vm
+            )
+          }
         }
       }
     }

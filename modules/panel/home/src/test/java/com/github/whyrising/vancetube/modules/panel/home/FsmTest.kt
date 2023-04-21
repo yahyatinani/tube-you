@@ -2,7 +2,6 @@ package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.recompose.fx.BuiltInFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.loading_is_done
 import com.github.whyrising.vancetube.modules.panel.common.AppDb

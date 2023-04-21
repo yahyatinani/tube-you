@@ -7,7 +7,6 @@ import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
-import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.error

@@ -1,7 +1,10 @@
 package com.github.whyrising.vancetube.modules.designsystem.component
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -25,14 +30,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.whyrising.vancetube.modules.designsystem.R
 import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
+import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 
 @Composable
@@ -173,6 +181,58 @@ fun SearchSuggestionItemDarkPreview() {
   ) {}
 }
 
+@Composable
+fun PlayListPortrait(
+  modifier: Modifier = Modifier,
+  viewModel: PlaylistVm
+) {
+  Column(modifier = Modifier.clickable { /*todo:*/ }) {
+    Box {
+      ThumbnailImage(
+        modifier = Modifier.fillMaxWidth(),
+        url = viewModel.thumbnailUrl
+      )
+      Row(
+        modifier = Modifier
+          .align(alignment = Alignment.BottomCenter)
+          .background(color = Color.Black.copy(alpha = .4f))
+          .fillMaxWidth()
+          .wrapContentHeight()
+          .padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Icon(
+          imageVector = Icons.Default.PlaylistPlay,
+          contentDescription = "",
+          tint = Color.White
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = viewModel.videoCount, color = Color.White)
+      }
+    }
+
+    Row(
+      modifier = modifier
+        .fillMaxWidth()
+        .padding(top = 8.dp, end = 4.dp, bottom = 24.dp)
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        VideoItemTitle(title = viewModel.title)
+        Spacer(modifier = Modifier.height(4.dp))
+        VideoItemInfo(
+          info = AnnotatedString(viewModel.author),
+          textStyle = TextStyle.Default.copy(fontSize = 12.sp)
+        )
+      }
+
+      Spacer(modifier = Modifier.width(24.dp))
+
+      VideoItemMoreButton()
+    }
+  }
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ChannelItemDarkPreview() {
@@ -183,6 +243,22 @@ fun ChannelItemDarkPreview() {
       subCount = "14.1M",
       handle = "@authorId",
       authorThumbnail = ""
+    )
+  )
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PlayListPortraitPreview() {
+  PlayListPortrait(
+    viewModel = PlaylistVm(
+      author = "author",
+      authorId = "id",
+      title = "Title",
+      videoCount = "13",
+      thumbnailUrl = "",
+      playlistId = "id",
+      authorUrl = ""
     )
   )
 }

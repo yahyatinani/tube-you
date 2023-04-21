@@ -24,5 +24,15 @@ data class ChannelVm(
   val authorThumbnail: String
 )
 
+data class PlaylistVm(
+  val title: String,
+  val playlistId: String,
+  val author: String,
+  val authorId: String,
+  val authorUrl: String,
+  val videoCount: String,
+  val thumbnailUrl: String
+)
+
 @Immutable
 data class SearchVm(val value: List<Any> = l())

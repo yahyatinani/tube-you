@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Divider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.DarkGray
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -67,16 +69,14 @@ fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
   composable(route = "$route/$SEARCH_ROUTE") {
     val listState = rememberLazyListState()
     val videos = watch<SearchVm>(v(search_results, stringResource(views_label)))
+    val lastIndex = videos.value.size - 1
     LazyColumn(
       state = listState,
       modifier = Modifier
         .testTag("search_list")
         .fillMaxSize()
     ) {
-      items(
-        items = videos.value,
-        key = { (it as? VideoViewModel)?.id ?: (it as? ChannelVm)?.id!! }
-      ) { vm ->
+      itemsIndexed(videos.value, key = { index, _ -> index }) { index, vm ->
         if (vm is VideoViewModel) {
           when (orientation) {
             Configuration.ORIENTATION_PORTRAIT -> {
@@ -89,7 +89,9 @@ fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
             else -> VideoListItemLandscapeCompact(vm)
           }
         } else if (vm is ChannelVm) {
+          if (index != 0) Divider(thickness = 6.dp, color = DarkGray)
           ChannelItem(modifier = Modifier.fillMaxWidth(), vm = vm)
+          if (index != lastIndex) Divider(thickness = 6.dp, color = DarkGray)
         }
       }
     }

@@ -1,6 +1,7 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
 import com.github.whyrising.recompose.fx.BuiltInFx
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.loading_is_done
@@ -20,26 +21,26 @@ class FsmTest : FreeSpec({
   "updateToNextState() should update AppDb to next state" {
     updateToNextState(m(), home.initialize) shouldBe assocIn(
       map,
-      l(HOME_ROUTE, home.state),
+      l(HOME_GRAPH_ROUTE, home.state),
       v(Loading, v(v(BuiltInFx.dispatch, v(home.load))))
     )
 
     updateToNextState(
-      db = assocIn(m(), l(HOME_ROUTE, home.state), v(Loading)) as AppDb,
+      db = assocIn(m(), l(HOME_GRAPH_ROUTE, home.state), v(Loading)) as AppDb,
       event = loading_is_done
-    ) shouldBe assocIn(map, l(HOME_ROUTE, home.state), v(Loaded))
+    ) shouldBe assocIn(map, l(HOME_GRAPH_ROUTE, home.state), v(Loaded))
   }
 
   "handleNextState() should update AppDb to next state" {
     handleNextState(m(), v(home.initialize)) shouldBe assocIn(
       map,
-      l(HOME_ROUTE, home.state),
+      l(HOME_GRAPH_ROUTE, home.state),
       v(Loading, v(v(BuiltInFx.dispatch, v(home.load))))
     )
 
     handleNextState(
-      db = m(HOME_ROUTE to m(home.state to Loaded)),
+      db = m(HOME_GRAPH_ROUTE to m(home.state to Loaded)),
       v(loading_is_done)
-    ) shouldBe assocIn(map, l(HOME_ROUTE, home.state), Loaded)
+    ) shouldBe assocIn(map, l(HOME_GRAPH_ROUTE, home.state), Loaded)
   }
 })

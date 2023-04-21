@@ -47,13 +47,13 @@ val Home_Transitions = m<Any?, Any>(
 )
 
 fun homeCurrentState(appDb: AppDb): Any? =
-  getIn<Any>(appDb, l(HOME_ROUTE, home.state))
+  getIn<Any>(appDb, l(HOME_GRAPH_ROUTE, home.state))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = get<States?>(homeCurrentState(db), 0)
   val nextState = nextState(Home_Transitions, currentState, event)
   return db.letIf(nextState != null) {
-    assocIn(it, l(HOME_ROUTE, home.state), nextState) as AppDb
+    assocIn(it, l(HOME_GRAPH_ROUTE, home.state), nextState) as AppDb
   }
 }
 

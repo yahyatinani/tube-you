@@ -125,10 +125,9 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
 
 @Composable
 fun ChannelItem(modifier: Modifier = Modifier, vm: ChannelVm) {
+  val typography = MaterialTheme.typography
   ListItem(
-    modifier = modifier
-      .clickable { /*TODO*/ }
-      .padding(vertical = 16.dp),
+    modifier = modifier.clickable { /*TODO*/ },
     leadingContent = {
       ChannelAvatar(
         modifier = Modifier.padding(horizontal = 40.dp),
@@ -136,33 +135,30 @@ fun ChannelItem(modifier: Modifier = Modifier, vm: ChannelVm) {
       )
     },
     headlineContent = {
-      Column {
-        Text(text = vm.author, style = MaterialTheme.typography.labelLarge)
-        val textStyle = MaterialTheme.typography.bodySmall.copy(
-          color = LocalContentColor.current.copy(alpha = .6f),
-          fontSize = 12.sp
+      Text(text = vm.author, style = typography.labelLarge)
+      val textStyle = typography.bodySmall.copy(
+        color = LocalContentColor.current.copy(alpha = .6f),
+        fontSize = 12.sp
+      )
+      Spacer(modifier = Modifier.height(4.dp))
+      Text(text = vm.handle, style = textStyle)
+      Spacer(modifier = Modifier.height(4.dp))
+      Text(text = "${vm.subCount} subscribers", style = textStyle)
+      val colorScheme = MaterialTheme.colorScheme
+      Button(
+        modifier = Modifier
+          .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+        onClick = { /*TODO*/ },
+        colors = ButtonDefaults.buttonColors(
+          containerColor = colorScheme.onSurface,
+          contentColor = colorScheme.surface
+        ),
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
+      ) {
+        Text(
+          text = stringResource(R.string.subscribe),
+          style = typography.labelMedium
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = vm.handle, style = textStyle)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = "${vm.subCount} subscribers", style = textStyle)
-
-        val colorScheme = MaterialTheme.colorScheme
-        Button(
-          modifier = Modifier
-            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-          onClick = { /*TODO*/ },
-          colors = ButtonDefaults.buttonColors(
-            containerColor = colorScheme.onSurface,
-            contentColor = colorScheme.surface
-          ),
-          contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
-        ) {
-          Text(
-            text = stringResource(R.string.subscribe),
-            style = MaterialTheme.typography.labelMedium
-          )
-        }
       }
     }
   )
@@ -177,7 +173,7 @@ fun SearchSuggestionItemDarkPreview() {
   ) {}
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ChannelItemDarkPreview() {
   ChannelItem(

@@ -7,6 +7,7 @@ import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
+import com.github.whyrising.vancetube.modules.core.keywords.HOME_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.home.error
@@ -46,13 +47,13 @@ val Home_Transitions = m<Any?, Any>(
 )
 
 fun homeCurrentState(appDb: AppDb): Any? =
-  getIn<Any>(appDb, l(HOME_GRAPH_ROUTE, home.state))
+  getIn<Any>(appDb, l(HOME_ROUTE, home.state))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = get<States?>(homeCurrentState(db), 0)
   val nextState = nextState(Home_Transitions, currentState, event)
   return db.letIf(nextState != null) {
-    assocIn(it, l(HOME_GRAPH_ROUTE, home.state), nextState) as AppDb
+    assocIn(it, l(HOME_ROUTE, home.state), nextState) as AppDb
   }
 }
 

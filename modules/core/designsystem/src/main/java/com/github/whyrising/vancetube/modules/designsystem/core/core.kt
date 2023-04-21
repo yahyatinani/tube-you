@@ -47,7 +47,7 @@ fun formatVideoInfo(
 }
 
 val OneDigitDecimalFormat = DecimalFormat("#.#").apply { roundingMode = FLOOR }
-const val thousandsSign = "K"
+const val ThousandsSign = "K"
 const val MillionsSign = "M"
 const val BillionsSign = "B"
 
@@ -55,38 +55,52 @@ fun formatViews(viewsCount: Long): String = when {
   viewsCount < 1000 -> "$viewsCount"
   viewsCount < 10_000 -> {
     val x = viewsCount / 1000f
-    "${OneDigitDecimalFormat.format(x)}$thousandsSign".replace(".0", "")
+    "${OneDigitDecimalFormat.format(x)}$ThousandsSign".replace(".0", "")
   }
 
-  viewsCount < 100_000 -> "${viewsCount / 1000}$thousandsSign"
-  viewsCount < 1_000_000 -> "${viewsCount / 1000}$thousandsSign"
+  viewsCount < 1_000_000 -> "${viewsCount / 1000}$ThousandsSign"
+  viewsCount < 10_000_000 -> {
+    val x = viewsCount / 1_000_000f
+    "${OneDigitDecimalFormat.format(x)}$MillionsSign".replace(".0", "")
+  }
+
   viewsCount < 1_000_000_000 -> "${viewsCount / 1_000_000}$MillionsSign"
+
+  viewsCount < 10_000_000_000 -> {
+    val x = viewsCount / 1_000_000_000f
+    "${OneDigitDecimalFormat.format(x)}$BillionsSign".replace(".0", "")
+  }
+
   else -> "${viewsCount / 1_000_000_000}$BillionsSign"
 }
 
-fun formatSubCount(subCount: Long): String {
-  val millionsSign = "M"
-  val billionsSign = "B"
+val ranges = listOf(
+  Pair(1E3, "K"),
+  Pair(1E6, "M"),
+  Pair(1E9, "B")
+)
 
-  return when {
-    subCount < 1000 -> subCount.toString()
-    subCount < 1_000_000 -> "${subCount / 1000}K"
-    subCount < 1_000_000_000 -> {
-      val x = subCount / 1_000_000f
-      if (x == x.toInt().toFloat()) {
-        "${x.toInt()}$millionsSign"
-      } else {
-        "${String.format("%.1f", x)}$millionsSign"
-      }
-    }
-
-    else -> {
-      val x = subCount / 1_000_000_000f
-      if (x == x.toInt().toFloat()) {
-        "${x.toInt()}$billionsSign"
-      } else {
-        "${String.format("%.1f", x)}$billionsSign"
-      }
-    }
+// TODO: Refactor
+fun formatSubCount(subCount: Long): String = when {
+  subCount < 1000 -> "$subCount"
+  subCount < 10_000 -> {
+    val x = subCount / 1000f
+    "${String.format("%.1f", x)}$ThousandsSign".replace(".0", "")
   }
+
+  subCount < 1_000_000 -> "${subCount / 1000}$ThousandsSign"
+  subCount < 100_000_000 -> {
+    val x = subCount / 1_000_000f
+
+    "${String.format("%.1f", x)}$MillionsSign".replace(".0", "")
+  }
+
+  subCount < 1_000_000_000 -> "${subCount / 1_000_000}$MillionsSign"
+
+  subCount < 10_000_000_000 -> {
+    val x = subCount / 1_000_000_000f
+    "${String.format("%.1f", x)}$BillionsSign".replace(".0", "")
+  }
+
+  else -> "${subCount / 1_000_000_000}$BillionsSign"
 }

@@ -37,25 +37,43 @@ import com.github.whyrising.y.core.v
 fun formatVideo(
   video: Video,
   viewsLabel: Any
-) = VideoViewModel(
-  id = video.videoId,
-  authorId = video.authorId!!,
-  title = video.title,
-  thumbnail = video.videoThumbnails[0].url,
-  length = formatSeconds(video.lengthSeconds.toLong()),
-  info = if (video.isUpcoming) {
+): VideoViewModel {
+  val isLiveStream = video.lengthSeconds == 0 && video.premiereTimestamp == null
+  val info = if (video.isUpcoming) {
     formatUpcomingInfo(video.author!!, video.premiereTimestamp!!)
   } else {
-    formatVideoInfo(
-      author = video.author!!,
-      authorId = video.authorId,
-      viewCount = formatViews(video.viewCount!!),
-      viewsLabel = viewsLabel as String,
-      publishedText = video.publishedText!!
-    )
-  },
-  isUpcoming = video.isUpcoming
-)
+    val viewCount = formatViews(video.viewCount!!)
+    if (isLiveStream) {
+      formatVideoInfo(
+        author = video.author!!,
+        authorId = video.authorId!!,
+        viewCount = viewCount,
+        viewsLabel = "watching"
+      )
+    } else {
+      formatVideoInfo(
+        author = video.author!!,
+        authorId = video.authorId!!,
+        viewCount = viewCount,
+        viewsLabel = viewsLabel as String,
+        publishedText = video.publishedText!!
+      )
+    }
+  }
+  return VideoViewModel(
+    id = video.videoId,
+    authorId = video.authorId!!,
+    title = video.title,
+    thumbnail = video.videoThumbnails[0].url,
+    length = when {
+      isLiveStream -> ""
+      else -> formatSeconds(video.lengthSeconds.toLong())
+    },
+    info = info,
+    isUpcoming = video.isUpcoming,
+    isLiveStream = isLiveStream
+  )
+}
 
 fun formatVideos(
   videoDataList: List<Video>,

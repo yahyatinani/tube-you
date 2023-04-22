@@ -11,7 +11,9 @@ data class VideoViewModel(
   val thumbnail: String,
   val length: String,
   val info: AnnotatedString,
-  val isUpcoming: Boolean = false
+  val isUpcoming: Boolean = false,
+  val isShort: Boolean = false,
+  val isLiveStream: Boolean = false
 )
 
 @Immutable

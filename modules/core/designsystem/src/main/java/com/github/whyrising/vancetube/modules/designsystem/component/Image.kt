@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -67,17 +66,14 @@ fun ThumbnailImage(modifier: Modifier = Modifier, url: String?) {
 fun Thumbnail(
   modifier: Modifier,
   url: String?,
-  videoLength: String
+  videoLength: @Composable () -> Unit = {}
 ) {
   Box(modifier = modifier, contentAlignment = Alignment.BottomEnd) {
     ThumbnailImage(
       modifier = modifier.fillMaxWidth(),
       url = url
     )
-    VideoLengthText(
-      modifier = Modifier.padding(8.dp),
-      videoLength = videoLength
-    )
+    videoLength()
   }
 }
 

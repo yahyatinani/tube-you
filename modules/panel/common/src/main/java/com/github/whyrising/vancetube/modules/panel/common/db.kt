@@ -50,8 +50,8 @@ data class Video(
   val viewCount: Long? = null,
 //    val published: Long,
   val publishedText: String? = null,
-  val liveNow: Boolean? = null,
-  val premium: Boolean? = null,
+  val liveNow: Boolean = false,
+  val premium: Boolean = false,
   val isUpcoming: Boolean = false,
   val premiereTimestamp: Long? = null
 ) : SearchResult

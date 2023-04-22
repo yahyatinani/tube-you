@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.PlaylistPlay
+import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,13 +34,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,16 +58,50 @@ fun VideoItemPortrait(
   thumbnailHeight: Dp
 ) {
   Column(modifier = Modifier.clickable { /*todo:*/ }) {
-    val videoLength = when {
-      viewModel.isUpcoming -> stringResource(R.string.upcoming)
-      else -> viewModel.length
-    }
     Thumbnail(
       modifier = Modifier
         .fillMaxWidth()
         .height(thumbnailHeight),
       url = viewModel.thumbnail,
-      videoLength = videoLength
+      videoLength = {
+        if (viewModel.isLiveStream) {
+          Row(
+            modifier = Modifier
+              .padding(8.dp)
+              .background(
+                color = Color.Red,
+                shape = RoundedCornerShape(2.dp)
+              )
+              .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Icon(
+              modifier = Modifier.size(12.dp),
+              imageVector = Icons.Default.Podcasts,
+              contentDescription = ""
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "LIVE",
+              textAlign = TextAlign.Center,
+              style = MaterialTheme.typography.bodySmall.copy(
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                platformStyle = PlatformTextStyle(includeFontPadding = false)
+              )
+            )
+          }
+        } else {
+          VideoLengthText(
+            videoLength = when {
+              viewModel.isUpcoming -> stringResource(R.string.upcoming)
+              viewModel.isShort -> TODO()
+              else -> viewModel.length
+            }
+          )
+        }
+      }
     )
     Row(
       modifier = modifier
@@ -96,9 +134,10 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
   ) {
     Thumbnail(
       modifier = Modifier.weight(.24f),
-      url = viewModel.thumbnail,
-      videoLength = viewModel.length
-    )
+      url = viewModel.thumbnail
+    ) {
+      VideoLengthText(videoLength = viewModel.length)
+    }
 
     Spacer(modifier = Modifier.width(16.dp))
 
@@ -260,10 +299,9 @@ fun ChannelItemDarkPreview() {
   )
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PlayListPortraitPreview() {
-  val density: Density = LocalDensity.current
   PlayListPortrait(
     viewModel = PlaylistVm(
       author = "author",

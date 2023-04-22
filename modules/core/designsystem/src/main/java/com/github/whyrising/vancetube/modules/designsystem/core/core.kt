@@ -20,21 +20,21 @@ fun formatSeconds(durationInSeconds: Long): String {
   }
 }
 
-const val VIDEO_INFO_DIVIDER = " • "
+const val VIDEO_INFO_DIVIDER = " · "
 
 fun formatVideoInfo(
   author: String,
   authorId: String,
   viewCount: String,
   viewsLabel: String,
-  publishedText: String
+  publishedText: String? = null
 ): AnnotatedString = buildAnnotatedString {
   "%#x ".format(3)
-  val str = "$author$VIDEO_INFO_DIVIDER$viewCount $viewsLabel" +
-    "$VIDEO_INFO_DIVIDER$publishedText"
+  val str = "$author$VIDEO_INFO_DIVIDER$viewCount $viewsLabel"
   val startIndex = 0
   val endIndex = startIndex + author.length
   append(str)
+  if (publishedText != null) append("$VIDEO_INFO_DIVIDER$publishedText")
   addStyle(
     style = SpanStyle(color = Blue300),
     start = startIndex,

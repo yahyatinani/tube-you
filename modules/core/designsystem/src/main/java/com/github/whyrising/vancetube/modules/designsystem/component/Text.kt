@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ fun VideoLengthText(
 ) {
   Text(
     modifier = modifier
+      .padding(8.dp)
       .background(
         color = Color.Black.copy(alpha = .8f),
         shape = RoundedCornerShape(2.dp)
@@ -65,7 +65,7 @@ fun VideoItemInfo(
   textStyle: TextStyle = TextStyle.Default
 ) {
   val context = LocalContext.current
-  val color = LocalContentColor.current.copy(alpha = .4f)
+  val color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)
   ClickableText(
     text = info,
     modifier = modifier,
@@ -92,5 +92,13 @@ fun VideoItemInfo(
 fun VideoLengthTextPreview() {
   VanceTheme {
     VideoLengthText(videoLength = "2:23")
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun VideoItemInfoPreview() {
+  VanceTheme {
+    VideoItemInfo(info = AnnotatedString("author . 2K"))
   }
 }

@@ -101,6 +101,7 @@ import com.github.whyrising.vancetube.modules.designsystem.component.SearchSugge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
+import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeight
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.homeGraph
@@ -201,6 +202,8 @@ fun VanceApp(
     regHomeEvents()
     dispatch(v(home.initialize))
   }
+
+  val thumbnailHeight = rememberThumbnailHeight()
 
   val isCompactDisplay = isCompact(windowSizeClass)
   VanceTheme(isCompact = isCompactDisplay) {
@@ -426,9 +429,9 @@ fun VanceApp(
           .padding(it)
           .consumeWindowInsets(it)
       ) {
-        homeGraph(isCompactDisplay, orientation)
-        subsGraph(isCompactDisplay, orientation)
-        libraryGraph(isCompactDisplay, orientation)
+        homeGraph(isCompactDisplay, orientation, thumbnailHeight)
+        subsGraph(isCompactDisplay, orientation, thumbnailHeight)
+        libraryGraph(isCompactDisplay, orientation, thumbnailHeight)
       }
     }
   }

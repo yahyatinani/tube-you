@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
@@ -38,7 +39,7 @@ private fun NavGraphBuilder.homeCommon(
   }
 }
 
-fun NavGraphBuilder.home(orientation: Int) {
+fun NavGraphBuilder.home(orientation: Int, thumbnailHeight: Dp) {
   homeCommon { videos ->
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
@@ -52,12 +53,13 @@ fun NavGraphBuilder.home(orientation: Int) {
     VideosList(
       orientation = orientation,
       listState = listState,
-      videos = videos
+      videos = videos,
+      thumbnailHeight = thumbnailHeight
     )
   }
 }
 
-fun NavGraphBuilder.homeLarge(orientation: Int) {
+fun NavGraphBuilder.homeLarge(orientation: Int, thumbnailHeight: Dp) {
   homeCommon { videos ->
     val scope = rememberCoroutineScope()
     val gridState = rememberLazyGridState()
@@ -69,16 +71,28 @@ fun NavGraphBuilder.homeLarge(orientation: Int) {
     VideosGrid(
       orientation = orientation,
       gridState = gridState,
-      videos = videos
+      videos = videos,
+      thumbnailHeight = thumbnailHeight
     )
   }
 }
 
-fun NavGraphBuilder.homeGraph(isCompactDisplay: Boolean, orientation: Int) {
+fun NavGraphBuilder.homeGraph(
+  isCompactDisplay: Boolean,
+  orientation: Int,
+  thumbnailHeight: Dp
+) {
   navigation(route = HOME_GRAPH_ROUTE, startDestination = HOME_ROUTE) {
-    if (isCompactDisplay) home(orientation = orientation)
-    else homeLarge(orientation = orientation)
+    if (isCompactDisplay) home(
+      orientation = orientation,
+      thumbnailHeight = thumbnailHeight
+    )
+    else homeLarge(orientation = orientation, thumbnailHeight = thumbnailHeight)
 
-    searchResults(route = HOME_GRAPH_ROUTE, orientation = orientation)
+    searchResults(
+      route = HOME_GRAPH_ROUTE,
+      orientation = orientation,
+      thumbnailHeight = thumbnailHeight
+    )
   }
 }

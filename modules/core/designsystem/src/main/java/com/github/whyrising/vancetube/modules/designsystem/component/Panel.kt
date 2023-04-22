@@ -112,7 +112,8 @@ fun HomePreview() {
       VideosList(
         orientation = 1,
         listState = rememberLazyListState(),
-        videos = videos
+        videos = videos,
+        thumbnailHeight = rememberThumbnailHeight()
       )
     }
   }

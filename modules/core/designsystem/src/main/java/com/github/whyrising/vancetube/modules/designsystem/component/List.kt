@@ -9,11 +9,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 
 @Composable
-fun VideosList(orientation: Int = 1, listState: LazyListState, videos: Videos) {
+fun VideosList(
+  orientation: Int = 1,
+  listState: LazyListState,
+  videos: Videos,
+  thumbnailHeight: Dp
+) {
   LazyColumn(
     state = listState,
     modifier = Modifier
@@ -32,7 +38,8 @@ fun VideosList(orientation: Int = 1, listState: LazyListState, videos: Videos) {
         Configuration.ORIENTATION_PORTRAIT -> {
           VideoItemPortrait(
             modifier = Modifier.padding(start = 12.dp),
-            viewModel = viewModel
+            viewModel = viewModel,
+            thumbnailHeight = thumbnailHeight
           )
         }
 

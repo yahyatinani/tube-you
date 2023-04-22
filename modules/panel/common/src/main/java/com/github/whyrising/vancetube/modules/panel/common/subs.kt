@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.DarkGray
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -21,7 +22,6 @@ import com.github.whyrising.vancetube.modules.designsystem.component.ChannelItem
 import com.github.whyrising.vancetube.modules.designsystem.component.PlayListPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoItemPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoListItemLandscapeCompact
-import com.github.whyrising.vancetube.modules.designsystem.core.VIDEO_INFO_DIVIDER
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSubCount
 import com.github.whyrising.vancetube.modules.designsystem.core.formatUpcomingInfo
@@ -78,13 +78,17 @@ fun formatPlayList(r: Playlist) = PlaylistVm(
   authorId = r.authorId,
   authorUrl = r.authorUrl,
   playlistId = r.playlistId,
-  thumbnailUrl = r.playlistThumbnail,
+  thumbnailUrl = r.videos[0].videoThumbnails[2].url,
   videoCount = "${r.videoCount}"
 )
 
 const val SEARCH_ROUTE = "search_results"
 
-fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
+fun NavGraphBuilder.searchResults(
+  route: String,
+  orientation: Int,
+  thumbnailHeight: Dp
+) {
   composable(route = "$route/$SEARCH_ROUTE") {
     val listState = rememberLazyListState()
     val videos = watch<SearchVm>(v(search_results, stringResource(views_label)))
@@ -103,7 +107,8 @@ fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
             Configuration.ORIENTATION_PORTRAIT -> {
               VideoItemPortrait(
                 modifier = Modifier.padding(start = 12.dp),
-                viewModel = vm
+                viewModel = vm,
+                thumbnailHeight = thumbnailHeight
               )
             }
 
@@ -116,7 +121,8 @@ fun NavGraphBuilder.searchResults(route: String, orientation: Int) {
           } else if (vm is PlaylistVm) {
             PlayListPortrait(
               modifier = Modifier.padding(start = 12.dp),
-              viewModel = vm
+              viewModel = vm,
+              thumbnailHeight = thumbnailHeight
             )
           }
         }

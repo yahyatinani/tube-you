@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
@@ -20,7 +21,8 @@ import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 fun VideosGrid(
   orientation: Int = 1,
   gridState: LazyGridState,
-  videos: Videos
+  videos: Videos,
+  thumbnailHeight: Dp
 ) {
   LazyVerticalGrid(
     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -45,7 +47,8 @@ fun VideosGrid(
         videoInfoTextStyle = TextStyle.Default.copy(
           fontSize = 14.sp
         ),
-        viewModel = viewModel
+        viewModel = viewModel,
+        thumbnailHeight = thumbnailHeight
       )
     }
   }

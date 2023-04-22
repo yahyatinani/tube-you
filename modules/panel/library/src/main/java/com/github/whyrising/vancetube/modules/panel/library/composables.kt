@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
@@ -21,7 +22,11 @@ fun NavGraphBuilder.library(orientation: Int) {
   }
 }
 
-fun NavGraphBuilder.libraryGraph(isCompactDisplay: Boolean, orientation: Int) {
+fun NavGraphBuilder.libraryGraph(
+  isCompactDisplay: Boolean,
+  orientation: Int,
+  thumbnailHeight: Dp
+) {
   navigation(
     route = LIBRARY_GRAPH_ROUTE,
     startDestination = LIBRARY_ROUTE
@@ -29,6 +34,10 @@ fun NavGraphBuilder.libraryGraph(isCompactDisplay: Boolean, orientation: Int) {
     if (isCompactDisplay) library(orientation = orientation)
     else library(orientation = orientation)
 
-    searchResults(route = LIBRARY_GRAPH_ROUTE, orientation = orientation)
+    searchResults(
+      route = LIBRARY_GRAPH_ROUTE,
+      orientation = orientation,
+      thumbnailHeight = thumbnailHeight
+    )
   }
 }

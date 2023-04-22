@@ -31,11 +31,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.whyrising.vancetube.modules.designsystem.R
@@ -47,13 +50,20 @@ import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 fun VideoItemPortrait(
   modifier: Modifier = Modifier,
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
-  viewModel: VideoViewModel
+  viewModel: VideoViewModel,
+  thumbnailHeight: Dp
 ) {
   Column(modifier = Modifier.clickable { /*todo:*/ }) {
+    val videoLength = when {
+      viewModel.isUpcoming -> stringResource(R.string.upcoming)
+      else -> viewModel.length
+    }
     Thumbnail(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(thumbnailHeight),
       url = viewModel.thumbnail,
-      videoLength = viewModel.length
+      videoLength = videoLength
     )
     Row(
       modifier = modifier
@@ -184,12 +194,15 @@ fun SearchSuggestionItemDarkPreview() {
 @Composable
 fun PlayListPortrait(
   modifier: Modifier = Modifier,
-  viewModel: PlaylistVm
+  viewModel: PlaylistVm,
+  thumbnailHeight: Dp
 ) {
   Column(modifier = Modifier.clickable { /*todo:*/ }) {
     Box {
       ThumbnailImage(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(thumbnailHeight),
         url = viewModel.thumbnailUrl
       )
       Row(
@@ -250,6 +263,7 @@ fun ChannelItemDarkPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PlayListPortraitPreview() {
+  val density: Density = LocalDensity.current
   PlayListPortrait(
     viewModel = PlaylistVm(
       author = "author",
@@ -259,6 +273,7 @@ fun PlayListPortraitPreview() {
       thumbnailUrl = "",
       playlistId = "id",
       authorUrl = ""
-    )
+    ),
+    thumbnailHeight = rememberThumbnailHeight()
   )
 }

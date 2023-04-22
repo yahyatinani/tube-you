@@ -51,7 +51,9 @@ data class Video(
 //    val published: Long,
   val publishedText: String? = null,
   val liveNow: Boolean? = null,
-  val premium: Boolean? = null
+  val premium: Boolean? = null,
+  val isUpcoming: Boolean = false,
+  val premiereTimestamp: Long? = null
 ) : SearchResult
 
 @Serializable
@@ -77,6 +79,7 @@ data class Channel(
 data class Playlist(
   val title: String,
   val playlistId: String,
+  val playlistThumbnail: String,
   val author: String,
   val authorId: String,
   val authorUrl: String,

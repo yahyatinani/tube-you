@@ -1,11 +1,13 @@
 package com.github.whyrising.vancetube.modules.designsystem.core
 
+import android.text.format.DateFormat
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
 import java.math.RoundingMode.FLOOR
 import java.text.DecimalFormat
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 fun formatSeconds(durationInSeconds: Long): String {
@@ -44,6 +46,24 @@ fun formatVideoInfo(
     start = startIndex,
     end = endIndex
   )
+}
+
+fun convertTimestamp(timestampMillis: Long): String {
+  val date = Date(timestampMillis * 1000)
+  return DateFormat.format("M/d/yy, h:mm a", date).toString()
+}
+
+/**
+ * eg.: SNY • Scheduled for 4/24/23, 5:00 PM
+ */
+fun formatUpcomingInfo(
+  author: String,
+  premiereTimestamp: Long
+): AnnotatedString = buildAnnotatedString {
+  append(author)
+  append(VIDEO_INFO_DIVIDER)
+  append("Scheduled for ")
+  append(convertTimestamp(premiereTimestamp))
 }
 
 val OneDigitDecimalFormat = DecimalFormat("#.#").apply { roundingMode = FLOOR }

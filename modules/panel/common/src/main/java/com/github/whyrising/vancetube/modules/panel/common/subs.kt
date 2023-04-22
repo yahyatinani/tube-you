@@ -21,8 +21,10 @@ import com.github.whyrising.vancetube.modules.designsystem.component.ChannelItem
 import com.github.whyrising.vancetube.modules.designsystem.component.PlayListPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoItemPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoListItemLandscapeCompact
+import com.github.whyrising.vancetube.modules.designsystem.core.VIDEO_INFO_DIVIDER
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSubCount
+import com.github.whyrising.vancetube.modules.designsystem.core.formatUpcomingInfo
 import com.github.whyrising.vancetube.modules.designsystem.core.formatVideoInfo
 import com.github.whyrising.vancetube.modules.designsystem.core.formatViews
 import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
@@ -39,15 +41,20 @@ fun formatVideo(
   id = video.videoId,
   authorId = video.authorId!!,
   title = video.title,
-  thumbnail = video.videoThumbnails[1].url,
+  thumbnail = video.videoThumbnails[0].url,
   length = formatSeconds(video.lengthSeconds.toLong()),
-  info = formatVideoInfo(
-    author = video.author!!,
-    authorId = video.authorId,
-    viewCount = formatViews(video.viewCount!!),
-    viewsLabel = viewsLabel as String,
-    publishedText = video.publishedText!!
-  )
+  info = if (video.isUpcoming) {
+    formatUpcomingInfo(video.author!!, video.premiereTimestamp!!)
+  } else {
+    formatVideoInfo(
+      author = video.author!!,
+      authorId = video.authorId,
+      viewCount = formatViews(video.viewCount!!),
+      viewsLabel = viewsLabel as String,
+      publishedText = video.publishedText!!
+    )
+  },
+  isUpcoming = video.isUpcoming
 )
 
 fun formatVideos(
@@ -71,7 +78,7 @@ fun formatPlayList(r: Playlist) = PlaylistVm(
   authorId = r.authorId,
   authorUrl = r.authorUrl,
   playlistId = r.playlistId,
-  thumbnailUrl = r.videos[0].videoThumbnails[0].url,
+  thumbnailUrl = r.playlistThumbnail,
   videoCount = "${r.videoCount}"
 )
 

@@ -10,7 +10,8 @@ data class VideoViewModel(
   val title: String,
   val thumbnail: String,
   val length: String,
-  val info: AnnotatedString
+  val info: AnnotatedString,
+  val isUpcoming: Boolean = false
 )
 
 @Immutable

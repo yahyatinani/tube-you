@@ -37,7 +37,6 @@ fun VideosList(
       when (orientation) {
         Configuration.ORIENTATION_PORTRAIT -> {
           VideoItemPortrait(
-            modifier = Modifier.padding(start = 12.dp),
             viewModel = viewModel,
             thumbnailHeight = thumbnailHeight
           )

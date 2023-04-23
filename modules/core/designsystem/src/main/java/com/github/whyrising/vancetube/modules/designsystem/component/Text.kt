@@ -24,8 +24,8 @@ import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 
 @Composable
 fun VideoLengthText(
-  modifier: Modifier = Modifier,
-  videoLength: String
+  videoLength: String,
+  modifier: Modifier = Modifier
 ) {
   Text(
     modifier = modifier

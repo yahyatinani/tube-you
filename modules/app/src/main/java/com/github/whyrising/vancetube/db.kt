@@ -16,13 +16,14 @@ import com.github.whyrising.y.core.m
 // const val DEFAULT_BASE_ADDRESS = "youtube.owacon.moe"
 // const val DEFAULT_BASE_ADDRESS = "y.com.sb"
 // const val DEFAULT_BASE_ADDRESS = "invidious.0011.lt"
-const val DEFAULT_BASE_ADDRESS = "invidious.projectsegfau.lt"
+//const val DEFAULT_BASE_ADDRESS = "invidious.projectsegfau.lt"
+const val DEFAULT_BASE_ADDRESS = "pipedapi.palveluntarjoaja.eu"
 // const val DEFAULT_BASE_ADDRESS = "yewtu.be"
 // const val DEFAULT_BASE_ADDRESS = "invidious.slipfox.xyz"
 
 val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
-  common.api_url to "https://$DEFAULT_BASE_ADDRESS/api/v1",
+  common.api_url to "https://$DEFAULT_BASE_ADDRESS",
   common.is_search_bar_active to true,
   common.is_search_bar_visible to false,
   common.is_backstack_empty to true

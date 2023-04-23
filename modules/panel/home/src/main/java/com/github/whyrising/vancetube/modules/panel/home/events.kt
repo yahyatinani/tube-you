@@ -95,9 +95,7 @@ fun regHomeEvents() {
     interceptors = v(injectCofx(home.fsm), injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    val popularVideosEndpoint = "${appDb[common.api_url]}/popular?" +
-      "fields=videoId,title,videoThumbnails,lengthSeconds,viewCount,author," +
-      "publishedText,authorId"
+    val popularVideosEndpoint = "${appDb[common.api_url]}/trending?region=CA"
     m<Any, Any>(db to appDb).assoc(
       BuiltInFx.fx,
       v(

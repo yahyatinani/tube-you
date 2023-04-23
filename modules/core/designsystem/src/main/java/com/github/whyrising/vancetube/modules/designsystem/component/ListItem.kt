@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material.icons.filled.Search
@@ -33,7 +35,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -45,7 +49,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.github.whyrising.vancetube.modules.designsystem.R
+import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
 import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
 import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
@@ -92,22 +98,65 @@ fun VideoItemPortrait(
               )
             )
           }
+        } else if (viewModel.isShort) {
+          Row(
+            modifier = Modifier
+              .padding(8.dp)
+              .background(
+                color = Color.Black.copy(alpha = .8f),
+                shape = RoundedCornerShape(2.dp)
+              )
+              .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Icon(
+              modifier = Modifier.size(12.dp),
+              imageVector = Icons.Default.FlashOn,
+              contentDescription = ""
+            )
+            Spacer(modifier = Modifier.width(2.dp))
+            Text(
+              text = "SHORTS",
+              textAlign = TextAlign.Center,
+              style = MaterialTheme.typography.bodySmall.copy(
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                platformStyle = PlatformTextStyle(includeFontPadding = false)
+              )
+            )
+          }
         } else {
           VideoLengthText(
             videoLength = when {
               viewModel.isUpcoming -> stringResource(R.string.upcoming)
-              viewModel.isShort -> TODO()
               else -> viewModel.length
             }
           )
         }
       }
     )
+
+    Spacer(modifier = Modifier.height(4.dp))
+
     Row(
       modifier = modifier
         .fillMaxWidth()
-        .padding(top = 8.dp, end = 4.dp, bottom = 24.dp)
+        .padding(start = 8.dp, top = 8.dp, end = 4.dp, bottom = 24.dp),
+      verticalAlignment = Alignment.Top
     ) {
+      AsyncImage(
+        model = viewModel.uploaderAvatar,
+        contentDescription = "channel's avatar",
+        modifier = modifier
+          .clip(CircleShape)
+          .size(40.dp)
+          .background(Color.DarkGray),
+        contentScale = ContentScale.Fit
+      )
+
+      Spacer(modifier = Modifier.width(16.dp))
+
       Column(modifier = Modifier.weight(1f)) {
         VideoItemTitle(title = viewModel.title)
         Spacer(modifier = Modifier.height(4.dp))
@@ -188,7 +237,7 @@ fun ChannelItem(modifier: Modifier = Modifier, vm: ChannelVm) {
     leadingContent = {
       ChannelAvatar(
         modifier = Modifier.padding(horizontal = 40.dp),
-        url = vm.authorThumbnail
+        url = vm.avatar
       )
     },
     headlineContent = {
@@ -294,8 +343,24 @@ fun ChannelItemDarkPreview() {
       author = "author",
       subCount = "14.1M",
       handle = "@authorId",
-      authorThumbnail = ""
+      avatar = ""
     )
+  )
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun VideoItemPortraitPreview() {
+  VideoItemPortrait(
+    viewModel = VideoViewModel(
+      id = "video.url",
+      authorId = "authorId",
+      title = "video.title",
+      thumbnail = "",
+      length = "2:00",
+      info = AnnotatedString("info"),
+    ),
+    thumbnailHeight = rememberThumbnailHeight()
   )
 }
 

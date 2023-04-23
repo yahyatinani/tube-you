@@ -25,8 +25,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.searchBar.results
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar.search_id
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.SEARCH_ROUTE
-import com.github.whyrising.vancetube.modules.panel.common.SearchResult
-import com.github.whyrising.vancetube.modules.panel.common.Suggestions
+import com.github.whyrising.vancetube.modules.panel.common.SearchResponse
 import com.github.whyrising.vancetube.modules.panel.common.appDbBy
 import com.github.whyrising.vancetube.modules.panel.common.bounce_fx
 import com.github.whyrising.vancetube.modules.panel.common.defaultSb
@@ -122,7 +121,7 @@ fun regAppEvents() {
     val sq = (searchQuery as String).replace(" ", "%20")
     val appDb = appDbBy(cofx)
     val suggestionsEndpoint =
-      "${appDb[common.api_url]}/search/suggestions?q=$sq"
+      "${appDb[common.api_url]}/suggestions?query=$sq"
 
     m<Any, Any>().assoc(
       fx,
@@ -134,7 +133,7 @@ fun regAppEvents() {
             ktor.url to suggestionsEndpoint,
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
-            ktor.response_type_info to typeInfo<Suggestions>(),
+            ktor.response_type_info to typeInfo<PersistentVector<String>>(),
             ktor.on_success to v(common.set_suggestions),
             ktor.on_failure to v(home.error)
           )
@@ -162,8 +161,8 @@ fun regAppEvents() {
       .assoc(is_search_bar_active, false)
 
     val sq = trimmedQuery.replace(" ", "%20")
-    val searchEndpoint = "${appDb[common.api_url]}/search?q=$sq"
-    val typeInfo = typeInfo<PersistentVector<SearchResult>>()
+    val searchEndpoint = "${appDb[common.api_url]}/search?q=$sq&filter=all"
+    println("klfjsdl j$searchEndpoint")
     m<Any, Any>(
       db to newDb,
       fx to v(
@@ -175,7 +174,7 @@ fun regAppEvents() {
             ktor.url to searchEndpoint,
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
-            ktor.response_type_info to typeInfo,
+            ktor.response_type_info to typeInfo<SearchResponse>(),
             ktor.on_success to v(common.set_search_results, sbIndex),
             ktor.on_failure to v(":error")
           )
@@ -224,9 +223,7 @@ fun regAppEvents() {
       l(activeTab, search_bar)
     ) ?: return@regEventDb db
 
-    val sb = sbVec
-      .last()
-      .assoc(searchBar.suggestions, (suggestions as Suggestions).value)
+    val sb = sbVec.last().assoc(searchBar.suggestions, suggestions)
 
     assocIn(db, l(activeTab, search_bar), sbVec.pop().conj(sb))
   }
@@ -239,7 +236,11 @@ fun regAppEvents() {
 
     if (vec == null || vec.count <= searchId as Int) return@regEventDb db
 
-    assocIn(db, l(activeTab, search_bar, searchId, results), searchResults)
+    assocIn(
+      db,
+      l(activeTab, search_bar, searchId, results),
+      (searchResults as SearchResponse).items
+    )
   }
 
   regEventFx(id = common.search_back_press) { cofx, _ ->

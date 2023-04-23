@@ -12,6 +12,11 @@ import kotlinx.serialization.modules.SerializersModule
 
 typealias AppDb = IPersistentMap<Any, Any>
 
+val defaultSb: IPersistentMap<Any, Any> = m(
+  searchBar.query to "",
+  searchBar.suggestions to v<String>()
+)
+
 val searchModule = SerializersModule {
   polymorphic(
     baseClass = SearchResult::class,
@@ -33,67 +38,59 @@ val searchModule = SerializersModule {
 @Serializable
 data class ThumbnailData(val url: String, val quality: String? = null)
 
-@Immutable
-@Serializable
-@SerialName("video")
-data class Video(
-  val title: String,
-  val videoId: String,
-  val lengthSeconds: Int,
-  val videoThumbnails: List<ThumbnailData>,
-
-  val author: String? = null,
-  val authorId: String? = null,
-//    val authorUrl: String,
-  val description: String? = null,
-  val descriptionHtml: String? = null,
-  val viewCount: Long? = null,
-//    val published: Long,
-  val publishedText: String? = null,
-  val liveNow: Boolean = false,
-  val premium: Boolean = false,
-  val isUpcoming: Boolean = false,
-  val premiereTimestamp: Long? = null
-) : SearchResult
-
 @Serializable
 sealed interface SearchResult
+
+@Immutable
+@Serializable
+@SerialName("stream")
+data class Video(
+  val url: String,
+  val title: String,
+  val thumbnail: String,
+  val uploaderName: String? = null,
+  val uploaderUrl: String? = null,
+  val uploaderAvatar: String? = null,
+  val uploadedDate: String? = null,
+  val shortDescription: String? = null,
+  val duration: Long,
+  val views: Long? = null,
+  val uploaded: Long,
+  val uploaderVerified: Boolean = false,
+  val isShort: Boolean = false,
+) : SearchResult
 
 @Immutable
 @SerialName("channel")
 @Serializable
 data class Channel(
-  val author: String,
-  val authorId: String,
-  val authorUrl: String,
-  val authorThumbnails: List<ThumbnailData>,
-  val subCount: Int,
-  val videoCount: Int,
-  val description: String,
-  val descriptionHtml: String
+  val url: String,
+  val name: String,
+  val thumbnail: String,
+  val subscribers: Int,
+  val videos: Int,
+  val description: String? = null,
+  val verified: Boolean
 ) : SearchResult
 
 @Immutable
 @SerialName("playlist")
 @Serializable
 data class Playlist(
-  val title: String,
-  val playlistId: String,
-  val playlistThumbnail: String,
-  val author: String,
-  val authorId: String,
-  val authorUrl: String,
-  val videoCount: Int,
-  val videos: List<Video>
+  val url: String,
+  val name: String,
+  val thumbnail: String,
+  val uploaderName: String,
+  val uploaderUrl: String,
+  val uploaderVerified: Boolean,
+  val playlistType: String,
+  val videos: Int,
 ) : SearchResult
 
 @Serializable
-data class Suggestions(
-  @SerialName("suggestions")
-  val value: PersistentVector<String>
-)
-
-val defaultSb: IPersistentMap<Any, Any> = m(
-  searchBar.query to "",
-  searchBar.suggestions to v<String>()
+data class SearchResponse(
+  val items: PersistentVector<SearchResult>,
+  val nextPage: String? = null,
+  val suggestion: String? = null,
+  val corrected: Boolean = false
 )

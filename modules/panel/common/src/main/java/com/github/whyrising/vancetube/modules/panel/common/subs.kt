@@ -22,9 +22,9 @@ import com.github.whyrising.vancetube.modules.designsystem.component.ChannelItem
 import com.github.whyrising.vancetube.modules.designsystem.component.PlayListPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoItemPortrait
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoListItemLandscapeCompact
+import com.github.whyrising.vancetube.modules.designsystem.core.convertTimestamp
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSubCount
-import com.github.whyrising.vancetube.modules.designsystem.core.formatUpcomingInfo
 import com.github.whyrising.vancetube.modules.designsystem.core.formatVideoInfo
 import com.github.whyrising.vancetube.modules.designsystem.core.formatViews
 import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
@@ -34,44 +34,54 @@ import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.panel.common.R.string.views_label
 import com.github.whyrising.y.core.v
 
+private fun highQuality(thumbnail: String) =
+  thumbnail.replace("hqdefault.jpg", "sddefault.jpg")
+
 fun formatVideo(
   video: Video,
   viewsLabel: Any
 ): VideoViewModel {
-  val isLiveStream = video.lengthSeconds == 0 && video.premiereTimestamp == null
-  val info = if (video.isUpcoming) {
-    formatUpcomingInfo(video.author!!, video.premiereTimestamp!!)
+  val isLiveStream = video.duration == -1L
+  val authorId = video.uploaderUrl!!
+  val isUpcoming = video.views == -1L
+  val info = if (isUpcoming) {
+//    formatUpcomingInfo(video.uploaderName!!, video.uploaded)
+    formatVideoInfo(
+      author = video.uploaderName!!,
+      authorId = authorId,
+      viewCount = "Scheduled for",
+      viewsLabel = convertTimestamp(video.uploaded)
+    )
   } else {
-    val viewCount = formatViews(video.viewCount!!)
+    val viewCount = formatViews(video.views!!)
     if (isLiveStream) {
       formatVideoInfo(
-        author = video.author!!,
-        authorId = video.authorId!!,
+        author = video.uploaderName!!,
+        authorId = authorId,
         viewCount = viewCount,
         viewsLabel = "watching"
       )
     } else {
       formatVideoInfo(
-        author = video.author!!,
-        authorId = video.authorId!!,
+        author = video.uploaderName!!,
+        authorId = authorId,
         viewCount = viewCount,
         viewsLabel = viewsLabel as String,
-        publishedText = video.publishedText!!
+        publishedText = video.uploadedDate!!
       )
     }
   }
   return VideoViewModel(
-    id = video.videoId,
-    authorId = video.authorId!!,
+    id = video.url,
+    authorId = authorId,
     title = video.title,
-    thumbnail = video.videoThumbnails[0].url,
-    length = when {
-      isLiveStream -> ""
-      else -> formatSeconds(video.lengthSeconds.toLong())
-    },
+    thumbnail = highQuality(video.thumbnail),
+    length = formatSeconds(video.duration),
     info = info,
-    isUpcoming = video.isUpcoming,
-    isLiveStream = isLiveStream
+    uploaderAvatar = video.uploaderAvatar,
+    isUpcoming = isUpcoming,
+    isLiveStream = isLiveStream,
+    isShort = video.isShort
   )
 }
 
@@ -83,21 +93,21 @@ fun formatVideos(
 }
 
 fun formatChannel(channel: Channel) = ChannelVm(
-  id = channel.authorId,
-  author = channel.author,
-  subCount = formatSubCount(channel.subCount.toLong()),
-  handle = "@${channel.author.replace(" ", "")}",
-  authorThumbnail = "https:${channel.authorThumbnails[1].url}"
+  id = channel.url,
+  author = channel.name,
+  subCount = formatSubCount(channel.subscribers.toLong()),
+  handle = "@${channel.name.replace(" ", "")}",
+  avatar = channel.thumbnail
 )
 
 fun formatPlayList(r: Playlist) = PlaylistVm(
-  title = r.title,
-  author = r.author,
-  authorId = r.authorId,
-  authorUrl = r.authorUrl,
-  playlistId = r.playlistId,
-  thumbnailUrl = r.videos[0].videoThumbnails[2].url,
-  videoCount = "${r.videoCount}"
+  title = r.name,
+  author = r.uploaderName,
+  authorId = r.uploaderUrl,
+  authorUrl = r.uploaderUrl,
+  playlistId = r.url,
+  thumbnailUrl = highQuality(r.thumbnail),
+  videoCount = "${r.videos}"
 )
 
 const val SEARCH_ROUTE = "search_results"
@@ -124,7 +134,6 @@ fun NavGraphBuilder.searchResults(
           when (orientation) {
             Configuration.ORIENTATION_PORTRAIT -> {
               VideoItemPortrait(
-                modifier = Modifier.padding(start = 12.dp),
                 viewModel = vm,
                 thumbnailHeight = thumbnailHeight
               )

@@ -48,8 +48,8 @@ fun formatVideoInfo(
   )
 }
 
-fun convertTimestamp(timestampMillis: Long): String {
-  val date = Date(timestampMillis * 1000)
+fun convertTimestamp(timestampSeconds: Long): String {
+  val date = Date(timestampSeconds)
   return DateFormat.format("M/d/yy, h:mm a", date).toString()
 }
 

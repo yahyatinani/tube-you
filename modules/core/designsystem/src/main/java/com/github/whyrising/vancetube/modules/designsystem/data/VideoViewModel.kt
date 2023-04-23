@@ -13,7 +13,8 @@ data class VideoViewModel(
   val info: AnnotatedString,
   val isUpcoming: Boolean = false,
   val isShort: Boolean = false,
-  val isLiveStream: Boolean = false
+  val isLiveStream: Boolean = false,
+  val uploaderAvatar: String? = null
 )
 
 @Immutable
@@ -24,7 +25,7 @@ data class ChannelVm(
   val author: String,
   val handle: String,
   val subCount: String,
-  val authorThumbnail: String
+  val avatar: String
 )
 
 data class PlaylistVm(

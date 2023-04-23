@@ -152,21 +152,38 @@ fun regAppEvents() {
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]
     val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
-    val sbIndex = sbVec.size - 1
-    val fsb = (sbVec.last() as IPersistentMap<Any, Any>)
-      .assoc(searchBar.query, trimmedQuery)
-      .assoc(search_id, sbIndex)
+    val last = sbVec.last() as IPersistentMap<Any, Any>
+    val prevSb = (if (sbVec.count > 1) sbVec.pop().last() else last)
+      as IPersistentMap<Any, Any>
 
-    val newDb = assocIn(appDb, l(activeTab, search_bar), sbVec.pop().conj(fsb))
-      .assoc(is_search_bar_active, false)
+    val nsb = last.assoc(searchBar.query, trimmedQuery)
+    val isDraftSb = last[results] == null
+    val isSamePrevSearch = prevSb[searchBar.query] == trimmedQuery
+
+    val newSbVec = when {
+      isSamePrevSearch && isDraftSb && sbVec.count > 1 -> sbVec.pop().pop()
+      else -> sbVec.pop()
+    }
+    val sbIndex = newSbVec.count
+    val newDb = assocIn(
+      appDb,
+      l(activeTab, search_bar),
+      newSbVec.conj(nsb.assoc(search_id, sbIndex))
+    ).assoc(is_search_bar_active, false)
 
     val sq = trimmedQuery.replace(" ", "%20")
     val searchEndpoint = "${appDb[common.api_url]}/search?q=$sq&filter=all"
-    println("klfjsdl j$searchEndpoint")
+    val isOneSb = sbVec.count == 1
     m<Any, Any>(
       db to newDb,
       fx to v(
-        v(navigate_to, m(common.destination to "$activeTab/$SEARCH_ROUTE")),
+        if (isOneSb && !isDraftSb && isSamePrevSearch ||
+          !isOneSb && isDraftSb && isSamePrevSearch
+        ) {
+          null
+        } else {
+          v(navigate_to, m(common.destination to "$activeTab/$SEARCH_ROUTE"))
+        },
         v(
           ktor.http_fx,
           m(

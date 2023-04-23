@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.whyrising.vancetube.modules.designsystem.R
-import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
 import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
 import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
@@ -358,7 +357,7 @@ fun VideoItemPortraitPreview() {
       title = "video.title",
       thumbnail = "",
       length = "2:00",
-      info = AnnotatedString("info"),
+      info = AnnotatedString("info")
     ),
     thumbnailHeight = rememberThumbnailHeight()
   )

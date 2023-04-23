@@ -57,7 +57,7 @@ data class Video(
   val views: Long? = null,
   val uploaded: Long,
   val uploaderVerified: Boolean = false,
-  val isShort: Boolean = false,
+  val isShort: Boolean = false
 ) : SearchResult
 
 @Immutable
@@ -84,7 +84,7 @@ data class Playlist(
   val uploaderUrl: String,
   val uploaderVerified: Boolean,
   val playlistType: String,
-  val videos: Int,
+  val videos: Int
 ) : SearchResult
 
 @Serializable

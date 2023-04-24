@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube.modules.panel.common
 
+import android.content.Context
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,8 +13,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.DarkGray
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
@@ -34,7 +35,6 @@ import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
 import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.SearchVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
-import com.github.whyrising.vancetube.modules.panel.common.R.string.views_label
 import com.github.whyrising.y.core.v
 
 /**
@@ -45,38 +45,39 @@ import com.github.whyrising.y.core.v
 private fun highQuality(thumbnail: String) =
   thumbnail.replace("hqdefault.jpg", "mqdefault.jpg")
 
-fun formatVideo(
-  video: Video,
-  viewsLabel: Any
-): VideoViewModel {
+fun formatVideo(video: Video, context: Context): VideoViewModel {
   val isLiveStream = video.duration == -1L
   val authorId = video.uploaderUrl!!
   val isUpcoming = video.views == -1L
+
   val info = if (isUpcoming) {
-//    formatUpcomingInfo(video.uploaderName!!, video.uploaded)
     formatVideoInfo(
       author = video.uploaderName!!,
       authorId = authorId,
-      viewCount = "Scheduled for",
-      viewsLabel = convertTimestamp(video.uploaded)
+      text1 = context.getString(R.string.scheduled_for),
+      text2 = convertTimestamp(video.uploaded)
     )
   } else {
     val viewCount = formatViews(video.views!!)
-    if (isLiveStream) {
-      formatVideoInfo(
-        author = video.uploaderName!!,
-        authorId = authorId,
-        viewCount = viewCount,
-        viewsLabel = "watching"
-      )
-    } else {
-      formatVideoInfo(
-        author = video.uploaderName!!,
-        authorId = authorId,
-        viewCount = viewCount,
-        viewsLabel = viewsLabel as String,
-        publishedText = video.uploadedDate!!
-      )
+    when {
+      isLiveStream -> {
+        formatVideoInfo(
+          author = video.uploaderName!!,
+          authorId = authorId,
+          text1 = viewCount,
+          text2 = context.getString(R.string.watching)
+        )
+      }
+
+      else -> {
+        formatVideoInfo(
+          author = video.uploaderName!!,
+          authorId = authorId,
+          text1 = viewCount,
+          text2 = context.getString(R.string.views_label),
+          publishedText = video.uploadedDate!!
+        )
+      }
     }
   }
   return VideoViewModel(
@@ -95,9 +96,9 @@ fun formatVideo(
 
 fun formatVideos(
   videoDataList: List<Video>,
-  viewsLabel: Any
+  context: Context
 ): List<VideoViewModel> = videoDataList.fold(v()) { acc, video ->
-  acc.conj(formatVideo(video, viewsLabel))
+  acc.conj(formatVideo(video, context))
 }
 
 fun formatChannel(channel: Channel) = ChannelVm(
@@ -127,7 +128,7 @@ fun NavGraphBuilder.searchResults(
 ) {
   composable(route = "$route/$SEARCH_ROUTE") {
     val listState = rememberLazyListState()
-    val videos = watch<SearchVm>(v(search_results, stringResource(views_label)))
+    val videos = watch<SearchVm>(v(search_results, LocalContext.current))
     LazyColumn(
       state = listState,
       modifier = Modifier

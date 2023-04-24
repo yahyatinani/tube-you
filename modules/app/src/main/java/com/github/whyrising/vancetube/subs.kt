@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.github.whyrising.recompose.regSub
@@ -134,13 +135,14 @@ fun regAppSubs() {
     queryId = common.search_results,
     signalsFn = { subscribe(v(search_bar)) },
     initialValue = SearchVm()
-  ) { sb, _, (_, viewsLabel) ->
+  ) { sb, _, (_, context) ->
+
     when (val search = get<PersistentVector<SearchResult>>(sb, results)) {
       null -> SearchVm()
       else -> {
         val ret = search.fold(v<Any>()) { acc, r ->
           val formatted = when (r) {
-            is Video -> formatVideo(r, viewsLabel)
+            is Video -> formatVideo(r, context as Context)
             is Channel -> formatChannel(r)
             is Playlist -> formatPlayList(r)
           }

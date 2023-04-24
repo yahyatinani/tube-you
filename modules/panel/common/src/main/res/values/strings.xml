@@ -1,3 +1,5 @@
 <resources>
   <string name="views_label">views</string>
+  <string name="watching">watching</string>
+  <string name="scheduled_for">Scheduled for</string>
 </resources>

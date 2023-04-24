@@ -77,9 +77,9 @@ private val designTimeData = v(
     formatVideoInfo(
       author = "Jon Deo",
       authorId = "2342lk2sdf",
-      viewCount = "32432",
+      text1 = "32432",
       publishedText = "2 hours ago",
-      viewsLabel = "views"
+      text2 = "views"
     )
   ),
   VideoViewModel(
@@ -92,9 +92,9 @@ private val designTimeData = v(
     formatVideoInfo(
       author = "Jon Deo",
       authorId = "2342lk2sdf",
-      viewCount = "32432",
+      text1 = "32432",
       publishedText = "2 hours ago",
-      viewsLabel = "views"
+      text2 = "views"
     )
   )
 )

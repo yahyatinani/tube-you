@@ -1,5 +1,6 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
+import android.content.Context
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
@@ -9,7 +10,6 @@ import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelVm
 import com.github.whyrising.vancetube.modules.panel.common.AppDb
 import com.github.whyrising.vancetube.modules.panel.common.States
-import com.github.whyrising.vancetube.modules.panel.common.Video
 import com.github.whyrising.vancetube.modules.panel.common.formatVideos
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
@@ -20,7 +20,7 @@ import com.github.whyrising.y.core.v
  * Call this lazy global property to initialise all [Home] page subscriptions.
  * @return [Unit]
  */
-fun getRegHomeSubs() {
+fun getRegHomeSubs(context: Context) {
   regSub<AppDb>(home.db) { db, _ ->
     db[HOME_GRAPH_ROUTE]
   }
@@ -40,10 +40,11 @@ fun getRegHomeSubs() {
         )
 
         States.Loaded -> {
-          val videos: List<Video> = get(homeDb, popular_vids) ?: v()
           VideosPanelVm(
             showList = true,
-            videos = Videos(formatVideos(videos, viewsLabel))
+            videos = Videos(
+              formatVideos(get(homeDb, popular_vids) ?: v(), context)
+            )
           )
         }
 

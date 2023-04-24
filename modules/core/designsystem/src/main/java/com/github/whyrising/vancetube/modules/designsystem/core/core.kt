@@ -25,25 +25,26 @@ const val VIDEO_INFO_DIVIDER = " · "
 fun formatVideoInfo(
   author: String,
   authorId: String,
-  viewCount: String,
-  viewsLabel: String,
+  text1: String,
+  text2: String,
   publishedText: String? = null
 ): AnnotatedString = buildAnnotatedString {
-  "%#x ".format(3)
-  val str = "$author$VIDEO_INFO_DIVIDER$viewCount $viewsLabel"
-  val startIndex = 0
-  val endIndex = startIndex + author.length
-  append(str)
-  if (publishedText != null) append("$VIDEO_INFO_DIVIDER$publishedText")
+  append("$author$VIDEO_INFO_DIVIDER$text1 $text2")
+
+  if (publishedText != null) {
+    append("$VIDEO_INFO_DIVIDER$publishedText")
+  }
+
+  val endIndex = author.length
   addStyle(
     style = SpanStyle(color = Blue300),
-    start = startIndex,
+    start = 0,
     end = endIndex
   )
   addStringAnnotation(
-    tag = "author",
+    tag = "author annotation",
     annotation = authorId,
-    start = startIndex,
+    start = 0,
     end = endIndex
   )
 }
@@ -51,19 +52,6 @@ fun formatVideoInfo(
 fun convertTimestamp(timestampSeconds: Long): String {
   val date = Date(timestampSeconds)
   return DateFormat.format("M/d/yy, h:mm a", date).toString()
-}
-
-/**
- * eg.: SNY • Scheduled for 4/24/23, 5:00 PM
- */
-fun formatUpcomingInfo(
-  author: String,
-  premiereTimestamp: Long
-): AnnotatedString = buildAnnotatedString {
-  append(author)
-  append(VIDEO_INFO_DIVIDER)
-  append("Scheduled for ")
-  append(convertTimestamp(premiereTimestamp))
 }
 
 val OneDigitDecimalFormat = DecimalFormat("#.#").apply { roundingMode = FLOOR }
@@ -94,11 +82,11 @@ fun formatViews(viewsCount: Long): String = when {
   else -> "${viewsCount / 1_000_000_000}$BillionsSign"
 }
 
-val ranges = listOf(
+/*val ranges = listOf(
   Pair(1E3, "K"),
   Pair(1E6, "M"),
   Pair(1E9, "B")
-)
+)*/
 
 // TODO: Refactor
 fun formatSubCount(subCount: Long): String = when {

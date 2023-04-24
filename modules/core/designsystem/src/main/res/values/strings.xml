@@ -2,4 +2,6 @@
 <resources>
     <string name="subscribe">Subscribe</string>
     <string name="upcoming">UPCOMING</string>
+    <string name="duration_live">LIVE</string>
+    <string name="duration_shorts">SHORTS</string>
 </resources>

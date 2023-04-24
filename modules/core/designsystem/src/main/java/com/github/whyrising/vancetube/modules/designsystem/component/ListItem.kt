@@ -17,12 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
-import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.PlaylistPlay
-import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,10 +38,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -68,66 +62,12 @@ fun VideoItemPortrait(
         .fillMaxWidth()
         .height(thumbnailHeight),
       url = viewModel.thumbnail,
-      videoLength = {
-        if (viewModel.isLiveStream) {
-          Row(
-            modifier = Modifier
-              .padding(8.dp)
-              .background(
-                color = Color.Red,
-                shape = RoundedCornerShape(2.dp)
-              )
-              .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Icon(
-              modifier = Modifier.size(12.dp),
-              imageVector = Icons.Default.Podcasts,
-              contentDescription = ""
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = "LIVE",
-              textAlign = TextAlign.Center,
-              style = MaterialTheme.typography.bodySmall.copy(
-                color = Color.White,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                platformStyle = PlatformTextStyle(includeFontPadding = false)
-              )
-            )
-          }
-        } else if (viewModel.isShort) {
-          Row(
-            modifier = Modifier
-              .padding(8.dp)
-              .background(
-                color = Color.Black.copy(alpha = .8f),
-                shape = RoundedCornerShape(2.dp)
-              )
-              .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Icon(
-              modifier = Modifier.size(12.dp),
-              imageVector = Icons.Default.FlashOn,
-              contentDescription = ""
-            )
-            Spacer(modifier = Modifier.width(2.dp))
-            Text(
-              text = "SHORTS",
-              textAlign = TextAlign.Center,
-              style = MaterialTheme.typography.bodySmall.copy(
-                color = Color.White,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                platformStyle = PlatformTextStyle(includeFontPadding = false)
-              )
-            )
-          }
-        } else {
-          VideoLengthText(
-            videoLength = when {
+      content = {
+        when {
+          viewModel.isLiveStream -> LiveDurationText()
+          viewModel.isShort -> ShortDurationText()
+          else -> VideoDurationText(
+            duration = when {
               viewModel.isUpcoming -> stringResource(R.string.upcoming)
               else -> viewModel.length
             }
@@ -167,7 +107,7 @@ fun VideoItemPortrait(
 
       Spacer(modifier = Modifier.width(24.dp))
 
-      VideoItemMoreButton()
+      MoreButton()
     }
   }
 }
@@ -184,7 +124,7 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
       modifier = Modifier.weight(.24f),
       url = viewModel.thumbnail
     ) {
-      VideoLengthText(videoLength = viewModel.length)
+      VideoDurationText(duration = viewModel.length)
     }
 
     Spacer(modifier = Modifier.width(16.dp))
@@ -195,7 +135,7 @@ fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
       VideoItemInfo(info = viewModel.info)
     }
 
-    VideoItemMoreButton()
+    MoreButton()
   }
 }
 
@@ -328,7 +268,7 @@ fun PlayListPortrait(
 
       Spacer(modifier = Modifier.width(24.dp))
 
-      VideoItemMoreButton()
+      MoreButton()
     }
   }
 }

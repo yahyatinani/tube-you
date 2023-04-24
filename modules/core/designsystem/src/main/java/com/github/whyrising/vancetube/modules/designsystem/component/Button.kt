@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun VideoItemMoreButton(modifier: Modifier = Modifier) {
+fun MoreButton(modifier: Modifier = Modifier) {
   IconButton(
     modifier = modifier.size(20.dp),
     onClick = { /*TODO*/ }

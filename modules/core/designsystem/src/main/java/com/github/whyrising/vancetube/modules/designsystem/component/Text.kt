@@ -2,15 +2,20 @@ package com.github.whyrising.vancetube.modules.designsystem.component
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.whyrising.vancetube.modules.designsystem.R
+import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
+import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 
 private val roundedCornerShape = RoundedCornerShape(4.dp)
@@ -105,11 +112,46 @@ fun VideoDurationText(
   duration: String,
   modifier: Modifier = Modifier
 ) {
-  val backgroundColor = Color.Black.copy(alpha = .8f)
   DurationText(
     text = duration,
-    modifier = modifier.bgModifier(backgroundColor)
+    modifier = modifier.bgModifier(
+      backgroundColor = Color.Black.copy(alpha = .8f)
+    )
   )
+}
+
+@Composable
+fun ThumbnailContent(viewModel: VideoViewModel) = when {
+  viewModel.isLiveStream -> LiveDurationText()
+  viewModel.isShort -> ShortDurationText()
+  else -> VideoDurationText(
+    duration = when {
+      viewModel.isUpcoming -> stringResource(R.string.upcoming)
+      else -> viewModel.length
+    }
+  )
+}
+
+@Composable
+fun BoxScope.PlaylistThumbnailContent(viewModel: PlaylistVm) {
+  Row(
+    modifier = Modifier
+      .align(alignment = Alignment.BottomCenter)
+      .background(color = Color.Black.copy(alpha = .4f))
+      .fillMaxWidth()
+      .wrapContentHeight()
+      .padding(vertical = 2.dp),
+    horizontalArrangement = Arrangement.Center,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Icon(
+      imageVector = Icons.Default.PlaylistPlay,
+      contentDescription = "",
+      tint = Color.White
+    )
+    Spacer(modifier = Modifier.width(4.dp))
+    Text(text = viewModel.videoCount, color = Color.White)
+  }
 }
 
 @Composable
@@ -120,7 +162,7 @@ fun VideoItemTitle(modifier: Modifier = Modifier, title: String) {
     maxLines = 2,
     softWrap = true,
     overflow = TextOverflow.Ellipsis,
-    style = MaterialTheme.typography.titleSmall
+    style = MaterialTheme.typography.titleSmall.copy(lineHeight = 18.sp)
   )
 }
 
@@ -128,7 +170,7 @@ fun VideoItemTitle(modifier: Modifier = Modifier, title: String) {
 fun VideoItemInfo(
   modifier: Modifier = Modifier,
   info: AnnotatedString,
-  textStyle: TextStyle = TextStyle.Default
+  textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp)
 ) {
   val context = LocalContext.current
   val color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)

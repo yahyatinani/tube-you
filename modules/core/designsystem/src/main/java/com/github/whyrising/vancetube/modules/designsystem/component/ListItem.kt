@@ -1,13 +1,13 @@
 package com.github.whyrising.vancetube.modules.designsystem.component
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
-import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,8 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -43,66 +39,42 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.github.whyrising.vancetube.modules.designsystem.R
 import com.github.whyrising.vancetube.modules.designsystem.data.ChannelVm
 import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 
 @Composable
-fun VideoItemPortrait(
+fun ListItemPortrait(
+  title: String,
+  thumbnail: String,
+  info: AnnotatedString,
   modifier: Modifier = Modifier,
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
-  viewModel: VideoViewModel,
-  thumbnailHeight: Dp
+  thumbnailHeight: Dp,
+  thumbnailContent: @Composable (BoxScope.() -> Unit),
+  channelAvatar: @Composable (RowScope.() -> Unit)? = null
 ) {
   Column(modifier = Modifier.clickable { /*todo:*/ }) {
     Thumbnail(
+      url = thumbnail,
       modifier = Modifier
         .fillMaxWidth()
         .height(thumbnailHeight),
-      url = viewModel.thumbnail,
-      content = {
-        when {
-          viewModel.isLiveStream -> LiveDurationText()
-          viewModel.isShort -> ShortDurationText()
-          else -> VideoDurationText(
-            duration = when {
-              viewModel.isUpcoming -> stringResource(R.string.upcoming)
-              else -> viewModel.length
-            }
-          )
-        }
-      }
+      content = thumbnailContent
     )
-
-    Spacer(modifier = Modifier.height(4.dp))
 
     Row(
       modifier = modifier
         .fillMaxWidth()
-        .padding(start = 8.dp, top = 8.dp, end = 4.dp, bottom = 24.dp),
+        .padding(start = 8.dp, end = 4.dp, bottom = 24.dp),
       verticalAlignment = Alignment.Top
     ) {
-      AsyncImage(
-        model = viewModel.uploaderAvatar,
-        contentDescription = "channel's avatar",
-        modifier = modifier
-          .clip(CircleShape)
-          .size(40.dp)
-          .background(Color.DarkGray),
-        contentScale = ContentScale.Fit
-      )
-
-      Spacer(modifier = Modifier.width(16.dp))
-
+      channelAvatar?.let { it() }
       Column(modifier = Modifier.weight(1f)) {
-        VideoItemTitle(title = viewModel.title)
+        VideoItemTitle(title = title)
         Spacer(modifier = Modifier.height(4.dp))
-        VideoItemInfo(
-          info = viewModel.info,
-          textStyle = videoInfoTextStyle
-        )
+        VideoItemInfo(info = info, textStyle = videoInfoTextStyle)
       }
 
       Spacer(modifier = Modifier.width(24.dp))
@@ -113,29 +85,91 @@ fun VideoItemPortrait(
 }
 
 @Composable
-fun VideoListItemLandscapeCompact(viewModel: VideoViewModel) {
+fun VideoItemPortrait(
+  modifier: Modifier = Modifier,
+  videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
+  viewModel: VideoViewModel,
+  thumbnailHeight: Dp
+) {
+  ListItemPortrait(
+    title = viewModel.title,
+    thumbnail = viewModel.thumbnail,
+    info = viewModel.info,
+    modifier = modifier.padding(top = 12.dp),
+    videoInfoTextStyle = videoInfoTextStyle,
+    thumbnailHeight = thumbnailHeight,
+    thumbnailContent = {
+      ThumbnailContent(viewModel)
+    },
+    channelAvatar = {
+      ChannelAvatar(
+        url = viewModel.uploaderAvatar,
+        modifier = Modifier.size(40.dp)
+      )
+      Spacer(modifier = Modifier.width(16.dp))
+    }
+  )
+}
+
+@Composable
+fun ListItemLandscape(
+  title: String,
+  modifier: Modifier = Modifier,
+  thumbnail: String,
+  info: AnnotatedString,
+  thumbnailHeight: Dp,
+  content: @Composable (BoxScope.() -> Unit),
+  channelAvatar: @Composable (ColumnScope.() -> Unit)? = null
+) {
   Row(
-    modifier = Modifier
+    modifier = modifier
       .testTag("video")
-      .padding(vertical = 8.dp)
       .clickable { /*todo:*/ }
   ) {
     Thumbnail(
-      modifier = Modifier.weight(.24f),
-      url = viewModel.thumbnail
-    ) {
-      VideoDurationText(duration = viewModel.length)
-    }
+      url = thumbnail,
+      modifier = Modifier
+        .weight(.25f)
+        .height(thumbnailHeight)
+        .clip(RoundedCornerShape(8.dp)),
+      content = content
+    )
 
     Spacer(modifier = Modifier.width(16.dp))
 
     Column(modifier = Modifier.weight(.8f)) {
-      VideoItemTitle(title = viewModel.title)
-      Spacer(modifier = Modifier.height(4.dp))
-      VideoItemInfo(info = viewModel.info)
+      VideoItemTitle(title = title)
+
+      Spacer(modifier = Modifier.height(2.dp))
+
+      VideoItemInfo(info = info)
+
+      channelAvatar?.let { it() }
     }
 
     MoreButton()
+  }
+}
+
+@Composable
+fun VideoItemLandscapeCompact(
+  viewModel: VideoViewModel,
+  thumbnailHeight: Dp
+) {
+  ListItemLandscape(
+    title = viewModel.title,
+    modifier = Modifier.padding(vertical = 8.dp),
+    thumbnail = viewModel.thumbnail,
+    info = viewModel.info,
+    thumbnailHeight = thumbnailHeight,
+    content = { ThumbnailContent(viewModel) }
+  ) {
+    Spacer(modifier = Modifier.height(12.dp))
+
+    ChannelAvatar(
+      url = viewModel.uploaderAvatar,
+      modifier = Modifier.size(40.dp)
+    )
   }
 }
 
@@ -169,14 +203,21 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun ChannelItem(modifier: Modifier = Modifier, vm: ChannelVm) {
+fun ChannelItem(
+  modifier: Modifier = Modifier,
+  avatarPaddingValues: PaddingValues = PaddingValues(0.dp),
+  vm: ChannelVm
+) {
   val typography = MaterialTheme.typography
   ListItem(
-    modifier = modifier.clickable { /*TODO*/ },
+    modifier = modifier,
     leadingContent = {
       ChannelAvatar(
-        modifier = Modifier.padding(horizontal = 40.dp),
-        url = vm.avatar
+        url = vm.avatar,
+        modifier = Modifier
+          .padding(avatarPaddingValues)
+          .padding(horizontal = 40.dp)
+          .size(AVATAR_SIZE)
       )
     },
     headlineContent = {
@@ -209,6 +250,49 @@ fun ChannelItem(modifier: Modifier = Modifier, vm: ChannelVm) {
   )
 }
 
+@Composable
+fun PlayListPortrait(
+  modifier: Modifier = Modifier,
+  viewModel: PlaylistVm,
+  thumbnailHeight: Dp
+) {
+  ListItemPortrait(
+    title = viewModel.title,
+    thumbnail = viewModel.thumbnailUrl,
+    info = AnnotatedString(viewModel.author),
+    modifier = modifier.padding(top = 12.dp),
+    thumbnailHeight = thumbnailHeight,
+    thumbnailContent = { PlaylistThumbnailContent(viewModel) },
+    channelAvatar = {}
+  )
+}
+
+@Composable
+fun PlayListLandscape(
+  viewModel: PlaylistVm,
+  thumbnailHeight: Dp
+) {
+  Row(
+    modifier = Modifier
+      .testTag("video")
+      .padding(vertical = 8.dp)
+      .clickable { /*todo:*/ }
+  ) {
+    ListItemLandscape(
+      title = viewModel.title,
+      thumbnail = viewModel.thumbnailUrl,
+      info = AnnotatedString(viewModel.author),
+      thumbnailHeight = thumbnailHeight,
+      content = { PlaylistThumbnailContent(viewModel) }
+    )
+  }
+}
+
+/*
+ * -- Previews -------------------------------------------------------------
+ *
+ */
+
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun SearchSuggestionItemDarkPreview() {
@@ -216,61 +300,6 @@ fun SearchSuggestionItemDarkPreview() {
     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do" +
       " eiusmod tempor "
   ) {}
-}
-
-@Composable
-fun PlayListPortrait(
-  modifier: Modifier = Modifier,
-  viewModel: PlaylistVm,
-  thumbnailHeight: Dp
-) {
-  Column(modifier = Modifier.clickable { /*todo:*/ }) {
-    Box {
-      ThumbnailImage(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(thumbnailHeight),
-        url = viewModel.thumbnailUrl
-      )
-      Row(
-        modifier = Modifier
-          .align(alignment = Alignment.BottomCenter)
-          .background(color = Color.Black.copy(alpha = .4f))
-          .fillMaxWidth()
-          .wrapContentHeight()
-          .padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Icon(
-          imageVector = Icons.Default.PlaylistPlay,
-          contentDescription = "",
-          tint = Color.White
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text = viewModel.videoCount, color = Color.White)
-      }
-    }
-
-    Row(
-      modifier = modifier
-        .fillMaxWidth()
-        .padding(top = 8.dp, end = 4.dp, bottom = 24.dp)
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        VideoItemTitle(title = viewModel.title)
-        Spacer(modifier = Modifier.height(4.dp))
-        VideoItemInfo(
-          info = AnnotatedString(viewModel.author),
-          textStyle = TextStyle.Default.copy(fontSize = 12.sp)
-        )
-      }
-
-      Spacer(modifier = Modifier.width(24.dp))
-
-      MoreButton()
-    }
-  }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -294,12 +323,30 @@ fun VideoItemPortraitPreview() {
     viewModel = VideoViewModel(
       id = "video.url",
       authorId = "authorId",
-      title = "video.title",
+      title = "title title title title title title title title title title " +
+        "title title ",
       thumbnail = "",
       length = "2:00",
       info = AnnotatedString("info")
     ),
-    thumbnailHeight = rememberThumbnailHeight()
+    thumbnailHeight = rememberThumbnailHeightPortrait()
+  )
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun VideoListItemLandscapeCompactPreview() {
+  VideoItemLandscapeCompact(
+    viewModel = VideoViewModel(
+      id = "video.url",
+      authorId = "authorId",
+      title = "title title title title title title title title title title " +
+        "title title ",
+      thumbnail = "",
+      length = "2:00",
+      info = AnnotatedString("info")
+    ),
+    thumbnailHeight = rememberThumbnailHeightLandscape()
   )
 }
 
@@ -316,6 +363,23 @@ fun PlayListPortraitPreview() {
       playlistId = "id",
       authorUrl = ""
     ),
-    thumbnailHeight = rememberThumbnailHeight()
+    thumbnailHeight = rememberThumbnailHeightPortrait()
+  )
+}
+
+@Preview(showBackground = true, uiMode = Configuration.ORIENTATION_LANDSCAPE)
+@Composable
+fun PlayListLandscapePreview() {
+  PlayListLandscape(
+    viewModel = PlaylistVm(
+      author = "author",
+      authorId = "id",
+      title = "Title",
+      videoCount = "13",
+      thumbnailUrl = "",
+      playlistId = "id",
+      authorUrl = ""
+    ),
+    thumbnailHeight = rememberThumbnailHeightLandscape()
   )
 }

@@ -1,6 +1,8 @@
 package com.github.whyrising.vancetube.modules.panel.common
 
-import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,9 +21,10 @@ import androidx.navigation.compose.composable
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_results
 import com.github.whyrising.vancetube.modules.designsystem.component.ChannelItem
+import com.github.whyrising.vancetube.modules.designsystem.component.PlayListLandscape
 import com.github.whyrising.vancetube.modules.designsystem.component.PlayListPortrait
+import com.github.whyrising.vancetube.modules.designsystem.component.VideoItemLandscapeCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VideoItemPortrait
-import com.github.whyrising.vancetube.modules.designsystem.component.VideoListItemLandscapeCompact
 import com.github.whyrising.vancetube.modules.designsystem.core.convertTimestamp
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSeconds
 import com.github.whyrising.vancetube.modules.designsystem.core.formatSubCount
@@ -36,9 +39,11 @@ import com.github.whyrising.y.core.v
 
 /**
  * Checkout https://github.com/TeamNewPipe/NewPipeExtractor/pull/268
+ * mqdefault.jpg 39.76kb
+ * maxresdefault.jpg 306.98 kb
  */
 private fun highQuality(thumbnail: String) =
-  thumbnail.replace("hqdefault.jpg", "sddefault.jpg")
+  thumbnail.replace("hqdefault.jpg", "mqdefault.jpg")
 
 fun formatVideo(
   video: Video,
@@ -130,30 +135,61 @@ fun NavGraphBuilder.searchResults(
         .fillMaxSize()
     ) {
       itemsIndexed(videos.value, key = { index, _ -> index }) { index, vm ->
+        val isPortrait = orientation == ORIENTATION_PORTRAIT
         if (vm is VideoViewModel) {
-          if (index > 1 && videos.value[index - 1] !is VideoViewModel) {
+          if (
+            index > 1 &&
+            videos.value[index - 1] !is VideoViewModel &&
+            isPortrait
+          ) {
             Divider(thickness = 6.dp, color = DarkGray)
           }
-          when (orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> {
-              VideoItemPortrait(
-                viewModel = vm,
-                thumbnailHeight = thumbnailHeight
-              )
-            }
-
-            else -> VideoListItemLandscapeCompact(vm)
-          }
-        } else {
-          if (index != 0) Divider(thickness = 6.dp, color = DarkGray)
-          if (vm is ChannelVm) {
-            ChannelItem(modifier = Modifier.fillMaxWidth(), vm = vm)
-          } else if (vm is PlaylistVm) {
-            PlayListPortrait(
-              modifier = Modifier.padding(start = 12.dp),
+          when {
+            isPortrait -> VideoItemPortrait(
               viewModel = vm,
               thumbnailHeight = thumbnailHeight
             )
+
+            else -> VideoItemLandscapeCompact(
+              viewModel = vm,
+              thumbnailHeight = thumbnailHeight
+            )
+          }
+        } else {
+          if (index != 0 && isPortrait) {
+            Divider(thickness = 6.dp, color = DarkGray)
+          }
+
+          when (vm) {
+            is ChannelVm -> {
+              ChannelItem(
+                vm = vm,
+                modifier = Modifier
+                  .clickable { /*TODO*/ }
+                  .fillMaxWidth(),
+                avatarPaddingValues = when {
+                  isPortrait -> PaddingValues()
+                  else -> PaddingValues(horizontal = 24.dp)
+                }
+              )
+            }
+
+            is PlaylistVm -> {
+              when {
+                isPortrait -> PlayListPortrait(
+                  modifier = Modifier.padding(start = 12.dp),
+                  viewModel = vm,
+                  thumbnailHeight = thumbnailHeight
+                )
+
+                else -> {
+                  PlayListLandscape(
+                    viewModel = vm,
+                    thumbnailHeight = thumbnailHeight
+                  )
+                }
+              }
+            }
           }
         }
       }

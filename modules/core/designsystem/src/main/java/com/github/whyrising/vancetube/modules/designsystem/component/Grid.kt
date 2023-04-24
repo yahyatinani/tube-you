@@ -44,9 +44,7 @@ fun VideosGrid(
         modifier = Modifier
           .testTag("video")
           .padding(bottom = 0.dp),
-        videoInfoTextStyle = TextStyle.Default.copy(
-          fontSize = 14.sp
-        ),
+        videoInfoTextStyle = TextStyle.Default.copy(fontSize = 14.sp),
         viewModel = viewModel,
         thumbnailHeight = thumbnailHeight
       )

@@ -113,7 +113,7 @@ fun HomePreview() {
         orientation = 1,
         listState = rememberLazyListState(),
         videos = videos,
-        thumbnailHeight = rememberThumbnailHeight()
+        thumbnailHeight = rememberThumbnailHeightPortrait()
       )
     }
   }

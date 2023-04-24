@@ -1,6 +1,7 @@
 package com.github.whyrising.vancetube
 
 import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -101,7 +102,8 @@ import com.github.whyrising.vancetube.modules.designsystem.component.SearchSugge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
-import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeight
+import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeightLandscape
+import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeightPortrait
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.homeGraph
@@ -203,9 +205,8 @@ fun VanceApp(
     dispatch(v(home.initialize))
   }
 
-  val thumbnailHeight = rememberThumbnailHeight()
-
   val isCompactDisplay = isCompact(windowSizeClass)
+
   VanceTheme(isCompact = isCompactDisplay) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = when {
@@ -421,6 +422,10 @@ fun VanceApp(
       }
 
       val orientation = LocalConfiguration.current.orientation
+      val thumbnailHeight = when (orientation) {
+        ORIENTATION_PORTRAIT -> rememberThumbnailHeightPortrait()
+        else -> rememberThumbnailHeightLandscape()
+      }
       NavHost(
         navController = navController,
         startDestination = HOME_GRAPH_ROUTE,

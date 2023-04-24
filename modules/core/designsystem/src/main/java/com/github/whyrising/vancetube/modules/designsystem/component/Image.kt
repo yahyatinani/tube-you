@@ -3,9 +3,8 @@ package com.github.whyrising.vancetube.modules.designsystem.component
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -34,12 +33,21 @@ fun screenWidthPx(
 }
 
 @Composable
-fun rememberThumbnailHeight(
+fun rememberThumbnailHeightPortrait(
   screenWidthPx: Float = screenWidthPx(),
   density: Density = LocalDensity.current
 ): Dp = remember(key1 = screenWidthPx, key2 = density) {
-  val heightPx = screenWidthPx * THUMBNAIL_HEIGHT / THUMBNAIL_WIDTH
-  with(density) { heightPx.toDp() }
+  with(density) { (screenWidthPx * THUMBNAIL_HEIGHT / THUMBNAIL_WIDTH).toDp() }
+}
+
+@Composable
+fun rememberThumbnailHeightLandscape(
+  screenWidthPx: Float = screenWidthPx(),
+  density: Density = LocalDensity.current
+): Dp = remember(key1 = screenWidthPx, key2 = density) {
+  with(density) {
+    ((screenWidthPx / 4.6f) * THUMBNAIL_HEIGHT / THUMBNAIL_WIDTH).toDp()
+  }
 }
 
 @Composable
@@ -56,7 +64,7 @@ fun ThumbnailImage(modifier: Modifier = Modifier, url: String?) {
 fun Thumbnail(
   modifier: Modifier,
   url: String?,
-  content: @Composable () -> Unit = {}
+  content: @Composable BoxScope.() -> Unit = {}
 ) {
   Box(modifier = modifier, contentAlignment = Alignment.BottomEnd) {
     ThumbnailImage(
@@ -67,21 +75,21 @@ fun Thumbnail(
   }
 }
 
-private val avatarSize = 72.dp
+val AVATAR_SIZE = 72.dp
 
 @Composable
-fun ChannelAvatar(modifier: Modifier = Modifier, url: String?) {
+fun ChannelAvatar(url: String?, modifier: Modifier = Modifier) {
   AsyncImage(
     model = url,
     contentDescription = "channel's avatar",
     modifier = modifier
       .clip(CircleShape)
-      .width(avatarSize)
-      .height(avatarSize)
       .background(Color.DarkGray),
     contentScale = ContentScale.FillWidth
   )
 }
+
+// -- Previews -----------------------------------------------------------------
 
 @Preview(showBackground = true)
 @Composable

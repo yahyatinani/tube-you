@@ -35,14 +35,15 @@ fun VideosList(
       key = { it.id }
     ) { viewModel ->
       when (orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> {
-          VideoItemPortrait(
-            viewModel = viewModel,
-            thumbnailHeight = thumbnailHeight
-          )
-        }
+        Configuration.ORIENTATION_PORTRAIT -> VideoItemPortrait(
+          viewModel = viewModel,
+          thumbnailHeight = thumbnailHeight
+        )
 
-        else -> VideoListItemLandscapeCompact(viewModel)
+        else -> VideoItemLandscapeCompact(
+          viewModel = viewModel,
+          thumbnailHeight = thumbnailHeight
+        )
       }
     }
   }

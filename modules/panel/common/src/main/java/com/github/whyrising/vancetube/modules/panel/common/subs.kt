@@ -34,6 +34,9 @@ import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.panel.common.R.string.views_label
 import com.github.whyrising.y.core.v
 
+/**
+ * Checkout https://github.com/TeamNewPipe/NewPipeExtractor/pull/268
+ */
 private fun highQuality(thumbnail: String) =
   thumbnail.replace("hqdefault.jpg", "sddefault.jpg")
 

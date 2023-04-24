@@ -51,25 +51,17 @@ fun rememberThumbnailHeightLandscape(
 }
 
 @Composable
-fun ThumbnailImage(modifier: Modifier = Modifier, url: String?) {
-  AsyncImage(
-    model = url,
-    contentDescription = "thumbnail",
-    modifier = modifier.background(Color.DarkGray),
-    contentScale = ContentScale.FillWidth
-  )
-}
-
-@Composable
 fun Thumbnail(
   modifier: Modifier,
   url: String?,
   content: @Composable BoxScope.() -> Unit = {}
 ) {
   Box(modifier = modifier, contentAlignment = Alignment.BottomEnd) {
-    ThumbnailImage(
-      modifier = modifier.fillMaxWidth(),
-      url = url
+    AsyncImage(
+      model = url,
+      contentDescription = "thumbnail",
+      modifier = modifier.fillMaxWidth().background(Color.DarkGray),
+      contentScale = ContentScale.FillWidth
     )
     content()
   }

@@ -85,33 +85,6 @@ fun ListItemPortrait(
 }
 
 @Composable
-fun VideoItemPortrait(
-  modifier: Modifier = Modifier,
-  videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
-  viewModel: VideoViewModel,
-  thumbnailHeight: Dp
-) {
-  ListItemPortrait(
-    title = viewModel.title,
-    thumbnail = viewModel.thumbnail,
-    info = viewModel.info,
-    modifier = modifier.padding(top = 12.dp),
-    videoInfoTextStyle = videoInfoTextStyle,
-    thumbnailHeight = thumbnailHeight,
-    thumbnailContent = {
-      ThumbnailContent(viewModel)
-    },
-    channelAvatar = {
-      ChannelAvatar(
-        url = viewModel.uploaderAvatar,
-        modifier = Modifier.size(40.dp)
-      )
-      Spacer(modifier = Modifier.width(16.dp))
-    }
-  )
-}
-
-@Composable
 fun ListItemLandscape(
   title: String,
   modifier: Modifier = Modifier,
@@ -149,6 +122,33 @@ fun ListItemLandscape(
 
     MoreButton()
   }
+}
+
+@Composable
+fun VideoItemPortrait(
+  modifier: Modifier = Modifier,
+  videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
+  viewModel: VideoViewModel,
+  thumbnailHeight: Dp
+) {
+  ListItemPortrait(
+    title = viewModel.title,
+    thumbnail = viewModel.thumbnail,
+    info = viewModel.info,
+    modifier = modifier.padding(top = 12.dp),
+    videoInfoTextStyle = videoInfoTextStyle,
+    thumbnailHeight = thumbnailHeight,
+    thumbnailContent = {
+      ThumbnailContent(viewModel)
+    },
+    channelAvatar = {
+      ChannelAvatar(
+        url = viewModel.uploaderAvatar,
+        modifier = Modifier.size(40.dp)
+      )
+      Spacer(modifier = Modifier.width(16.dp))
+    }
+  )
 }
 
 @Composable

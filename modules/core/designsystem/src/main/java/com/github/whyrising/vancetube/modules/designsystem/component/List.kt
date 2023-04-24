@@ -1,6 +1,6 @@
 package com.github.whyrising.vancetube.modules.designsystem.component
 
-import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,22 +20,20 @@ fun VideosList(
   videos: Videos,
   thumbnailHeight: Dp
 ) {
+  val isPortrait = orientation == ORIENTATION_PORTRAIT
   LazyColumn(
     state = listState,
     modifier = Modifier
       .testTag("popular_videos_list")
       .fillMaxSize()
-      .then(
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) Modifier
-        else Modifier.padding(horizontal = 16.dp)
-      )
+      .then(if (isPortrait) Modifier else Modifier.padding(horizontal = 16.dp))
   ) {
     items(
       items = videos.value,
       key = { it.id }
     ) { viewModel ->
-      when (orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> VideoItemPortrait(
+      when {
+        isPortrait -> VideoItemPortrait(
           viewModel = viewModel,
           thumbnailHeight = thumbnailHeight
         )

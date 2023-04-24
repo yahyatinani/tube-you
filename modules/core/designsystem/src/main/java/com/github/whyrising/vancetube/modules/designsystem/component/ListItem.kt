@@ -47,9 +47,9 @@ import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 @Composable
 fun ListItemPortrait(
   title: String,
+  modifier: Modifier = Modifier,
   thumbnail: String,
   info: AnnotatedString,
-  modifier: Modifier = Modifier,
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
   thumbnailHeight: Dp,
   thumbnailContent: @Composable (BoxScope.() -> Unit),
@@ -138,13 +138,11 @@ fun VideoItemPortrait(
     modifier = modifier.padding(top = 12.dp),
     videoInfoTextStyle = videoInfoTextStyle,
     thumbnailHeight = thumbnailHeight,
-    thumbnailContent = {
-      ThumbnailContent(viewModel)
-    },
+    thumbnailContent = { ThumbnailContent(viewModel) },
     channelAvatar = {
       ChannelAvatar(
         url = viewModel.uploaderAvatar,
-        modifier = Modifier.size(40.dp)
+        modifier = Modifier.size(MINI_AVATAR)
       )
       Spacer(modifier = Modifier.width(16.dp))
     }
@@ -168,7 +166,7 @@ fun VideoItemLandscapeCompact(
 
     ChannelAvatar(
       url = viewModel.uploaderAvatar,
-      modifier = Modifier.size(40.dp)
+      modifier = Modifier.size(MINI_AVATAR)
     )
   }
 }
@@ -217,7 +215,7 @@ fun ChannelItem(
         modifier = Modifier
           .padding(avatarPaddingValues)
           .padding(horizontal = 40.dp)
-          .size(AVATAR_SIZE)
+          .size(LARGE_AVATAR)
       )
     },
     headlineContent = {

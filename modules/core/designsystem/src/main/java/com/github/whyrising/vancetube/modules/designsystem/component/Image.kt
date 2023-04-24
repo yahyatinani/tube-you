@@ -60,14 +60,17 @@ fun Thumbnail(
     AsyncImage(
       model = url,
       contentDescription = "thumbnail",
-      modifier = modifier.fillMaxWidth().background(Color.DarkGray),
+      modifier = modifier
+        .fillMaxWidth()
+        .background(Color.DarkGray),
       contentScale = ContentScale.FillWidth
     )
     content()
   }
 }
 
-val AVATAR_SIZE = 72.dp
+val LARGE_AVATAR = 72.dp
+val MINI_AVATAR = 40.dp
 
 @Composable
 fun ChannelAvatar(url: String?, modifier: Modifier = Modifier) {

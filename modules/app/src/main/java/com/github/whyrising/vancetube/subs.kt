@@ -1,8 +1,6 @@
 package com.github.whyrising.vancetube
 
-import android.content.Context
-import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.Stable
+import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
@@ -66,11 +64,18 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
   )
 )
 
-@Immutable
-data class SearchBarUiState(
-  val query: String,
-  @Stable val suggestions: List<String> = l()
-)
+private fun formatSearch(
+  search: PersistentVector<SearchResult>,
+  resources: Any
+): PersistentVector<Any> = search.fold(v()) { acc, r ->
+  acc.conj(
+    when (r) {
+      is Video -> formatVideo(r, resources as Resources)
+      is Channel -> formatChannel(r)
+      is Playlist -> formatPlayList(r)
+    }
+  )
+}
 
 fun regAppSubs() {
   regSub<AppDb>(is_backstack_available) { db, _ ->
@@ -135,21 +140,10 @@ fun regAppSubs() {
     queryId = common.search_results,
     signalsFn = { subscribe(v(search_bar)) },
     initialValue = SearchVm()
-  ) { sb, _, (_, context) ->
-
+  ) { sb, _, (_, resources) ->
     when (val search = get<PersistentVector<SearchResult>>(sb, results)) {
       null -> SearchVm()
-      else -> {
-        val ret = search.fold(v<Any>()) { acc, r ->
-          val formatted = when (r) {
-            is Video -> formatVideo(r, context as Context)
-            is Channel -> formatChannel(r)
-            is Playlist -> formatPlayList(r)
-          }
-          acc.conj(formatted)
-        }
-        SearchVm(ret)
-      }
+      else -> SearchVm(formatSearch(search, resources))
     }
   }
 }

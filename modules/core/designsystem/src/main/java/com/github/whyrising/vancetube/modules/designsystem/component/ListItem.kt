@@ -266,10 +266,7 @@ fun PlayListPortrait(
 }
 
 @Composable
-fun PlayListLandscape(
-  viewModel: PlaylistVm,
-  thumbnailHeight: Dp
-) {
+fun PlayListLandscape(viewModel: PlaylistVm, thumbnailHeight: Dp) {
   Row(
     modifier = Modifier
       .testTag("video")

@@ -31,7 +31,7 @@ private fun NavGraphBuilder.homeCommon(
   content: @Composable (videos: Videos) -> Unit
 ) {
   composable(route = HOME_ROUTE) {
-    getRegHomeSubs(LocalContext.current)
+    getRegHomeSubs(LocalContext.current.resources)
     VideosPanel(
       panelVm = watch(v(home.view_model, stringResource(R.string.views_label))),
       onRefresh = { dispatch(v(home.refresh)) },

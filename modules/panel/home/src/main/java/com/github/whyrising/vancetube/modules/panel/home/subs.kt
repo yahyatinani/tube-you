@@ -1,6 +1,6 @@
 package com.github.whyrising.vancetube.modules.panel.home
 
-import android.content.Context
+import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
@@ -14,13 +14,11 @@ import com.github.whyrising.vancetube.modules.panel.common.formatVideos
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
 
-// -- Subs ---------------------------------------------------------------------
-
 /**
  * Call this lazy global property to initialise all [Home] page subscriptions.
  * @return [Unit]
  */
-fun getRegHomeSubs(context: Context) {
+fun getRegHomeSubs(resources: Resources) {
   regSub<AppDb>(home.db) { db, _ ->
     db[HOME_GRAPH_ROUTE]
   }
@@ -29,7 +27,7 @@ fun getRegHomeSubs(context: Context) {
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.db)) },
     initialValue = VideosPanelVm(isLoading = true),
-    computationFn = { homeDb, currentValue, (_, viewsLabel) ->
+    computationFn = { homeDb, currentValue, _ ->
       when (get<States>(homeDb?.get(home.state), 0)) {
         null, States.Loading -> VideosPanelVm(isLoading = true)
 
@@ -43,7 +41,7 @@ fun getRegHomeSubs(context: Context) {
           VideosPanelVm(
             showList = true,
             videos = Videos(
-              formatVideos(get(homeDb, popular_vids) ?: v(), context)
+              formatVideos(get(homeDb, popular_vids) ?: v(), resources)
             )
           )
         }

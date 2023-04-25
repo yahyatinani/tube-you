@@ -54,7 +54,7 @@ fun formatVideo(video: Video, resources: Resources): VideoViewModel {
         authorId = authorId,
         text1 = viewCount,
         text2 = resources.getString(R.string.views_label),
-        publishedText = video.uploadedDate!!
+        publishedText = video.uploadedDate
       )
     }
   }

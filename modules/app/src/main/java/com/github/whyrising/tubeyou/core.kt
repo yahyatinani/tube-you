@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube
+package com.github.whyrising.tubeyou
 
 import android.app.Application
 import android.os.Bundle
@@ -18,7 +18,7 @@ import com.github.whyrising.y.core.v
 
 // -- Application Implementation -----------------------------------------------
 
-class VanceApplication : Application() {
+class TyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
     regBounceFx()
 
     setContent {
-      VanceApp(windowSizeClass = calculateWindowSizeClass(this))
+      TyApp(windowSizeClass = calculateWindowSizeClass(this))
     }
   }
 

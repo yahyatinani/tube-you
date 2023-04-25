@@ -52,7 +52,7 @@ import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.y.core.get
 
 @Composable
-fun VanceNavigationItem(
+fun TyNavigationItem(
   selected: Boolean,
   icon: @Composable () -> Unit,
   modifier: Modifier = Modifier,
@@ -146,7 +146,7 @@ val BOTTOM_BAR_HEIGHT = 48.dp
 val BOTTOM_BAR_TOP_BORDER_THICKNESS = 1.dp
 
 @Composable
-fun VanceNavigationBarCompact(
+fun TyNavigationBarCompact(
   modifier: Modifier = Modifier,
   content: @Composable (Modifier) -> Unit
 ) {
@@ -162,7 +162,7 @@ fun VanceNavigationBarCompact(
 }
 
 @Composable
-fun VanceNavigationBarLarge(
+fun TyNavigationBarLarge(
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit
 ) = Layout(
@@ -203,7 +203,7 @@ fun VanceNavigationBarLarge(
 )
 
 @Composable
-fun BottomNavigationBar(
+fun TyBottomNavigationBar(
   navItems: Map<Any, Any>,
   isCompact: Boolean,
   colorScheme: ColorScheme,
@@ -220,7 +220,7 @@ fun BottomNavigationBar(
         val text = stringResource(get(navItem, common.label_text_id)!!)
         val selected: Boolean = get(navItem, common.is_selected)!!
         val lightGray = colorScheme.onSurface.copy(.12f)
-        VanceNavigationItem(
+        TyNavigationItem(
           selected = selected,
           icon = {
             val id = get<Any>(navItem, common.icon)!!
@@ -266,9 +266,9 @@ fun BottomNavigationBar(
         color = lightGray
       )
       if (isCompact) {
-        VanceNavigationBarCompact(content = content)
+        TyNavigationBarCompact(content = content)
       } else {
-        VanceNavigationBarLarge { content(Modifier) }
+        TyNavigationBarLarge { content(Modifier) }
       }
     }
   }

@@ -1,8 +1,9 @@
-package com.github.whyrising.vancetube
+package com.github.whyrising.tubeyou
 
 import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.recompose.subscribe
+import com.github.whyrising.vancetube.R
 import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTIONS_GRAPH_ROUTE

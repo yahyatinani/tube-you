@@ -37,7 +37,7 @@ fun isCompact(windowSizeClass: WindowSizeClass) =
     windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
 
 @Composable
-fun VanceTheme(
+fun TyTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
   isCompact: Boolean = true,
   content: @Composable () -> Unit

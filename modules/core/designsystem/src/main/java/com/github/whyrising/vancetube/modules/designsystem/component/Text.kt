@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.github.whyrising.vancetube.modules.designsystem.R
 import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
-import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
+import com.github.whyrising.vancetube.modules.designsystem.theme.TyTheme
 
 val roundedCornerShape = RoundedCornerShape(4.dp)
 
@@ -197,7 +197,7 @@ fun VideoItemInfo(
 @Preview(showBackground = true)
 @Composable
 fun VideoLengthTextPreview() {
-  VanceTheme {
+  TyTheme {
     VideoDurationText(duration = "2:23")
   }
 }
@@ -205,7 +205,7 @@ fun VideoLengthTextPreview() {
 @Preview(showBackground = true)
 @Composable
 fun LiveStreamTextPreview() {
-  VanceTheme {
+  TyTheme {
     LiveDurationText()
   }
 }
@@ -213,7 +213,7 @@ fun LiveStreamTextPreview() {
 @Preview(showBackground = true)
 @Composable
 fun ShortVideoTextPreview() {
-  VanceTheme {
+  TyTheme {
     ShortDurationText()
   }
 }
@@ -221,7 +221,7 @@ fun ShortVideoTextPreview() {
 @Preview(showBackground = true)
 @Composable
 fun VideoItemInfoPreview() {
-  VanceTheme {
+  TyTheme {
     VideoItemInfo(info = AnnotatedString("author سلاام . 2K"))
   }
 }

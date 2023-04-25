@@ -19,7 +19,7 @@ import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.designsystem.data.Videos
 import com.github.whyrising.vancetube.modules.designsystem.data.VideosPanelVm
 import com.github.whyrising.vancetube.modules.designsystem.theme.Blue300
-import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
+import com.github.whyrising.vancetube.modules.designsystem.theme.TyTheme
 import com.github.whyrising.y.core.v
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -102,7 +102,7 @@ private val designTimeData = v(
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-  VanceTheme {
+  TyTheme {
     VideosPanel(
       panelVm = VideosPanelVm(
         videos = Videos(designTimeData),

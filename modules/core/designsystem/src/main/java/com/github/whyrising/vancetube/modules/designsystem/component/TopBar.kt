@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun SearchBar(
+fun TySearchBar(
   searchQuery: String,
   onQueryChange: (String) -> Unit,
   onSearch: (String) -> Unit,

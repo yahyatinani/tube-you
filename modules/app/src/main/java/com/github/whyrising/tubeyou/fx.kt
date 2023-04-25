@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube
+package com.github.whyrising.tubeyou
 
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy

@@ -1,29 +1,20 @@
-package com.github.whyrising.vancetube
+package com.github.whyrising.tubeyou
 
-import android.content.res.Configuration
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Top
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,25 +24,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize.Companion.Zero
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -75,20 +60,20 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.search_back_p
 import com.github.whyrising.vancetube.modules.core.keywords.common.start_destination
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
-import com.github.whyrising.vancetube.modules.designsystem.component.BottomNavigationBar
-import com.github.whyrising.vancetube.modules.designsystem.component.SearchBar
-import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeightLandscape
-import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeightPortrait
-import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
+import com.github.whyrising.vancetube.modules.designsystem.component.TyBottomNavigationBar
+import com.github.whyrising.vancetube.modules.designsystem.component.TySearchBar
+import com.github.whyrising.vancetube.modules.designsystem.component.thumbnailHeight
+import com.github.whyrising.vancetube.modules.designsystem.theme.TyTheme
 import com.github.whyrising.vancetube.modules.designsystem.theme.isCompact
 import com.github.whyrising.vancetube.modules.panel.home.homeGraph
-import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.home.regHomeEvents
 import com.github.whyrising.vancetube.modules.panel.library.libraryGraph
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subsGraph
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import kotlinx.coroutines.CoroutineScope
+
+// -- Navigation ---------------------------------------------------------------
 
 private fun navGraphRoute(destination: NavDestination) =
   destination.hierarchy.toList().dropLast(1).last().route!!
@@ -116,39 +101,28 @@ private fun NavigationChangedListenerEffect(navController: NavHostController) {
   }
 }
 
+// -- Views --------------------------------------------------------------------
+
 @Composable
-private fun ProfileIcon(colorScheme: ColorScheme) {
-  Box(
-    modifier = Modifier
-      .background(
-        shape = CircleShape,
-        color = Color.Transparent
-      )
-      .clickable(role = Role.Image) { /*TODO*/ }
-      .padding(8.dp)
-  ) {
-    Box(
-      modifier = Modifier
-        .background(
-          shape = CircleShape,
-//                    color = Color(0xFFEB3F7A),
-          color = colorScheme.onBackground
-        )
-        .width(24.dp)
-        .height(24.dp)
-        .padding(3.dp),
-      contentAlignment = Center
-    ) {
-      Icon(
-        imageVector = Icons.Filled.Person,
-        modifier = Modifier,
-//                    .clip(CircleShape)
-//                    .size(20.dp),
-        contentDescription = "profile picture",
-        tint = colorScheme.background
-      )
+@OptIn(ExperimentalMaterial3Api::class)
+fun topAppBarScrollBehavior(
+  isCompactDisplay: Boolean,
+  topAppBarState: TopAppBarState,
+  searchQuery: String?
+) = when {
+  isCompactDisplay && searchQuery == null -> {
+    LaunchedEffect(Unit) {
+      regFx(expand_top_app_bar) {
+        topAppBarState.heightOffset = 0f
+      }
+      regEventFx(expand_top_app_bar) { _, _ ->
+        m(fx to v(v(expand_top_app_bar)))
+      }
     }
+    enterAlwaysScrollBehavior(topAppBarState)
   }
+
+  else -> pinnedScrollBehavior()
 }
 
 @OptIn(
@@ -157,7 +131,7 @@ private fun ProfileIcon(colorScheme: ColorScheme) {
   ExperimentalLayoutApi::class
 )
 @Composable
-fun VanceApp(
+fun TyApp(
   windowSizeClass: WindowSizeClass,
   navController: NavHostController = rememberNavController()
 ) {
@@ -181,33 +155,15 @@ fun VanceApp(
 
   val isCompactDisplay = isCompact(windowSizeClass)
 
-  VanceTheme(isCompact = isCompactDisplay) {
-    val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = when {
-      isCompactDisplay -> {
-        LaunchedEffect(Unit) {
-          regFx(expand_top_app_bar) {
-            topAppBarState.heightOffset = 0f
-          }
-          regEventFx(expand_top_app_bar) { _, _ ->
-            m(fx to v(v(expand_top_app_bar)))
-          }
-        }
-        enterAlwaysScrollBehavior(topAppBarState)
-      }
-
-      else -> pinnedScrollBehavior()
-    }
+  TyTheme(isCompact = isCompactDisplay) {
     val colorScheme = MaterialTheme.colorScheme
     val searchQuery = watch<String?>(v(searchBar.query))
+    val topBarState = rememberTopAppBarState()
+    val scrollBehavior =
+      topAppBarScrollBehavior(isCompactDisplay, topBarState, searchQuery)
     Scaffold(
       modifier = Modifier
-        .then(
-          // topBar scrolls in other tabs too if search was scrolled.
-          if (isCompactDisplay && searchQuery == null) {
-            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-          } else Modifier
-        )
+        .nestedScroll(scrollBehavior.nestedScrollConnection)
         .semantics {
           // Allows to use testTag() for UiAutomator resource-id.
           testTagsAsResourceId = true
@@ -215,7 +171,7 @@ fun VanceApp(
       topBar = {
         when {
           searchQuery != null -> {
-            SearchBar(
+            TySearchBar(
               searchQuery = searchQuery,
               onQueryChange = { dispatchSync(v(common.search_input, it)) },
               onSearch = { dispatch(v(common.search, it)) },
@@ -257,7 +213,13 @@ fun VanceApp(
                     contentDescription = "Search a video"
                   )
                 }
-                ProfileIcon(colorScheme)
+                IconButton(onClick = { /*TODO*/ }) {
+                  Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = "profile picture",
+                    tint = colorScheme.onSurface
+                  )
+                }
               },
               colors = topAppBarColors(
                 scrolledContainerColor = colorScheme.background
@@ -267,7 +229,7 @@ fun VanceApp(
         }
       },
       bottomBar = {
-        BottomNavigationBar(
+        TyBottomNavigationBar(
           navItems = watch(v(common.navigation_items)),
           isCompact = isCompactDisplay,
           colorScheme = colorScheme
@@ -276,17 +238,12 @@ fun VanceApp(
         }
       }
     ) {
-      BackHandler(
-        enabled = !watch<Boolean>(query = v(common.is_backstack_empty))
-      ) {
+      BackHandler(!watch<Boolean>(query = v(common.is_backstack_empty))) {
         dispatchSync(v(common.back_press))
       }
 
       val orientation = LocalConfiguration.current.orientation
-      val thumbnailHeight = when (orientation) {
-        ORIENTATION_PORTRAIT -> rememberThumbnailHeightPortrait()
-        else -> rememberThumbnailHeightLandscape()
-      }
+      val thumbnailHeight = thumbnailHeight(orientation)
       NavHost(
         navController = navController,
         startDestination = HOME_GRAPH_ROUTE,
@@ -301,24 +258,4 @@ fun VanceApp(
       }
     }
   }
-}
-
-// -- Previews -----------------------------------------------------------------
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-  regAppCofx(LocalContext.current)
-  regHomeCofx
-  regAppEvents()
-  regAppSubs()
-  dispatchSync(v(common.initialize))
-
-  VanceApp(windowSizeClass = WindowSizeClass.calculateFromSize(Zero))
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun AppDarkPreview() {
-  AppPreview()
 }

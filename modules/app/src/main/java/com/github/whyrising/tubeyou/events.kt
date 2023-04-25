@@ -1,4 +1,4 @@
-package com.github.whyrising.vancetube
+package com.github.whyrising.tubeyou
 
 import androidx.navigation.navOptions
 import com.github.whyrising.recompose.cofx.injectCofx

@@ -1,6 +1,7 @@
 package com.github.whyrising.vancetube.modules.designsystem.component
 
 import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -58,6 +59,12 @@ fun rememberThumbnailHeightLandscape(
   with(density) {
     ((screenWidthPx / 4.6f) * THUMBNAIL_HEIGHT / THUMBNAIL_WIDTH).toDp()
   }
+}
+
+@Composable
+fun thumbnailHeight(orientation: Int) = when (orientation) {
+  ORIENTATION_PORTRAIT -> rememberThumbnailHeightPortrait()
+  else -> rememberThumbnailHeightLandscape()
 }
 
 @Composable

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.whyrising.vancetube.modules.designsystem.R
@@ -41,12 +42,13 @@ import com.github.whyrising.vancetube.modules.designsystem.data.PlaylistVm
 import com.github.whyrising.vancetube.modules.designsystem.data.VideoViewModel
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
 
-private val roundedCornerShape = RoundedCornerShape(4.dp)
+val roundedCornerShape = RoundedCornerShape(4.dp)
 
 @Composable
-private fun DurationText(
+fun DurationText(
   text: String,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  fontSize: TextUnit = 12.sp
 ) {
   Text(
     text = text,
@@ -54,14 +56,14 @@ private fun DurationText(
     textAlign = TextAlign.Center,
     style = MaterialTheme.typography.bodySmall.copy(
       color = Color.White,
-      fontSize = 12.sp,
+      fontSize = fontSize,
       fontWeight = FontWeight.Medium,
       platformStyle = PlatformTextStyle(includeFontPadding = false)
     )
   )
 }
 
-private fun Modifier.bgModifier(backgroundColor: Color) = this
+fun Modifier.bgModifier(backgroundColor: Color): Modifier = this
   .padding(bottom = 8.dp, end = 8.dp)
   .background(color = backgroundColor, shape = roundedCornerShape)
   .padding(horizontal = 4.dp)
@@ -108,10 +110,7 @@ fun ShortDurationText() {
 }
 
 @Composable
-fun VideoDurationText(
-  duration: String,
-  modifier: Modifier = Modifier
-) {
+fun VideoDurationText(duration: String, modifier: Modifier = Modifier) {
   DurationText(
     text = duration,
     modifier = modifier.bgModifier(

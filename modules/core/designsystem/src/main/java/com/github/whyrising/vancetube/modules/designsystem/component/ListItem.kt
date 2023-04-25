@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -140,10 +139,10 @@ fun VideoItemPortrait(
     thumbnailHeight = thumbnailHeight,
     thumbnailContent = { ThumbnailContent(viewModel) },
     channelAvatar = {
-      ChannelAvatar(
-        url = viewModel.uploaderAvatar,
-        modifier = Modifier.size(MINI_AVATAR)
-      )
+      when {
+        viewModel.isLiveStream -> ChannelAvatarLive(viewModel.uploaderAvatar)
+        else -> ChannelAvatar(url = viewModel.uploaderAvatar)
+      }
       Spacer(modifier = Modifier.width(16.dp))
     }
   )
@@ -164,10 +163,10 @@ fun VideoItemLandscapeCompact(
   ) {
     Spacer(modifier = Modifier.height(12.dp))
 
-    ChannelAvatar(
-      url = viewModel.uploaderAvatar,
-      modifier = Modifier.size(MINI_AVATAR)
-    )
+    when {
+      viewModel.isLiveStream -> ChannelAvatarLive(viewModel.uploaderAvatar)
+      else -> ChannelAvatar(url = viewModel.uploaderAvatar)
+    }
   }
 }
 
@@ -214,8 +213,8 @@ fun ChannelItem(
         url = vm.avatar,
         modifier = Modifier
           .padding(avatarPaddingValues)
-          .padding(horizontal = 40.dp)
-          .size(LARGE_AVATAR)
+          .padding(horizontal = 40.dp),
+        size = LARGE_AVATAR
       )
     },
     headlineContent = {

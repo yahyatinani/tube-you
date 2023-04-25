@@ -20,13 +20,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ColorScheme
@@ -37,8 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -56,8 +49,6 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -96,9 +87,8 @@ import com.github.whyrising.vancetube.modules.core.keywords.common.search_back_p
 import com.github.whyrising.vancetube.modules.core.keywords.common.start_destination
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
-import com.github.whyrising.vancetube.modules.core.keywords.searchBar.suggestions
 import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
-import com.github.whyrising.vancetube.modules.designsystem.component.SearchSuggestionItem
+import com.github.whyrising.vancetube.modules.designsystem.component.SearchBar
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
 import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
@@ -239,110 +229,57 @@ fun VanceApp(
           testTagsAsResourceId = true
         },
       topBar = {
-        if (searchQuery != null) {
-          val focusRequester = FocusRequester()
-          val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
-          val isActive = watch<Boolean>(query = v(common.is_search_bar_active))
-          SearchBar(
-            query = searchQuery,
-            modifier = Modifier.focusRequester(focusRequester),
-            active = isActive,
-            tonalElevation = 0.dp,
-            shape = RoundedCornerShape(30.dp),
-            colors = SearchBarDefaults.colors(
-              inputFieldColors = SearchBarDefaults.inputFieldColors(
-                focusedPlaceholderColor = placeHolderColor,
-                unfocusedPlaceholderColor = placeHolderColor
-              )
-            ),
-            placeholder = { Text(text = "Search YouTube") },
-            leadingIcon = {
-              IconButton(
-                onClick = {
-                  dispatchSync(v(search_back_press))
-                }
-              ) {
-                Icon(
-                  imageVector = Icons.Filled.ArrowBack,
-                  modifier = Modifier,
-                  contentDescription = ""
-                )
-              }
-            },
-            trailingIcon = {
-              IconButton(
-                onClick = {
-                  dispatchSync(v(common.clear_search_input))
-                }
-              ) {
-                Icon(
-                  imageVector = Icons.Filled.Close,
-                  modifier = Modifier,
-                  contentDescription = ""
-                )
-              }
-            },
-            onQueryChange = {
-              dispatchSync(v(common.search_input, it))
-            },
-            onActiveChange = {
-              dispatch(v(common.is_search_bar_active, it))
-            },
-            onSearch = {
-              dispatch(v(common.search, it))
+        when {
+          searchQuery != null -> {
+            SearchBar(
+              searchQuery = searchQuery,
+              onQueryChange = { dispatchSync(v(common.search_input, it)) },
+              onSearch = { dispatch(v(common.search, it)) },
+              isActive = watch(query = v(common.is_search_bar_active)),
+              onActiveChange = { dispatch(v(common.is_search_bar_active, it)) },
+              clearInput = { dispatchSync(v(common.clear_search_input)) },
+              backPress = { dispatchSync(v(search_back_press)) },
+              suggestions = watch(query = v(searchBar.suggestions)),
+              colorScheme = colorScheme
+            ) {
+              // FIXME: Move cursor to the end of text.
+              dispatch(v(common.search_input, it))
             }
-          ) {
-            val suggestions = watch<List<String>>(query = v(suggestions))
-            LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
-              itemsIndexed(
-                key = { i, _ -> i },
-                items = suggestions
-              ) { _, str ->
-                SearchSuggestionItem(text = str) {
-                  // FIXME: Move cursor to the end of text.
-                  dispatch(v(common.search_input, str))
-                }
-              }
+
+            BackHandler {
+              dispatchSync(v(search_back_press))
             }
           }
 
-          LaunchedEffect(isActive) {
-            if (isActive) {
-              focusRequester.requestFocus()
-            }
-          }
-
-          BackHandler {
-            dispatchSync(v(search_back_press))
-          }
-        } else {
-          TopAppBar(
-            modifier = Modifier
-              .windowInsetsPadding(
-                insets = WindowInsets.safeDrawing.only(Top + Horizontal)
-              )
-              .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
-            title = {},
-            scrollBehavior = scrollBehavior,
-            navigationIcon = {},
-            actions = {
-              IconButton(
-                onClick = {
-                  dispatch(v(common.show_search_bar))
-                }
-              ) {
-                Icon(
-                  imageVector = Icons.Outlined.Search,
-                  modifier = Modifier.size(26.dp),
-                  contentDescription = "Search a video"
+          else -> {
+            TopAppBar(
+              modifier = Modifier
+                .windowInsetsPadding(
+                  insets = WindowInsets.safeDrawing.only(Top + Horizontal)
                 )
-              }
-              ProfileIcon(colorScheme)
-            },
-            colors = topAppBarColors(
-              scrolledContainerColor = colorScheme.background
+                .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
+              title = {},
+              scrollBehavior = scrollBehavior,
+              navigationIcon = {},
+              actions = {
+                IconButton(
+                  onClick = {
+                    dispatch(v(common.show_search_bar))
+                  }
+                ) {
+                  Icon(
+                    imageVector = Icons.Outlined.Search,
+                    modifier = Modifier.size(26.dp),
+                    contentDescription = "Search a video"
+                  )
+                }
+                ProfileIcon(colorScheme)
+              },
+              colors = topAppBarColors(
+                scrolledContainerColor = colorScheme.background
+              )
             )
-          )
+          }
         }
       },
       bottomBar = {

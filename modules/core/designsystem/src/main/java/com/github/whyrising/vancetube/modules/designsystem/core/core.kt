@@ -29,13 +29,13 @@ fun formatVideoInfo(
   text2: String,
   publishedText: String? = null
 ): AnnotatedString = buildAnnotatedString {
-  append("$author$VIDEO_INFO_DIVIDER$text1 $text2")
+  append("\u200F$author\u200E$VIDEO_INFO_DIVIDER$text1 $text2")
 
   if (publishedText != null) {
     append("$VIDEO_INFO_DIVIDER$publishedText")
   }
 
-  val endIndex = author.length
+  val endIndex = author.length + 1
   addStyle(
     style = SpanStyle(color = Blue300),
     start = 0,

@@ -222,6 +222,6 @@ fun ShortVideoTextPreview() {
 @Composable
 fun VideoItemInfoPreview() {
   VanceTheme {
-    VideoItemInfo(info = AnnotatedString("author . 2K"))
+    VideoItemInfo(info = AnnotatedString("author سلاام . 2K"))
   }
 }

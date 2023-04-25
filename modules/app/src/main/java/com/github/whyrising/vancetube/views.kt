@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Top
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -25,15 +24,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
@@ -46,16 +41,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -80,18 +71,12 @@ import com.github.whyrising.vancetube.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.common
 import com.github.whyrising.vancetube.modules.core.keywords.common.active_navigation_item
 import com.github.whyrising.vancetube.modules.core.keywords.common.expand_top_app_bar
-import com.github.whyrising.vancetube.modules.core.keywords.common.icon
-import com.github.whyrising.vancetube.modules.core.keywords.common.is_selected
-import com.github.whyrising.vancetube.modules.core.keywords.common.label_text_id
 import com.github.whyrising.vancetube.modules.core.keywords.common.search_back_press
 import com.github.whyrising.vancetube.modules.core.keywords.common.start_destination
 import com.github.whyrising.vancetube.modules.core.keywords.home
 import com.github.whyrising.vancetube.modules.core.keywords.searchBar
-import com.github.whyrising.vancetube.modules.designsystem.component.BOTTOM_BAR_TOP_BORDER_THICKNESS
+import com.github.whyrising.vancetube.modules.designsystem.component.BottomNavigationBar
 import com.github.whyrising.vancetube.modules.designsystem.component.SearchBar
-import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarCompact
-import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationBarLarge
-import com.github.whyrising.vancetube.modules.designsystem.component.VanceNavigationItem
 import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeightLandscape
 import com.github.whyrising.vancetube.modules.designsystem.component.rememberThumbnailHeightPortrait
 import com.github.whyrising.vancetube.modules.designsystem.theme.VanceTheme
@@ -101,7 +86,6 @@ import com.github.whyrising.vancetube.modules.panel.home.regHomeCofx
 import com.github.whyrising.vancetube.modules.panel.home.regHomeEvents
 import com.github.whyrising.vancetube.modules.panel.library.libraryGraph
 import com.github.whyrising.vancetube.modules.panel.subscriptions.subsGraph
-import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import kotlinx.coroutines.CoroutineScope
@@ -283,72 +267,12 @@ fun VanceApp(
         }
       },
       bottomBar = {
-        Surface(
-          modifier = Modifier.windowInsetsPadding(
-            NavigationBarDefaults.windowInsets
-          )
+        BottomNavigationBar(
+          navItems = watch(v(common.navigation_items)),
+          isCompact = isCompactDisplay,
+          colorScheme = colorScheme
         ) {
-          Box(contentAlignment = TopCenter) {
-            val lightGray = colorScheme.onSurface.copy(.12f)
-            Divider(
-              modifier = Modifier.fillMaxWidth(),
-              thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS,
-              color = lightGray
-            )
-            val content: @Composable (Modifier) -> Unit = { modifier ->
-              watch<Map<Any, Any>>(v(common.navigation_items))
-                .forEach { (route, navItem) ->
-                  val contentDescription = stringResource(
-                    get(navItem, common.icon_content_desc_text_id)!!
-                  )
-                  val text = stringResource(get(navItem, label_text_id)!!)
-                  val selected: Boolean = get(navItem, is_selected)!!
-                  VanceNavigationItem(
-                    selected = selected,
-                    modifier = modifier,
-                    icon = {
-                      val id = get<Any>(navItem, icon)!!
-
-                      if (id is Int) {
-                        Icon(
-                          painter = painterResource(id),
-                          contentDescription = contentDescription,
-                          tint = colorScheme.onBackground,
-                          modifier = Modifier.then(
-                            if (selected) Modifier.size(32.dp) else Modifier
-                          )
-                        )
-                      } else if (id is ImageVector) {
-                        Icon(
-                          imageVector = id,
-                          contentDescription = contentDescription,
-                          tint = colorScheme.onBackground,
-                          modifier = Modifier.then(
-                            if (selected) Modifier.size(32.dp) else Modifier
-                          )
-                        )
-                      }
-                    },
-                    label = {
-                      val t = MaterialTheme.typography
-                      Text(
-                        text = text,
-                        style = if (selected) t.labelMedium else t.labelSmall
-                      )
-                    },
-                    onPressColor = lightGray
-                  ) {
-                    dispatch(v(common.on_click_nav_item, route))
-                  }
-                }
-            }
-
-            if (isCompact(windowSizeClass = windowSizeClass)) {
-              VanceNavigationBarCompact(content = content)
-            } else {
-              VanceNavigationBarLarge { content(Modifier) }
-            }
-          }
+          dispatch(v(common.on_click_nav_item, it))
         }
       }
     ) {

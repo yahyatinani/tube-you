@@ -23,6 +23,9 @@ class TyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
+    regHttpKtor()
+    regBounceFx()
+
     regAppCofx(this)
     regAppEvents()
     regAppSubs()
@@ -48,9 +51,6 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     WindowCompat.setDecorFitsSystemWindows(window, false)
-
-    regHttpKtor()
-    regBounceFx()
 
     setContent {
       TyApp(windowSizeClass = calculateWindowSizeClass(this))

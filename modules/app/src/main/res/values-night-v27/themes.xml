@@ -2,7 +2,7 @@
 
 <resources>
 
-  <style name="PlatformAdjusted.Theme.Vance" parent="NightAdjusted.Theme.Vance">
+  <style name="PlatformAdjusted.Theme.Ty" parent="NightAdjusted.Theme.Ty">
     <item name="android:statusBarColor">@android:color/transparent</item>
     <item name="android:navigationBarColor">@android:color/transparent</item>
   </style>
@@ -13,7 +13,7 @@
     <item name="android:windowLightNavigationBar">false</item>
   </style>
 
-  <style name="NightAdjusted.Theme.Vance" parent="android:Theme.Material.NoActionBar">
+  <style name="NightAdjusted.Theme.Ty" parent="android:Theme.Material.NoActionBar">
     <item name="android:windowLightStatusBar">false</item>
     <item name="android:windowLightNavigationBar">false</item>
   </style>

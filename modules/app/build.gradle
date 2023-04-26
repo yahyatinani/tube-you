@@ -1,5 +1,5 @@
 plugins {
-  id 'vancetube.android-app-conventions'
+  id 'tubeyou.android-app-conventions'
 }
 
 dependencies {

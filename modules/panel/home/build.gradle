@@ -1,7 +1,7 @@
-import static com.github.whyrising.vancetube.Build.APP_ID
+import static com.github.yahyatinani.tubeyou.Build.APP_ID
 
 plugins {
-  id 'vancetube.android-lib-conventions'
+  id 'tubeyou.android-lib-conventions'
   alias deps.plugins.serialization
 }
 

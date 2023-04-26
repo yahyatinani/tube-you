@@ -2,7 +2,7 @@
 
 <resources>
 
-  <style name="PlatformAdjusted.Theme.Vance" parent="NightAdjusted.Theme.Vance">
+  <style name="PlatformAdjusted.Theme.Ty" parent="NightAdjusted.Theme.Ty">
     <item name="android:statusBarColor">@android:color/transparent</item>
   </style>
 </resources>

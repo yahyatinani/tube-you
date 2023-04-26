@@ -14,7 +14,8 @@ val defaultDb = m<Any, Any>(
   common.api_url to "https://pipedapi.palveluntarjoaja.eu",
   common.is_search_bar_active to true,
   common.is_search_bar_visible to false,
-  common.is_backstack_empty to true
+  common.is_backstack_empty to true,
+  common.active_navigation_item to HOME_GRAPH_ROUTE
 )
 
 // -- Cofx ---------------------------------------------------------------------

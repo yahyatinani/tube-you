@@ -8,6 +8,7 @@ import com.github.whyrising.y.core.get
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.panel.common.States
 import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
+import kotlinx.coroutines.CoroutineScope
 
 // -- Spec ---------------------------------------------------------------------
 
@@ -21,7 +22,13 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
 
 // -- Cofx Registrations -------------------------------------------------------
 
-val regHomeCofx = regCofx(home.fsm) { cofx ->
-  val (eventId) = cofx[coeffects.originalEvent] as Event
-  cofx.assoc(recompose.db, updateToNextState(appDbBy(cofx), eventId))
+fun getRegHomeCofx(scope: CoroutineScope) {
+  regCofx(home.fsm_next_state) { cofx ->
+    val e = cofx[coeffects.originalEvent] as Event
+    cofx.assoc(recompose.db, handleNextState(appDbBy(cofx), e))
+  }
+
+  regCofx(home.coroutine_scope) { cofx ->
+    cofx.assoc(home.coroutine_scope, scope)
+  }
 }

@@ -16,7 +16,6 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.regBounceFx
 import com.github.yahyatinani.tubeyou.modules.panel.common.regHttpKtor
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonEvents
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonSubs
-import com.github.yahyatinani.tubeyou.modules.panel.home.regHomeCofx
 
 // -- Application Implementation -----------------------------------------------
 
@@ -25,7 +24,6 @@ class TyApplication : Application() {
     super.onCreate()
 
     regAppCofx(this)
-    regHomeCofx
     regAppEvents()
     regAppSubs()
     regCommonEvents()

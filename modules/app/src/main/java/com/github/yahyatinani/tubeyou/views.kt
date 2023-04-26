@@ -24,13 +24,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -60,7 +60,6 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_naviga
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.expand_top_app_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_back_press
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.start_destination
-import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyBottomNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
@@ -68,10 +67,8 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.thumbnailHe
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
 import com.github.yahyatinani.tubeyou.modules.panel.home.homeGraph
-import com.github.yahyatinani.tubeyou.modules.panel.home.regHomeEvents
 import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
 import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
-import kotlinx.coroutines.CoroutineScope
 
 // -- Navigation ---------------------------------------------------------------
 
@@ -109,7 +106,7 @@ fun topAppBarScrollBehavior(
   isCompactDisplay: Boolean,
   topAppBarState: TopAppBarState,
   searchQuery: String?
-) = when {
+): TopAppBarScrollBehavior = when {
   isCompactDisplay && searchQuery == null -> {
     LaunchedEffect(Unit) {
       regFx(expand_top_app_bar) {
@@ -137,20 +134,14 @@ fun TyApp(
 ) {
   NavigationChangedListenerEffect(navController)
 
-  val scope: CoroutineScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
     regAppFx(navController)
-    regCofx(home.coroutine_scope) { cofx ->
-      cofx.assoc(home.coroutine_scope, scope)
-    }
     regCofx(start_destination) { cofx ->
       cofx.assoc(
         start_destination,
         navController.graph.findStartDestination().id
       )
     }
-    regHomeEvents()
-    dispatch(v(home.initialize))
   }
 
   val isCompactSize = isCompact(windowSizeClass)

@@ -3,6 +3,8 @@ package com.github.yahyatinani.tubeyou.modules.panel.home
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavGraphBuilder
@@ -19,14 +21,24 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosList
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosPanel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.searchPanel
+import kotlinx.coroutines.CoroutineScope
 
-// -- navigation ---------------------------------------------------------------
+@Composable
+private fun InitHome() {
+  getRegHomeSubs()
+  val scope: CoroutineScope = rememberCoroutineScope()
+  LaunchedEffect(Unit) {
+    getRegHomeCofx(scope)
+    regHomeEvents()
+    dispatch(v(home.initialize))
+  }
+}
 
 private fun NavGraphBuilder.homeCommon(
   content: @Composable (videos: Videos) -> Unit
 ) {
-  getRegHomeSubs()
   composable(route = HOME_ROUTE) {
+    InitHome()
     VideosPanel(
       panelVm = watch(v(home.view_model, LocalContext.current.resources)),
       onRefresh = { dispatch(v(home.refresh)) },

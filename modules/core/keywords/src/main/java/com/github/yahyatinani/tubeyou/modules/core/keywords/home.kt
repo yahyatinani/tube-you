@@ -4,16 +4,18 @@ package com.github.yahyatinani.tubeyou.modules.core.keywords
 enum class home {
   state,
   view_model,
-  refresh,
   load,
   go_top_list,
   popular_vids,
   error,
+  fsm_next_state,
+  coroutine_scope,
+  db,
+
+  // FSM events
   initialize,
   loading_is_done,
-  fsm,
-  coroutine_scope,
-  db;
+  refresh;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

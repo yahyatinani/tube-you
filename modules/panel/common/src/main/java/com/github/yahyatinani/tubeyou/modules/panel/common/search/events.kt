@@ -52,12 +52,10 @@ fun regCommonEvents() {
   ) { cofx, (_, searchQuery) ->
     val sq = (searchQuery as String).replace(" ", "%20")
     val appDb = appDbBy(cofx)
-    val suggestionsEndpoint =
-      "${appDb[common.api_url]}/suggestions?query=$sq"
+    val suggestionsEndpoint = "${appDb[common.api_url]}/suggestions?query=$sq"
 
-    m<Any, Any>().assoc(
-      fx,
-      v(
+    m<Any, Any>(
+      fx to v(
         v(
           ktor.http_fx,
           m(

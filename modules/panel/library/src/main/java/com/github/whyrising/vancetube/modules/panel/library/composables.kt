@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.LIBRARY_ROUTE
-import com.github.whyrising.vancetube.modules.panel.common.searchResults
+import com.github.whyrising.vancetube.modules.panel.common.searchPanel
 
 fun NavGraphBuilder.library(orientation: Int) {
   composable(
@@ -34,7 +34,7 @@ fun NavGraphBuilder.libraryGraph(
     if (isCompactDisplay) library(orientation = orientation)
     else library(orientation = orientation)
 
-    searchResults(
+    searchPanel(
       route = LIBRARY_GRAPH_ROUTE,
       orientation = orientation,
       thumbnailHeight = thumbnailHeight

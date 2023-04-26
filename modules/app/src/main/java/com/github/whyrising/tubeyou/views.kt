@@ -153,14 +153,14 @@ fun TyApp(
     dispatch(v(home.initialize))
   }
 
-  val isCompactDisplay = isCompact(windowSizeClass)
+  val isCompactSize = isCompact(windowSizeClass)
 
-  TyTheme(isCompact = isCompactDisplay) {
+  TyTheme(isCompact = isCompactSize) {
     val colorScheme = MaterialTheme.colorScheme
     val searchQuery = watch<String?>(v(searchBar.query))
     val topBarState = rememberTopAppBarState()
     val scrollBehavior =
-      topAppBarScrollBehavior(isCompactDisplay, topBarState, searchQuery)
+      topAppBarScrollBehavior(isCompactSize, topBarState, searchQuery)
     Scaffold(
       modifier = Modifier
         .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -197,7 +197,7 @@ fun TyApp(
                 .windowInsetsPadding(
                   insets = WindowInsets.safeDrawing.only(Top + Horizontal)
                 )
-                .padding(end = if (isCompactDisplay) 4.dp else 16.dp),
+                .padding(end = if (isCompactSize) 4.dp else 16.dp),
               title = {},
               scrollBehavior = scrollBehavior,
               navigationIcon = {},
@@ -231,7 +231,7 @@ fun TyApp(
       bottomBar = {
         TyBottomNavigationBar(
           navItems = watch(v(common.navigation_items)),
-          isCompact = isCompactDisplay,
+          isCompact = isCompactSize,
           colorScheme = colorScheme
         ) {
           dispatch(v(common.on_click_nav_item, it))
@@ -252,9 +252,9 @@ fun TyApp(
           .padding(it)
           .consumeWindowInsets(it)
       ) {
-        homeGraph(isCompactDisplay, orientation, thumbnailHeight)
-        subsGraph(isCompactDisplay, orientation, thumbnailHeight)
-        libraryGraph(isCompactDisplay, orientation, thumbnailHeight)
+        homeGraph(isCompactSize, orientation, thumbnailHeight)
+        subsGraph(isCompactSize, orientation, thumbnailHeight)
+        libraryGraph(isCompactSize, orientation, thumbnailHeight)
       }
     }
   }

@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTIONS_GRAPH_ROUTE
 import com.github.whyrising.vancetube.modules.core.keywords.SUBSCRIPTIONS_ROUTE
-import com.github.whyrising.vancetube.modules.panel.common.searchResults
+import com.github.whyrising.vancetube.modules.panel.common.searchPanel
 
 fun NavGraphBuilder.subscriptions(orientation: Int) {
   composable(route = SUBSCRIPTIONS_ROUTE) {
@@ -32,7 +32,7 @@ fun NavGraphBuilder.subsGraph(
     if (isCompactDisplay) subscriptions(orientation = orientation)
     else subscriptions(orientation = orientation)
 
-    searchResults(
+    searchPanel(
       route = SUBSCRIPTIONS_GRAPH_ROUTE,
       orientation = orientation,
       thumbnailHeight = thumbnailHeight

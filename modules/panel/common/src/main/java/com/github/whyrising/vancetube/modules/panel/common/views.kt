@@ -33,7 +33,7 @@ import com.github.whyrising.y.core.v
 
 const val SEARCH_ROUTE = "search_results"
 
-fun NavGraphBuilder.searchResults(
+fun NavGraphBuilder.searchPanel(
   route: String,
   orientation: Int,
   thumbnailHeight: Dp

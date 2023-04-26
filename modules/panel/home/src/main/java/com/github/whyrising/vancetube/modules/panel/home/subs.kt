@@ -14,11 +14,7 @@ import com.github.whyrising.vancetube.modules.panel.common.formatVideos
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
 
-/**
- * Call this lazy global property to initialise all [Home] page subscriptions.
- * @return [Unit]
- */
-fun getRegHomeSubs(resources: Resources) {
+fun getRegHomeSubs() {
   regSub<AppDb>(home.db) { db, _ ->
     db[HOME_GRAPH_ROUTE]
   }
@@ -26,28 +22,30 @@ fun getRegHomeSubs(resources: Resources) {
   regSub<AppDb?, VideosPanelVm>(
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.db)) },
-    initialValue = VideosPanelVm(isLoading = true),
-    computationFn = { homeDb, currentValue, _ ->
-      when (get<States>(homeDb?.get(home.state), 0)) {
-        null, States.Loading -> VideosPanelVm(isLoading = true)
+    initialValue = VideosPanelVm(isLoading = true)
+  ) { homeDb, currentValue, (_, resources) ->
+    when (get<States>(homeDb?.get(home.state), 0)) {
+      null, States.Loading -> VideosPanelVm(isLoading = true)
 
-        States.Refreshing -> VideosPanelVm(
-          isRefreshing = true,
+      States.Refreshing -> VideosPanelVm(
+        isRefreshing = true,
+        showList = true,
+        videos = currentValue.videos
+      )
+
+      States.Loaded -> {
+        VideosPanelVm(
           showList = true,
-          videos = currentValue.videos
-        )
-
-        States.Loaded -> {
-          VideosPanelVm(
-            showList = true,
-            videos = Videos(
-              formatVideos(get(homeDb, popular_vids) ?: v(), resources)
+          videos = Videos(
+            formatVideos(
+              videoDataList = get(homeDb, popular_vids) ?: v(),
+              resources = resources as Resources
             )
           )
-        }
-
-        States.Failed -> VideosPanelVm(error = get(homeDb, home.error)!!)
+        )
       }
+
+      States.Failed -> VideosPanelVm(error = get(homeDb, home.error)!!)
     }
-  )
+  }
 }

@@ -10,6 +10,9 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatViews
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.ChannelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PlaylistVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Channel
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Playlist
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 

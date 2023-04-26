@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.github.yahyatinani.tubeyou.modules.core.keywords.SUBSCRIPTIONS_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.SUBSCRIPTIONS_ROUTE
-import com.github.yahyatinani.tubeyou.modules.panel.common.searchPanel
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.searchPanel
 
 fun NavGraphBuilder.subscriptions(orientation: Int) {
   composable(route = SUBSCRIPTIONS_ROUTE) {

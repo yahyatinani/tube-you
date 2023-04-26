@@ -10,6 +10,7 @@ import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.m
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.panel.common.ktor.response_type_info
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.searchModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpRequestTimeoutException
@@ -39,10 +40,7 @@ val client = HttpClient(Android) {
     logger = Logger.DEFAULT
     level = LogLevel.ALL
     filter { request ->
-      request.url.host.contains("invidious.tiekoetter.com") ||
-        request.url.host.contains("invidious.namazso.eu") ||
-        request.url.host.contains("y.com.sb")
-      request.url.host.contains("youtube.076.ne.jp")
+      request.url.host.contains("pipedapi.palveluntarjoaja.eu")
     }
   }
   install(HttpTimeout)

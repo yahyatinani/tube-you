@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.github.yahyatinani.tubeyou.modules.core.keywords.LIBRARY_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.LIBRARY_ROUTE
-import com.github.yahyatinani.tubeyou.modules.panel.common.searchPanel
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.searchPanel
 
 fun NavGraphBuilder.library(orientation: Int) {
   composable(

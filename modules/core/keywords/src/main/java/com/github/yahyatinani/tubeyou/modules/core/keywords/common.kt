@@ -4,7 +4,6 @@ package com.github.yahyatinani.tubeyou.modules.core.keywords
 enum class common {
   initialize,
   navigate_to,
-  set_backstack_status,
   is_backstack_available,
   api_url,
   navigation_items,

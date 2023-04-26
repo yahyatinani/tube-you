@@ -18,7 +18,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosGrid
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosList
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosPanel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
-import com.github.yahyatinani.tubeyou.modules.panel.common.searchPanel
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.searchPanel
 
 // -- navigation ---------------------------------------------------------------
 

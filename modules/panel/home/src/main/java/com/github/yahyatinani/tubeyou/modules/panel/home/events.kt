@@ -27,11 +27,11 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.States.Failed
 import com.github.yahyatinani.tubeyou.modules.panel.common.States.Loaded
 import com.github.yahyatinani.tubeyou.modules.panel.common.States.Loading
 import com.github.yahyatinani.tubeyou.modules.panel.common.States.Refreshing
-import com.github.yahyatinani.tubeyou.modules.panel.common.Video
 import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
 import com.github.yahyatinani.tubeyou.modules.panel.common.ktor
 import com.github.yahyatinani.tubeyou.modules.panel.common.letIf
 import com.github.yahyatinani.tubeyou.modules.panel.common.nextState
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
 import io.ktor.http.HttpMethod
 import io.ktor.util.reflect.typeInfo
 

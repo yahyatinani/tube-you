@@ -14,6 +14,8 @@ import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.panel.common.regBounceFx
 import com.github.yahyatinani.tubeyou.modules.panel.common.regHttpKtor
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonEvents
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonSubs
 import com.github.yahyatinani.tubeyou.modules.panel.home.regHomeCofx
 
 // -- Application Implementation -----------------------------------------------
@@ -26,6 +28,8 @@ class TyApplication : Application() {
     regHomeCofx
     regAppEvents()
     regAppSubs()
+    regCommonEvents()
+    regCommonSubs()
 
     dispatchSync(v(common.initialize))
 

@@ -6,8 +6,6 @@ enum class home {
   view_model,
   load,
   go_top_list,
-  popular_vids,
-  error,
   fsm_next_state,
   coroutine_scope,
   db,
@@ -15,7 +13,8 @@ enum class home {
   // FSM events
   initialize,
   loading_is_done,
-  refresh;
+  refresh,
+  error;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 
 @Composable
@@ -29,7 +30,7 @@ fun VideosList(
       .then(if (isPortrait) Modifier else Modifier.padding(horizontal = 16.dp))
   ) {
     items(
-      items = videos.value,
+      items = videos.value as List<VideoViewModel>,
       key = { it.id }
     ) { viewModel ->
       when {

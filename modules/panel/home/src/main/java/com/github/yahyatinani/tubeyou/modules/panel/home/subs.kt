@@ -8,8 +8,8 @@ import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home.popular_vids
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
-import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideosPanelVm
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
 import com.github.yahyatinani.tubeyou.modules.panel.common.States
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideos
@@ -19,33 +19,26 @@ fun getRegHomeSubs() {
     db[HOME_GRAPH_ROUTE]
   }
 
-  regSub<AppDb?, VideosPanelVm>(
+  regSub<AppDb?, PanelVm>(
     queryId = home.view_model,
     signalsFn = { subscribe(v(home.db)) },
-    initialValue = VideosPanelVm(isLoading = true)
+    initialValue = PanelVm.Loading
   ) { homeDb, currentValue, (_, resources) ->
-    when (get<States>(homeDb?.get(home.state), 0)) {
-      null, States.Loading -> VideosPanelVm(isLoading = true)
+    when (get<States>(homeDb, home.state)) {
+      null, States.Loading -> PanelVm.Loading
 
-      States.Refreshing -> VideosPanelVm(
-        isRefreshing = true,
-        showList = true,
-        videos = currentValue.videos
-      )
+      States.Refreshing -> PanelVm.Refreshing(currentValue.videos)
 
-      States.Loaded -> {
-        VideosPanelVm(
-          showList = true,
-          videos = Videos(
-            formatVideos(
-              videoDataList = get(homeDb, popular_vids) ?: v(),
-              resources = resources as Resources
-            )
+      States.Loaded -> PanelVm.Loaded(
+        videos = Videos(
+          formatVideos(
+            videoDataList = get(homeDb, popular_vids) ?: v(),
+            resources = resources as Resources
           )
         )
-      }
+      )
 
-      States.Failed -> VideosPanelVm(error = get(homeDb, home.error)!!)
+      States.Failed -> PanelVm.Error(error = get(homeDb, home.error)!!)
     }
   }
 }

@@ -17,10 +17,8 @@ import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
-import com.github.yahyatinani.tubeyou.modules.core.keywords.home.error
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home.go_top_list
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home.load
-import com.github.yahyatinani.tubeyou.modules.core.keywords.home.popular_vids
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
 import com.github.yahyatinani.tubeyou.modules.panel.common.States
 import com.github.yahyatinani.tubeyou.modules.panel.common.States.Failed
@@ -37,15 +35,21 @@ import io.ktor.util.reflect.typeInfo
 // -- Home FSM -----------------------------------------------------------------
 
 val Home_Transitions = m<Any?, Any>(
-  null to m(home.initialize to v(Loading, v(v(BuiltInFx.dispatch, v(load))))),
-  Loading to m(home.loading_is_done to v(Loaded), error to v(Failed)),
-  Loaded to m(home.refresh to v(Refreshing, v(v(BuiltInFx.dispatch, v(load))))),
-  Refreshing to m(home.loading_is_done to v(Loaded), error to v(Failed)),
-  Failed to m(home.initialize to v(Loading, v(v(BuiltInFx.dispatch, v(load)))))
+  null to m(home.initialize to Loading),
+  Loading to m(
+    home.loading_is_done to Loaded,
+    home.error to Failed
+  ),
+  Loaded to m(home.refresh to Refreshing),
+  Refreshing to m(
+    home.loading_is_done to Loaded,
+    home.error to Failed
+  ),
+  Failed to m(home.refresh to Loading)
 )
 
-fun homeCurrentState(appDb: AppDb): Any? =
-  getIn<Any>(appDb, l(HOME_GRAPH_ROUTE, home.state))
+fun homeCurrentState(appDb: AppDb) =
+  getIn<States>(appDb, l(HOME_GRAPH_ROUTE, home.state))
 
 fun nextState(
   fsm: Map<Any?, Any>,
@@ -54,7 +58,7 @@ fun nextState(
 ): Any? = getIn(fsm, l(currentState, transition))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
-  val currentState = get<States?>(homeCurrentState(db), 0)
+  val currentState = homeCurrentState(db)
   val nextState = nextState(Home_Transitions, currentState, event)
   return db.letIf(nextState != null) {
     assocIn(it, l(HOME_GRAPH_ROUTE, home.state), nextState) as AppDb
@@ -65,54 +69,47 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
   updateToNextState(db, id)
 }
 
-fun fsmActionFx(state: Any?) = get<Any>(state, 1)
-
-// -- Registration -------------------------------------------------------------
+// -- Registrations ------------------------------------------------------------
 
 /**
- * Register all event handlers of FSM events.
+ * Register all handlers of home FSM events.
  */
-private fun fsmEvents() {
+private fun fsmTriggers() {
   regEventFx(
     id = home.initialize,
     interceptors = v(injectCofx(home.fsm_next_state))
   ) { cofx, _ ->
-    val appDb = appDbBy(cofx)
-    m<Any, Any?>(db to appDb, fx to fsmActionFx(homeCurrentState(appDb)))
+    m<Any, Any?>(db to appDbBy(cofx), fx to v(v(BuiltInFx.dispatch, v(load))))
   }
 
   regEventDb<AppDb>(
     id = home.loading_is_done,
     interceptors = v(injectCofx(home.fsm_next_state))
   ) { db, (_, videos) ->
-    assocIn(db, l(HOME_GRAPH_ROUTE, popular_vids), videos)
+    assocIn(db, l(HOME_GRAPH_ROUTE, home.state), videos)
   }
 
   regEventFx(
     id = home.refresh,
     interceptors = v(injectCofx(home.fsm_next_state))
   ) { cofx, _ ->
-    val appDb = appDbBy(cofx)
-    m(db to appDb, fx to fsmActionFx(homeCurrentState(appDb)))
+    m(db to appDbBy(cofx), fx to v(v(BuiltInFx.dispatch, v(load))))
+  }
+
+  regEventDb<AppDb>(
+    id = home.error,
+    interceptors = v(injectCofx(home.fsm_next_state))
+  ) { db, (_, e) ->
+    assocIn(db, l(HOME_GRAPH_ROUTE, home.error), e)
   }
 }
 
 fun regHomeEvents() {
-  fsmEvents()
-
-  regEventDb<AppDb>(
-    id = error,
-    interceptors = v(injectCofx(home.fsm_next_state))
-  ) { db, (_, e) ->
-    assocIn(db, l(HOME_GRAPH_ROUTE, error), e)
-  }
+  fsmTriggers()
 
   regEventFx(
     id = load,
-    interceptors = v(
-      injectCofx(home.fsm_next_state),
-      injectCofx(home.coroutine_scope)
-    )
+    interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
     val popularVideosEndpoint = "${appDb[common.api_url]}/trending?region=CA"
@@ -128,11 +125,10 @@ fun regHomeEvents() {
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<Video>>(),
             ktor.on_success to v(home.loading_is_done),
-            ktor.on_failure to v(error)
+            ktor.on_failure to v(home.error)
           )
         )
       )
-
     )
   }
 

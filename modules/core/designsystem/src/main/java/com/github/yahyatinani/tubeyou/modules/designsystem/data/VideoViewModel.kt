@@ -18,7 +18,12 @@ data class VideoViewModel(
 )
 
 @Immutable
-data class Videos(val value: List<VideoViewModel> = l())
+data class Videos(val value: List<Any>) {
+  companion object {
+    private val videos: Videos = Videos(l())
+    operator fun invoke(): Videos = videos
+  }
+}
 
 data class ChannelVm(
   val id: String,
@@ -37,6 +42,3 @@ data class PlaylistVm(
   val videoCount: String,
   val thumbnailUrl: String
 )
-
-@Immutable
-data class SearchVm(val value: List<Any> = l())

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 
 @Composable
@@ -37,7 +38,7 @@ fun VideosGrid(
       .padding(start = 16.dp, end = 16.dp)
   ) {
     items(
-      items = videos.value,
+      items = videos.value as List<VideoViewModel>,
       key = { it.id }
     ) { viewModel ->
       VideoItemPortrait(

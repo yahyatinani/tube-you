@@ -6,17 +6,17 @@ import com.github.whyrising.recompose.ids.coeffects
 import com.github.whyrising.recompose.ids.recompose
 import com.github.whyrising.y.core.get
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
-import com.github.yahyatinani.tubeyou.modules.panel.common.States
 import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
 import kotlinx.coroutines.CoroutineScope
 
 // -- Spec ---------------------------------------------------------------------
 
 /**
- * {:state [States.Loading]
- * :home/popular_vids (
- * [com.github.yahyatinani.tubeyou.modules.panel.common.Video])
- * :search_bar ({:query "" :suggestions [] :results []}, ...)
+ * {:home/state ([States.Loaded] , value)
+ *  :home/popular_vids ([Video])
+ *  :home/error e
+ *  :search_bar ({:query "" :suggestions [] :results []}, ...)
  * }
  */
 

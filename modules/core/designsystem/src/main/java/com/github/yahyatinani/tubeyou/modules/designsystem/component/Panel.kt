@@ -16,9 +16,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatVideoInfo
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
-import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideosPanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -26,70 +26,70 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @Composable
-fun VideosPanel(
+fun Panel(
   modifier: Modifier = Modifier,
-  panelVm: VideosPanelVm,
-  onRefresh: () -> Unit = {},
+  panelVm: PanelVm,
   content: @Composable (videos: Videos) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
+    content(panelVm.videos)
+
     if (panelVm.isLoading) {
+      // TODO: if online use placeholder UI loader.
       CircularProgressIndicator(
         modifier = Modifier.align(Alignment.Center),
         color = Blue300
       )
     }
 
-    if (panelVm.showList) {
-      SwipeRefresh(
-        modifier = Modifier.testTag("swipe_refresh"),
-        state = rememberSwipeRefreshState(panelVm.isRefreshing),
-        onRefresh = onRefresh,
-        indicator = { state, refreshTrigger ->
-          val colorScheme = MaterialTheme.colorScheme
-          SwipeRefreshIndicator(
-            state = state,
-            refreshTriggerDistance = refreshTrigger,
-            backgroundColor = colorScheme.primaryContainer,
-            contentColor = colorScheme.onBackground,
-            elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
-          )
-        }
-      ) {
-        content(panelVm.videos)
-      }
-    } else if (panelVm.error != null) {
-      // TODO: Implement proper UI for errors.
+    if (panelVm.error != null) {
+      // TODO: Implement proper UI for errors. Also, make it an argument.
       Text(text = "Request failed! Error: ${panelVm.error}")
+    }
+  }
+}
+
+@Composable
+fun VideosPanel(
+  modifier: Modifier = Modifier,
+  panelVm: PanelVm,
+  onRefresh: () -> Unit = {},
+  content: @Composable (videos: Videos) -> Unit
+) {
+  Panel(modifier = modifier, panelVm = panelVm) {
+    SwipeRefresh(
+      modifier = Modifier.testTag("swipe_refresh"),
+      swipeEnabled = !panelVm.isLoading,
+      state = rememberSwipeRefreshState(panelVm.isRefreshing),
+      onRefresh = onRefresh,
+      indicator = { state, refreshTrigger ->
+        val colorScheme = MaterialTheme.colorScheme
+        SwipeRefreshIndicator(
+          state = state,
+          refreshTriggerDistance = refreshTrigger,
+          backgroundColor = colorScheme.primaryContainer,
+          contentColor = colorScheme.onBackground,
+          elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+        )
+      }
+    ) {
+      content(it)
     }
   }
 }
 
 // -- Previews -----------------------------------------------------------------
 
-private val designTimeData = v(
-  VideoViewModel(
-    "#ldfj243kj2r",
-    "2342lk2sdf",
-    "Title",
-    "",
-    "2:23",
-    formatVideoInfo(
-      author = "Jon Deo",
-      authorId = "2342lk2sdf",
-      text1 = "32432",
-      publishedText = "2 hours ago",
-      text2 = "views"
-    )
-  ),
-  VideoViewModel(
-    "#ld2lk43kj2r",
-    "fklj223jflrk23j",
-    "Very long tiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii" +
-      "iiiiiiiiiiiiiiiiiiiiitle",
-    "",
-    "2:23",
-    formatVideoInfo(
+@Preview(showBackground = true)
+@Composable
+fun HomePreview() {
+  val viewModel = VideoViewModel(
+    id = "#ldfj243kj2r",
+    authorId = "2342lk2sdf",
+    title = "Title",
+    thumbnail = "",
+    length = "2:23",
+    info = formatVideoInfo(
       author = "Jon Deo",
       authorId = "2342lk2sdf",
       text1 = "32432",
@@ -97,16 +97,11 @@ private val designTimeData = v(
       text2 = "views"
     )
   )
-)
 
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
   TyTheme {
     VideosPanel(
-      panelVm = VideosPanelVm(
-        videos = Videos(designTimeData),
-        showList = true
+      panelVm = PanelVm.Loaded(
+        videos = Videos(v(viewModel, viewModel, viewModel, viewModel)),
       )
     ) { videos ->
       VideosList(

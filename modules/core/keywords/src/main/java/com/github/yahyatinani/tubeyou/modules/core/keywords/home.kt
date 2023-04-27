@@ -6,10 +6,9 @@ enum class home {
   view_model,
   load,
   go_top_list,
-  popular_vids,
   fsm_next_state,
   coroutine_scope,
-  db,
+  fsm_state,
 
   // FSM events
   initialize,

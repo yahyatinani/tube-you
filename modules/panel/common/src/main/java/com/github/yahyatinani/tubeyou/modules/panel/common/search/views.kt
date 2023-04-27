@@ -24,21 +24,22 @@ import com.github.whyrising.recompose.watch
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelItem
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.Panel
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.PlayListLandscape
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.PlayListPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoItemLandscapeCompact
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoItemPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.ChannelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PlaylistVm
-import com.github.yahyatinani.tubeyou.modules.designsystem.data.SearchVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 
 const val SEARCH_ROUTE = "search_results"
 
 @Composable
 private fun SearchPanel(
   listState: LazyListState,
-  videos: SearchVm,
+  videos: Videos,
   orientation: Int,
   thumbnailHeight: Dp
 ) {
@@ -75,17 +76,15 @@ private fun SearchPanel(
         }
 
         when (vm) {
-          is ChannelVm -> {
-            ChannelItem(
-              vm = vm,
-              modifier = Modifier
-                .clickable { /*TODO*/ }
-                .fillMaxWidth(),
-              avatarPaddingValues = PaddingValues(
-                horizontal = (if (isPortrait) 0 else 24).dp
-              )
+          is ChannelVm -> ChannelItem(
+            vm = vm,
+            modifier = Modifier
+              .clickable { /*TODO*/ }
+              .fillMaxWidth(),
+            avatarPaddingValues = PaddingValues(
+              horizontal = (if (isPortrait) 0 else 24).dp
             )
-          }
+          )
 
           is PlaylistVm -> {
             when {
@@ -95,12 +94,10 @@ private fun SearchPanel(
                 thumbnailHeight = thumbnailHeight
               )
 
-              else -> {
-                PlayListLandscape(
-                  viewModel = vm,
-                  thumbnailHeight = thumbnailHeight
-                )
-              }
+              else -> PlayListLandscape(
+                viewModel = vm,
+                thumbnailHeight = thumbnailHeight
+              )
             }
           }
         }
@@ -115,11 +112,15 @@ fun NavGraphBuilder.searchPanel(
   thumbnailHeight: Dp
 ) {
   composable(route = "$route/$SEARCH_ROUTE") {
-    SearchPanel(
-      listState = rememberLazyListState(),
-      videos = watch(v(common.search_results, LocalContext.current.resources)),
-      orientation = orientation,
-      thumbnailHeight = thumbnailHeight
-    )
+    Panel(
+      panelVm = watch(v(common.search_results, LocalContext.current.resources))
+    ) {
+      SearchPanel(
+        listState = rememberLazyListState(),
+        videos = it,
+        orientation = orientation,
+        thumbnailHeight = thumbnailHeight
+      )
+    }
   }
 }

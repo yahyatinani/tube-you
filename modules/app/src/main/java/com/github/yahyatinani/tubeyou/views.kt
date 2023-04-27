@@ -31,6 +31,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -162,6 +163,10 @@ fun TyApp(
       topBar = {
         when {
           searchQuery != null -> {
+            val scope = rememberCoroutineScope()
+            regCofx(":search/coroutine_scope") { cofx ->
+              cofx.assoc(":search/coroutine_scope"  , scope)
+            }
             TySearchBar(
               searchQuery = searchQuery,
               onQueryChange = { dispatchSync(v(common.search_input, it)) },

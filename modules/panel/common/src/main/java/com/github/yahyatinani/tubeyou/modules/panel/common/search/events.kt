@@ -48,7 +48,7 @@ fun regCommonEvents() {
 
   regEventFx(
     id = search_suggestions,
-    interceptors = v(injectCofx(home.coroutine_scope))
+    interceptors = v(injectCofx(":search/coroutine_scope"))
   ) { cofx, (_, searchQuery) ->
     val sq = (searchQuery as String).replace(" ", "%20")
     val appDb = appDbBy(cofx)
@@ -62,7 +62,7 @@ fun regCommonEvents() {
             ktor.method to HttpMethod.Get,
             ktor.url to suggestionsEndpoint,
             ktor.timeout to 8000,
-            ktor.coroutine_scope to cofx[home.coroutine_scope],
+            ktor.coroutine_scope to cofx[":search/coroutine_scope"],
             ktor.response_type_info to typeInfo<PersistentVector<String>>(),
             ktor.on_success to v(common.set_suggestions),
             ktor.on_failure to v(home.error)
@@ -74,7 +74,7 @@ fun regCommonEvents() {
 
   regEventFx(
     id = common.search,
-    interceptors = v(injectCofx(home.coroutine_scope))
+    interceptors = v(injectCofx(":search/coroutine_scope"))
   ) { cofx, (_, searchQuery) ->
     if ((searchQuery as String).isEmpty()) return@regEventFx m()
 
@@ -120,7 +120,7 @@ fun regCommonEvents() {
             ktor.method to HttpMethod.Get,
             ktor.url to searchEndpoint,
             ktor.timeout to 8000,
-            ktor.coroutine_scope to cofx[home.coroutine_scope],
+            ktor.coroutine_scope to cofx[":search/coroutine_scope"],
             ktor.response_type_info to typeInfo<SearchResponse>(),
             ktor.on_success to v(common.set_search_results, sbIndex),
             ktor.on_failure to v(":error")
@@ -132,7 +132,7 @@ fun regCommonEvents() {
 
   regEventFx(
     id = common.search_input,
-    interceptors = v(injectCofx(home.coroutine_scope))
+    interceptors = v(injectCofx(":search/coroutine_scope"))
   ) { cofx, (_, searchQuery) ->
     val appDb = appDbBy(cofx)
     val activeTab = appDb[active_navigation_item]

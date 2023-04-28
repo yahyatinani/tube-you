@@ -74,4 +74,8 @@ fun regAppEvents() {
       )
     )
   }
+
+  regEventFx(common.back_press) { _, _ ->
+    m<Any, Any>(fx to v(v(common.back_press)))
+  }
 }

@@ -71,6 +71,21 @@ fun regCommonEvents() {
     )
   }
 
+  regEventDb<AppDb>(
+    id = common.set_search_results
+  ) { db, (_, searchId, searchResults) ->
+    val activeTab = db[active_navigation_item]
+    val vec = getIn<PersistentVector<Any>>(db, l(activeTab, search_bar))
+
+    if (vec == null || vec.count <= searchId as Int) return@regEventDb db
+
+    assocIn(
+      db,
+      l(activeTab, search_bar, searchId, results),
+      (searchResults as SearchResponse).items
+    )
+  }
+
   regEventFx(
     id = common.search,
     interceptors = v(injectCofx(":search/coroutine_scope"))
@@ -106,13 +121,6 @@ fun regCommonEvents() {
     m<Any, Any>(
       db to newDb,
       fx to v(
-        if (isOneSb && !isDraftSb && isSamePrevSearch ||
-          !isOneSb && isDraftSb && isSamePrevSearch
-        ) {
-          null
-        } else {
-          v(navigate_to, m(common.destination to "$activeTab/$SEARCH_ROUTE"))
-        },
         v(
           ktor.http_fx,
           m(
@@ -124,7 +132,10 @@ fun regCommonEvents() {
             ktor.on_success to v(common.set_search_results, sbIndex),
             ktor.on_failure to v(":error")
           )
-        )
+        ),
+        if (sbVec.count == 1) {
+          v(navigate_to, m(common.destination to "$activeTab/$SEARCH_ROUTE"))
+        } else null,
       )
     )
   }
@@ -158,10 +169,6 @@ fun regCommonEvents() {
     )
   }
 
-  regEventFx(common.back_press) { _, _ ->
-    m<Any, Any>(fx to v(v(common.back_press)))
-  }
-
   regEventDb<AppDb>(id = common.set_suggestions) { db, (_, suggestions) ->
     val activeTab = db[active_navigation_item]
     val sbVec = getIn<PersistentVector<IPersistentMap<Any, Any>>>(
@@ -172,21 +179,6 @@ fun regCommonEvents() {
     val sb = sbVec.last().assoc(searchBar.suggestions, suggestions)
 
     assocIn(db, l(activeTab, search_bar), sbVec.pop().conj(sb))
-  }
-
-  regEventDb<AppDb>(
-    id = common.set_search_results
-  ) { db, (_, searchId, searchResults) ->
-    val activeTab = db[active_navigation_item]
-    val vec = getIn<PersistentVector<Any>>(db, l(activeTab, search_bar))
-
-    if (vec == null || vec.count <= searchId as Int) return@regEventDb db
-
-    assocIn(
-      db,
-      l(activeTab, search_bar, searchId, results),
-      (searchResults as SearchResponse).items
-    )
   }
 
   regEventFx(id = common.search_back_press) { cofx, _ ->
@@ -204,19 +196,17 @@ fun regCommonEvents() {
     }
 
     val newSbVec = sbVec.pop()
-    val effects = if (searchDone) v(common.pop_back_stack) else null
     if (newSbVec.isEmpty()) {
       return@regEventFx m<Any, Any>(
         db to assocIn(appDb, l(activeTab), removeSearchBar(appDb, activeTab)),
-        fx to v(effects)
-      )
-    } else {
-      m<Any, Any>(
-        db to assocIn(appDb, l(activeTab, search_bar), newSbVec)
-          .assoc(is_search_bar_active, false),
-        fx to v(effects)
+        fx to v(v(common.pop_back_stack))
       )
     }
+
+    m<Any, Any>(
+      db to assocIn(appDb, l(activeTab, search_bar), newSbVec)
+        .assoc(is_search_bar_active, false)
+    )
   }
 
   regEventFx(id = common.clear_search_input) { cofx, _ ->

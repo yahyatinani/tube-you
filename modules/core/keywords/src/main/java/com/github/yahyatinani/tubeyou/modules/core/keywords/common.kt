@@ -21,7 +21,7 @@ enum class common {
   is_online,
   dispatch_debounce,
   is_search_bar_active,
-  search_bar,
+  search_stack,
   is_search_bar_visible,
   back_press,
   search_back_press,

@@ -15,10 +15,9 @@ import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_navigation_item
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar_active
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_bar
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_stack
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_suggestions
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.results
@@ -26,14 +25,28 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.search_id
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
 import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
 import com.github.yahyatinani.tubeyou.modules.panel.common.bounce_fx
+import com.github.yahyatinani.tubeyou.modules.panel.common.getActiveTab
 import com.github.yahyatinani.tubeyou.modules.panel.common.ktor
 import io.ktor.http.HttpMethod
 import io.ktor.util.reflect.typeInfo
 
+typealias SearchBar = IPersistentMap<Any, Any>
+typealias SearchStack = PersistentVector<SearchBar>
+
 private fun removeSearchBar(
   appDb: AppDb,
   activeTab: Any?
-) = getIn<IPersistentMap<Any, Any>>(appDb, l(activeTab))!!.dissoc(search_bar)
+) = getIn<AppDb>(appDb, l(activeTab))!!.dissoc(search_stack)
+
+private fun searchStack(
+  appDb: AppDb,
+  activeTab: Any?
+): SearchStack? = getIn<SearchStack>(appDb, l(activeTab, search_stack))
+
+fun swapTop(searchStack: SearchStack, searchBar: SearchBar): SearchStack =
+  searchStack.pop().conj(searchBar)
+
+fun top(searchStack: SearchStack) = searchStack.peek()
 
 fun regCommonEvents() {
   regEventDb<AppDb>(id = is_search_bar_active) { db, (_, flag) ->
@@ -41,8 +54,17 @@ fun regCommonEvents() {
   }
 
   regEventDb<AppDb>(id = common.show_search_bar) { db, _ ->
-    assocIn(db, l(db[active_navigation_item], search_bar), v(defaultSb))
+    assocIn(db, l(getActiveTab(db), search_stack), v(defaultSb))
       .assoc(is_search_bar_active, true)
+  }
+
+  regEventDb<AppDb>(id = common.set_suggestions) { db, (_, suggestions) ->
+    val activeTab = getActiveTab(db)
+    val searchStack = searchStack(db, activeTab) ?: return@regEventDb db
+
+    val newTop = top(searchStack)!!.assoc(searchBar.suggestions, suggestions)
+
+    assocIn(db, l(activeTab, search_stack), swapTop(searchStack, newTop))
   }
 
   regEventFx(
@@ -71,89 +93,23 @@ fun regCommonEvents() {
     )
   }
 
-  regEventDb<AppDb>(
-    id = common.set_search_results
-  ) { db, (_, searchId, searchResults) ->
-    val activeTab = db[active_navigation_item]
-    val vec = getIn<PersistentVector<Any>>(db, l(activeTab, search_bar))
-
-    if (vec == null || vec.count <= searchId as Int) return@regEventDb db
-
-    assocIn(
-      db,
-      l(activeTab, search_bar, searchId, results),
-      (searchResults as SearchResponse).items
-    )
-  }
-
-  regEventFx(
-    id = common.search,
-    interceptors = v(injectCofx(":search/coroutine_scope"))
-  ) { cofx, (_, searchQuery) ->
-    if ((searchQuery as String).isEmpty()) return@regEventFx m()
-
-    val trimmedQuery = searchQuery.trim()
-    val appDb = appDbBy(cofx)
-    val activeTab = appDb[active_navigation_item]
-    val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
-    val last = sbVec.last() as IPersistentMap<Any, Any>
-    val prevSb = (if (sbVec.count > 1) sbVec.pop().last() else last)
-      as IPersistentMap<Any, Any>
-
-    val nsb = last.assoc(searchBar.query, trimmedQuery)
-    val isDraftSb = last[results] == null
-    val isSamePrevSearch = prevSb[searchBar.query] == trimmedQuery
-
-    val newSbVec = when {
-      isSamePrevSearch && isDraftSb && sbVec.count > 1 -> sbVec.pop().pop()
-      else -> sbVec.pop()
-    }
-    val sbIndex = newSbVec.count
-    val newDb = assocIn(
-      appDb,
-      l(activeTab, search_bar),
-      newSbVec.conj(nsb.assoc(search_id, sbIndex))
-    ).assoc(is_search_bar_active, false)
-
-    val sq = trimmedQuery.replace(" ", "%20")
-    val searchEndpoint = "${appDb[common.api_url]}/search?q=$sq&filter=all"
-    val isOneSb = sbVec.count == 1
-    m<Any, Any>(
-      db to newDb,
-      fx to v(
-        v(
-          ktor.http_fx,
-          m(
-            ktor.method to HttpMethod.Get,
-            ktor.url to searchEndpoint,
-            ktor.timeout to 8000,
-            ktor.coroutine_scope to cofx[":search/coroutine_scope"],
-            ktor.response_type_info to typeInfo<SearchResponse>(),
-            ktor.on_success to v(common.set_search_results, sbIndex),
-            ktor.on_failure to v(":error")
-          )
-        ),
-        if (sbVec.count == 1) {
-          v(navigate_to, m(common.destination to "$activeTab/$SEARCH_ROUTE"))
-        } else null,
-      )
-    )
-  }
-
   regEventFx(
     id = common.search_input,
     interceptors = v(injectCofx(":search/coroutine_scope"))
   ) { cofx, (_, searchQuery) ->
     val appDb = appDbBy(cofx)
-    val activeTab = appDb[active_navigation_item]
-    val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
-    val sb = sbVec.last() as IPersistentMap<Any, Any>
-    val i = if (sb[search_id] != null) sbVec.count else sbVec.count - 1
+    val activeTab = getActiveTab(appDb)
+    val searchStack = searchStack(appDb, activeTab)!!
+    val top = top(searchStack)!!
+    val i = when {
+      top[search_id] != null -> searchStack.count
+      else -> searchStack.count - 1
+    }
 
     m<Any, Any>(
       db to assocIn(
         appDb,
-        l(activeTab, search_bar, i, searchBar.query),
+        l(activeTab, search_stack, i, searchBar.query),
         searchQuery
       ),
       fx to v(
@@ -169,24 +125,82 @@ fun regCommonEvents() {
     )
   }
 
-  regEventDb<AppDb>(id = common.set_suggestions) { db, (_, suggestions) ->
-    val activeTab = db[active_navigation_item]
-    val sbVec = getIn<PersistentVector<IPersistentMap<Any, Any>>>(
+  regEventDb<AppDb>(
+    id = common.set_search_results
+  ) { db, (_, searchId, searchResults) ->
+    val activeTab = getActiveTab(db)
+    val searchStack = searchStack(db, activeTab)
+    if (searchStack == null || searchStack.count <= searchId as Int) {
+      return@regEventDb db
+    }
+
+    assocIn(
       db,
-      l(activeTab, search_bar)
-    ) ?: return@regEventDb db
+      l(activeTab, search_stack, searchId, results),
+      (searchResults as SearchResponse).items
+    )
+  }
 
-    val sb = sbVec.last().assoc(searchBar.suggestions, suggestions)
+  regEventFx(
+    id = common.search,
+    interceptors = v(injectCofx(":search/coroutine_scope"))
+  ) { cofx, (_, searchQuery) ->
+    if ((searchQuery as String).isEmpty()) return@regEventFx m()
 
-    assocIn(db, l(activeTab, search_bar), sbVec.pop().conj(sb))
+    val trimmedQuery = searchQuery.trim()
+    val appDb = appDbBy(cofx)
+    val activeTab = getActiveTab(appDb)
+    val searchStack = searchStack(appDb, activeTab)!!
+    val top = top(searchStack)!!
+    val prevSb = if (searchStack.count > 1) top(searchStack.pop())!! else top
+
+    val newTop = top.assoc(searchBar.query, trimmedQuery)
+    val isDraftSb = top[results] == null
+    val isSamePrevSearch = prevSb[searchBar.query] == trimmedQuery
+
+    val newSbVec = when {
+      isSamePrevSearch &&
+        isDraftSb &&
+        searchStack.count > 1 -> searchStack.pop().pop()
+
+      else -> searchStack.pop()
+    }
+    val sbIndex = newSbVec.count
+    val newDb = assocIn(
+      appDb,
+      l(activeTab, search_stack),
+      newSbVec.conj(newTop.assoc(search_id, sbIndex))
+    ).assoc(is_search_bar_active, false)
+
+    val sq = trimmedQuery.replace(" ", "%20")
+    m<Any, Any>(
+      db to newDb,
+      fx to v(
+        v(
+          ktor.http_fx,
+          m(
+            ktor.method to HttpMethod.Get,
+            ktor.url to "${appDb[common.api_url]}/search?q=$sq&filter=all",
+            ktor.timeout to 8000,
+            ktor.coroutine_scope to cofx[":search/coroutine_scope"],
+            ktor.response_type_info to typeInfo<SearchResponse>(),
+            ktor.on_success to v(common.set_search_results, sbIndex),
+            ktor.on_failure to v(":error")
+          )
+        ),
+        if (searchStack.count == 1) {
+          v(navigate_to, m(common.destination to "$activeTab/$SEARCH_ROUTE"))
+        } else null
+      )
+    )
   }
 
   regEventFx(id = common.search_back_press) { cofx, _ ->
     val appDb = appDbBy(cofx)
     val isSearchBarActive = appDb[is_search_bar_active] as Boolean
-    val activeTab = appDb[active_navigation_item]
-    val sbVec = getIn<PersistentVector<Any>>(appDb, l(activeTab, search_bar))!!
-    val sb = sbVec.last() as IPersistentMap<Any, Any>
+    val activeTab = getActiveTab(appDb)
+    val searchStack = searchStack(appDb, activeTab)!!
+    val sb = top(searchStack) as IPersistentMap<Any, Any>
     val searchDone = sb[search_id] != null
 
     if (isSearchBarActive && searchDone) {
@@ -195,7 +209,7 @@ fun regCommonEvents() {
       )
     }
 
-    val newSbVec = sbVec.pop()
+    val newSbVec = searchStack.pop()
     if (newSbVec.isEmpty()) {
       return@regEventFx m<Any, Any>(
         db to assocIn(appDb, l(activeTab), removeSearchBar(appDb, activeTab)),
@@ -204,7 +218,7 @@ fun regCommonEvents() {
     }
 
     m<Any, Any>(
-      db to assocIn(appDb, l(activeTab, search_bar), newSbVec)
+      db to assocIn(appDb, l(activeTab, search_stack), newSbVec)
         .assoc(is_search_bar_active, false)
     )
   }

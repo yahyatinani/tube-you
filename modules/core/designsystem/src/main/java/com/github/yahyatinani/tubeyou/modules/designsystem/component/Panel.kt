@@ -101,7 +101,7 @@ fun HomePreview() {
   TyTheme {
     VideosPanel(
       panelVm = PanelVm.Loaded(
-        videos = Videos(v(viewModel, viewModel, viewModel, viewModel)),
+        videos = Videos(v(viewModel, viewModel, viewModel, viewModel))
       )
     ) { videos ->
       VideosList(

@@ -11,7 +11,7 @@ import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_navigation_item
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar_active
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_bar
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_stack
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.results
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
@@ -43,23 +43,23 @@ fun regCommonSubs() {
   regSub<AppDb>(queryId = searchBar.query) { db, _ ->
     val sbVec = getIn<PersistentVector<Map<Any, Any>>>(
       db,
-      l(db[active_navigation_item], search_bar)
+      l(db[active_navigation_item], search_stack)
     )
     if (sbVec != null) {
       sbVec.last()[searchBar.query]
     } else null
   }
 
-  regSub<AppDb>(queryId = search_bar) { db, _ ->
+  regSub<AppDb>(queryId = search_stack) { db, _ ->
     getIn<PersistentVector<Map<Any, Any>>>(
       db,
-      l(db[active_navigation_item], search_bar)
+      l(db[active_navigation_item], search_stack)
     )?.last()
   }
 
   regSub<Map<Any, Any>?, List<String>>(
     queryId = searchBar.suggestions,
-    signalsFn = { subscribe(v(search_bar)) },
+    signalsFn = { subscribe(v(search_stack)) },
     initialValue = v()
   ) { sb, _, _ ->
     if (sb != null) sb[searchBar.suggestions] as List<String>? ?: l() else l()
@@ -67,7 +67,7 @@ fun regCommonSubs() {
 
   regSub<Any?, PanelVm>(
     queryId = common.search_results,
-    signalsFn = { subscribe(v(search_bar)) },
+    signalsFn = { subscribe(v(search_stack)) },
     initialValue = PanelVm.Loading
   ) { sb, _, (_, resources) ->
     when (val search = get<PersistentVector<SearchResult>>(sb, results)) {

@@ -165,7 +165,7 @@ fun TyApp(
           searchQuery != null -> {
             val scope = rememberCoroutineScope()
             regCofx(":search/coroutine_scope") { cofx ->
-              cofx.assoc(":search/coroutine_scope"  , scope)
+              cofx.assoc(":search/coroutine_scope", scope)
             }
             TySearchBar(
               searchQuery = searchQuery,

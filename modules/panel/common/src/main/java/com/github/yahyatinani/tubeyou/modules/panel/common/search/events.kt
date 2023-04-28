@@ -20,7 +20,6 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_suggestions
-import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.results
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.search_id
@@ -65,7 +64,7 @@ fun regCommonEvents() {
             ktor.coroutine_scope to cofx[":search/coroutine_scope"],
             ktor.response_type_info to typeInfo<PersistentVector<String>>(),
             ktor.on_success to v(common.set_suggestions),
-            ktor.on_failure to v(home.error)
+            ktor.on_failure to v(":search/error")
           )
         )
       )

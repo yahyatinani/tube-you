@@ -41,9 +41,9 @@ fun regCommonSubs() {
   }
 
   regSub<AppDb>(queryId = searchBar.query) { db, _ ->
-    val sbVec = getIn<PersistentVector<Map<Any, Any>>>(
+    val sbVec = getIn<SearchStack>(
       db,
-      l(db[active_navigation_item], search_stack)
+      l(db[active_navigation_item], search_stack, "stack")
     )
     if (sbVec != null) {
       sbVec.last()[searchBar.query]
@@ -51,10 +51,10 @@ fun regCommonSubs() {
   }
 
   regSub<AppDb>(queryId = search_stack) { db, _ ->
-    getIn<PersistentVector<Map<Any, Any>>>(
+    getIn<SearchStack>(
       db,
-      l(db[active_navigation_item], search_stack)
-    )?.last()
+      l(db[active_navigation_item], search_stack, "stack")
+    )?.peek()
   }
 
   regSub<Map<Any, Any>?, List<String>>(

@@ -169,7 +169,7 @@ fun TyApp(
             }
             TySearchBar(
               searchQuery = searchQuery,
-              onQueryChange = { dispatchSync(v(common.search_input, it)) },
+              onQueryChange = { dispatchSync(v(common.type_search, it)) },
               onSearch = { dispatch(v(common.search, it)) },
               isActive = watch(query = v(common.is_search_bar_active)),
               onActiveChange = { dispatch(v(common.is_search_bar_active, it)) },
@@ -179,7 +179,7 @@ fun TyApp(
               colorScheme = colorScheme
             ) {
               // FIXME: Move cursor to the end of text.
-              dispatch(v(common.search_input, it))
+              dispatch(v(common.type_search, it))
             }
 
             BackHandler {
@@ -200,7 +200,7 @@ fun TyApp(
               actions = {
                 IconButton(
                   onClick = {
-                    dispatch(v(common.show_search_bar))
+                    dispatch(v(common.init_search_bar))
                   }
                 ) {
                   Icon(

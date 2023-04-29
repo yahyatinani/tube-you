@@ -28,12 +28,12 @@ enum class common {
   pop_back_stack,
   is_backstack_empty,
   clear_search_input,
-  show_search_bar,
+  init_search_bar,
   search_suggestions,
   set_suggestions,
   search,
   set_search_results,
-  search_input,
+  type_search,
   search_results,
   start_destination;
 

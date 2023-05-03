@@ -75,32 +75,26 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
  * Register all handlers of home FSM events.
  */
 private fun fsmTriggers() {
-  regEventFx(
-    id = home.initialize,
-    interceptors = v(injectCofx(home.fsm_next_state))
-  ) { cofx, _ ->
-    m<Any, Any?>(db to appDbBy(cofx), fx to v(v(BuiltInFx.dispatch, v(load))))
+  regEventFx(id = home.initialize) { cofx, e ->
+    val newDb = handleNextState(appDbBy(cofx), e)
+    m<Any, Any?>(db to newDb, fx to v(v(BuiltInFx.dispatch, v(load))))
   }
 
-  regEventDb<AppDb>(
-    id = home.loading_is_done,
-    interceptors = v(injectCofx(home.fsm_next_state))
-  ) { db, (_, videos) ->
-    assocIn(db, l(HOME_GRAPH_ROUTE, home.state, 1), videos)
+  regEventDb<AppDb>(id = home.loading_is_done) { db, e ->
+    val (_, videos) = e
+    assocIn(handleNextState(db, e), l(HOME_GRAPH_ROUTE, home.state, 1), videos)
   }
 
-  regEventFx(
-    id = home.refresh,
-    interceptors = v(injectCofx(home.fsm_next_state))
-  ) { cofx, _ ->
-    m(db to appDbBy(cofx), fx to v(v(BuiltInFx.dispatch, v(load))))
+  regEventFx(id = home.refresh) { cofx, e ->
+    m(
+      db to handleNextState(appDbBy(cofx), e),
+      fx to v(v(BuiltInFx.dispatch, v(load)))
+    )
   }
 
-  regEventDb<AppDb>(
-    id = home.error,
-    interceptors = v(injectCofx(home.fsm_next_state))
-  ) { db, (_, e) ->
-    assocIn(db, l(HOME_GRAPH_ROUTE, home.state, 1), e)
+  regEventDb<AppDb>(id = home.error) { db, e ->
+    val error = e[1]
+    assocIn(handleNextState(db, e), l(HOME_GRAPH_ROUTE, home.state, 1), error)
   }
 }
 

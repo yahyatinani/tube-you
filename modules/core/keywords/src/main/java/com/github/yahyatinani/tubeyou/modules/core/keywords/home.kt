@@ -6,7 +6,6 @@ enum class home {
   view_model,
   load,
   go_top_list,
-  fsm_next_state,
   coroutine_scope,
   fsm_state,
 

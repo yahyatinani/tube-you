@@ -23,8 +23,8 @@ fun getRegHomeSubs() {
 
   regSub<PersistentVector<Any?>?, PanelVm>(
     queryId = home.view_model,
-    signalsFn = { subscribe(v(home.fsm_state)) },
-    initialValue = PanelVm.Loading
+    initialValue = PanelVm.Loading,
+    v(home.fsm_state)
   ) { homeFsmState, currentValue, (_, resources) ->
     if (homeFsmState == null) return@regSub PanelVm.Loading
 

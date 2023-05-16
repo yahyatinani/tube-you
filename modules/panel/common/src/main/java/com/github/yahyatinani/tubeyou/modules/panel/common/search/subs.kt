@@ -2,7 +2,6 @@ package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
 import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
-import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
@@ -59,16 +58,16 @@ fun regCommonSubs() {
 
   regSub<Map<Any, Any>?, List<String>>(
     queryId = searchBar.suggestions,
-    signalsFn = { subscribe(v(search_stack)) },
-    initialValue = v()
+    initialValue = v(),
+    v(search_stack)
   ) { sb, _, _ ->
-    if (sb != null) sb[searchBar.suggestions] as List<String>? ?: l() else l()
+    get<List<String>>(sb, searchBar.suggestions) ?: l()
   }
 
   regSub<Any?, PanelVm>(
     queryId = common.search_results,
-    signalsFn = { subscribe(v(search_stack)) },
-    initialValue = PanelVm.Loading
+    initialValue = PanelVm.Loading,
+    v(search_stack)
   ) { sb, _, (_, resources) ->
     when (val search = get<PersistentVector<SearchResult>>(sb, results)) {
       null -> PanelVm.Loading

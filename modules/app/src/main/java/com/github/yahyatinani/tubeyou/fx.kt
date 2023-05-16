@@ -9,6 +9,9 @@ import com.github.whyrising.y.core.get
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object BackStack {
   val queue = ArrayDeque<String>().apply { add(HOME_GRAPH_ROUTE) }
@@ -48,7 +51,7 @@ object BackStack {
   }
 }
 
-fun regAppFx(navController: NavController) {
+fun regAppFx(navController: NavController, appScope: CoroutineScope) {
   regFx(navigate_to) { destination ->
     val toRoute = get<String>(destination, common.destination)!!
     val navOptions = get<NavOptions>(destination, common.navOptions)
@@ -57,7 +60,9 @@ fun regAppFx(navController: NavController) {
       BackStack.addDistinct(BackStack.currentDestination(navController))
       BackStack.remove(toRoute)
     }
-    navController.navigate(toRoute, navOptions)
+    appScope.launch(Dispatchers.Main.immediate) {
+      navController.navigate(toRoute, navOptions)
+    }
   }
 
   regFx(common.back_press) {

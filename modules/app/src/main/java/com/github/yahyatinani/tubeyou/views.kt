@@ -135,8 +135,9 @@ fun TyApp(
 ) {
   NavigationChangedListenerEffect(navController)
 
+  val appScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
-    regAppFx(navController)
+    regAppFx(navController, appScope)
     regCofx(start_destination) { cofx ->
       cofx.assoc(
         start_destination,

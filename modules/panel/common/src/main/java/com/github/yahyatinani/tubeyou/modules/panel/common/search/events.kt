@@ -109,7 +109,13 @@ fun regCommonEvents() {
     id = search_suggestions,
     interceptors = v(injectCofx(":search/coroutine_scope"))
   ) { cofx, (_, searchQuery) ->
-    val sq = (searchQuery as String).replace(" ", "%20")
+    if ((searchQuery as String).isBlank() || searchQuery.isEmpty()) {
+      return@regEventFx m<Any, Any>(
+        fx to v(v(dispatch, v(common.set_suggestions, l<String>())))
+      )
+    }
+
+    val sq = searchQuery.replace(" ", "%20")
     val appDb = appDbBy(cofx)
     val suggestionsEndpoint = "${appDb[common.api_url]}/suggestions?query=$sq"
 

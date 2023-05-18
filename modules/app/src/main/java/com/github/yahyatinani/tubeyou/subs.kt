@@ -1,7 +1,6 @@
 package com.github.yahyatinani.tubeyou
 
 import com.github.whyrising.recompose.regSub
-import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.y.core.assoc
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.collections.PersistentArrayMap
@@ -47,33 +46,28 @@ val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(
   )
 )
 
+fun activate(selectedItem: IPersistentMap<Any, Any>) = assoc(
+  selectedItem,
+  icon to selectedItem[icon_variant],
+  is_selected to true
+)
+
+fun navigationItems(activeNavigationItem: Any) = assoc(
+  navItems,
+  activeNavigationItem to activate(navItems[activeNavigationItem]!!)
+)
+
 fun regAppSubs() {
-  regSub<AppDb>(is_backstack_available) { db, _ ->
-    db[is_backstack_available] as Boolean
-  }
+  regSub(is_backstack_available, key = is_backstack_available)
 
-  regSub<AppDb>(active_navigation_item) { db, _ ->
-    db[active_navigation_item]
-  }
+  regSub(active_navigation_item, key = active_navigation_item)
 
-  regSub<Any, Any>(
+  regSub(
     queryId = navigation_items,
     initialValue = m<Any, Any>(),
     v(active_navigation_item),
-    computationFn = { activeNavigationItem, _, _ ->
-      val selectedItem = navItems[activeNavigationItem]!!
-      assoc(
-        navItems,
-        activeNavigationItem to assoc(
-          selectedItem,
-          icon to selectedItem[icon_variant],
-          is_selected to true
-        )
-      )
-    }
+    computationFn = ::navigationItems
   )
 
-  regSub<AppDb>(queryId = is_backstack_empty) { db, _ ->
-    db[is_backstack_empty]
-  }
+  regSub(is_backstack_empty, key = is_backstack_empty)
 }

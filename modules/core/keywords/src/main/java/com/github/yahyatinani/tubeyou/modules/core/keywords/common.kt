@@ -35,7 +35,8 @@ enum class common {
   set_search_results,
   type_search,
   search_results,
-  start_destination;
+  start_destination,
+  active_search_bar;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

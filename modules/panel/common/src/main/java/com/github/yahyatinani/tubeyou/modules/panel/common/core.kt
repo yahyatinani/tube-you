@@ -34,7 +34,7 @@ private fun highQuality(thumbnail: String) =
 fun formatVideo(video: Video, resources: Resources): VideoViewModel {
   val isLiveStream = video.duration == -1L
   val authorId = video.uploaderUrl!!
-  val isUpcoming = video.views == -1L
+  val isUpcoming = video.views == -1L && video.duration == -1L
   val info = if (isUpcoming) {
     formatVideoInfo(
       author = video.uploaderName!!,

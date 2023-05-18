@@ -2,7 +2,6 @@ package com.github.yahyatinani.tubeyou.modules.panel.home
 
 import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
-import com.github.whyrising.recompose.subscribe
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
@@ -16,10 +15,11 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.States
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideos
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
 
+fun homeFsmState(db: AppDb): Any? =
+  getIn(db, l(HOME_GRAPH_ROUTE, home.state))
+
 fun getRegHomeSubs() {
-  regSub<AppDb>(home.fsm_state) { db, _ ->
-    getIn(db, l(HOME_GRAPH_ROUTE, home.state))
-  }
+  regSub(home.fsm_state, ::homeFsmState)
 
   regSub<PersistentVector<Any?>?, PanelVm>(
     queryId = home.view_model,

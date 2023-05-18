@@ -9,9 +9,11 @@ import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_navigation_item
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_search_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar_active
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_stack
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
+import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.query
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.results
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
@@ -19,7 +21,7 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.formatChannel
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatPlayList
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideo
 
-private fun formatSearch(
+fun formatSearch(
   search: PersistentVector<SearchResult>,
   resources: Any
 ): Videos = Videos(
@@ -34,40 +36,39 @@ private fun formatSearch(
   }
 )
 
+fun searchStack(
+  db: AppDb,
+  activeTab: Any? = db[active_navigation_item]
+): SearchBarStack? = getIn<SearchBarStack>(
+  db,
+  l(activeTab, search_stack, "stack")
+)
+
+fun searchQuery(db: AppDb) = searchStack(db)?.last()?.get(query) as String?
+
+fun searchBar(db: AppDb): SearchBar? = searchStack(db)?.peek()
+
+fun searchSuggestions(sb: SearchBar?): List<String> =
+  get<List<String>>(sb, searchBar.suggestions) ?: l()
+
 fun regCommonSubs() {
-  regSub<AppDb>(queryId = is_search_bar_active) { db, _ ->
-    db[is_search_bar_active]
-  }
+  regSub(queryId = is_search_bar_active, key = is_search_bar_active)
 
-  regSub<AppDb>(queryId = searchBar.query) { db, _ ->
-    val sbVec = getIn<SearchStack>(
-      db,
-      l(db[active_navigation_item], search_stack, "stack")
-    )
-    if (sbVec != null) {
-      sbVec.last()[searchBar.query]
-    } else null
-  }
+  regSub(queryId = query, ::searchQuery)
 
-  regSub<AppDb>(queryId = search_stack) { db, _ ->
-    getIn<SearchStack>(
-      db,
-      l(db[active_navigation_item], search_stack, "stack")
-    )?.peek()
-  }
+  regSub(queryId = active_search_bar, ::searchBar)
 
-  regSub<Map<Any, Any>?, List<String>>(
+  regSub(
     queryId = searchBar.suggestions,
-    initialValue = v(),
-    v(search_stack)
-  ) { sb, _, _ ->
-    get<List<String>>(sb, searchBar.suggestions) ?: l()
-  }
+    initialValue = v<Any?>(),
+    v(active_search_bar),
+    computationFn = ::searchSuggestions
+  )
 
   regSub<Any?, PanelVm>(
     queryId = common.search_results,
     initialValue = PanelVm.Loading,
-    v(search_stack)
+    v(active_search_bar)
   ) { sb, _, (_, resources) ->
     when (val search = get<PersistentVector<SearchResult>>(sb, results)) {
       null -> PanelVm.Loading

@@ -18,10 +18,10 @@ class FsmTest : FreeSpec({
   val map = m<Any, Any>()
 
   "updateToNextState() should update AppDb to next state" {
-    updateToNextState(m(), home.initialize) shouldBe assocIn(
+    updateToNextState(m(), home.load) shouldBe assocIn(
       map,
       l(HOME_GRAPH_ROUTE, home.state),
-      v(Loading, v(v(BuiltInFx.dispatch, v(home.load))))
+      v(Loading, v(v(BuiltInFx.dispatch, v(home.load_trending))))
     )
 
     updateToNextState(
@@ -31,10 +31,10 @@ class FsmTest : FreeSpec({
   }
 
   "handleNextState() should update AppDb to next state" {
-    handleNextState(m(), v(home.initialize)) shouldBe assocIn(
+    handleNextState(m(), v(home.load)) shouldBe assocIn(
       map,
       l(HOME_GRAPH_ROUTE, home.state),
-      v(Loading, v(v(BuiltInFx.dispatch, v(home.load))))
+      v(Loading, v(v(BuiltInFx.dispatch, v(home.load_trending))))
     )
 
     handleNextState(

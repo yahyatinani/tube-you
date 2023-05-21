@@ -2,7 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.home
 
 import com.github.whyrising.recompose.cofx.injectCofx
 import com.github.whyrising.recompose.events.Event
-import com.github.whyrising.recompose.fx.BuiltInFx
+import com.github.whyrising.recompose.fx.BuiltInFx.dispatch
 import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.recompose.regEventDb
@@ -18,7 +18,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home.go_top_list
-import com.github.yahyatinani.tubeyou.modules.core.keywords.home.load
+import com.github.yahyatinani.tubeyou.modules.core.keywords.home.load_trending
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
 import com.github.yahyatinani.tubeyou.modules.panel.common.States
 import com.github.yahyatinani.tubeyou.modules.panel.common.States.Failed
@@ -35,27 +35,32 @@ import io.ktor.util.reflect.typeInfo
 // -- Home FSM -----------------------------------------------------------------
 
 val Home_Transitions = m<Any?, Any>(
-  null to m(home.initialize to Loading),
+  null to m(home.load to Loading),
   Loading to m(
     home.loading_is_done to Loaded,
-    home.error to Failed
+    home.loading_failed to Failed
   ),
-  Loaded to m(home.refresh to Refreshing),
+  Loaded to m(
+    home.load to Loading,
+    home.refresh to Refreshing,
+    home.loading_failed to Failed
+  ),
   Refreshing to m(
     home.loading_is_done to Loaded,
-    home.error to Failed
+    home.loading_failed to Failed
   ),
-  Failed to m(home.refresh to Loading)
+  Failed to m(
+    home.refresh to Loading,
+    home.load to Loading,
+    home.loading_is_done to Loaded
+  )
 )
 
 fun homeCurrentState(appDb: AppDb) =
   getIn<States>(appDb, l(HOME_GRAPH_ROUTE, home.state, 0))
 
-fun nextState(
-  fsm: Map<Any?, Any>,
-  currentState: States?,
-  transition: Any
-): Any? = getIn(fsm, l(currentState, transition))
+fun nextState(fsm: Map<Any?, Any>, currentState: States?, transition: Any) =
+  getIn<Any?>(fsm, l(currentState, transition))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = homeCurrentState(db)
@@ -75,9 +80,9 @@ fun handleNextState(db: AppDb, event: Event): AppDb = event.let { (id) ->
  * Register all handlers of home FSM events.
  */
 private fun fsmTriggers() {
-  regEventFx(id = home.initialize) { cofx, e ->
+  regEventFx(id = home.load) { cofx, e ->
     val newDb = handleNextState(appDbBy(cofx), e)
-    m<Any, Any?>(db to newDb, fx to v(v(BuiltInFx.dispatch, v(load))))
+    m<Any, Any?>(db to newDb, fx to v(v(dispatch, v(load_trending))))
   }
 
   regEventDb<AppDb>(id = home.loading_is_done) { db, e ->
@@ -88,11 +93,11 @@ private fun fsmTriggers() {
   regEventFx(id = home.refresh) { cofx, e ->
     m(
       db to handleNextState(appDbBy(cofx), e),
-      fx to v(v(BuiltInFx.dispatch, v(load)))
+      fx to v(v(dispatch, v(load_trending)))
     )
   }
 
-  regEventDb<AppDb>(id = home.error) { db, e ->
+  regEventDb<AppDb>(id = home.loading_failed) { db, e ->
     val error = e[1]
     assocIn(handleNextState(db, e), l(HOME_GRAPH_ROUTE, home.state, 1), error)
   }
@@ -102,7 +107,7 @@ fun regHomeEvents() {
   fsmTriggers()
 
   regEventFx(
-    id = load,
+    id = load_trending,
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
@@ -119,7 +124,7 @@ fun regHomeEvents() {
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<Video>>(),
             ktor.on_success to v(home.loading_is_done),
-            ktor.on_failure to v(home.error)
+            ktor.on_failure to v(home.loading_failed)
           )
         )
       )

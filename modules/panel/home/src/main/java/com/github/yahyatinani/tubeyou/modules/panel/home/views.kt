@@ -30,7 +30,7 @@ private fun InitHome() {
   LaunchedEffect(Unit) {
     getRegHomeCofx(scope)
     regHomeEvents()
-    dispatch(v(home.initialize))
+    dispatch(v(home.load))
   }
 }
 

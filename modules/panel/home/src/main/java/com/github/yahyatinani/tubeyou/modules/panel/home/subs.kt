@@ -33,16 +33,14 @@ fun getRegHomeSubs() {
 
       States.Refreshing -> PanelVm.Refreshing(currentValue.videos)
 
-      States.Loaded -> {
-        PanelVm.Loaded(
-          videos = Videos(
-            formatVideos(
-              videoDataList = homeFsmState[1] as List<Video>,
-              resources = resources as Resources
-            )
+      States.Loaded -> PanelVm.Loaded(
+        videos = Videos(
+          formatVideos(
+            videoDataList = homeFsmState[1] as List<Video>,
+            resources = resources as Resources
           )
         )
-      }
+      )
 
       States.Failed -> PanelVm.Error(error = homeFsmState[1] as Int)
     }

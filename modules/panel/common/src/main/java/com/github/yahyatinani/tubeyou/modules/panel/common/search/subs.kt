@@ -4,22 +4,21 @@ import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getIn
-import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_navigation_item
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_search_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar_active
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_stack
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.sb_fsm
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.query
-import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.results
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm.Loaded
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatChannel
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatPlayList
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideo
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.ACTIVE
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.LOADING
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCH_DONE
 
 fun formatSearch(
   search: PersistentVector<SearchResult>,
@@ -36,43 +35,41 @@ fun formatSearch(
   }
 )
 
-fun searchStack(
-  db: AppDb,
-  activeTab: Any? = db[active_navigation_item]
-): SearchBarStack? = getIn<SearchBarStack>(
-  db,
-  l(activeTab, search_stack, "stack")
-)
+fun searchQuery(appDb: AppDb): String? {
+  val searchStack = searchStack(appDb) ?: return null
+  return top(searchStack)[query] as String
+}
 
-fun searchQuery(db: AppDb) = searchStack(db)?.last()?.get(query) as String?
-
-fun searchBar(db: AppDb): SearchBar? = searchStack(db)?.peek()
-
-fun searchSuggestions(sb: SearchBar?): List<String> =
-  get<List<String>>(sb, searchBar.suggestions) ?: l()
+fun sbFsm(appDb: AppDb): SearchBarFsm? = searchBarFsm(appDb)
 
 fun regCommonSubs() {
   regSub(queryId = is_search_bar_active, key = is_search_bar_active)
 
   regSub(queryId = query, ::searchQuery)
 
-  regSub(queryId = active_search_bar, ::searchBar)
+  regSub(queryId = sb_fsm, ::sbFsm)
 
   regSub(
     queryId = searchBar.suggestions,
     initialValue = v<Any?>(),
-    v(active_search_bar),
+    v(sb_fsm),
     computationFn = ::searchSuggestions
   )
 
   regSub<Any?, PanelVm>(
-    queryId = common.search_results,
+    queryId = search.view_model,
     initialValue = PanelVm.Loading,
-    v(active_search_bar)
-  ) { sb, _, (_, resources) ->
-    when (val search = get<PersistentVector<SearchResult>>(sb, results)) {
-      null -> PanelVm.Loading
-      else -> PanelVm.Loaded(formatSearch(search, resources))
+    v(sb_fsm)
+  ) { sbFsm, prev, (_, resources) ->
+    when (currentState(sbFsm as SearchBarFsm?)) {
+      null -> PanelVm.Init
+      LOADING -> PanelVm.Loading
+      ACTIVE -> prev
+      SEARCH_DONE -> {
+        val error = searchError(sbFsm!!)
+        if (error != null) PanelVm.Error(error)
+        else Loaded(formatSearch(searchResults(sbFsm), resources))
+      }
     }
   }
 }

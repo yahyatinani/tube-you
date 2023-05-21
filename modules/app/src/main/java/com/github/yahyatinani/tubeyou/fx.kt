@@ -65,16 +65,20 @@ fun regAppFx(navController: NavController, appScope: CoroutineScope) {
     }
   }
 
-  regFx(common.back_press) {
-    navController.navigate(BackStack.pop(navController)) {
-      popUpTo(navController.graph.findStartDestination().id) {
-        saveState = true
+  regFx(common.bottom_bar_back_press) {
+    appScope.launch(Dispatchers.Main.immediate) {
+      navController.navigate(BackStack.pop(navController)) {
+        popUpTo(navController.graph.findStartDestination().id) {
+          saveState = true
+        }
+        restoreState = true
       }
-      restoreState = true
     }
   }
 
   regFx(common.pop_back_stack) {
-    navController.popBackStack()
+    appScope.launch(Dispatchers.Main.immediate) {
+      navController.popBackStack()
+    }
   }
 }

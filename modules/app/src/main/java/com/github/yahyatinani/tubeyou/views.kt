@@ -59,8 +59,10 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_navigation_item
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.expand_top_app_bar
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.search_back_press
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.start_destination
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.clear_search_input
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.update_search_input
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyBottomNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
@@ -165,26 +167,28 @@ fun TyApp(
         when {
           searchQuery != null -> {
             val scope = rememberCoroutineScope()
-            regCofx(":search/coroutine_scope") { cofx ->
-              cofx.assoc(":search/coroutine_scope", scope)
+            regCofx(search.coroutine_scope) { cofx ->
+              cofx.assoc(search.coroutine_scope, scope)
             }
             TySearchBar(
               searchQuery = searchQuery,
-              onQueryChange = { dispatchSync(v(common.type_search, it)) },
-              onSearch = { dispatch(v(common.search, it)) },
+              onQueryChange = {
+                dispatchSync(v(update_search_input, it))
+              },
+              onSearch = { dispatchSync(v(search.submit, it)) },
               isActive = watch(query = v(common.is_search_bar_active)),
               onActiveChange = { dispatch(v(common.is_search_bar_active, it)) },
-              clearInput = { dispatchSync(v(common.clear_search_input)) },
-              backPress = { dispatchSync(v(search_back_press)) },
+              clearInput = { dispatchSync(v(clear_search_input)) },
+              backPress = { dispatchSync(v(search.back_press_search)) },
               suggestions = watch(query = v(searchBar.suggestions)),
               colorScheme = colorScheme
             ) {
               // FIXME: Move cursor to the end of text.
-              dispatch(v(common.type_search, it))
+              dispatch(v(update_search_input, it))
             }
 
             BackHandler {
-              dispatchSync(v(search_back_press))
+              dispatchSync(v(search.back_press_search))
             }
           }
 
@@ -200,9 +204,7 @@ fun TyApp(
               navigationIcon = {},
               actions = {
                 IconButton(
-                  onClick = {
-                    dispatch(v(common.init_search_bar))
-                  }
+                  onClick = { dispatch(v(search.show_search_bar)) }
                 ) {
                   Icon(
                     imageVector = Icons.Outlined.Search,
@@ -235,8 +237,9 @@ fun TyApp(
         }
       }
     ) {
-      BackHandler(!watch<Boolean>(query = v(common.is_backstack_empty))) {
-        dispatchSync(v(common.back_press))
+      val enabled = !watch<Boolean>(query = v(common.is_backstack_empty))
+      BackHandler(enabled) {
+        dispatchSync(v(common.bottom_bar_back_press))
       }
 
       val orientation = LocalConfiguration.current.orientation

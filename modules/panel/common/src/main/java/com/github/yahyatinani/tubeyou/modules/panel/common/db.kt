@@ -6,4 +6,4 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 
 typealias AppDb = IPersistentMap<Any, Any>
 
-fun activeTab(appDb: AppDb) = appDb[common.active_navigation_item]
+fun activeTab(appDb: AppDb): Any = appDb[common.active_navigation_item]!!

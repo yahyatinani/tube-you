@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Panel
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.PlayListLandscape
@@ -113,7 +114,7 @@ fun NavGraphBuilder.searchPanel(
 ) {
   composable(route = "$route/$SEARCH_ROUTE") {
     Panel(
-      panelVm = watch(v(common.search_results, LocalContext.current.resources))
+      panelVm = watch(v(search.view_model, LocalContext.current.resources))
     ) {
       SearchPanel(
         listState = rememberLazyListState(),

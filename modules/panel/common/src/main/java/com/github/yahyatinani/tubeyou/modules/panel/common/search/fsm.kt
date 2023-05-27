@@ -168,12 +168,15 @@ fun sbFsm(appDb: AppDb, event: Any, vararg args: Any): Effects {
     )
 
     ACTIVE__searchSubmit, SEARCH_DONE__searchSubmit -> {
-      val searchQuery = args[0]
+      val searchQuery = "${args[0]}".trim()
       m(
         db to setSbFsm(
           appDb = collapseSearchBar(appDb),
           activeTab = activeTab,
-          searchBarFsm = updateState(sbFsm!!, LOADING)
+          searchBarFsm = updateSbInput(
+            searchBarFsm = updateState(sbFsm!!, LOADING),
+            searchQuery = searchQuery
+          )
         ),
         fx to v(
           v(

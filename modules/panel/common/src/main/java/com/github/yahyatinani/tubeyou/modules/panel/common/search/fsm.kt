@@ -17,8 +17,10 @@ import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.destination
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.dispatch_debounce
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar_active
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.back_press_search
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.clear_search_input
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.get_search_suggestions
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.stack
@@ -27,9 +29,9 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
 import com.github.yahyatinani.tubeyou.modules.panel.common.activeTab
 import com.github.yahyatinani.tubeyou.modules.panel.common.bounce_fx
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.ACTIVE
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.LOADING
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCH_DONE
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.DRAFT
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCHING
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCH_RESULTS
 
 // -- SearchBar FSM ------------------------------------------------------------
 
@@ -41,13 +43,13 @@ typealias SearchBarStack = PersistentVector<SearchBar>
  * SearchBarFsm spec:
  * ============
  *
- * {:state (ACTIVE, LOADING, SEARCH_DONE)
+ * {:state (DRAFT, SEARCHING, SEARCH_DONE)
  *  :stack [{ query "1", suggestions [])}, { query "2", suggestions [])}]}
  */
 
-enum class SearchBarState { ACTIVE, SEARCH_DONE, LOADING }
+enum class SearchBarState { DRAFT, SEARCHING, SEARCH_RESULTS }
 
-val initSearchBarFsm = m(search.state to ACTIVE, stack to v(defaultSb))
+val initSearchBarFsm = m(search.state to DRAFT, stack to v(defaultSb))
 
 fun searchBarFsm(appDb: AppDb, activeTab: Any? = activeTab(appDb)) =
   getIn<SearchBarFsm?>(appDb, l(activeTab, search.sb_fsm))
@@ -58,7 +60,7 @@ fun searchStack(appDb: AppDb, activeTab: Any? = activeTab(appDb)) =
 fun top(searchBarStack: SearchBarStack): SearchBar = searchBarStack.peek()!!
 
 fun showSearchBar(appDb: AppDb): AppDb =
-  appDb.assoc(common.is_search_bar_active, true)
+  appDb.assoc(is_search_bar_active, true)
 
 fun setSbFsm(
   appDb: AppDb,
@@ -95,7 +97,7 @@ fun removeSearchBarFsm(appDb: AppDb, activeTab: Any?) =
   )
 
 fun collapseSearchBar(db: AppDb): AppDb =
-  db.assoc(common.is_search_bar_active, false)
+  db.assoc(is_search_bar_active, false)
 
 fun updateState(sbFsm: SearchBarFsm, nextState: SearchBarState) =
   sbFsm.assoc(search.state, nextState)
@@ -137,12 +139,30 @@ fun conjSearchBar(
   searchBar: IPersistentMap<Any, Any>
 ) = fsm.assoc(stack, searchBarStack(fsm).conj(searchBar))
 
+fun popTopSearchBar(appDb: AppDb, sbFsm: SearchBarFsm?, activeTab: Any): AppDb {
+  val searchBarStack = searchBarStack(sbFsm!!)
+  if (searchBarStack.count > 1) {
+    return m(
+      db to setSbFsm(
+        collapseSearchBar(appDb),
+        activeTab,
+        sbFsm.assoc(stack, searchBarStack.pop())
+      )
+    )
+  }
+
+  return m(
+    db to removeSearchBarFsm(appDb, activeTab),
+    fx to v(v(common.pop_back_stack))
+  )
+}
+
 /* FSM transitions: */
 val NULL_show_search_bar = v(null, search.show_search_bar)
-val ACTIVE__update_search_input = v(ACTIVE, update_search_input)
-val ACTIVE__searchBackPress = v(ACTIVE, search.back_press_search)
-val ACTIVE__searchSubmit = v(ACTIVE, search.submit)
-val SEARCH_DONE__searchSubmit = v(SEARCH_DONE, search.submit)
+val DRAFT__update_search_input = v(DRAFT, update_search_input)
+val DRAFT__searchBackPress = v(DRAFT, back_press_search)
+val DRAFT__searchSubmit = v(DRAFT, search.submit)
+val SEARCH_DONE__searchSubmit = v(SEARCH_RESULTS, search.submit)
 
 /** The search bar FSM implementation. */
 fun sbFsm(appDb: AppDb, event: Any, vararg args: Any): Effects {
@@ -156,25 +176,25 @@ fun sbFsm(appDb: AppDb, event: Any, vararg args: Any): Effects {
       fx to v(v(navigate_to, m(destination to "$activeTab/$SEARCH_ROUTE")))
     )
 
-    ACTIVE__update_search_input,
-    v(ACTIVE, clear_search_input),
-    v(LOADING, clear_search_input) -> m(
+    DRAFT__update_search_input,
+    v(DRAFT, clear_search_input),
+    v(SEARCHING, clear_search_input) -> m(
       db to setSbFsm(
         appDb = showSearchBar(appDb),
         activeTab = activeTab,
-        searchBarFsm = updateSbInput(updateState(sbFsm!!, ACTIVE), args[0])
+        searchBarFsm = updateSbInput(updateState(sbFsm!!, DRAFT), args[0])
       ),
       fx to v(searchSuggestionsFx(searchQuery = args[0]))
     )
 
-    ACTIVE__searchSubmit, SEARCH_DONE__searchSubmit -> {
+    DRAFT__searchSubmit, SEARCH_DONE__searchSubmit -> {
       val searchQuery = "${args[0]}".trim()
       m(
         db to setSbFsm(
           appDb = collapseSearchBar(appDb),
           activeTab = activeTab,
           searchBarFsm = updateSbInput(
-            searchBarFsm = updateState(sbFsm!!, LOADING),
+            searchBarFsm = updateState(sbFsm!!, SEARCHING),
             searchQuery = searchQuery
           )
         ),
@@ -187,28 +207,20 @@ fun sbFsm(appDb: AppDb, event: Any, vararg args: Any): Effects {
       )
     }
 
-    v(LOADING, search.back_press_search),
-    v(SEARCH_DONE, search.back_press_search),
-    ACTIVE__searchBackPress -> {
-      val searchBarStack = searchBarStack(sbFsm!!)
-      if (searchBarStack.count > 1) {
-        return m(
-          db to setSbFsm(
-            collapseSearchBar(appDb),
-            activeTab,
-            updateState(sbFsm, SEARCH_DONE).assoc(stack, searchBarStack.pop())
-          )
-        )
+    v(SEARCH_RESULTS, back_press_search) -> {
+      if (get<Boolean>(appDb, is_search_bar_active)!!) {
+        return m(db to collapseSearchBar(appDb))
       }
 
-      m(
-        db to removeSearchBarFsm(appDb, activeTab),
-        fx to v(v(common.pop_back_stack))
-      )
+      popTopSearchBar(appDb, sbFsm, activeTab)
     }
 
-    v(LOADING, search.set_search_results) -> {
-      val searchBarFsm = updateState(sbFsm!!, SEARCH_DONE)
+    v(SEARCHING, back_press_search), DRAFT__searchBackPress -> {
+      popTopSearchBar(appDb, updateState(sbFsm!!, SEARCH_RESULTS), activeTab)
+    }
+
+    v(SEARCHING, search.set_search_results) -> {
+      val searchBarFsm = updateState(sbFsm!!, SEARCH_RESULTS)
       val searchBarStack = searchBarStack(searchBarFsm)
       val top = cleanUpSearchBar(top(searchBarStack))
         .run {
@@ -230,13 +242,13 @@ fun sbFsm(appDb: AppDb, event: Any, vararg args: Any): Effects {
       )
     }
 
-    v(SEARCH_DONE, update_search_input),
-    v(SEARCH_DONE, clear_search_input) -> m(
+    v(SEARCH_RESULTS, update_search_input),
+    v(SEARCH_RESULTS, clear_search_input) -> m(
       db to setSbFsm(
         appDb = showSearchBar(appDb),
         activeTab = activeTab,
         searchBarFsm = conjSearchBar(
-          fsm = updateState(sbFsm!!, ACTIVE),
+          fsm = updateState(sbFsm!!, DRAFT),
           searchBar = defaultSb.assoc(searchBar.query, args[0])
         )
       ),

@@ -16,9 +16,9 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatChannel
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatPlayList
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideo
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.ACTIVE
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.LOADING
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCH_DONE
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.DRAFT
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCHING
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCH_RESULTS
 
 fun formatSearch(
   search: PersistentVector<SearchResult>,
@@ -63,9 +63,9 @@ fun regCommonSubs() {
   ) { sbFsm, prev, (_, resources) ->
     when (currentState(sbFsm as SearchBarFsm?)) {
       null -> PanelVm.Init
-      LOADING -> PanelVm.Loading
-      ACTIVE -> prev
-      SEARCH_DONE -> {
+      SEARCHING -> PanelVm.Loading
+      DRAFT -> prev
+      SEARCH_RESULTS -> {
         val error = searchError(sbFsm!!)
         if (error != null) PanelVm.Error(error)
         else Loaded(formatSearch(searchResults(sbFsm), resources))

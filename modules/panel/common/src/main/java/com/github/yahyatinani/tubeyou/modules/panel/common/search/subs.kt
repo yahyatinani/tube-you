@@ -7,7 +7,7 @@ import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar_active
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
-import com.github.yahyatinani.tubeyou.modules.core.keywords.search.sb_fsm
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.sb_state
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.query
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
@@ -47,19 +47,19 @@ fun regCommonSubs() {
 
   regSub(queryId = query, ::searchQuery)
 
-  regSub(queryId = sb_fsm, ::sbFsm)
+  regSub(queryId = sb_state, ::sbFsm)
 
   regSub(
     queryId = searchBar.suggestions,
     initialValue = v<Any?>(),
-    v(sb_fsm),
+    v(sb_state),
     computationFn = ::searchSuggestions
   )
 
   regSub<Any?, PanelVm>(
     queryId = search.view_model,
     initialValue = PanelVm.Loading,
-    v(sb_fsm)
+    v(sb_state)
   ) { sbFsm, prev, (_, resources) ->
     when (currentState(sbFsm as SearchBarFsm?)) {
       null -> PanelVm.Init

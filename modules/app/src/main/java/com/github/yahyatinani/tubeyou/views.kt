@@ -173,22 +173,24 @@ fun TyApp(
             TySearchBar(
               searchQuery = searchQuery,
               onQueryChange = {
-                dispatchSync(v(update_search_input, it))
+                dispatchSync(v(search.fsm, update_search_input, it))
               },
-              onSearch = { dispatchSync(v(search.submit, it)) },
+              onSearch = { dispatchSync(v(search.fsm, search.submit, it)) },
               isActive = watch(query = v(common.is_search_bar_active)),
               onActiveChange = { dispatch(v(common.is_search_bar_active, it)) },
-              clearInput = { dispatchSync(v(clear_search_input)) },
-              backPress = { dispatchSync(v(search.back_press_search)) },
+              clearInput = { dispatchSync(v(search.fsm, clear_search_input)) },
+              backPress = {
+                dispatchSync(v(search.fsm, search.back_press_search))
+              },
               suggestions = watch(query = v(searchBar.suggestions)),
               colorScheme = colorScheme
             ) {
               // FIXME: Move cursor to the end of text.
-              dispatch(v(update_search_input, it))
+              dispatch(v(search.fsm, update_search_input, it))
             }
 
             BackHandler {
-              dispatchSync(v(search.back_press_search))
+              dispatchSync(v(search.fsm, search.back_press_search))
             }
           }
 
@@ -204,7 +206,7 @@ fun TyApp(
               navigationIcon = {},
               actions = {
                 IconButton(
-                  onClick = { dispatch(v(search.show_search_bar)) }
+                  onClick = { dispatch(v(search.fsm, search.show_search_bar)) }
                 ) {
                   Icon(
                     imageVector = Icons.Outlined.Search,

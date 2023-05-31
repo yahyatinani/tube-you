@@ -2,23 +2,22 @@ package com.github.yahyatinani.tubeyou.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class search {
-  // FSM events:
+  // FSM events/triggers:
   show_search_bar,
   update_search_input,
-  back_press_search,
-  submit,
-  set_search_results,
-  search_failed,
   clear_search_input,
+  submit,
+  set_suggestions,
+  set_search_results,
+  back_press_search,
 
+  fsm,
   route,
   stack,
-  state,
   get_search_results,
-  view_model,
-  sb_fsm,
   get_search_suggestions,
-  set_suggestions,
+  view_model,
+  sb_state,
   coroutine_scope;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"

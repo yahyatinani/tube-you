@@ -87,7 +87,7 @@ data class Playlist(
 @Serializable
 data class SearchResponse(
   val items: PersistentVector<SearchResult>,
-  val nextPage: String? = null,
+  val nextpage: String? = null,
   val suggestion: String? = null,
   val corrected: Boolean = false
 )

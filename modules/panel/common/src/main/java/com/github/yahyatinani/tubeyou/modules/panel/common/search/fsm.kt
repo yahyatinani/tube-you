@@ -1,5 +1,7 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import com.github.whyrising.recompose.events.Event
 import com.github.whyrising.recompose.fx.BuiltInFx.dispatch
 import com.github.whyrising.recompose.fx.BuiltInFx.fx
@@ -8,6 +10,7 @@ import com.github.whyrising.recompose.ids.recompose.db
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.collections.Associative
 import com.github.whyrising.y.core.collections.IPersistentMap
+import com.github.whyrising.y.core.collections.IPersistentVector
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
@@ -39,6 +42,7 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.ALL
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.actions
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.guard
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.target
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.APPENDING
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.DRAFT
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCHING
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCH_RESULTS
@@ -57,7 +61,7 @@ typealias SearchBarFsm = Associative<Any, Any>
  *  :stack [{ query "1", suggestions [])}, { query "2", suggestions [])}]}
  */
 
-enum class SearchBarState { DRAFT, SEARCHING, SEARCH_RESULTS }
+enum class SearchBarState { DRAFT, SEARCHING, SEARCH_RESULTS, APPENDING }
 
 val initSearchBarFsm = m(fsm._state to DRAFT, stack to v(defaultSb))
 
@@ -200,8 +204,9 @@ fun setResults(appDb: AppDb, state: State, event: Event): Effects {
   val searchBarStack = searchBarStack(state!! as SearchBarFsm)
   val top = cleanUpSearchBar(top(searchBarStack)).run {
     val (_, results) = event
-    if (results is SearchResponse) assoc(searchBar.results, results.items)
-    else assoc(searchBar.search_error, results)
+    if (results is IPersistentVector<*>) {
+      assoc(searchBar.results, results)
+    } else assoc(searchBar.search_error, results)
   }
 
   val newStack = searchBarStack.pop().let {
@@ -237,6 +242,11 @@ fun setSuggestions(appDb: AppDb, state: State, event: Event): Effects {
       suggestions
     )
   )
+}
+
+fun isAppendLoading(appDb: AppDb, state: State, event: Event): Boolean {
+  val (_, loadState) = event
+  return (loadState as CombinedLoadStates).append == LoadState.Loading
 }
 
 val searchMachine = m<Any?, Any?>(
@@ -318,6 +328,18 @@ val searchMachine = m<Any?, Any?>(
     submit to m(
       target to SEARCHING,
       actions to v(::deactivateSearchBar, ::getSearchResults)
+    ),
+    set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults),
+    "append" to v(
+      m(target to APPENDING, guard to ::isAppendLoading),
+      m(target to SEARCH_RESULTS)
+    )
+  ),
+  APPENDING to m(
+    set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults),
+    "append" to v(
+      m(target to APPENDING, guard to ::isAppendLoading),
+      m(target to SEARCH_RESULTS)
     )
   ),
   ALL to m(set_suggestions to m(target to ALL, actions to ::setSuggestions))

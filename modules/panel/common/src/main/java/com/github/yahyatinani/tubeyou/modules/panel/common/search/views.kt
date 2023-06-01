@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.y.core.v
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Panel
@@ -31,6 +31,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.PlayListPor
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoItemLandscapeCompact
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoItemPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.ChannelVm
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PlaylistVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
@@ -38,11 +39,13 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 const val SEARCH_ROUTE = "search_results"
 
 @Composable
-private fun SearchPanel(
+fun SearchPanel(
   listState: LazyListState,
   videos: Videos,
+  appendEvent: Any?,
   orientation: Int,
-  thumbnailHeight: Dp
+  thumbnailHeight: Dp,
+  appendLoader: @Composable () -> Unit
 ) {
   LazyColumn(
     state = listState,
@@ -50,12 +53,16 @@ private fun SearchPanel(
       .testTag("search_list")
       .fillMaxSize()
   ) {
-    itemsIndexed(videos.value, key = { index, _ -> index }) { index, vm ->
+    // Pagination Loading UI
+    val items = videos.value
+    itemsIndexed(items = items) { index: Int, vm: Any ->
+      if (appendEvent != null) dispatch(v(appendEvent, index))
+
       val isPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
       if (vm is VideoViewModel) {
         if (
           index > 1 &&
-          videos.value[index - 1] !is VideoViewModel &&
+          items[index - 1] as? VideoViewModel != null &&
           isPortrait
         ) {
           Divider(thickness = 6.dp, color = Color.DarkGray)
@@ -104,6 +111,7 @@ private fun SearchPanel(
         }
       }
     }
+    item { appendLoader() }
   }
 }
 
@@ -113,14 +121,17 @@ fun NavGraphBuilder.searchPanel(
   thumbnailHeight: Dp
 ) {
   composable(route = "$route/$SEARCH_ROUTE") {
-    Panel(
-      panelVm = watch(v(search.view_model, LocalContext.current.resources))
-    ) {
+    val panelVm =
+      watch<PanelVm>(v(search.view_model, LocalContext.current.resources))
+
+    Panel(panelVm = panelVm) { videos, appendEvent, appendLoader ->
       SearchPanel(
         listState = rememberLazyListState(),
-        videos = it,
+        videos = videos,
+        appendEvent = appendEvent,
         orientation = orientation,
-        thumbnailHeight = thumbnailHeight
+        thumbnailHeight = thumbnailHeight,
+        appendLoader = appendLoader
       )
     }
   }

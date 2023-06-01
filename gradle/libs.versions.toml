@@ -9,14 +9,16 @@ spotless = "6.9.0"
 junit4 = "4.13.2"
 
 compose = "1.4.3"
-material3 = "1.2.0-alpha01"
-navigation-compose = "2.5.3"
-activity-compose = "1.7.1"
+material3 = "1.2.0-alpha02"
+navigation-compose = "2.6.0"
+activity-compose = "1.7.2"
 splashscreen = "1.0.1"
 accompanist = "0.28.0"
 constraintlayout = "1.0.1"
 lifecycle = "2.6.1"
 profileinstaller = "1.3.1"
+paging = "3.1.1"
+paging-compose = "1.0.0-alpha20"
 
 core-ktx = "1.10.1"
 appcompat = "1.6.1"
@@ -31,7 +33,7 @@ slf4j = "1.3.0"
 datetime = "0.4.0"
 
 ylib = "0.2.0.17-SNAPSHOT"
-recompose = "0.2.0.54-SNAPSHOT" #FIXME: release the new recompose version.
+recompose = "0.2.0.56-SNAPSHOT" #FIXME: release the new recompose version.
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -66,6 +68,8 @@ androidx-lifecycle-viewmodelCompose = { module = "androidx.lifecycle:lifecycle-v
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging-compose" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 android-tools-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -87,6 +91,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 compose = ["androidx-compose-ui-ui", "androidx-compose-ui-util", "androidx-compose-ui-tooling", "androidx-compose-material3", "androidx-constraintlayout-compose", "accompanist-swiperefresh", "androidx-compose-material3-windowssizeclass", "androidx-profileinstaller", "androidx-compose-material-icons-ext", "androidx-navigation-compose"]
 kotest = ["kotest-jvm-runner", "kotest-assertions", "kotlin-reflect"]
 ktor = ["ktor-client-core", "ktor-client-android", "ktor-client-contentnegotiation", "ktor-serialization-json", "ktor-client-logging", "slf4j"]
+paging = ["androidx-paging-compose", "androidx-paging-runtime"]
 
 [plugins]
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

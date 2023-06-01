@@ -3,7 +3,9 @@ package com.github.yahyatinani.tubeyou.modules.designsystem.component
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -29,10 +31,22 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 fun Panel(
   modifier: Modifier = Modifier,
   panelVm: PanelVm,
-  content: @Composable (videos: Videos) -> Unit
+  content: @Composable (videos: Videos, appendEvent: Any?, appendLoader: @Composable () -> Unit) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    content(panelVm.videos)
+    Column(modifier = modifier.fillMaxSize()) {
+      content(panelVm.videos, panelVm.appendEvent) {
+        if (panelVm.isAppending) {
+          Box(modifier = Modifier.fillMaxWidth()) {
+            CircularProgressIndicator(
+              modifier = Modifier.align(Alignment.Center),
+              color = Blue300
+            )
+          }
+        }
+      }
+    }
+
 
     if (panelVm.isLoading) {
       // TODO: if online use placeholder UI loader.
@@ -56,7 +70,7 @@ fun VideosPanel(
   onRefresh: () -> Unit = {},
   content: @Composable (videos: Videos) -> Unit
 ) {
-  Panel(modifier = modifier, panelVm = panelVm) {
+  Panel(modifier = modifier, panelVm = panelVm) { videos, _, _ ->
     SwipeRefresh(
       modifier = Modifier.testTag("swipe_refresh"),
       swipeEnabled = !panelVm.isLoading,
@@ -73,7 +87,7 @@ fun VideosPanel(
         )
       }
     ) {
-      content(it)
+      content(videos)
     }
   }
 }

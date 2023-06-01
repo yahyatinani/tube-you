@@ -60,17 +60,24 @@ fun regCommonEvents() {
     interceptors = v(injectCofx(search.coroutine_scope))
   ) { cofx, (_, sq) ->
     val handleResultsEvent = v(search.fsm, set_search_results)
+    val api = appDbBy(cofx)[api_url]
+    val url = "$api/search?q=$sq&filter=all"
+    val nextUrl = "$api/nextpage/search?q=$sq&filter=all"
     m<Any, Any>(
       fx to v(
         v(
-          ktor.http_fx,
+          "paging",
           m(
             ktor.method to HttpMethod.Get,
-            ktor.url to "${appDbBy(cofx)[api_url]}/search?q=$sq&filter=all",
+            ktor.url to url,
             ktor.timeout to 8000,
+            "pageName" to "nextpage",
+            "nextUrl" to nextUrl,
+            "eventId" to get_search_results,
             ktor.coroutine_scope to cofx[search.coroutine_scope],
             ktor.response_type_info to typeInfo<SearchResponse>(),
             ktor.on_success to handleResultsEvent,
+            "on_appending" to v(search.fsm, "append"),
             ktor.on_failure to handleResultsEvent
           )
         )

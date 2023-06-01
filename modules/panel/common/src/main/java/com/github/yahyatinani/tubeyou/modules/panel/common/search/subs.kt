@@ -2,6 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
 import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
+import com.github.whyrising.y.core.collections.IPersistentVector
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.v
@@ -40,14 +41,14 @@ fun searchQuery(appDb: AppDb): String? {
   return top(searchStack)[query] as String
 }
 
-fun sbFsm(appDb: AppDb): SearchBarFsm? = searchBarFsm(appDb)
+fun sbStateMap(appDb: AppDb): SearchBarFsm? = searchBarFsm(appDb)
 
 fun regCommonSubs() {
   regSub(queryId = is_search_bar_active, key = is_search_bar_active)
 
   regSub(queryId = query, ::searchQuery)
 
-  regSub(queryId = sb_state, ::sbFsm)
+  regSub(queryId = sb_state, ::sbStateMap)
 
   regSub(
     queryId = searchBar.suggestions,
@@ -60,16 +61,30 @@ fun regCommonSubs() {
     queryId = search.view_model,
     initialValue = PanelVm.Loading,
     v(sb_state)
-  ) { sbFsm, prev, (_, resources) ->
-    when (currentState(sbFsm as SearchBarFsm?)) {
+  ) { sbStateMap, prev, (_, resources) ->
+    when (currentState(sbStateMap as SearchBarFsm?)) {
       null -> PanelVm.Init
       SEARCHING -> PanelVm.Loading
       DRAFT -> prev
       SEARCH_RESULTS -> {
-        val error = searchError(sbFsm!!)
+        val error = searchError(sbStateMap!!)
         if (error != null) PanelVm.Error(error)
-        else Loaded(formatSearch(searchResults(sbFsm), resources))
+        else {
+          val (id, items) = get<IPersistentVector<Any>>(
+            searchBarStack(sbStateMap).peek()!!,
+            searchBar.results
+          )!!
+          Loaded(
+            videos = formatSearch(
+              items as PersistentVector<SearchResult>,
+              resources
+            ),
+            appendEvent = id
+          )
+        }
       }
+
+      SearchBarState.APPENDING -> (prev as Loaded).copy(isAppending = true)
     }
   }
 }

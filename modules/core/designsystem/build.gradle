@@ -1,7 +1,7 @@
-import static com.github.whyrising.vancetube.Build.APP_ID
+import static com.github.yahyatinani.tubeyou.Build.APP_ID
 
 plugins {
-  id 'vancetube.android-lib-conventions'
+  id 'tubeyou.android-lib-conventions'
 }
 
 group APP_ID
@@ -11,6 +11,7 @@ android {
 }
 
 dependencies {
+  implementation project(':modules:core:keywords')
   implementation deps.androidx.core.ktx
   implementation deps.bundles.compose
   implementation deps.coil

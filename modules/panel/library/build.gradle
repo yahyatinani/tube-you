@@ -1,7 +1,7 @@
-import static com.github.whyrising.vancetube.Build.APP_ID
+import static com.github.yahyatinani.tubeyou.Build.APP_ID
 
 plugins {
-  id 'vancetube.android-lib-conventions'
+  id 'tubeyou.android-lib-conventions'
   alias deps.plugins.serialization
 }
 
@@ -14,10 +14,10 @@ android {
 dependencies {
   implementation project(':modules:core:designsystem')
   implementation project(':modules:core:keywords')
+  implementation project(':modules:panel:common')
   api deps.androidx.core.ktx
   api deps.bundles.compose
   api deps.androidx.navigation.compose
-  api deps.accompanist.nav.anim
   api deps.recompose
   implementation deps.kotlinx.datetime
   implementation deps.coil

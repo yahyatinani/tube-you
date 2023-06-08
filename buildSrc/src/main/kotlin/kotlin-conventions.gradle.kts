@@ -1,4 +1,4 @@
-import com.github.whyrising.vancetube.Build
+import com.github.yahyatinani.tubeyou.Build
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -34,10 +34,9 @@ tasks.withType<KotlinCompile>().configureEach {
       "-P",
       "$composePlugin:reportsDestination=$buildDirAbsolutePath$out",
       "-P",
-      "$composePlugin:metricsDestination=$buildDirAbsolutePath$out"
+      "$composePlugin:metricsDestination=$buildDirAbsolutePath$out",
+      "-opt-in=kotlin.RequiresOptIn"
     )
-    freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
-
     jvmTarget = Build.Versions.JVM
     apiVersion = Build.Versions.KOTLIN
     languageVersion = Build.Versions.KOTLIN

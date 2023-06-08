@@ -25,23 +25,21 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 private fun InitHome() {
-  getRegHomeSubs()
+  regHomeSubs()
   val scope: CoroutineScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
     getRegHomeCofx(scope)
     regHomeEvents()
-    dispatch(v(home.load))
+    dispatch(v(home.fsm, home.load))
   }
 }
 
-private fun NavGraphBuilder.homeCommon(
-  content: @Composable (videos: Videos) -> Unit
-) {
+private fun NavGraphBuilder.homeCommon(content: @Composable (Videos) -> Unit) {
   composable(route = HOME_ROUTE) {
     InitHome()
     VideosPanel(
       panelVm = watch(v(home.view_model, LocalContext.current.resources)),
-      onRefresh = { dispatch(v(home.refresh)) },
+      onRefresh = { dispatch(v(home.fsm, home.refresh)) },
       content = content
     )
   }

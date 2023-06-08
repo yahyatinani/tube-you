@@ -5,21 +5,25 @@ import com.github.whyrising.recompose.regSub
 import com.github.whyrising.y.core.collections.IPersistentVector
 import com.github.whyrising.y.core.collections.PersistentVector
 import com.github.whyrising.y.core.get
+import com.github.whyrising.y.core.getIn
+import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_search_bar_active
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
-import com.github.yahyatinani.tubeyou.modules.core.keywords.search.sb_state
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.search_bar
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.search_list
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
-import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar.query
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm.Loaded
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
+import com.github.yahyatinani.tubeyou.modules.panel.common.State
+import com.github.yahyatinani.tubeyou.modules.panel.common.activeTab
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatChannel
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatPlayList
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideo
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.DRAFT
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCHING
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.SEARCH_RESULTS
+import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.ACTIVE
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCHING
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCH_RESULTS
 
 fun formatSearch(
   search: PersistentVector<SearchResult>,
@@ -36,55 +40,52 @@ fun formatSearch(
   }
 )
 
-fun searchQuery(appDb: AppDb): String? {
-  val searchStack = searchStack(appDb) ?: return null
-  return top(searchStack)[query] as String
+fun searchBarState(appDb: AppDb): SearchBar? {
+  val state =
+    getIn<State>(appDb, l(activeTab(appDb), search.panel_fsm)) ?: return null
+  val sbState = getIn<Any>(state, l(fsm._state, search_bar))
+  val sb = state[search_bar] as SearchBar
+  return sb.assoc(fsm._state, sbState == ACTIVE)
 }
 
-fun sbStateMap(appDb: AppDb): SearchBarFsm? = searchBarFsm(appDb)
+fun searchPanelState(appDb: AppDb): State? =
+  getIn(appDb, l(activeTab(appDb), search.panel_fsm))
 
 fun regCommonSubs() {
-  regSub(queryId = is_search_bar_active, key = is_search_bar_active)
+  regSub(queryId = search_bar, ::searchBarState)
 
-  regSub(queryId = query, ::searchQuery)
-
-  regSub(queryId = sb_state, ::sbStateMap)
-
-  regSub(
-    queryId = searchBar.suggestions,
-    initialValue = v<Any?>(),
-    v(sb_state),
-    computationFn = ::searchSuggestions
-  )
+  regSub(queryId = search.panel_fsm, ::searchPanelState)
 
   regSub<Any?, PanelVm>(
     queryId = search.view_model,
     initialValue = PanelVm.Loading,
-    v(sb_state)
-  ) { sbStateMap, prev, (_, resources) ->
-    when (currentState(sbStateMap as SearchBarFsm?)) {
-      null -> PanelVm.Init
-      SEARCHING -> PanelVm.Loading
-      DRAFT -> prev
+    v(search.panel_fsm)
+  ) { searchPanelState, prev, (_, resources) ->
+    when (getIn<SearchState>(searchPanelState, l(fsm._state, search_list))) {
+      null, SEARCHING -> PanelVm.Loading
       SEARCH_RESULTS -> {
-        val error = searchError(sbStateMap!!)
-        if (error != null) PanelVm.Error(error)
-        else {
-          val (id, items) = get<IPersistentVector<Any>>(
-            searchBarStack(sbStateMap).peek()!!,
-            searchBar.results
-          )!!
-          Loaded(
-            videos = formatSearch(
-              items as PersistentVector<SearchResult>,
-              resources
-            ),
-            appendEvent = id
-          )
+        val search =
+          ((searchPanelState as State?)!![search.stack] as SearchStack).peek()
+        val error = search!![searchBar.search_error]
+        when {
+          error != null -> PanelVm.Error(error as Int?)
+          else -> {
+            val (id, items) = get<IPersistentVector<Any>>(
+              search,
+              searchBar.results
+            )!!
+            Loaded(
+              videos = formatSearch(
+                items as PersistentVector<SearchResult>,
+                resources
+              ),
+              appendEvent = id
+            )
+          }
         }
       }
 
-      SearchBarState.APPENDING -> (prev as Loaded).copy(isAppending = true)
+      SearchState.APPENDING -> (prev as Loaded).copy(isAppending = true)
     }
   }
 }

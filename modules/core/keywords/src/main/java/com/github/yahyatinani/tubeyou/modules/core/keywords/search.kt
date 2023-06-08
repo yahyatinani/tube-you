@@ -7,18 +7,20 @@ enum class search {
   update_search_input,
   clear_search_input,
   submit,
+  activate_searchBar,
   set_suggestions,
   set_search_results,
   back_press_search,
 
-  fsm,
   route,
   stack,
   get_search_results,
   get_search_suggestions,
   view_model,
-  sb_state,
-  coroutine_scope;
+  search_bar,
+  search_list,
+  coroutine_scope,
+  panel_fsm;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

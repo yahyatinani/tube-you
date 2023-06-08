@@ -43,7 +43,7 @@ class LazyPagingItems2<T : Any> internal constructor(
    */
   private val flow: Flow<PagingData<T>>,
   val onSuccessEvent: Event,
-  val onAppendEvent: Event,
+  val onAppendEvent: Event
 ) {
   val id = hashCode()
 
@@ -114,9 +114,12 @@ class LazyPagingItems2<T : Any> internal constructor(
     itemSnapshotList = pagingDataDiffer.snapshot()
 
     val event = onSuccessEvent.conj(
-      v(id, itemSnapshotList.fold(v<T>()) { acc, t ->
-        if (t != null) acc.conj(t) else acc
-      })
+      v(
+        id,
+        itemSnapshotList.fold(v<T>()) { acc, t ->
+          if (t != null) acc.conj(t) else acc
+        }
+      )
     )
     dispatch(event)
   }

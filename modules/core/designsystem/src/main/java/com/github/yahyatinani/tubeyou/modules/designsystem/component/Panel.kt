@@ -31,7 +31,11 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 fun Panel(
   modifier: Modifier = Modifier,
   panelVm: PanelVm,
-  content: @Composable (videos: Videos, appendEvent: Any?, appendLoader: @Composable () -> Unit) -> Unit
+  content: @Composable (
+    videos: Videos,
+    appendEvent: Any?,
+    appendLoader: @Composable () -> Unit
+  ) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -46,7 +50,6 @@ fun Panel(
         }
       }
     }
-
 
     if (panelVm.isLoading) {
       // TODO: if online use placeholder UI loader.

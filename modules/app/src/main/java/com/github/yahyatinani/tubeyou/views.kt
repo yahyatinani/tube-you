@@ -53,6 +53,7 @@ import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.recompose.watch
+import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.m
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
@@ -61,7 +62,9 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_naviga
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.expand_top_app_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.start_destination
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.activate_searchBar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.clear_search_input
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search.show_search_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.update_search_input
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyBottomNavigationBar
@@ -69,6 +72,8 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.thumbnailHeight
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
+import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBar
 import com.github.yahyatinani.tubeyou.modules.panel.home.homeGraph
 import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
 import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
@@ -108,9 +113,9 @@ private fun NavigationChangedListenerEffect(navController: NavHostController) {
 fun topAppBarScrollBehavior(
   isCompactDisplay: Boolean,
   topAppBarState: TopAppBarState,
-  searchQuery: String?
+  searchBar: Any?
 ): TopAppBarScrollBehavior = when {
-  isCompactDisplay && searchQuery == null -> {
+  isCompactDisplay && searchBar == null -> {
     LaunchedEffect(Unit) {
       regFx(expand_top_app_bar) {
         topAppBarState.heightOffset = 0f
@@ -152,10 +157,10 @@ fun TyApp(
 
   TyTheme(isCompact = isCompactSize) {
     val colorScheme = MaterialTheme.colorScheme
-    val searchQuery = watch<String?>(v(searchBar.query))
     val topBarState = rememberTopAppBarState()
+    val sb = watch<SearchBar?>(v(search.search_bar))
     val scrollBehavior =
-      topAppBarScrollBehavior(isCompactSize, topBarState, searchQuery)
+      topAppBarScrollBehavior(isCompactSize, topBarState, sb)
     Scaffold(
       modifier = Modifier
         .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -165,32 +170,40 @@ fun TyApp(
         },
       topBar = {
         when {
-          searchQuery != null -> {
+          sb != null -> {
             val scope = rememberCoroutineScope()
             regCofx(search.coroutine_scope) { cofx ->
               cofx.assoc(search.coroutine_scope, scope)
             }
             TySearchBar(
-              searchQuery = searchQuery,
+              searchQuery = sb[searchBar.query]!! as String,
               onQueryChange = {
-                dispatchSync(v(search.fsm, update_search_input, it))
+                dispatchSync(v(search.panel_fsm, update_search_input, it))
               },
-              onSearch = { dispatchSync(v(search.fsm, search.submit, it)) },
-              isActive = watch(query = v(common.is_search_bar_active)),
-              onActiveChange = { dispatch(v(common.is_search_bar_active, it)) },
-              clearInput = { dispatchSync(v(search.fsm, clear_search_input)) },
+              onSearch = {
+                dispatch(v(search.panel_fsm, search.submit, it))
+              },
+              isActive = sb[fsm._state] as Boolean,
+              onActiveChange = {
+                dispatch(v(search.panel_fsm, activate_searchBar))
+              },
+              clearInput = {
+                dispatchSync(v(search.panel_fsm, clear_search_input))
+              },
               backPress = {
-                dispatchSync(v(search.fsm, search.back_press_search))
+                dispatch(v(search.panel_fsm, search.back_press_search))
               },
-              suggestions = watch(query = v(searchBar.suggestions)),
+              suggestions = sb[searchBar.suggestions] as List<String>,
               colorScheme = colorScheme
-            ) {
+            ) { selectedSuggestion ->
               // FIXME: Move cursor to the end of text.
-              dispatch(v(search.fsm, update_search_input, it))
+              dispatchSync(
+                v(search.panel_fsm, update_search_input, selectedSuggestion)
+              )
             }
 
             BackHandler {
-              dispatchSync(v(search.fsm, search.back_press_search))
+              dispatchSync(v(search.panel_fsm, search.back_press_search))
             }
           }
 
@@ -206,7 +219,9 @@ fun TyApp(
               navigationIcon = {},
               actions = {
                 IconButton(
-                  onClick = { dispatch(v(search.fsm, search.show_search_bar)) }
+                  onClick = {
+                    dispatchSync(v(search.panel_fsm, show_search_bar))
+                  }
                 ) {
                   Icon(
                     imageVector = Icons.Outlined.Search,
@@ -234,15 +249,11 @@ fun TyApp(
           navItems = watch(v(common.navigation_items)),
           isCompact = isCompactSize,
           colorScheme = colorScheme
-        ) {
-          dispatch(v(common.on_click_nav_item, it))
-        }
+        ) { dispatch(v(common.on_click_nav_item, it)) }
       }
     ) {
       val enabled = !watch<Boolean>(query = v(common.is_backstack_empty))
-      BackHandler(enabled) {
-        dispatchSync(v(common.bottom_bar_back_press))
-      }
+      BackHandler(enabled) { dispatchSync(v(common.bottom_bar_back_press)) }
 
       val orientation = LocalConfiguration.current.orientation
       val thumbnailHeight = thumbnailHeight(orientation)

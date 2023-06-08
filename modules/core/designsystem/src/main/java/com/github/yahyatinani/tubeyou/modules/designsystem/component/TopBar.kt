@@ -16,13 +16,14 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 fun TySearchBar(
   searchQuery: String,
   onQueryChange: (String) -> Unit,
@@ -87,8 +88,6 @@ fun TySearchBar(
   }
 
   LaunchedEffect(isActive) {
-    if (isActive) {
-      focusRequester.requestFocus()
-    }
+    if (isActive) focusRequester.requestFocus()
   }
 }

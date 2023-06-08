@@ -28,6 +28,7 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.States.Refreshing
 import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
 import com.github.yahyatinani.tubeyou.modules.panel.common.ktor
 import com.github.yahyatinani.tubeyou.modules.panel.common.letIf
+import com.github.yahyatinani.tubeyou.modules.panel.common.nextState
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
 import io.ktor.http.HttpMethod
 import io.ktor.util.reflect.typeInfo
@@ -58,9 +59,6 @@ val Home_Transitions = m<Any?, Any>(
 
 fun homeCurrentState(appDb: AppDb) =
   getIn<States>(appDb, l(HOME_GRAPH_ROUTE, home.state, 0))
-
-fun nextState(fsm: Map<Any?, Any>, currentState: States?, transition: Any) =
-  getIn<Any?>(fsm, l(currentState, transition))
 
 fun updateToNextState(db: AppDb, event: Any): AppDb {
   val currentState = homeCurrentState(db)

@@ -207,3 +207,6 @@ fun trigger(
 
   return effects.assoc(recompose.db, newAppDb)
 }
+
+fun nextState(fsm: Map<Any?, Any>, currentState: States?, transition: Any) =
+  getIn<Any?>(fsm, l(currentState, transition))

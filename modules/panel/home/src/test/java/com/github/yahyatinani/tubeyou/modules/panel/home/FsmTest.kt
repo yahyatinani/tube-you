@@ -1,6 +1,5 @@
 package com.github.yahyatinani.tubeyou.modules.panel.home
 
-import com.github.whyrising.recompose.fx.BuiltInFx
 import com.github.whyrising.y.core.assocIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.m
@@ -21,7 +20,7 @@ class FsmTest : FreeSpec({
     updateToNextState(m(), home.load) shouldBe assocIn(
       map,
       l(HOME_GRAPH_ROUTE, home.state),
-      v(Loading, v(v(BuiltInFx.dispatch, v(home.load_trending))))
+      v(Loading)
     )
 
     updateToNextState(
@@ -34,7 +33,7 @@ class FsmTest : FreeSpec({
     handleNextState(m(), v(home.load)) shouldBe assocIn(
       map,
       l(HOME_GRAPH_ROUTE, home.state),
-      v(Loading, v(v(BuiltInFx.dispatch, v(home.load_trending))))
+      v(Loading)
     )
 
     handleNextState(

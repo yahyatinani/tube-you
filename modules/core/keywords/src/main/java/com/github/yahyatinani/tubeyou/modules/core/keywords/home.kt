@@ -2,18 +2,19 @@ package com.github.yahyatinani.tubeyou.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class home {
-  state,
   view_model,
   load_trending,
   go_top_list,
   coroutine_scope,
   fsm_state,
+  fsm,
+  content,
 
   // FSM events
   load,
-  loading_is_done,
   refresh,
-  loading_failed;
+  set_loading_results,
+  set_loading_error;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

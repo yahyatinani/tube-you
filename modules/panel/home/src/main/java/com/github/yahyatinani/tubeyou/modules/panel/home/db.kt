@@ -8,9 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 // -- Spec ---------------------------------------------------------------------
 
 /**
- * {:home/state ([States.Loaded] , value)
- *  :home/popular_vids ([Video])
- *  :home/error e
+ * {:home/state ([PanelStates.LOADED] , value)
+ *  :home/content ([Video])
  *  :search_bar ({:query "" :suggestions [] :results []}, ...)
  * }
  */

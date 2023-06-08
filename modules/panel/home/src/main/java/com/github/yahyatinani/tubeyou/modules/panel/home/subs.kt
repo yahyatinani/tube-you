@@ -2,7 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.home
 
 import android.content.res.Resources
 import com.github.whyrising.recompose.regSub
-import com.github.whyrising.y.core.collections.PersistentVector
+import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.getIn
 import com.github.whyrising.y.core.l
 import com.github.whyrising.y.core.v
@@ -11,38 +11,36 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
-import com.github.yahyatinani.tubeyou.modules.panel.common.States
+import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates
+import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.FAILED
+import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.LOADED
+import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.LOADING
+import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.REFRESHING
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideos
-import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
+import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
 
 fun homeFsmState(db: AppDb): Any? =
-  getIn(db, l(HOME_GRAPH_ROUTE, home.state))
+  getIn(db, l(HOME_GRAPH_ROUTE, home.fsm_state))
 
-fun getRegHomeSubs() {
+fun <R> homeContent(stateMap: Any?): R = get(stateMap, home.content)!!
+
+fun regHomeSubs() {
   regSub(home.fsm_state, ::homeFsmState)
 
-  regSub<PersistentVector<Any?>?, PanelVm>(
+  regSub<Any?, PanelVm>(
     queryId = home.view_model,
     initialValue = PanelVm.Loading,
     v(home.fsm_state)
-  ) { homeFsmState, currentValue, (_, resources) ->
-    if (homeFsmState == null) return@regSub PanelVm.Loading
-
-    when (homeFsmState[0] as States?) {
-      null, States.Loading -> PanelVm.Loading
-
-      States.Refreshing -> PanelVm.Refreshing(currentValue.videos)
-
-      States.Loaded -> PanelVm.Loaded(
+  ) { stateMap, currentValue, (_, resources) ->
+    when (get<PanelStates>(stateMap, fsm._state)) {
+      null, LOADING -> PanelVm.Loading
+      REFRESHING -> PanelVm.Refreshing(currentValue.videos)
+      FAILED -> PanelVm.Error(error = homeContent(stateMap))
+      LOADED -> PanelVm.Loaded(
         videos = Videos(
-          formatVideos(
-            videoDataList = homeFsmState[1] as List<Video>,
-            resources = resources as Resources
-          )
+          formatVideos(homeContent(stateMap), resources as Resources)
         )
       )
-
-      States.Failed -> PanelVm.Error(error = homeFsmState[1] as Int)
     }
   }
 }

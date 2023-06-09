@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +40,9 @@ fun Panel(
   Box(modifier = modifier.fillMaxSize()) {
     content(panelVm.videos, panelVm.appendEvent) {
       if (panelVm.isAppending) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier
+          .fillMaxWidth()
+          .padding(vertical = 4.dp)) {
           CircularProgressIndicator(
             modifier = Modifier.align(Alignment.Center),
             color = Blue300

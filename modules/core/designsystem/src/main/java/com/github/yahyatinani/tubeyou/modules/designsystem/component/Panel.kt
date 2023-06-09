@@ -3,7 +3,6 @@ package com.github.yahyatinani.tubeyou.modules.designsystem.component
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -33,20 +32,18 @@ fun Panel(
   panelVm: PanelVm,
   content: @Composable (
     videos: Videos,
-    appendEvent: Any?,
+    triggerAppending: Any?,
     appendLoader: @Composable () -> Unit
   ) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    Column(modifier = modifier.fillMaxSize()) {
-      content(panelVm.videos, panelVm.appendEvent) {
-        if (panelVm.isAppending) {
-          Box(modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(
-              modifier = Modifier.align(Alignment.Center),
-              color = Blue300
-            )
-          }
+    content(panelVm.videos, panelVm.appendEvent) {
+      if (panelVm.isAppending) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+          CircularProgressIndicator(
+            modifier = Modifier.align(Alignment.Center),
+            color = Blue300
+          )
         }
       }
     }

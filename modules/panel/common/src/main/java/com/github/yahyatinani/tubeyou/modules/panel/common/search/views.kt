@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.github.whyrising.recompose.dispatch
+import com.github.whyrising.recompose.dispatchSync
 import com.github.whyrising.recompose.watch
 import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
@@ -42,7 +42,7 @@ const val SEARCH_ROUTE = "search_results"
 fun SearchPanel(
   listState: LazyListState,
   videos: Videos,
-  appendEvent: Any?,
+  triggerAppending: Any?,
   orientation: Int,
   thumbnailHeight: Dp,
   appendLoader: @Composable () -> Unit
@@ -56,7 +56,7 @@ fun SearchPanel(
     // Pagination Loading UI
     val items = videos.value
     itemsIndexed(items = items) { index: Int, vm: Any ->
-      if (appendEvent != null) dispatch(v(appendEvent, index))
+      if (triggerAppending != null) dispatchSync(v(triggerAppending, index))
 
       val isPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
       if (vm is VideoViewModel) {
@@ -124,11 +124,11 @@ fun NavGraphBuilder.searchPanel(
     val panelVm =
       watch<PanelVm>(v(search.view_model, LocalContext.current.resources))
 
-    Panel(panelVm = panelVm) { videos, appendEvent, appendLoader ->
+    Panel(panelVm = panelVm) { videos, triggerAppending, appendLoader ->
       SearchPanel(
         listState = rememberLazyListState(),
         videos = videos,
-        appendEvent = appendEvent,
+        triggerAppending = triggerAppending,
         orientation = orientation,
         thumbnailHeight = thumbnailHeight,
         appendLoader = appendLoader

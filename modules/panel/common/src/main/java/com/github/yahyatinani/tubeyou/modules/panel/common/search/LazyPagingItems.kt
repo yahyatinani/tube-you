@@ -45,14 +45,17 @@ class LazyPagingItems2<T : Any> internal constructor(
   val onSuccessEvent: Event,
   val onAppendEvent: Event
 ) {
-  val id = hashCode()
+  private val triggerAppending =
+    hashCode() + onSuccessEvent.hashCode() + onAppendEvent.hashCode()
 
   init {
-    regFx(id) { index ->
-      get(index as Int)
+    regFx(triggerAppending) { index ->
+      // Notify Paging of the item access to trigger any loads necessary to
+      // fulfill prefetchDistance.
+      pagingDataDiffer[index as Int]
     }
 
-    regEventFx(id) { _, event ->
+    regEventFx(triggerAppending) { _, event ->
       m(BuiltInFx.fx to v(event))
     }
   }
@@ -115,7 +118,7 @@ class LazyPagingItems2<T : Any> internal constructor(
 
     val event = onSuccessEvent.conj(
       v(
-        id,
+        triggerAppending,
         itemSnapshotList.fold(v<T>()) { acc, t ->
           if (t != null) acc.conj(t) else acc
         }

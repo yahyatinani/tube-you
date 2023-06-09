@@ -1,7 +1,9 @@
 package com.github.yahyatinani.tubeyou.modules.designsystem.component
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -13,10 +15,13 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -248,6 +254,48 @@ fun ChannelItem(
 }
 
 @Composable
+fun BoxScope.PlaylistThumbnailContent(viewModel: PlaylistVm) {
+  val textStyle = MaterialTheme.typography.labelMedium
+  Row(
+    modifier = Modifier
+      .align(alignment = Alignment.BottomCenter)
+      .background(color = Color.Black.copy(alpha = .4f))
+      .fillMaxWidth()
+      .wrapContentHeight()
+      .padding(vertical = 2.dp, horizontal = 4.dp),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Icon(
+        imageVector = Icons.Default.PlaylistPlay,
+        contentDescription = "",
+        modifier = Modifier.size(18.dp),
+        tint = Color.White
+      )
+      Text(
+        text = "Playlist",
+        color = Color.White,
+        style = textStyle
+      )
+    }
+    Row {
+      Text(
+        text = viewModel.videoCount,
+        color = Color.White,
+        style = textStyle
+      )
+      Spacer(modifier = Modifier.width(4.dp))
+      Text(
+        text = "videos",
+        color = Color.White,
+        style = textStyle
+      )
+    }
+  }
+}
+
+@Composable
 fun PlayListPortrait(
   modifier: Modifier = Modifier,
   viewModel: PlaylistVm,
@@ -260,7 +308,6 @@ fun PlayListPortrait(
     modifier = modifier.padding(top = 12.dp),
     thumbnailHeight = thumbnailHeight,
     thumbnailContent = { PlaylistThumbnailContent(viewModel) },
-    channelAvatar = {}
   )
 }
 

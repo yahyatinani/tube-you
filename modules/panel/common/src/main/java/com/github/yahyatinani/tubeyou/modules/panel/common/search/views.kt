@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.DarkGray
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
@@ -42,28 +42,34 @@ const val SEARCH_ROUTE = "search_results"
 fun PortraitListItem(
   vm: Any,
   thumbnailHeight: Dp,
-  index: Int
-) = when (vm) {
-  is VideoViewModel -> VideoItemPortrait(
-    viewModel = vm,
-    thumbnailHeight = thumbnailHeight
-  )
+  index: Int,
+  lastIndex: Int
+) {
+  when (vm) {
+    is VideoViewModel -> VideoItemPortrait(
+      viewModel = vm,
+      thumbnailHeight = thumbnailHeight
+    )
 
-  is ChannelVm -> {
-    if (index != 0) Divider(color = Color.DarkGray)
-    ChannelItem(
-      modifier = Modifier
-        .clickable { /*TODO*/ }
-        .fillMaxWidth(),
-      vm = vm
+    is ChannelVm -> {
+      if (index != 0) Divider(color = DarkGray)
+
+      ChannelItem(
+        modifier = Modifier
+          .clickable { /*TODO*/ }
+          .fillMaxWidth(),
+        vm = vm
+      )
+
+      if (index != lastIndex) Divider(color = DarkGray)
+    }
+
+    else -> PlayListPortrait(
+      modifier = Modifier.padding(start = 12.dp),
+      viewModel = vm as PlaylistVm,
+      thumbnailHeight = thumbnailHeight
     )
   }
-
-  else -> PlayListPortrait(
-    modifier = Modifier.padding(start = 12.dp),
-    viewModel = vm as PlaylistVm,
-    thumbnailHeight = thumbnailHeight
-  )
 }
 
 
@@ -71,21 +77,23 @@ fun PortraitListItem(
 fun LandscapeListItem(
   vm: Any,
   thumbnailHeight: Dp
-) = when (vm) {
-  is VideoViewModel -> VideoItemLandscapeCompact(
-    viewModel = vm,
-    thumbnailHeight = thumbnailHeight
-  )
+) {
+  when (vm) {
+    is VideoViewModel -> VideoItemLandscapeCompact(
+      viewModel = vm,
+      thumbnailHeight = thumbnailHeight
+    )
 
-  is ChannelVm -> ChannelItem(
-    vm = vm,
-    modifier = Modifier
-      .clickable { /*TODO*/ }
-      .fillMaxWidth(),
-    avatarPaddingValues = PaddingValues(horizontal = 24.dp)
-  )
+    is ChannelVm -> ChannelItem(
+      vm = vm,
+      modifier = Modifier
+        .clickable { /*TODO*/ }
+        .fillMaxWidth(),
+      avatarPaddingValues = PaddingValues(horizontal = 24.dp)
+    )
 
-  else -> PlayListLandscape(vm as PlaylistVm, thumbnailHeight)
+    else -> PlayListLandscape(vm as PlaylistVm, thumbnailHeight)
+  }
 }
 
 @Composable
@@ -106,7 +114,13 @@ fun SearchPanel(
     itemsIndexed(items = videos.value) { index: Int, vm: Any ->
       dispatchSync(v(triggerAppending!!, index))
       when {
-        isPortrait -> PortraitListItem(vm, thumbnailHeight, index)
+        isPortrait -> PortraitListItem(
+          vm = vm,
+          thumbnailHeight = thumbnailHeight,
+          index = index,
+          lastIndex = videos.value.size
+        )
+
         else -> LandscapeListItem(vm, thumbnailHeight)
       }
     }

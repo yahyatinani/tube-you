@@ -132,28 +132,6 @@ fun ThumbnailContent(viewModel: VideoViewModel) = when {
 }
 
 @Composable
-fun BoxScope.PlaylistThumbnailContent(viewModel: PlaylistVm) {
-  Row(
-    modifier = Modifier
-      .align(alignment = Alignment.BottomCenter)
-      .background(color = Color.Black.copy(alpha = .4f))
-      .fillMaxWidth()
-      .wrapContentHeight()
-      .padding(vertical = 2.dp),
-    horizontalArrangement = Arrangement.Center,
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Icon(
-      imageVector = Icons.Default.PlaylistPlay,
-      contentDescription = "",
-      tint = Color.White
-    )
-    Spacer(modifier = Modifier.width(4.dp))
-    Text(text = viewModel.videoCount, color = Color.White)
-  }
-}
-
-@Composable
 fun VideoItemTitle(modifier: Modifier = Modifier, title: String) {
   Text(
     text = title,

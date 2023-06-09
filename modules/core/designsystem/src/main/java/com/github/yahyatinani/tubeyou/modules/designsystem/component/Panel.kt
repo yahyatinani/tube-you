@@ -64,7 +64,7 @@ fun Panel(
 }
 
 @Composable
-fun VideosPanel(
+fun PullRefreshPanel(
   modifier: Modifier = Modifier,
   panelVm: PanelVm,
   onRefresh: () -> Unit = {},
@@ -113,7 +113,7 @@ fun HomePreview() {
   )
 
   TyTheme {
-    VideosPanel(
+    PullRefreshPanel(
       panelVm = PanelVm.Loaded(
         videos = Videos(v(viewModel, viewModel, viewModel, viewModel))
       )

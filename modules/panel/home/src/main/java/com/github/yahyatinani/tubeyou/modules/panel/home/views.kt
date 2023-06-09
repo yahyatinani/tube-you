@@ -18,7 +18,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosGrid
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosList
-import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosPanel
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.PullRefreshPanel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.searchPanel
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +37,7 @@ private fun InitHome() {
 private fun NavGraphBuilder.homeCommon(content: @Composable (Videos) -> Unit) {
   composable(route = HOME_ROUTE) {
     InitHome()
-    VideosPanel(
+    PullRefreshPanel(
       panelVm = watch(v(home.view_model, LocalContext.current.resources)),
       onRefresh = { dispatch(v(home.fsm, home.refresh)) },
       content = content

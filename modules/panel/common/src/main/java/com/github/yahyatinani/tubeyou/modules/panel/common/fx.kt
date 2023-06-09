@@ -182,15 +182,14 @@ class PagingSourceString(
   override suspend fun load(
     params: LoadParams<String>
   ): LoadResult<String, SearchResult> {
-    if (params.key == "null" || params.key == null) {
-      return LoadResult.Page(data = v(), prevKey = null, nextKey = null)
-    }
-
     val sr: SearchResponse = f(params)
+    val nextpage = sr.nextpage
     return LoadResult.Page(
       data = sr.items,
       prevKey = null,
-      nextKey = URLEncoder.encode(sr.nextpage, "UTF-8")
+      nextKey = if (nextpage != "null" && nextpage != null) {
+        URLEncoder.encode(nextpage, "UTF-8")
+      } else null
     )
   }
 }

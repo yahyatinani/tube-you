@@ -1,6 +1,6 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
-import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,76 +39,75 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
 const val SEARCH_ROUTE = "search_results"
 
 @Composable
+fun PortraitListItem(
+  vm: Any,
+  thumbnailHeight: Dp,
+  index: Int
+) = when (vm) {
+  is VideoViewModel -> VideoItemPortrait(
+    viewModel = vm,
+    thumbnailHeight = thumbnailHeight
+  )
+
+  is ChannelVm -> {
+    if (index != 0) Divider(color = Color.DarkGray)
+    ChannelItem(
+      modifier = Modifier
+        .clickable { /*TODO*/ }
+        .fillMaxWidth(),
+      vm = vm
+    )
+  }
+
+  else -> PlayListPortrait(
+    modifier = Modifier.padding(start = 12.dp),
+    viewModel = vm as PlaylistVm,
+    thumbnailHeight = thumbnailHeight
+  )
+}
+
+
+@Composable
+fun LandscapeListItem(
+  vm: Any,
+  thumbnailHeight: Dp
+) = when (vm) {
+  is VideoViewModel -> VideoItemLandscapeCompact(
+    viewModel = vm,
+    thumbnailHeight = thumbnailHeight
+  )
+
+  is ChannelVm -> ChannelItem(
+    vm = vm,
+    modifier = Modifier
+      .clickable { /*TODO*/ }
+      .fillMaxWidth(),
+    avatarPaddingValues = PaddingValues(horizontal = 24.dp)
+  )
+
+  else -> PlayListLandscape(vm as PlaylistVm, thumbnailHeight)
+}
+
+@Composable
 fun SearchPanel(
   listState: LazyListState,
   videos: Videos,
   triggerAppending: Any?,
-  orientation: Int,
+  isPortrait: Boolean,
   thumbnailHeight: Dp,
   appendLoader: @Composable () -> Unit
 ) {
   LazyColumn(
     state = listState,
     modifier = Modifier
-      .testTag("search_list")
+      .testTag("search_results_list")
       .fillMaxSize()
   ) {
-    // Pagination Loading UI
-    val items = videos.value
-    itemsIndexed(items = items) { index: Int, vm: Any ->
-      if (triggerAppending != null) dispatchSync(v(triggerAppending, index))
-
-      val isPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
-      if (vm is VideoViewModel) {
-        if (
-          index > 1 &&
-          items[index - 1] as? VideoViewModel != null &&
-          isPortrait
-        ) {
-          Divider(thickness = 6.dp, color = Color.DarkGray)
-        }
-        when {
-          isPortrait -> VideoItemPortrait(
-            viewModel = vm,
-            thumbnailHeight = thumbnailHeight
-          )
-
-          else -> VideoItemLandscapeCompact(
-            viewModel = vm,
-            thumbnailHeight = thumbnailHeight
-          )
-        }
-      } else {
-        if (index != 0 && isPortrait) {
-          Divider(thickness = 6.dp, color = Color.DarkGray)
-        }
-
-        when (vm) {
-          is ChannelVm -> ChannelItem(
-            vm = vm,
-            modifier = Modifier
-              .clickable { /*TODO*/ }
-              .fillMaxWidth(),
-            avatarPaddingValues = PaddingValues(
-              horizontal = (if (isPortrait) 0 else 24).dp
-            )
-          )
-
-          is PlaylistVm -> {
-            when {
-              isPortrait -> PlayListPortrait(
-                modifier = Modifier.padding(start = 12.dp),
-                viewModel = vm,
-                thumbnailHeight = thumbnailHeight
-              )
-
-              else -> PlayListLandscape(
-                viewModel = vm,
-                thumbnailHeight = thumbnailHeight
-              )
-            }
-          }
-        }
+    itemsIndexed(items = videos.value) { index: Int, vm: Any ->
+      dispatchSync(v(triggerAppending!!, index))
+      when {
+        isPortrait -> PortraitListItem(vm, thumbnailHeight, index)
+        else -> LandscapeListItem(vm, thumbnailHeight)
       }
     }
     item { appendLoader() }
@@ -129,7 +128,7 @@ fun NavGraphBuilder.searchPanel(
         listState = rememberLazyListState(),
         videos = videos,
         triggerAppending = triggerAppending,
-        orientation = orientation,
+        isPortrait = orientation == ORIENTATION_PORTRAIT,
         thumbnailHeight = thumbnailHeight,
         appendLoader = appendLoader
       )

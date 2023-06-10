@@ -17,9 +17,11 @@ import androidx.paging.NullPaddedList
 import androidx.paging.PagingData
 import androidx.paging.PagingDataDiffer
 import androidx.paging.compose.LazyPagingItems
+import com.github.whyrising.recompose.clearEvent
+import com.github.whyrising.recompose.clearFx
 import com.github.whyrising.recompose.dispatch
 import com.github.whyrising.recompose.events.Event
-import com.github.whyrising.recompose.fx.BuiltInFx
+import com.github.whyrising.recompose.fx.BuiltInFx.fx
 import com.github.whyrising.recompose.regEventFx
 import com.github.whyrising.recompose.regFx
 import com.github.whyrising.y.core.m
@@ -56,8 +58,13 @@ class LazyPagingItems2<T : Any> internal constructor(
     }
 
     regEventFx(triggerAppending) { _, event ->
-      m(BuiltInFx.fx to v(event))
+      m(fx to v(event))
     }
+  }
+
+  fun clear() {
+    clearEvent(triggerAppending)
+    clearFx(triggerAppending)
   }
 
   private val mainDispatcher = Dispatchers.Main
@@ -125,28 +132,6 @@ class LazyPagingItems2<T : Any> internal constructor(
       )
     )
     dispatch(event)
-  }
-
-  /**
-   * Returns the presented item at the specified position, notifying Paging of the item access to
-   * trigger any loads necessary to fulfill prefetchDistance.
-   *
-   * @see peek
-   */
-  operator fun get(index: Int): T? {
-    pagingDataDiffer[index] // this registers the value load
-    return itemSnapshotList[index]
-  }
-
-  /**
-   * Returns the presented item at the specified position, without notifying Paging of the item
-   * access that would normally trigger page loads.
-   *
-   * @param index Index of the presented item to return, including placeholders.
-   * @return The presented item at position [index], `null` if it is a placeholder
-   */
-  fun peek(index: Int): T? {
-    return itemSnapshotList[index]
   }
 
   /**

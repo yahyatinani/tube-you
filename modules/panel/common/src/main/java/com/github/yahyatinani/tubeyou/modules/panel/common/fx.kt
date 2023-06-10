@@ -2,7 +2,6 @@ package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.PagingSource.LoadParams
 import androidx.paging.PagingState
@@ -15,7 +14,6 @@ import com.github.whyrising.y.concurrency.atom
 import com.github.whyrising.y.core.collections.IPersistentMap
 import com.github.whyrising.y.core.get
 import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.panel.common.ktor.response_type_info
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.LazyPagingItems2
@@ -41,7 +39,6 @@ import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
@@ -174,7 +171,7 @@ fun regBounceFx() {
 val pagingSrcCache: Atom<IPersistentMap<Any, Any>> = atom(m())
 
 class PagingSourceString(
-  val f: suspend (params: LoadParams<String>) -> SearchResponse
+  val httpCall: suspend (params: LoadParams<String>) -> SearchResponse
 ) : PagingSource<String, SearchResult>() {
   override fun getRefreshKey(state: PagingState<String, SearchResult>) =
     state.anchorPosition?.let { i -> state.closestPageToPosition(i)?.nextKey }
@@ -182,7 +179,7 @@ class PagingSourceString(
   override suspend fun load(
     params: LoadParams<String>
   ): LoadResult<String, SearchResult> {
-    val sr: SearchResponse = f(params)
+    val sr: SearchResponse = httpCall(params)
     val nextpage = sr.nextpage
     return LoadResult.Page(
       data = sr.items,
@@ -194,33 +191,35 @@ class PagingSourceString(
   }
 }
 
-private const val initialKey = "initialKey"
+private const val INITIAL_KEY = "INITIAL_KEY"
 
 fun pagingEffect(request: Any?) {
   val coroutineScope = get<CoroutineScope>(request, ktor.coroutine_scope)!!
   coroutineScope.launch {
     val onFailure = get<Event>(request, ktor.on_failure)!!
-    val pager = Pager(PagingConfig(pageSize = 20), initialKey = initialKey) {
-      val eventId = get<Any>(request, "eventId")!!
+    val eventId = get<Any>(request, "eventId")!!
+    val pager = Pager(PagingConfig(pageSize = 20), initialKey = INITIAL_KEY) {
       PagingSourceString { params: LoadParams<String> ->
         return@PagingSourceString try {
           // TODO: 1. validate(request).
           request as IPersistentMap<Any, Any>
 
-          val timeout = request[ktor.timeout]
-          val pageName: String = request["pageName"] as String
-          val method = request[ktor.method] as HttpMethod // TODO:
-          val url = when (val nextPage = params.key) {
-            initialKey -> get<String>(request, ktor.url)!!
-            else -> "${request["nextUrl"]}&$pageName=$nextPage"
+          val nextPageKey = params.key
+          val url = when {
+            nextPageKey === INITIAL_KEY -> get<String>(request, ktor.url)!!
+            else -> "${request["nextUrl"]}&${request["pageName"]}=$nextPageKey"
           }
+
+          val timeout = request[ktor.timeout]
+          val method = request[ktor.method] as HttpMethod // TODO:
           val httpResponse = client.get {
             url(url)
             timeout { requestTimeoutMillis = (timeout as Number?)?.toLong() }
           }
 
           if (httpResponse.status == HttpStatusCode.OK) {
-            val responseTypeInfo = get<TypeInfo>(request, response_type_info)!!
+            val responseTypeInfo =
+              get<TypeInfo>(request, response_type_info)!!
             httpResponse.call.body(responseTypeInfo) as SearchResponse
           } else {
             TODO("${httpResponse.status}, $url")
@@ -230,23 +229,24 @@ fun pagingEffect(request: Any?) {
             is UnknownHostException -> 0
             is HttpRequestTimeoutException -> -1
             /*
-            catch (e: NoTransformationFoundException) {
-                TODO("504 Gateway Time-out: $e")
-            } */
+              catch (e: NoTransformationFoundException) {
+                  TODO("504 Gateway Time-out: $e")
+              } */
             else -> throw e
           }
           TODO()
         }
       } as PagingSource<Any, Any>
     }
-    val flow: Flow<PagingData<Any>> = pager.flow.cachedIn(coroutineScope)
-    val onSuccess = get<Event>(request, ktor.on_success)!!
-    val onAppending = get<Event>(request, "on_appending")!!
 
-    val lazyPagingItems2 = LazyPagingItems2(flow, onSuccess, onAppending)
-    coroutineScope.launch { lazyPagingItems2.collectPagingData() }
-    coroutineScope.launch { lazyPagingItems2.collectLoadState() }
-
-//    dispatch(onSuccess.conj(flow))
+    val lazyPagingItems = LazyPagingItems2(
+      flow = pager.flow.cachedIn(coroutineScope),
+      onSuccessEvent = get<Event>(request, ktor.on_success)!!,
+      onAppendEvent = get<Event>(request, "on_appending")!!
+    )
+    coroutineScope.launch { lazyPagingItems.collectPagingData() }
+      .invokeOnCompletion { lazyPagingItems.clear() }
+    coroutineScope.launch { lazyPagingItems.collectLoadState() }
+      .invokeOnCompletion { lazyPagingItems.clear() }
   }
 }

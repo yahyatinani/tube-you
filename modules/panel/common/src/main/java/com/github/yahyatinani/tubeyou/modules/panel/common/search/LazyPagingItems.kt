@@ -183,7 +183,9 @@ class LazyPagingItems2<T : Any> internal constructor(
 
   internal suspend fun collectLoadState() {
     pagingDataDiffer.loadStateFlow.filterNotNull().collect {
-      dispatch(onAppendEvent.conj(it))
+      if (it.append == LoadState.Loading) {
+        dispatch(onAppendEvent.conj(it))
+      }
       loadState = it
     }
   }

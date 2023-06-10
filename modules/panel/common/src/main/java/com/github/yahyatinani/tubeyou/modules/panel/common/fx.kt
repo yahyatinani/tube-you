@@ -195,7 +195,7 @@ private const val INITIAL_KEY = "INITIAL_KEY"
 
 fun pagingEffect(request: Any?) {
   val coroutineScope = get<CoroutineScope>(request, ktor.coroutine_scope)!!
-  coroutineScope.launch {
+  val job = coroutineScope.launch {
     val onFailure = get<Event>(request, ktor.on_failure)!!
     val eventId = get<Any>(request, "eventId")!!
     val pager = Pager(PagingConfig(pageSize = 10), initialKey = INITIAL_KEY) {
@@ -244,9 +244,9 @@ fun pagingEffect(request: Any?) {
       onSuccessEvent = get<Event>(request, ktor.on_success)!!,
       onAppendEvent = get<Event>(request, "on_appending")!!
     )
-    coroutineScope.launch { lazyPagingItems.collectPagingData() }
+    launch { lazyPagingItems.collectPagingData() }
       .invokeOnCompletion { lazyPagingItems.clear() }
-    coroutineScope.launch { lazyPagingItems.collectLoadState() }
+    launch { lazyPagingItems.collectLoadState() }
       .invokeOnCompletion { lazyPagingItems.clear() }
   }
 }

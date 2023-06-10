@@ -146,7 +146,11 @@ val searchListMachine = m<Any?, Any?>(
       m(target to null, guard to ::isSearchStackEmpty),
       m(target to SEARCH_RESULTS, actions to ::updateSearchBarToMatchTopOfStack)
     ),
-    set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults)
+    set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults),
+    clear_search_input to v(
+      m(target to null, guard to ::isSearchStackEmpty),
+      m(target to SEARCH_RESULTS)
+    )
   ),
   SEARCH_RESULTS to m(
     back_press_search to v(
@@ -157,10 +161,7 @@ val searchListMachine = m<Any?, Any?>(
       m(target to SEARCH_RESULTS, guard to ::isQueryBlankOrEmpty),
       m(target to SEARCHING)
     ),
-    "append" to v(
-      m(target to APPENDING, guard to ::isAppendLoading),
-      m(target to SEARCH_RESULTS)
-    )
+    "append" to m(target to APPENDING)
   ),
   APPENDING to m(
     set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults),

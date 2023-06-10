@@ -264,16 +264,16 @@ val searchBarMachine = m<Any?, Any?>(
     back_press_search to v(
       m(
         target to null,
-        guard to v(::isSearchStackEmpty),
-        actions to v(::navigateBack)
+        guard to ::isSearchStackEmpty,
+        actions to ::navigateBack
       ),
       v(
         m(target to INACTIVE, guard to ::isSearching),
         v(
           m(
             target to null,
-            guard to v(::isLastSearchBar),
-            actions to v(::navigateBack)
+            guard to ::isLastSearchBar,
+            actions to ::navigateBack
           ),
           m(
             target to INACTIVE,

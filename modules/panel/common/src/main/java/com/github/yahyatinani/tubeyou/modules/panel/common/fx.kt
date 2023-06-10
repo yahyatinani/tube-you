@@ -198,7 +198,7 @@ fun pagingEffect(request: Any?) {
   coroutineScope.launch {
     val onFailure = get<Event>(request, ktor.on_failure)!!
     val eventId = get<Any>(request, "eventId")!!
-    val pager = Pager(PagingConfig(pageSize = 20), initialKey = INITIAL_KEY) {
+    val pager = Pager(PagingConfig(pageSize = 10), initialKey = INITIAL_KEY) {
       PagingSourceString { params: LoadParams<String> ->
         return@PagingSourceString try {
           // TODO: 1. validate(request).

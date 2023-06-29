@@ -2,6 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
 import androidx.compose.runtime.Immutable
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
+import io.github.yahyatinani.recompose.pagingfx.Page
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.collections.PersistentVector
 import io.github.yahyatinani.y.core.m
@@ -9,6 +10,7 @@ import io.github.yahyatinani.y.core.v
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
+import java.net.URLEncoder
 
 typealias AppDb = IPersistentMap<Any, Any>
 
@@ -90,4 +92,10 @@ data class SearchResponse(
   val nextpage: String? = null,
   val suggestion: String? = null,
   val corrected: Boolean = false
-)
+) : Page {
+  override val data: List<SearchResult> = items
+  override val prevKey: String? = null
+  override val nextKey: String? = if (nextpage != "null" && nextpage != null) {
+    URLEncoder.encode(nextpage, "UTF-8")
+  } else null
+}

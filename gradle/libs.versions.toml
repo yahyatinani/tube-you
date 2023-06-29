@@ -33,7 +33,7 @@ slf4j = "1.3.5"
 datetime = "0.4.0"
 
 ylib = "0.5.0"
-recompose = "0.4.0.83-SNAPSHOT" #FIXME: release the new recompose version.
+recompose = "0.4.0.84-SNAPSHOT" #FIXME: release the new recompose version.
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -89,13 +89,14 @@ y-concurrency = { module = "io.github.yahyatinani:y-concurrency", version.ref = 
 recompose = { module = "io.github.yahyatinani.recompose:re-compose", version.ref = "recompose" }
 recompose-httpfx = { module = "io.github.yahyatinani.recompose:http-fx", version.ref = "recompose" }
 recompose-fsm = { module = "io.github.yahyatinani.recompose:fsm", version.ref = "recompose" }
+recompose-paging-fx = { module = "io.github.yahyatinani.recompose:paging-fx", version.ref = "recompose" }
 
 [bundles]
 compose = ["androidx-compose-ui-ui", "androidx-compose-ui-util", "androidx-compose-ui-tooling", "androidx-compose-material3", "androidx-constraintlayout-compose", "accompanist-swiperefresh", "androidx-compose-material3-windowssizeclass", "androidx-profileinstaller", "androidx-compose-material-icons-ext", "androidx-navigation-compose"]
 kotest = ["kotest-jvm-runner", "kotest-assertions", "kotlin-reflect"]
 ktor = ["ktor-client-core", "ktor-client-android", "ktor-client-contentnegotiation", "ktor-serialization-json", "ktor-client-logging", "slf4j"]
 paging = ["androidx-paging-compose", "androidx-paging-runtime"]
-recompose = ["recompose", "recompose-httpfx", "recompose-fsm"]
+recompose = ["recompose", "recompose-httpfx", "recompose-fsm", "recompose-paging-fx"]
 
 [plugins]
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

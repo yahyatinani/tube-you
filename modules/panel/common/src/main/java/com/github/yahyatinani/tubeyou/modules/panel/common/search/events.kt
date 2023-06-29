@@ -15,6 +15,7 @@ import io.github.yahyatinani.recompose.fsm.trigger
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.ids.recompose.db
+import io.github.yahyatinani.recompose.pagingfx.paging
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.y.core.collections.PersistentVector
 import io.github.yahyatinani.y.core.get
@@ -63,7 +64,7 @@ fun regCommonEvents() {
     m<Any, Any>(
       fx to v(
         v(
-          "paging",
+          paging.fx,
           m(
             ktor.method to HttpMethod.Get,
             ktor.url to "$api/search?q=$sq&filter=all",

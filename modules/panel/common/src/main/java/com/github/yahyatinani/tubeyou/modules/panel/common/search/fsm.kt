@@ -2,22 +2,8 @@ package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
-import com.github.whyrising.recompose.events.Event
-import com.github.whyrising.recompose.fx.BuiltInFx.dispatch
-import com.github.whyrising.recompose.fx.BuiltInFx.fx
-import com.github.whyrising.recompose.fx.Effects
-import com.github.whyrising.y.core.assocIn
-import com.github.whyrising.y.core.collections.IPersistentMap
-import com.github.whyrising.y.core.collections.IPersistentVector
-import com.github.whyrising.y.core.collections.PersistentVector
-import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getIn
-import com.github.whyrising.y.core.l
-import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.destination
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.dispatch_debounce
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.activate_searchBar
@@ -34,7 +20,6 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
 import com.github.yahyatinani.tubeyou.modules.panel.common.State
 import com.github.yahyatinani.tubeyou.modules.panel.common.activeTab
-import com.github.yahyatinani.tubeyou.modules.panel.common.bounce_fx
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.ALL
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.actions
@@ -48,6 +33,20 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.APPENDING
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCHING
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCH_RESULTS
+import io.github.yahyatinani.recompose.events.Event
+import io.github.yahyatinani.recompose.fx.BuiltInFx.dispatch
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
+import io.github.yahyatinani.recompose.fx.Effects
+import io.github.yahyatinani.recompose.httpfx.bounce
+import io.github.yahyatinani.y.core.assocIn
+import io.github.yahyatinani.y.core.collections.IPersistentMap
+import io.github.yahyatinani.y.core.collections.IPersistentVector
+import io.github.yahyatinani.y.core.collections.PersistentVector
+import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.getIn
+import io.github.yahyatinani.y.core.l
+import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.v
 
 /*
  * The state map spec:
@@ -197,11 +196,11 @@ fun getSearchSuggestions(appDb: AppDb, state: State?, event: Event): Effects {
   return m(
     fx to v(
       v(
-        dispatch_debounce,
+        bounce.fx,
         m(
-          bounce_fx.id to get_search_suggestions,
-          bounce_fx.event to v(get_search_suggestions, b = searchQuery),
-          bounce_fx.delay to 500
+          bounce.id to get_search_suggestions,
+          bounce.event to v(get_search_suggestions, b = searchQuery),
+          bounce.delay to 500
         )
       )
     )

@@ -1,11 +1,11 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
 import androidx.compose.runtime.Immutable
-import com.github.whyrising.y.core.collections.IPersistentMap
-import com.github.whyrising.y.core.collections.PersistentVector
-import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
+import io.github.yahyatinani.y.core.collections.IPersistentMap
+import io.github.yahyatinani.y.core.collections.PersistentVector
+import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.v
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule

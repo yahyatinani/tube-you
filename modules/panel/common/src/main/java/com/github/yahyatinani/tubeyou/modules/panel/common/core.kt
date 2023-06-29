@@ -1,7 +1,6 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import android.content.res.Resources
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.convertTimestamp
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatSeconds
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatSubCount
@@ -13,6 +12,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.Channel
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.Playlist
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
+import io.github.yahyatinani.y.core.v
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 

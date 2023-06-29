@@ -19,7 +19,6 @@ enum class common {
   destination,
   navOptions,
   is_online,
-  dispatch_debounce,
 
 //  is_search_bar_active,
   bottom_bar_back_press,

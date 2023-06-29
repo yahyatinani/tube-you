@@ -1,12 +1,5 @@
 package com.github.yahyatinani.tubeyou
 
-import com.github.whyrising.recompose.regSub
-import com.github.whyrising.y.core.assoc
-import com.github.whyrising.y.core.collections.IPersistentMap
-import com.github.whyrising.y.core.collections.PersistentArrayMap
-import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.LIBRARY_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.SUBSCRIPTIONS_GRAPH_ROUTE
@@ -19,7 +12,14 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_backstack_
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_selected
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.label_text_id
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigation_items
-import com.github.whyrising.y.core.util.m as m2
+import io.github.yahyatinani.recompose.regSub
+import io.github.yahyatinani.y.core.assoc
+import io.github.yahyatinani.y.core.collections.IPersistentMap
+import io.github.yahyatinani.y.core.collections.PersistentArrayMap
+import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.v
+import io.github.yahyatinani.y.core.util.m as m2
 
 // TODO: decouple type from map?
 val navItems: PersistentArrayMap<Any, IPersistentMap<Any, Any>> = m(

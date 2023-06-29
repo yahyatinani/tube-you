@@ -20,9 +20,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.github.whyrising.recompose.dispatchSync
-import com.github.whyrising.recompose.watch
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Panel
@@ -35,6 +32,9 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PlaylistVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
+import io.github.yahyatinani.recompose.dispatchSync
+import io.github.yahyatinani.recompose.watch
+import io.github.yahyatinani.y.core.v
 
 const val SEARCH_ROUTE = "search_results"
 
@@ -71,7 +71,6 @@ fun PortraitListItem(
     )
   }
 }
-
 
 @Composable
 fun LandscapeListItem(

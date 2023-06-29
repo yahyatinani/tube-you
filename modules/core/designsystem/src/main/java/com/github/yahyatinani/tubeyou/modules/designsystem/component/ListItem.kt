@@ -307,7 +307,7 @@ fun PlayListPortrait(
     info = AnnotatedString(viewModel.author),
     modifier = modifier.padding(top = 12.dp),
     thumbnailHeight = thumbnailHeight,
-    thumbnailContent = { PlaylistThumbnailContent(viewModel) },
+    thumbnailContent = { PlaylistThumbnailContent(viewModel) }
   )
 }
 

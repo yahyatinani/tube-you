@@ -1,13 +1,6 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
 import android.content.res.Resources
-import com.github.whyrising.recompose.regSub
-import com.github.whyrising.y.core.collections.IPersistentVector
-import com.github.whyrising.y.core.collections.PersistentVector
-import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getIn
-import com.github.whyrising.y.core.l
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.search_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.search_list
@@ -24,6 +17,13 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.ACTIVE
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCHING
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCH_RESULTS
+import io.github.yahyatinani.recompose.regSub
+import io.github.yahyatinani.y.core.collections.IPersistentVector
+import io.github.yahyatinani.y.core.collections.PersistentVector
+import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.getIn
+import io.github.yahyatinani.y.core.l
+import io.github.yahyatinani.y.core.v
 
 fun formatSearch(
   search: PersistentVector<SearchResult>,

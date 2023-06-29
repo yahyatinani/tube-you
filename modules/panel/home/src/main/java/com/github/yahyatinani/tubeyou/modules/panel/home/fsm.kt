@@ -1,11 +1,5 @@
 package com.github.yahyatinani.tubeyou.modules.panel.home
 
-import com.github.whyrising.recompose.events.Event
-import com.github.whyrising.recompose.fx.BuiltInFx.dispatch
-import com.github.whyrising.recompose.fx.BuiltInFx.fx
-import com.github.whyrising.recompose.fx.Effects
-import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home.load
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home.refresh
@@ -20,6 +14,12 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.State
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.actions
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.target
+import io.github.yahyatinani.recompose.events.Event
+import io.github.yahyatinani.recompose.fx.BuiltInFx.dispatch
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
+import io.github.yahyatinani.recompose.fx.Effects
+import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.v
 
 fun loadHomeContent(appDb: AppDb, state: State?, event: Event): Effects =
   m(fx to v(v(dispatch, v(home.load_trending))))

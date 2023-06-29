@@ -8,14 +8,17 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import com.github.whyrising.recompose.dispatch
-import com.github.whyrising.recompose.dispatchSync
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.panel.common.regBounceFx
-import com.github.yahyatinani.tubeyou.modules.panel.common.regHttpKtor
+import com.github.yahyatinani.tubeyou.modules.panel.common.myClient
+import com.github.yahyatinani.tubeyou.modules.panel.common.regPagingFx
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonEvents
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonSubs
+import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.recompose.dispatchSync
+import io.github.yahyatinani.recompose.httpfx.httpFxClient
+import io.github.yahyatinani.recompose.httpfx.regBounceFx
+import io.github.yahyatinani.recompose.httpfx.regHttpKtor
+import io.github.yahyatinani.y.core.v
 
 // -- Application Implementation -----------------------------------------------
 
@@ -23,8 +26,12 @@ class TyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    regHttpKtor()
-    regBounceFx()
+    httpFxClient = myClient
+
+    regBounceFx
+    regHttpKtor
+
+    regPagingFx()
 
     regAppCofx(this)
     regAppEvents()

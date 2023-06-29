@@ -1,20 +1,20 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
-import com.github.whyrising.recompose.events.Event
-import com.github.whyrising.recompose.fx.BuiltInFx
-import com.github.whyrising.recompose.fx.Effects
-import com.github.whyrising.recompose.ids.recompose
-import com.github.whyrising.y.core.assocIn
-import com.github.whyrising.y.core.collections.IPersistentMap
-import com.github.whyrising.y.core.collections.IPersistentVector
-import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.getIn
-import com.github.whyrising.y.core.l
-import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.parallel
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.regions
 import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.type
+import io.github.yahyatinani.recompose.events.Event
+import io.github.yahyatinani.recompose.fx.BuiltInFx
+import io.github.yahyatinani.recompose.fx.Effects
+import io.github.yahyatinani.recompose.ids.recompose
+import io.github.yahyatinani.y.core.assocIn
+import io.github.yahyatinani.y.core.collections.IPersistentMap
+import io.github.yahyatinani.y.core.collections.IPersistentVector
+import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.getIn
+import io.github.yahyatinani.y.core.l
+import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.v
 import kotlin.reflect.KFunction3
 
 // TODO: Move this file to re-compose.

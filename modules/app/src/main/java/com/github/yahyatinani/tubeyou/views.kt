@@ -46,16 +46,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.github.whyrising.recompose.cofx.regCofx
-import com.github.whyrising.recompose.dispatch
-import com.github.whyrising.recompose.dispatchSync
-import com.github.whyrising.recompose.fx.BuiltInFx.fx
-import com.github.whyrising.recompose.regEventFx
-import com.github.whyrising.recompose.regFx
-import com.github.whyrising.recompose.watch
-import com.github.whyrising.y.core.get
-import com.github.whyrising.y.core.m
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_navigation_item
@@ -77,6 +67,16 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBar
 import com.github.yahyatinani.tubeyou.modules.panel.home.homeGraph
 import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
 import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
+import io.github.yahyatinani.recompose.cofx.regCofx
+import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.recompose.dispatchSync
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
+import io.github.yahyatinani.recompose.regEventFx
+import io.github.yahyatinani.recompose.regFx
+import io.github.yahyatinani.recompose.watch
+import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.v
 
 // -- Navigation ---------------------------------------------------------------
 

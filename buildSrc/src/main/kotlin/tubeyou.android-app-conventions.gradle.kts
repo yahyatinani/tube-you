@@ -4,7 +4,7 @@ import com.github.yahyatinani.tubeyou.Build.keyStoreBase64ToStoreFile
 import com.github.yahyatinani.tubeyou.Build.versionMajor
 import com.github.yahyatinani.tubeyou.Build.versionMinor
 import com.github.yahyatinani.tubeyou.Build.versionPatch
-import org.gradle.api.JavaVersion.VERSION_1_8
+import org.gradle.api.JavaVersion.VERSION_11
 
 plugins {
   id("kotlin-conventions")
@@ -108,8 +108,8 @@ android {
 
   compileOptions {
     isCoreLibraryDesugaringEnabled = true
-    sourceCompatibility = VERSION_1_8
-    targetCompatibility = VERSION_1_8
+    sourceCompatibility = VERSION_11
+    targetCompatibility = VERSION_11
   }
 
   testOptions {

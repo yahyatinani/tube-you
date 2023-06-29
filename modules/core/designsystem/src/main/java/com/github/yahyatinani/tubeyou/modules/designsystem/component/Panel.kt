@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatVideoInfo
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
@@ -26,6 +25,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import io.github.yahyatinani.y.core.v
 
 @Composable
 fun Panel(
@@ -40,9 +40,11 @@ fun Panel(
   Box(modifier = modifier.fillMaxSize()) {
     content(panelVm.videos, panelVm.appendEvent) {
       if (panelVm.isAppending) {
-        Box(modifier = Modifier
-          .fillMaxWidth()
-          .padding(vertical = 4.dp)) {
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+        ) {
           CircularProgressIndicator(
             modifier = Modifier.align(Alignment.Center),
             color = Blue300

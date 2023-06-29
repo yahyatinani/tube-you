@@ -12,6 +12,7 @@ dependencies {
   implementation deps.androidx.appcompat
   implementation deps.androidx.core.splashscreen
   implementation deps.androidx.datastore.prefrences
+  implementation deps.bundles.recompose
 
   testImplementation deps.bundles.kotest
   androidTestImplementation deps.androidx.compose.ui.test

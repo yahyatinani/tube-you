@@ -48,8 +48,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import com.github.whyrising.y.core.get
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
+import io.github.yahyatinani.y.core.get
 
 @Composable
 fun TyNavigationItem(

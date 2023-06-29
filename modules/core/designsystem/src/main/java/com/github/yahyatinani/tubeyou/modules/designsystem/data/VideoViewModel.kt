@@ -2,7 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.designsystem.data
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.AnnotatedString
-import com.github.whyrising.y.core.l
+import io.github.yahyatinani.y.core.l
 
 data class VideoViewModel(
   val id: String,

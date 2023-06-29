@@ -3,11 +3,11 @@ package com.github.yahyatinani.tubeyou.modules.panel.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import com.github.whyrising.recompose.dispatch
-import com.github.whyrising.recompose.regFx
-import com.github.whyrising.y.core.v
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
+import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.recompose.regFx
+import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.launch
 
 @Composable

@@ -10,8 +10,8 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.search.set_suggestio
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.panel.common.activeTab
 import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
-import com.github.yahyatinani.tubeyou.modules.panel.common.trigger
 import io.github.yahyatinani.recompose.cofx.injectCofx
+import io.github.yahyatinani.recompose.fsm.trigger
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.ids.recompose.db

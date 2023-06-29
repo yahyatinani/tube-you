@@ -9,10 +9,10 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.panel.common.tyHttpClient
 import com.github.yahyatinani.tubeyou.modules.panel.common.regPagingFx
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonEvents
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonSubs
+import com.github.yahyatinani.tubeyou.modules.panel.common.tyHttpClient
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.httpfx.httpFxClient

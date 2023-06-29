@@ -8,15 +8,15 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm.Loaded
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
-import com.github.yahyatinani.tubeyou.modules.panel.common.State
 import com.github.yahyatinani.tubeyou.modules.panel.common.activeTab
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatChannel
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatPlayList
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideo
-import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBarState.ACTIVE
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCHING
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SEARCH_RESULTS
+import io.github.yahyatinani.recompose.fsm.State
+import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.y.core.collections.IPersistentVector
 import io.github.yahyatinani.y.core.collections.PersistentVector

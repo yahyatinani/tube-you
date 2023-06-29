@@ -7,8 +7,8 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.home.go_top_list
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home.load_trending
 import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
-import com.github.yahyatinani.tubeyou.modules.panel.common.trigger
 import io.github.yahyatinani.recompose.cofx.injectCofx
+import io.github.yahyatinani.recompose.fsm.trigger
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.ids.recompose.db

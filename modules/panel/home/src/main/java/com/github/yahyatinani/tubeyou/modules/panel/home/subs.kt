@@ -12,7 +12,7 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.LOADED
 import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.LOADING
 import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.REFRESHING
 import com.github.yahyatinani.tubeyou.modules.panel.common.formatVideos
-import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
+import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn

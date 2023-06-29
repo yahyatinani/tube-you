@@ -10,11 +10,11 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.FAILED
 import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.LOADED
 import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.LOADING
 import com.github.yahyatinani.tubeyou.modules.panel.common.PanelStates.REFRESHING
-import com.github.yahyatinani.tubeyou.modules.panel.common.State
-import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
-import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.actions
-import com.github.yahyatinani.tubeyou.modules.panel.common.fsm.target
 import io.github.yahyatinani.recompose.events.Event
+import io.github.yahyatinani.recompose.fsm.State
+import io.github.yahyatinani.recompose.fsm.fsm
+import io.github.yahyatinani.recompose.fsm.fsm.actions
+import io.github.yahyatinani.recompose.fsm.fsm.target
 import io.github.yahyatinani.recompose.fx.BuiltInFx.dispatch
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects

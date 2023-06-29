@@ -62,7 +62,6 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.thumbnailHeight
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
-import com.github.yahyatinani.tubeyou.modules.panel.common.fsm
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBar
 import com.github.yahyatinani.tubeyou.modules.panel.home.homeGraph
 import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
@@ -70,6 +69,7 @@ import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
 import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
+import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.regFx

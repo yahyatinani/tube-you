@@ -9,7 +9,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.panel.common.myClient
+import com.github.yahyatinani.tubeyou.modules.panel.common.tyHttpClient
 import com.github.yahyatinani.tubeyou.modules.panel.common.regPagingFx
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonEvents
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regCommonSubs
@@ -26,7 +26,7 @@ class TyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    httpFxClient = myClient
+    httpFxClient = tyHttpClient
 
     regBounceFx
     regHttpKtor

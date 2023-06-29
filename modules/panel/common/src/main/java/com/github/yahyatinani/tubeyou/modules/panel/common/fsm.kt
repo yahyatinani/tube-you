@@ -14,6 +14,7 @@ import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.updateIn
 import io.github.yahyatinani.y.core.v
 import kotlin.reflect.KFunction3
 
@@ -122,16 +123,17 @@ internal fun triggerParallel(
 
     val rTransitionMap = transitionMap(rTransition, appDb, stateMap, event)
 
-    val nextRegionState =
-      when (val targetState = rTransitionMap[fsm.target]) {
-        fsm.ALL -> regionCurrentState // keep same state.
-        else -> targetState
-      }
+    val nextRegionState = when (val targetState = rTransitionMap[fsm.target]) {
+      fsm.ALL -> regionCurrentState // keep same state.
+      else -> targetState
+    }
 
     val newFx = if (nextRegionState == null) {
-      val _tmpState =
-        getIn<State>(accFx, l(fsm.state_map, fsm._state))?.dissoc(fsmKey)
-      assocIn(accFx, l(fsm.state_map, fsm._state), _tmpState)
+      updateIn(
+        accFx,
+        l(fsm.state_map, fsm._state),
+        { s: State -> s.dissoc(fsmKey) }
+      )
     } else {
       assocIn(accFx, l(fsm.state_map, fsm._state, fsmKey), nextRegionState)
     }
@@ -201,8 +203,7 @@ fun trigger(
   } else { // fsm halt aka null => remove state from db.
     val last = statePath.peek()!!
     val butLast = statePath.pop().seq()
-    val tmp = getIn<IPersistentMap<Any, Any>>(appDb, butLast)?.dissoc(last)
-    assocIn(appDb, butLast, tmp)
+    updateIn(appDb, butLast, { s: IPersistentMap<Any, Any> -> s.dissoc(last) })
   }
 
   return effects.assoc(recompose.db, newAppDb)

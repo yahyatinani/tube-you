@@ -46,6 +46,7 @@ import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.selectKeys
 import io.github.yahyatinani.y.core.v
 
 /*
@@ -107,8 +108,12 @@ fun setResults(appDb: AppDb, state: State?, event: Event): Effects {
 
   val newSearchStack = when {
     sb[searchBar.query] == topSb?.get(searchBar.query) -> { // dup
-      val tmp = topSb!!.dissoc(searchBar.search_error).dissoc(searchBar.results)
-      searchStack.pop().conj(tmp.assoc(key, results))
+      val newSb: IPersistentMap<Any, Any?> = selectKeys(
+        topSb,
+        l(searchBar.query, searchBar.suggestions)
+      ).assoc(key, results) as IPersistentMap<Any, Any?>
+
+      searchStack.pop().conj(newSb)
     }
 
     else -> searchStack.conj(sb.assoc(key, results))

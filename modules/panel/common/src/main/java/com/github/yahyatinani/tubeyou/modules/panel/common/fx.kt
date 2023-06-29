@@ -40,7 +40,7 @@ import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 import java.net.UnknownHostException
 
-val myClient = HttpClient(Android) {
+val tyHttpClient = HttpClient(Android) {
   install(Logging) {
     logger = Logger.DEFAULT
     level = LogLevel.ALL
@@ -117,7 +117,7 @@ fun pagingEffect(request: Any?) {
 
             val timeout = request[ktor.timeout]
             val method = request[ktor.method] as HttpMethod // TODO:
-            val httpResponse = myClient.get {
+            val httpResponse = tyHttpClient.get {
               url(url)
               timeout {
                 requestTimeoutMillis =

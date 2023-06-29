@@ -29,8 +29,6 @@ fun regCommonEvents() {
     interceptors = v(injectCofx(search.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
     val sq = (searchQuery as String).replace(" ", "%20")
-    val appDb = appDbBy(cofx)
-    val suggestionsEndpoint = "${appDb[api_url]}/suggestions?query=$sq"
 
     m<Any, Any>(
       fx to v(
@@ -38,7 +36,7 @@ fun regCommonEvents() {
           ktor.http_fx,
           m(
             ktor.method to HttpMethod.Get,
-            ktor.url to suggestionsEndpoint,
+            ktor.url to "${appDbBy(cofx)[api_url]}/suggestions?query=$sq",
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[search.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<String>>(),

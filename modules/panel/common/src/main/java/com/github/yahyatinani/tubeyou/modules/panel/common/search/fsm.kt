@@ -46,7 +46,9 @@ import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.merge
 import io.github.yahyatinani.y.core.selectKeys
+import io.github.yahyatinani.y.core.updateIn
 import io.github.yahyatinani.y.core.v
 
 /*
@@ -86,8 +88,8 @@ fun updateSearchBarToMatchTopOfStack(
   state: State?,
   event: Event
 ): Effects {
-  val sb = (state!![search.stack] as SearchStack).peek()
-  return m(fsm.state_map to state.assoc(search_bar, sb))
+  val top = (state!![search.stack] as SearchStack).peek()
+  return m(fsm.state_map to state.assoc(search_bar, top))
 }
 
 fun isAppendLoading(appDb: AppDb, state: State?, event: Event): Boolean {
@@ -227,6 +229,17 @@ fun setSuggestions(appDb: AppDb, state: State?, event: Event): Effects {
   )
 }
 
+fun backUpSearchBar(appDb: AppDb, state: State?, event: Event): Effects {
+  val newState = updateIn(
+    m = state,
+    ks = l(search.stack),
+    f = { stack: SearchStack ->
+      stack.pop().conj(merge(stack.peek(), state!![search_bar])!!)
+    }
+  )
+  return m(fsm.state_map to newState)
+}
+
 fun navigateBack(appDb: AppDb, state: State?, event: Event): Effects =
   m(fx to v(v(common.pop_back_stack)))
 
@@ -287,7 +300,7 @@ val searchBarMachine = m<Any?, Any?>(
         )
       )
     ),
-    activate_searchBar to m(target to ACTIVE)
+    activate_searchBar to m(target to ACTIVE, actions to ::backUpSearchBar)
   ),
   ALL to m(
     set_suggestions to m(target to ALL, actions to ::setSuggestions),

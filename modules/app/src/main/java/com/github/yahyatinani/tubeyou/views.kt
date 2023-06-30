@@ -203,7 +203,7 @@ fun TyApp(
             }
 
             BackHandler {
-              dispatchSync(v(search.panel_fsm, search.back_press_search))
+              dispatch(v(search.panel_fsm, search.back_press_search))
             }
           }
 

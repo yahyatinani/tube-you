@@ -64,8 +64,7 @@ fun regCommonSubs() {
     when (getIn<SearchState>(searchPanelState, l(fsm._state, search_list))) {
       null, SEARCHING -> PanelVm.Loading
       SEARCH_RESULTS -> {
-        val sb =
-          ((searchPanelState as State)[search.stack] as SearchStack).peek()
+        val sb = get<SearchStack>(searchPanelState, search.stack)!!.peek()
         val error = sb!![searchBar.search_error]
         when {
           error != null -> PanelVm.Error(error as Int?)

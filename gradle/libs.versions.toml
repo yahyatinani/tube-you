@@ -5,7 +5,7 @@ gradleplugin = "8.0.2"
 kotest = "5.6.2"
 ktlint = "0.46.1"
 kover = "0.5.1"
-spotless = "6.9.0"
+spotless = "6.11.0"
 junit4 = "4.13.2"
 
 compose = "1.4.3"

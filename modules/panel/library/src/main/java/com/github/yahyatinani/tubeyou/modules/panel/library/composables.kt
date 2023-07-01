@@ -31,8 +31,11 @@ fun NavGraphBuilder.libraryGraph(
     route = LIBRARY_GRAPH_ROUTE,
     startDestination = LIBRARY_ROUTE
   ) {
-    if (isCompactDisplay) library(orientation = orientation)
-    else library(orientation = orientation)
+    if (isCompactDisplay) {
+      library(orientation = orientation)
+    } else {
+      library(orientation = orientation)
+    }
 
     searchPanel(
       route = LIBRARY_GRAPH_ROUTE,

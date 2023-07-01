@@ -61,16 +61,18 @@ fun regAppEvents() {
         if (destination == appDb[active_navigation_item]) {
           // TODO: Use one fx for all panels to scroll up by overriding reg fx
           v(home.go_top_list)
-        } else v(
-          navigate_to,
-          m(
-            common.destination to destination,
-            common.navOptions to navOptions {
-              popUpTo(cofx[start_destination] as Int) { saveState = true }
-              restoreState = true
-            }
+        } else {
+          v(
+            navigate_to,
+            m(
+              common.destination to destination,
+              common.navOptions to navOptions {
+                popUpTo(cofx[start_destination] as Int) { saveState = true }
+                restoreState = true
+              }
+            )
           )
-        )
+        }
       )
     )
   }

@@ -33,7 +33,7 @@ jobs:
       - run: rm -rf .gradle/configuration-cache
 
       - name: Spotless check
-        run: ./gradlew spotlessCheck lintDebug --stacktrace
+        run: ./gradlew spotlessCheck --stacktrace
 
       - name: Run unit tests
         run: ./gradlew check --stacktrace

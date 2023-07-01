@@ -29,8 +29,11 @@ fun NavGraphBuilder.subsGraph(
     route = SUBSCRIPTIONS_GRAPH_ROUTE,
     startDestination = SUBSCRIPTIONS_ROUTE
   ) {
-    if (isCompactDisplay) subscriptions(orientation = orientation)
-    else subscriptions(orientation = orientation)
+    if (isCompactDisplay) {
+      subscriptions(orientation = orientation)
+    } else {
+      subscriptions(orientation = orientation)
+    }
 
     searchPanel(
       route = SUBSCRIPTIONS_GRAPH_ROUTE,

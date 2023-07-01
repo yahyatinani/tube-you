@@ -97,5 +97,7 @@ data class SearchResponse(
   override val prevKey: String? = null
   override val nextKey: String? = if (nextpage != "null" && nextpage != null) {
     URLEncoder.encode(nextpage, "UTF-8")
-  } else null
+  } else {
+    null
+  }
 }

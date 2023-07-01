@@ -75,7 +75,7 @@ fun regCommonEvents() {
             ktor.coroutine_scope to cofx[search.coroutine_scope],
             ktor.response_type_info to typeInfo<SearchResponse>(),
             ktor.on_success to handleResultsEvent,
-            "on_appending" to v(search.panel_fsm, "append"),
+            "on_appending" to v(search.panel_fsm),
             ktor.on_failure to handleResultsEvent
           )
         )

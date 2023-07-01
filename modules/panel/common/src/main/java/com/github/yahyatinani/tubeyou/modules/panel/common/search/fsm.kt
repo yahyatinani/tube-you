@@ -1,7 +1,7 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
-import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
+import androidx.paging.LoadState.Loading
+import androidx.paging.LoadState.NotLoading
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.destination
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
@@ -92,11 +92,6 @@ fun updateSearchBarToMatchTopOfStack(
   return m(fsm.state_map to state.assoc(search_bar, top))
 }
 
-fun isAppendLoading(appDb: AppDb, state: State?, event: Event): Boolean {
-  val (_, loadState) = event
-  return (loadState as CombinedLoadStates).append == LoadState.Loading
-}
-
 fun setResults(appDb: AppDb, state: State?, event: Event): Effects {
   val sb = event[1] as State
   val results = event[2]
@@ -167,14 +162,12 @@ val searchListMachine = m<Any?, Any?>(
       m(target to SEARCH_RESULTS, guard to ::isQueryBlankOrEmpty),
       m(target to SEARCHING)
     ),
-    "append" to m(target to APPENDING)
+    Loading to m(target to APPENDING),
   ),
   APPENDING to m(
     set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults),
-    "append" to v(
-      m(target to APPENDING, guard to ::isAppendLoading),
-      m(target to SEARCH_RESULTS)
-    )
+    Loading to m(target to APPENDING),
+    NotLoading(endOfPaginationReached = true) to m(target to SEARCH_RESULTS)
   )
 )
 

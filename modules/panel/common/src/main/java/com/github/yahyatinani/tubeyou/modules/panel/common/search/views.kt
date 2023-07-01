@@ -32,7 +32,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PlaylistVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
-import io.github.yahyatinani.recompose.dispatchSync
+import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.v
 
@@ -111,7 +111,7 @@ fun SearchPanel(
       .fillMaxSize()
   ) {
     itemsIndexed(items = videos.value) { index: Int, vm: Any ->
-      dispatchSync(v(triggerAppending!!, index))
+      dispatch(v(triggerAppending!!, index))
       when {
         isPortrait -> PortraitListItem(
           vm = vm,

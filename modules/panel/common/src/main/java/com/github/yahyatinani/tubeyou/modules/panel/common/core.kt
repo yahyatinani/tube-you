@@ -25,11 +25,17 @@ inline fun <T> T.letIf(b: Boolean, block: (T) -> T): T {
 
 /**
  * Checkout https://github.com/TeamNewPipe/NewPipeExtractor/pull/268
+ *
+ * default.jpg 8.73 kb
  * mqdefault.jpg 39.76kb
+ * hqdefault.jpg 76.84 kb
+ * sddefault.jpg 121.76 kb
+ * hq720.jpg 306.98 kb
  * maxresdefault.jpg 306.98 kb
+ *
  */
 private fun highQuality(thumbnail: String) =
-  thumbnail.replace("hqdefault.jpg", "mqdefault.jpg")
+  thumbnail.replace("hqdefault.jpg", "sddefault.jpg")
 
 fun formatVideo(video: Video, resources: Resources): VideoViewModel {
   val isLiveStream = video.duration == -1L

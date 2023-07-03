@@ -204,13 +204,14 @@ fun TyNavigationBarLarge(
 
 @Composable
 fun TyBottomNavigationBar(
+  modifier: Modifier = Modifier,
   navItems: Map<Any, Any>,
   isCompact: Boolean,
   colorScheme: ColorScheme,
   onNavItemPress: (route: Any) -> Unit
 ) {
   Surface(
-    modifier = Modifier.windowInsetsPadding(NavigationBarDefaults.windowInsets)
+    modifier = modifier.windowInsetsPadding(NavigationBarDefaults.windowInsets)
   ) {
     val content: @Composable (Modifier) -> Unit = {
       navItems.forEach { (route, navItem) ->

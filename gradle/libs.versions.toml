@@ -9,7 +9,7 @@ spotless = "6.11.0"
 junit4 = "4.13.2"
 
 compose = "1.4.3"
-material3 = "1.2.0-alpha02"
+material3 = "1.2.0-alpha03"
 navigation-compose = "2.6.0"
 activity-compose = "1.7.2"
 splashscreen = "1.0.1"

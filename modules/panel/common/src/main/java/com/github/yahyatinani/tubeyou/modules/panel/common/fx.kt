@@ -17,7 +17,7 @@ val tyHttpClient = HttpClient(Android) {
     logger = Logger.DEFAULT
     level = LogLevel.ALL
     filter { request ->
-      request.url.host.contains("pipedapi.palveluntarjoaja.eu")
+      request.url.host.contains("piped")
     }
   }
   install(HttpTimeout)

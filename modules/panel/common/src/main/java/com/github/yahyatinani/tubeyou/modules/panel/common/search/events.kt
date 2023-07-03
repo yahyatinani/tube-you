@@ -24,13 +24,12 @@ import io.github.yahyatinani.y.core.v
 import io.ktor.http.HttpMethod
 import io.ktor.util.reflect.typeInfo
 
-fun regCommonEvents() {
+fun regSearchEvents() {
   regEventFx(
     id = get_search_suggestions,
     interceptors = v(injectCofx(search.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
     val sq = (searchQuery as String).replace(" ", "%20")
-
     m<Any, Any>(
       fx to v(
         v(

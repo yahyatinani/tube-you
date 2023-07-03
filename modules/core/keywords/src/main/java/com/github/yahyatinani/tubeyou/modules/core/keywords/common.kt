@@ -20,11 +20,18 @@ enum class common {
   navOptions,
   is_online,
 
-//  is_search_bar_active,
+  //  is_search_bar_active,
   bottom_bar_back_press,
   pop_back_stack,
   is_backstack_empty,
-  start_destination;
+  start_destination,
+  play_video,
+  expand_player_sheet,
+  coroutine_scope,
+  close_player,
+  close_stream,
+  toggle_player,
+  play_new_stream;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

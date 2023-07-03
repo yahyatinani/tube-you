@@ -23,6 +23,11 @@ dependencies {
   implementation deps.bundles.ktor
   implementation deps.bundles.paging
 
+  def media3 = "1.1.0-rc01"
+  implementation "androidx.media3:media3-exoplayer:" + media3
+  implementation "androidx.media3:media3-exoplayer-dash:" + media3
+  implementation "androidx.media3:media3-ui:" + media3
+
   testImplementation deps.kotlin.reflect
   testImplementation deps.bundles.kotest
 }

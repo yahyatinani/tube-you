@@ -19,7 +19,8 @@ fun VideosList(
   orientation: Int = 1,
   listState: LazyListState,
   videos: Videos,
-  thumbnailHeight: Dp
+  thumbnailHeight: Dp,
+  playVideo: (vidUrl: String) -> Unit = {}
 ) {
   val isPortrait = orientation == ORIENTATION_PORTRAIT
   LazyColumn(
@@ -34,10 +35,13 @@ fun VideosList(
       key = { it.id }
     ) { viewModel ->
       when {
-        isPortrait -> VideoItemPortrait(
-          viewModel = viewModel,
-          thumbnailHeight = thumbnailHeight
-        )
+        isPortrait -> {
+          VideoItemPortrait(
+            viewModel = viewModel,
+            thumbnailHeight = thumbnailHeight,
+            play = playVideo
+          )
+        }
 
         else -> VideoItemLandscapeCompact(
           viewModel = viewModel,

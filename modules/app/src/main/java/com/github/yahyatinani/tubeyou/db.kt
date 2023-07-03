@@ -11,7 +11,7 @@ import io.github.yahyatinani.y.core.m
 
 val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
-  common.api_url to "https://pipedapi.palveluntarjoaja.eu",
+  common.api_url to "https://pipedapi.smnz.de",
   common.is_backstack_empty to true,
   common.active_navigation_item to HOME_GRAPH_ROUTE
 )

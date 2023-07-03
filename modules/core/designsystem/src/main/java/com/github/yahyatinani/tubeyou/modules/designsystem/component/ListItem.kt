@@ -58,9 +58,10 @@ fun ListItemPortrait(
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
   thumbnailHeight: Dp,
   thumbnailContent: @Composable (BoxScope.() -> Unit),
-  channelAvatar: @Composable (RowScope.() -> Unit)? = null
+  channelAvatar: @Composable (RowScope.() -> Unit)? = null,
+  onClick: () -> Unit = {}
 ) {
-  Column(modifier = Modifier.clickable { /*todo:*/ }) {
+  Column(modifier = Modifier.clickable(onClick = onClick)) {
     Thumbnail(
       url = thumbnail,
       modifier = Modifier
@@ -134,7 +135,8 @@ fun VideoItemPortrait(
   modifier: Modifier = Modifier,
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
   viewModel: VideoViewModel,
-  thumbnailHeight: Dp
+  thumbnailHeight: Dp,
+  play: (url: String) -> Unit = {}
 ) {
   ListItemPortrait(
     title = viewModel.title,
@@ -150,6 +152,10 @@ fun VideoItemPortrait(
         else -> ChannelAvatar(url = viewModel.uploaderAvatar)
       }
       Spacer(modifier = Modifier.width(16.dp))
+    },
+    onClick = {
+      println("jdfjsdfj ${viewModel.id}")
+      play(viewModel.id)
     }
   )
 }

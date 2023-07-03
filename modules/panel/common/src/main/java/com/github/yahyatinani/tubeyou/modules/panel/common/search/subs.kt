@@ -51,7 +51,7 @@ fun searchBarState(appDb: AppDb): SearchBar? {
 fun searchPanelState(appDb: AppDb): State? =
   getIn(appDb, l(activeTab(appDb), search.panel_fsm))
 
-fun regCommonSubs() {
+fun regSearchSubs() {
   regSub(queryId = search_bar, ::searchBarState)
 
   regSub(queryId = search.panel_fsm, ::searchPanelState)

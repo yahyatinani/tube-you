@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Panel
@@ -46,10 +47,14 @@ fun PortraitListItem(
   lastIndex: Int
 ) {
   when (vm) {
-    is VideoViewModel -> VideoItemPortrait(
-      viewModel = vm,
-      thumbnailHeight = thumbnailHeight
-    )
+    is VideoViewModel -> {
+      VideoItemPortrait(
+        viewModel = vm,
+        thumbnailHeight = thumbnailHeight
+      ) {
+        dispatch(v(common.play_video, it))
+      }
+    }
 
     is ChannelVm -> {
       if (index != 0) Divider(color = DarkGray)

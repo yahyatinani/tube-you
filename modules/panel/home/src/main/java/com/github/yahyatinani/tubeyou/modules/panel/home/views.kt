@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_ROUTE
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.PullRefreshPanel
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideosGrid
@@ -37,6 +38,7 @@ private fun InitHome() {
 private fun NavGraphBuilder.homeCommon(content: @Composable (Videos) -> Unit) {
   composable(route = HOME_ROUTE) {
     InitHome()
+
     PullRefreshPanel(
       panelVm = watch(v(home.view_model, LocalContext.current.resources)),
       onRefresh = { dispatch(v(home.fsm, home.refresh)) },
@@ -57,7 +59,9 @@ fun NavGraphBuilder.home(orientation: Int, thumbnailHeight: Dp) =
       listState = listState,
       videos = videos,
       thumbnailHeight = thumbnailHeight
-    )
+    ) { videoUrl ->
+      dispatch(v(common.play_video, videoUrl))
+    }
   }
 
 fun NavGraphBuilder.homeLarge(orientation: Int, thumbnailHeight: Dp) =

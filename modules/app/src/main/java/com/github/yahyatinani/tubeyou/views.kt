@@ -136,6 +136,10 @@ private fun NavigationChangedListenerEffect(navController: NavHostController) {
 
 // -- Views --------------------------------------------------------------------
 
+/**
+ * @param isPlayerVisible this is needed to avoid late loading a stream after
+ * the the player sheet was closed before the loading completed.
+ */
 @Composable
 fun PlaybackBottomSheet(
   streamData: IPersistentMap<Any, Any>?,
@@ -143,6 +147,7 @@ fun PlaybackBottomSheet(
   isPlaying: Boolean,
   thumbnail: String?,
   showPlayerThumbnail: Boolean,
+  isPlayerVisible: Boolean,
   closeVideo: () -> Unit = {},
   togglePlayPause: () -> Unit = {},
   onTapMiniPlayer: () -> Unit = {}
@@ -171,14 +176,15 @@ fun PlaybackBottomSheet(
           .fillMaxWidth()
           .aspectRatio(16 / 9f)
       }
-
-      VideoView(
-        modifier = playerModifier,
-        streamData = streamData,
-        thumbnail = thumbnail,
-        showPlayerThumbnail = showPlayerThumbnail,
-        isCollapsed = isCollapsed
-      )
+      if (isPlayerVisible) {
+        VideoView(
+          modifier = playerModifier,
+          streamData = streamData,
+          thumbnail = thumbnail,
+          showPlayerThumbnail = showPlayerThumbnail,
+          isCollapsed = isCollapsed
+        )
+      }
       if (isCollapsed) {
         Row(
           modifier = Modifier.height(110.dp - 48.dp),
@@ -304,7 +310,6 @@ fun TyApp(
         ) { dispatch(v(common.on_click_nav_item, it)) }
       }
     ) { p1 ->
-
       LaunchedEffect(Unit) {
         snapshotFlow { sheetState.isVisible }.collect { isVisible ->
           if (!isVisible) {
@@ -363,10 +368,13 @@ fun TyApp(
             isCollapsed = isCollapsed,
             isPlaying = isPlaying,
             thumbnail = thumbnail,
+            isPlayerVisible = isPlayerVisible,
             showPlayerThumbnail = showPlayerThumbnail,
             closeVideo = { dispatchSync(v(close_stream)) },
             togglePlayPause = { dispatchSync(v(common.toggle_player)) },
-            onTapMiniPlayer = { dispatch(v(expand_player_sheet)) }
+            onTapMiniPlayer = {
+              dispatch(v(expand_player_sheet))
+            }
           )
         }
       ) {

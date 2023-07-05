@@ -67,6 +67,9 @@ data class StreamData(
 
 fun regCommonEvents() {
   regEventDb<AppDb>("set_current_stream") { db, (_, streamData) ->
+    val isPlayerVisible: Boolean = get(db, "is_player_sheet_visible") ?: false
+    if (!isPlayerVisible) return@regEventDb db
+
     val videos = (streamData as StreamData).videoStreams.filter { it.videoOnly }
     db.assoc(
       "current_video_stream",

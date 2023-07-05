@@ -22,6 +22,7 @@ dependencies {
   implementation deps.kotlinx.datetime
   implementation deps.bundles.ktor
   implementation deps.bundles.paging
+  implementation deps.coil
 
   def media3 = "1.1.0-rc01"
   implementation "androidx.media3:media3-exoplayer:" + media3

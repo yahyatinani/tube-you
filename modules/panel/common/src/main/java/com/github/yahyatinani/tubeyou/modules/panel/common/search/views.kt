@@ -51,8 +51,8 @@ fun PortraitListItem(
       VideoItemPortrait(
         viewModel = vm,
         thumbnailHeight = thumbnailHeight
-      ) {
-        dispatch(v(common.play_video, it))
+      ) { url: String, thumbnail: String ->
+        dispatch(v(common.play_video, url, thumbnail))
       }
     }
 

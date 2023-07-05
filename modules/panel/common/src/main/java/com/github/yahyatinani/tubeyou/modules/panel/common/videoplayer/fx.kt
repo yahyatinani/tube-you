@@ -18,6 +18,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import io.github.yahyatinani.recompose.clearFx
 import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
@@ -26,11 +27,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-private var exoPlayer: ExoPlayer? = null
+var exoPlayer: ExoPlayer? = null
 
 val listener = object : Player.Listener {
   override fun onIsPlayingChanged(isPlaying: Boolean) {
-    println("jsdfjsdjf $isPlaying")
     dispatch(v("is_playing", isPlaying))
   }
 
@@ -40,7 +40,9 @@ val listener = object : Player.Listener {
   }
 
   override fun onPlaybackStateChanged(playbackState: Int) {
-    super.onPlaybackStateChanged(playbackState)
+    if (playbackState == Player.STATE_READY) {
+      dispatchSync(v("hidePlayerThumbnail"))
+    }
   }
 }
 
@@ -49,6 +51,7 @@ private fun closePlayer() {
   if (exoPlayer?.isCommandAvailable(Player.COMMAND_RELEASE) == true) {
     exoPlayer?.release()
     exoPlayer = null
+    dispatchSync(v("showPlayerThumbnail"))
   }
 }
 

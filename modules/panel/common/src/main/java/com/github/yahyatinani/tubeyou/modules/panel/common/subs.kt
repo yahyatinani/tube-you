@@ -1,19 +1,29 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.recompose.subs.Query
 import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.getIn
+import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 
 enum class Stream {
   audio_uri,
   video_uri,
-  aspect_ratio
+  aspect_ratio,
+  thumbnail
 }
 
 fun regCommonSubs() {
   regSub(queryId = "current_video_stream", key = "current_video_stream")
+
+  regSub(queryId = "current_video_thumbnail", key = "current_video_thumbnail")
+
+  regSub<AppDb>(queryId = "show_player_thumbnail") { db, _ ->
+    getIn(db, l(common.active_stream, "show_player_thumbnail"))
+  }
 
   regSub<StreamData?, Any?>(
     queryId = "currently_playing",
@@ -32,6 +42,7 @@ fun regCommonSubs() {
     m(
       Stream.audio_uri to aUri,
       Stream.video_uri to stream.url,
+      Stream.thumbnail to streamData.thumbnailUrl,
       Stream.aspect_ratio to w / h
     )
   }

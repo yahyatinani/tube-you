@@ -136,7 +136,7 @@ fun VideoItemPortrait(
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
   viewModel: VideoViewModel,
   thumbnailHeight: Dp,
-  play: (url: String) -> Unit = {}
+  play: (url: String, thumbnail: String) -> Unit = { _, _ -> }
 ) {
   ListItemPortrait(
     title = viewModel.title,
@@ -154,8 +154,7 @@ fun VideoItemPortrait(
       Spacer(modifier = Modifier.width(16.dp))
     },
     onClick = {
-      println("jdfjsdfj ${viewModel.id}")
-      play(viewModel.id)
+      play(viewModel.id, viewModel.thumbnail)
     }
   )
 }

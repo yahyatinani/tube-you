@@ -9,7 +9,9 @@ import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.ids.recompose
 import io.github.yahyatinani.recompose.regEventDb
 import io.github.yahyatinani.recompose.regEventFx
+import io.github.yahyatinani.y.core.assocIn
 import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 import io.ktor.http.HttpMethod
@@ -27,7 +29,7 @@ data class VideoStream(
   val videoOnly: Boolean,
   val contentLength: Long,
   val width: Int,
-  val height: Int,
+  val height: Int
 )
 
 @Immutable
@@ -64,19 +66,31 @@ data class StreamData(
 )
 
 fun regCommonEvents() {
-  regEventDb<AppDb>("set_current_video_uri") { db, (_, streamData) ->
+  regEventDb<AppDb>("set_current_stream") { db, (_, streamData) ->
     val videos = (streamData as StreamData).videoStreams.filter { it.videoOnly }
-    db.assoc("current_video_stream", streamData.copy(videoStreams = videos))
+    db.assoc(
+      "current_video_stream",
+      streamData.copy(videoStreams = videos)
+    )
+  }
+
+  regEventDb<AppDb>("hidePlayerThumbnail") { db, _ ->
+    assocIn(db, l(common.active_stream, "show_player_thumbnail"), false)
+  }
+
+  regEventDb<AppDb>("showPlayerThumbnail") { db, _ ->
+    assocIn(db, l(common.active_stream, "show_player_thumbnail"), true)
   }
 
   regEventFx(
     id = common.play_video,
     interceptors = v(injectCofx(common.coroutine_scope))
-  ) { cofx: Coeffects, (_, videoId) ->
+  ) { cofx: Coeffects, (_, videoId, thumbnail) ->
     val appDb = appDbBy(cofx)
     val id = (videoId as String).replace("/watch?v=", "")
     m(
       recompose.db to appDb
+        .assoc("current_video_thumbnail", thumbnail)
         .dissoc("current_video_stream")
         .assoc("is_player_sheet_visible", true),
       BuiltInFx.fx to v(
@@ -88,7 +102,7 @@ fun regCommonEvents() {
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[common.coroutine_scope],
             ktor.response_type_info to typeInfo<StreamData>(),
-            ktor.on_success to v("set_current_video_uri"),
+            ktor.on_success to v("set_current_stream"),
             ktor.on_failure to v("todo")
           )
         ),

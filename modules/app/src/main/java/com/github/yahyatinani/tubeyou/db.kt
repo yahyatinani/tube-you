@@ -13,7 +13,8 @@ val defaultDb = m<Any, Any>(
   common.is_backstack_available to false,
   common.api_url to "https://pipedapi.smnz.de",
   common.is_backstack_empty to true,
-  common.active_navigation_item to HOME_GRAPH_ROUTE
+  common.active_navigation_item to HOME_GRAPH_ROUTE,
+  common.active_stream to m("show_player_thumbnail" to true)
 )
 
 // -- Cofx ---------------------------------------------------------------------

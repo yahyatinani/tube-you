@@ -20,7 +20,7 @@ fun VideosList(
   listState: LazyListState,
   videos: Videos,
   thumbnailHeight: Dp,
-  playVideo: (vidUrl: String) -> Unit = {}
+  playVideo: (url: String, thumbnail: String) -> Unit = { _, _ -> }
 ) {
   val isPortrait = orientation == ORIENTATION_PORTRAIT
   LazyColumn(

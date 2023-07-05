@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.Icons.Default
@@ -142,6 +141,8 @@ fun PlaybackBottomSheet(
   streamData: IPersistentMap<Any, Any>?,
   isCollapsed: Boolean,
   isPlaying: Boolean,
+  thumbnail: String?,
+  showPlayerThumbnail: Boolean,
   closeVideo: () -> Unit = {},
   togglePlayPause: () -> Unit = {},
   onTapMiniPlayer: () -> Unit = {}
@@ -174,6 +175,8 @@ fun PlaybackBottomSheet(
       VideoView(
         modifier = playerModifier,
         streamData = streamData,
+        thumbnail = thumbnail,
+        showPlayerThumbnail = showPlayerThumbnail,
         isCollapsed = isCollapsed
       )
       if (isCollapsed) {
@@ -274,6 +277,8 @@ fun TyApp(
     val isCollapsed =
       sheetScaffoldState.bottomSheetState.currentValue.ordinal == 2
     val isPlaying = watch<Boolean>(query = v("is_playing"))
+    val thumbnail = watch<String?>(query = v("current_video_thumbnail"))
+    val showPlayerThumbnail = watch<Boolean>(query = v("show_player_thumbnail"))
 
     if (orientation == ORIENTATION_LANDSCAPE && streamData != null) {
       LaunchedEffect(Unit) {
@@ -283,6 +288,8 @@ fun TyApp(
       VideoView(
         modifier = Modifier.fillMaxSize(),
         streamData = streamData,
+        thumbnail = thumbnail,
+        showPlayerThumbnail = showPlayerThumbnail,
         isCollapsed = isCollapsed
       )
       return@TyTheme
@@ -355,6 +362,8 @@ fun TyApp(
             streamData = streamData,
             isCollapsed = isCollapsed,
             isPlaying = isPlaying,
+            thumbnail = thumbnail,
+            showPlayerThumbnail = showPlayerThumbnail,
             closeVideo = { dispatchSync(v(close_stream)) },
             togglePlayPause = { dispatchSync(v(common.toggle_player)) },
             onTapMiniPlayer = { dispatch(v(expand_player_sheet)) }

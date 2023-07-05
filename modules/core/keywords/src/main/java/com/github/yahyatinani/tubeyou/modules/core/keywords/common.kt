@@ -31,7 +31,8 @@ enum class common {
   close_player,
   close_stream,
   toggle_player,
-  play_new_stream;
+  play_new_stream,
+  active_stream;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

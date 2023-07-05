@@ -2,6 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import androidx.compose.runtime.Immutable
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_stream
 import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
 import io.github.yahyatinani.recompose.fx.BuiltInFx
@@ -11,6 +12,7 @@ import io.github.yahyatinani.recompose.regEventDb
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.y.core.assocIn
 import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
@@ -78,23 +80,31 @@ fun regCommonEvents() {
   }
 
   regEventDb<AppDb>("hidePlayerThumbnail") { db, _ ->
-    assocIn(db, l(common.active_stream, "show_player_thumbnail"), false)
+    assocIn(db, l(active_stream, "show_player_thumbnail"), false)
   }
 
   regEventDb<AppDb>("showPlayerThumbnail") { db, _ ->
-    assocIn(db, l(common.active_stream, "show_player_thumbnail"), true)
+    assocIn(db, l(active_stream, "show_player_thumbnail"), true)
   }
 
   regEventFx(
     id = common.play_video,
     interceptors = v(injectCofx(common.coroutine_scope))
   ) { cofx: Coeffects, (_, videoId, thumbnail) ->
-    val appDb = appDbBy(cofx)
+    val appDbBy = appDbBy(cofx)
+    if (getIn<String>(appDbBy, l(active_stream, "videoId")) == videoId) {
+      return@regEventFx m(BuiltInFx.fx to v(v(common.expand_player_sheet)))
+    }
+
+    val appDb = appDbBy.dissoc("current_video_stream")
     val id = (videoId as String).replace("/watch?v=", "")
     m(
-      recompose.db to appDb
+      recompose.db to assocIn(
+        appDb,
+        l(active_stream, "videoId"),
+        videoId
+      )
         .assoc("current_video_thumbnail", thumbnail)
-        .dissoc("current_video_stream")
         .assoc("is_player_sheet_visible", true),
       BuiltInFx.fx to v(
         v(

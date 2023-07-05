@@ -102,7 +102,9 @@ import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.updateIn
 import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.launch
 
@@ -356,8 +358,14 @@ fun TyApp(
               val appDb = appDbBy(cofx = cofx)
                 .dissoc("current_video_stream")
                 .assoc("is_player_sheet_visible", false)
+
+              val newAppDb = updateIn(
+                appDb,
+                l(common.active_stream),
+                { map: IPersistentMap<Any?, *> -> map.dissoc("videoId") }
+              )
               m(
-                recompose.db to appDb,
+                recompose.db to newAppDb,
                 fx to v(v("hide_player_sheet"), v(common.close_player))
               )
             }

@@ -25,6 +25,14 @@ fun regCommonSubs() {
     getIn(db, l(common.active_stream, "show_player_thumbnail"))
   }
 
+  regSub<AppDb>(queryId = "show_player_loading") { db, _ ->
+    getIn<Boolean>(db, l(common.active_stream, "show_player_thumbnail"))!! ||
+      getIn<Boolean>(
+        db,
+        l(common.active_stream, "show_player_loading")
+      ) ?: false
+  }
+
   regSub<StreamData?, Any?>(
     queryId = "currently_playing",
     initialValue = null,

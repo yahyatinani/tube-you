@@ -6,7 +6,10 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -16,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
+import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.R
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 
@@ -27,6 +31,7 @@ fun VideoView(
   streamData: IPersistentMap<Any, Any>?,
   thumbnail: String?,
   showPlayerThumbnail: Boolean,
+  showPlayerLoading: Boolean,
   isCollapsed: Boolean,
   context: Context = LocalContext.current
 ) {
@@ -57,6 +62,14 @@ fun VideoView(
       Thumbnail(
         url = thumbnail,
         modifier = modifier
+      )
+    }
+    if (showPlayerLoading) {
+      CircularProgressIndicator(
+        modifier = Modifier
+          .align(Alignment.Center)
+          .size(56.dp),
+        color = Grey300.copy(alpha = .4f)
       )
     }
   }

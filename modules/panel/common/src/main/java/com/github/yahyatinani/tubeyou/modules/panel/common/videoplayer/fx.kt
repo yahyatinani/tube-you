@@ -41,7 +41,9 @@ val listener = object : Player.Listener {
 
   override fun onPlaybackStateChanged(playbackState: Int) {
     if (playbackState == Player.STATE_READY) {
-      dispatchSync(v("hidePlayerThumbnail"))
+      dispatch(v("hidePlayerThumbnail"))
+    } else if (playbackState == Player.STATE_BUFFERING) {
+      dispatch(v("showPlayerLoading"))
     }
   }
 }

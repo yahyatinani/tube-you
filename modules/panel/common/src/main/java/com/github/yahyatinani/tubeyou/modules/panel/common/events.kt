@@ -80,11 +80,16 @@ fun regCommonEvents() {
   }
 
   regEventDb<AppDb>("hidePlayerThumbnail") { db, _ ->
-    assocIn(db, l(active_stream, "show_player_thumbnail"), false)
+    val tmp = assocIn(db, l(active_stream, "show_player_thumbnail"), false)
+    assocIn(tmp, l(active_stream, "show_player_loading"), false)
   }
 
   regEventDb<AppDb>("showPlayerThumbnail") { db, _ ->
     assocIn(db, l(active_stream, "show_player_thumbnail"), true)
+  }
+
+  regEventDb<AppDb>("showPlayerLoading") { db, _ ->
+    assocIn(db, l(active_stream, "show_player_loading"), true)
   }
 
   regEventFx(

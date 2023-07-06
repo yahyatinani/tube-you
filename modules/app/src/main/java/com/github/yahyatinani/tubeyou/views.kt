@@ -149,6 +149,7 @@ fun PlaybackBottomSheet(
   isPlaying: Boolean,
   thumbnail: String?,
   showPlayerThumbnail: Boolean,
+  showPlayerLoading: Boolean,
   isPlayerVisible: Boolean,
   closeVideo: () -> Unit = {},
   togglePlayPause: () -> Unit = {},
@@ -184,6 +185,7 @@ fun PlaybackBottomSheet(
           streamData = streamData,
           thumbnail = thumbnail,
           showPlayerThumbnail = showPlayerThumbnail,
+          showPlayerLoading = showPlayerLoading,
           isCollapsed = isCollapsed
         )
       }
@@ -287,6 +289,7 @@ fun TyApp(
     val isPlaying = watch<Boolean>(query = v("is_playing"))
     val thumbnail = watch<String?>(query = v("current_video_thumbnail"))
     val showPlayerThumbnail = watch<Boolean>(query = v("show_player_thumbnail"))
+    val showPlayerLoading = watch<Boolean>(query = v("show_player_loading"))
 
     if (orientation == ORIENTATION_LANDSCAPE && streamData != null) {
       LaunchedEffect(Unit) {
@@ -298,6 +301,7 @@ fun TyApp(
         streamData = streamData,
         thumbnail = thumbnail,
         showPlayerThumbnail = showPlayerThumbnail,
+        showPlayerLoading = showPlayerLoading,
         isCollapsed = isCollapsed
       )
       return@TyTheme
@@ -378,6 +382,7 @@ fun TyApp(
             thumbnail = thumbnail,
             isPlayerVisible = isPlayerVisible,
             showPlayerThumbnail = showPlayerThumbnail,
+            showPlayerLoading = showPlayerLoading,
             closeVideo = { dispatchSync(v(close_stream)) },
             togglePlayPause = { dispatchSync(v(common.toggle_player)) },
             onTapMiniPlayer = {

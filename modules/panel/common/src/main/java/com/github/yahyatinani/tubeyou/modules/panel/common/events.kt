@@ -5,7 +5,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_stream
 import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
-import io.github.yahyatinani.recompose.fx.BuiltInFx
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.ids.recompose
 import io.github.yahyatinani.recompose.regEventDb
@@ -93,39 +93,42 @@ fun regCommonEvents() {
   }
 
   regEventFx(
-    id = common.play_video,
-    interceptors = v(injectCofx(common.coroutine_scope))
-  ) { cofx: Coeffects, (_, videoId, thumbnail) ->
+    id = "load_stream",
+    interceptors = v(injectCofx("player_scope"))
+  ) { cofx: Coeffects, _ ->
     val appDbBy = appDbBy(cofx)
-    if (getIn<String>(appDbBy, l(active_stream, "videoId")) == videoId) {
-      return@regEventFx m(BuiltInFx.fx to v(v(common.expand_player_sheet)))
-    }
-
+    val videoId = getIn<Any>(appDbBy, l(active_stream, "videoId"))
     val appDb = appDbBy.dissoc("current_video_stream")
     val id = (videoId as String).replace("/watch?v=", "")
     m(
-      recompose.db to assocIn(
-        appDb,
-        l(active_stream, "videoId"),
-        videoId
-      )
-        .assoc("current_video_thumbnail", thumbnail)
-        .assoc("is_player_sheet_visible", true),
-      BuiltInFx.fx to v(
+      fx to v(
         v(
           ktor.http_fx,
           m(
             ktor.method to HttpMethod.Get,
             ktor.url to "${appDb[common.api_url]}/streams/$id",
             ktor.timeout to 8000,
-            ktor.coroutine_scope to cofx[common.coroutine_scope],
+            ktor.coroutine_scope to cofx["player_scope"],
             ktor.response_type_info to typeInfo<StreamData>(),
             ktor.on_success to v("set_current_stream"),
             ktor.on_failure to v("todo")
           )
-        ),
-        v(common.play_new_stream)
+        )
       )
+    )
+  }
+
+  regEventFx(common.play_video) { cofx: Coeffects, (_, videoId, thumbnail) ->
+    val appDbBy = appDbBy(cofx)
+    if (getIn<String>(appDbBy, l(active_stream, "videoId")) == videoId) {
+      return@regEventFx m(fx to v(v(common.expand_player_sheet)))
+    }
+    val appDb = appDbBy.dissoc("current_video_stream")
+    m(
+      recompose.db to assocIn(appDb, l(active_stream, "videoId"), videoId)
+        .assoc("current_video_thumbnail", thumbnail)
+        .assoc("is_player_sheet_visible", true),
+      fx to v(v(common.play_new_stream))
     )
   }
 

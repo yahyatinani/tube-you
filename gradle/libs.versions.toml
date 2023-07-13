@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.8.21"
-gradleplugin = "8.0.2"
+gradleplugin = "8.1.0-rc01"
 
 kotest = "5.6.2"
 ktlint = "0.46.1"
@@ -33,7 +33,8 @@ slf4j = "1.3.5"
 datetime = "0.4.0"
 
 ylib = "0.5.0"
-recompose = "0.4.0.85-SNAPSHOT" #FIXME: release the new recompose version.
+recompose = "0.4.0.85-SNAPSHOT"
+cronet-okhttp = "0.1.0" #FIXME: release the new recompose version.
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -90,6 +91,7 @@ recompose = { module = "io.github.yahyatinani.recompose:re-compose", version.ref
 recompose-httpfx = { module = "io.github.yahyatinani.recompose:http-fx", version.ref = "recompose" }
 recompose-fsm = { module = "io.github.yahyatinani.recompose:fsm", version.ref = "recompose" }
 recompose-paging-fx = { module = "io.github.yahyatinani.recompose:paging-fx", version.ref = "recompose" }
+cronet-okhttp = { group = "com.google.net.cronet", name = "cronet-okhttp", version.ref = "cronet-okhttp" }
 
 [bundles]
 compose = ["androidx-compose-ui-ui", "androidx-compose-ui-util", "androidx-compose-ui-tooling", "androidx-compose-material3", "androidx-constraintlayout-compose", "accompanist-swiperefresh", "androidx-compose-material3-windowssizeclass", "androidx-profileinstaller", "androidx-compose-material-icons-ext", "androidx-navigation-compose"]

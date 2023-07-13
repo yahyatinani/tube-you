@@ -1,65 +1,77 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerState
+import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.recompose.subs.Query
+import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
-import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 
 enum class Stream {
-  audio_uri,
+  title,
+  uploader,
   video_uri,
   aspect_ratio,
-  thumbnail
+  thumbnail,
+  quality_list,
+  current_quality
+}
+
+private fun ratio(streamData: StreamData): Float {
+  val stream = streamData.videoStreams.first {
+    val codec: String? = it.codec
+    codec != null && codec.contains("avc1")
+  }
+  val w = stream.width / 240f
+  val h = stream.height / 240f
+  return w / h
 }
 
 fun regCommonSubs() {
-  regSub(queryId = "current_video_stream", key = "current_video_stream")
-
-  regSub(queryId = "current_video_thumbnail", key = "current_video_thumbnail")
-
-  regSub<AppDb>(queryId = "show_player_thumbnail") { db, _ ->
-    getIn(db, l(common.active_stream, "show_player_thumbnail"))
+  regSub("playback_fsm") { db: AppDb, _: Query ->
+    db["playback_fsm"]
   }
 
-  regSub<AppDb>(queryId = "show_player_loading") { db, _ ->
-    getIn<Boolean>(db, l(common.active_stream, "show_player_thumbnail"))!! ||
-      getIn<Boolean>(
-        db,
-        l(common.active_stream, "show_player_loading")
-      ) ?: false
-  }
-
-  regSub<StreamData?, Any?>(
+  regSub<IPersistentMap<Any, Any>, Any?>(
     queryId = "currently_playing",
     initialValue = null,
-    inputSignal = v("current_video_stream")
-  ) { streamData: StreamData?, _, _ ->
-    if (streamData == null) return@regSub null
+    inputSignal = v("playback_fsm")
+  ) { playbackFsm: IPersistentMap<Any, Any>?, _, _ ->
+    val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val playerRegion = get<Any>(playbackMachine, ":player")
+    val streamData = playbackFsm?.get("stream_data") as StreamData?
 
-    val aUri = streamData.audioStreams.first().url
-    val stream = streamData.videoStreams.first {
-      val codec: String? = it.codec
-      codec != null && codec.contains("avc1")
+    if (playerRegion == null || playerRegion == PlayerState.LOADING ||
+      playbackFsm == null ||
+      streamData == null
+    ) {
+      return@regSub null
     }
-    val w = stream.width / 240f
-    val h = stream.height / 240f
+
+    println("playerRegion $playerRegion")
+
+    val currentQuality = playbackFsm["current_quality"]
+    val ql = get<List<Pair<String, Int>>>(playbackFsm, "quality_list") ?: l()
+    val qualityList = ql.map {
+      val a = if (currentQuality == it.second) "${it.first} ✓" else it.first
+      a to it.second
+    }
+
+    val cq = if (currentQuality == null) "" else "${currentQuality}p"
+
+    val ratio = if (streamData.livestream) 16 / 9f else ratio(streamData)
+
     m(
-      Stream.audio_uri to aUri,
-      Stream.video_uri to stream.url,
+      Stream.title to streamData.title,
+      Stream.uploader to streamData.uploader,
+      Stream.video_uri to streamData.hls,
       Stream.thumbnail to streamData.thumbnailUrl,
-      Stream.aspect_ratio to w / h
+      Stream.quality_list to qualityList,
+      Stream.current_quality to cq,
+      Stream.aspect_ratio to ratio
     )
-  }
-
-  regSub("is_playing") { db: AppDb, _: Query ->
-    db["is_playing"] ?: false
-  }
-
-  regSub("is_player_sheet_visible") { db: AppDb, _: Query ->
-    db["is_player_sheet_visible"] ?: false
   }
 }

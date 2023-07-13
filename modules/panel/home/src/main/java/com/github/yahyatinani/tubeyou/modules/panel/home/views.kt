@@ -59,8 +59,8 @@ fun NavGraphBuilder.home(orientation: Int, thumbnailHeight: Dp) =
       listState = listState,
       videos = videos,
       thumbnailHeight = thumbnailHeight
-    ) { videoUrl, thumbnail ->
-      dispatch(v(common.play_video, videoUrl, thumbnail))
+    ) {
+      dispatch(v("playback_fsm", common.play_video, it))
     }
   }
 

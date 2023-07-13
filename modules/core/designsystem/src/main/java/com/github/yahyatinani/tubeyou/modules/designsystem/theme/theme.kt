@@ -19,7 +19,8 @@ val DarkColorPalette = darkColorScheme(
   onSurfaceVariant = Color.White,
   background = Grey900,
   surfaceVariant = Color.Cyan,
-  onBackground = Color.White
+  onBackground = Color.White,
+  surfaceTint = Grey900
 )
 
 val LightColorPalette = lightColorScheme(
@@ -28,7 +29,8 @@ val LightColorPalette = lightColorScheme(
   secondary = Teal200,
   surface = Color.White,
   background = Color.White,
-  onBackground = Color.Black
+  onBackground = Color.Black,
+  surfaceTint = Color.White
 )
 
 @Composable

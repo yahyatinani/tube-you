@@ -1,11 +1,20 @@
 package com.github.yahyatinani.tubeyou
 
 import android.app.Application
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.view.OrientationEventListener
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -17,6 +26,7 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.regCommonSubs
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regSearchEvents
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regSearchSubs
 import com.github.yahyatinani.tubeyou.modules.panel.common.tyHttpClient
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.TyPlayer
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.fx.BuiltInFx
@@ -34,6 +44,8 @@ import io.github.yahyatinani.y.core.v
 class TyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
+
+    TyPlayer.initInstance(applicationContext)
 
     httpFxClient = tyHttpClient
 
@@ -67,6 +79,30 @@ class MainActivity : ComponentActivity() {
     }
     super.onCreate(savedInstanceState)
 
+    val orientationEventListener: OrientationEventListener =
+      object : OrientationEventListener(this) {
+        override fun onOrientationChanged(orientation: Int) {
+          val epsilon = 10
+          val leftLandscape = 90
+          val rightLandscape = 270
+          if (epsilonCheck(orientation, leftLandscape, epsilon) ||
+            epsilonCheck(orientation, rightLandscape, epsilon)
+          ) {
+            this@MainActivity.requestedOrientation = SCREEN_ORIENTATION_SENSOR
+          }
+        }
+
+        private fun epsilonCheck(a: Int, b: Int, epsilon: Int): Boolean {
+          return a > b - epsilon && a < b + epsilon
+        }
+      }
+    orientationEventListener.enable()
+
+    val bitmap = Bitmap.createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply {
+      eraseColor(ContextCompat.getColor(this@MainActivity, R.color.black_900))
+    }
+    window.setBackgroundDrawable(BitmapDrawable(resources, bitmap))
+
     WindowCompat.setDecorFitsSystemWindows(window, true)
 
     regFx(":player_fullscreen_landscape") {
@@ -87,12 +123,29 @@ class MainActivity : ComponentActivity() {
       }
     }
 
+    regFx(":toggle_orientation") {
+      when (resources.configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+          requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
+        }
+
+        else -> {
+          requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
+          requestedOrientation = SCREEN_ORIENTATION_UNSPECIFIED
+        }
+      }
+    }
+
     regEventFx(":player_fullscreen_landscape") { _, _ ->
       m(BuiltInFx.fx to v(v(":player_fullscreen_landscape")))
     }
 
     regEventFx(":player_portrait") { _, _ ->
       m(BuiltInFx.fx to v(v(":player_portrait")))
+    }
+
+    regEventFx(":toggle_orientation") { _, _ ->
+      m(BuiltInFx.fx to v(v(":toggle_orientation")))
     }
 
     setContent {

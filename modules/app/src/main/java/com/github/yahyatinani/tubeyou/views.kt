@@ -1,9 +1,7 @@
 package com.github.yahyatinani.tubeyou
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.os.Bundle
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,11 +9,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -23,11 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.Icons.Default
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +27,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
@@ -46,31 +40,23 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_navigation_item
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.close_stream
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.expand_player_sheet
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.expand_top_app_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.start_destination
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
@@ -82,150 +68,41 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyBottomNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.thumbnailHeight
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
-import com.github.yahyatinani.tubeyou.modules.panel.common.appDbBy
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBar
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.VideoView
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.MiniPlayerControls
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerSheetState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerSheetState.HIDDEN
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.RegPlayerSheetEffects
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.VideoPlayer
 import com.github.yahyatinani.tubeyou.modules.panel.home.homeGraph
 import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
 import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
+import com.github.yahyatinani.tubeyou.nav.NavigationChangedListenerEffect
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
-import io.github.yahyatinani.recompose.ids.recompose
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
-import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
-import io.github.yahyatinani.y.core.updateIn
 import io.github.yahyatinani.y.core.v
-import kotlinx.coroutines.launch
-
-// -- Navigation ---------------------------------------------------------------
-
-private fun navGraphRoute(destination: NavDestination) =
-  destination.hierarchy.toList().dropLast(1).last().route!!
-
-private val navChangedListener: (
-  controller: NavController,
-  destination: NavDestination,
-  arguments: Bundle?
-) -> Unit = { navCtrl, destination, _ ->
-  navCtrl.apply {
-    destination.route?.let {
-      dispatch(v(active_navigation_item, navGraphRoute(destination)))
-    }
-  }
-}
-
-@Composable
-private fun NavigationChangedListenerEffect(navController: NavHostController) {
-  DisposableEffect(navController) {
-    navController.addOnDestinationChangedListener(navChangedListener)
-
-    onDispose {
-      navController.removeOnDestinationChangedListener(navChangedListener)
-    }
-  }
-}
-
-// -- Views --------------------------------------------------------------------
-
-/**
- * @param isPlayerVisible this is needed to avoid late loading a stream after
- * the the player sheet was closed before the loading completed.
- */
-@Composable
-fun PlaybackBottomSheet(
-  streamData: IPersistentMap<Any, Any>?,
-  isCollapsed: Boolean,
-  isPlaying: Boolean,
-  thumbnail: String?,
-  showPlayerThumbnail: Boolean,
-  showPlayerLoading: Boolean,
-  isPlayerVisible: Boolean,
-  closeVideo: () -> Unit = {},
-  togglePlayPause: () -> Unit = {},
-  onTapMiniPlayer: () -> Unit = {}
-) {
-  Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
-  ) {
-    Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .clickable(onClick = onTapMiniPlayer),
-      horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-      val playerModifier = if (isCollapsed) {
-        Modifier
-          .height(110.dp - 48.dp)
-          .aspectRatio(16 / 9f)
-      } else if (streamData != null) {
-        Modifier
-          .fillMaxWidth()
-          .aspectRatio(get(streamData, Stream.aspect_ratio)!!)
-      } else {
-        Modifier
-          .fillMaxWidth()
-          .aspectRatio(16 / 9f)
-      }
-      if (isPlayerVisible) {
-        VideoView(
-          modifier = playerModifier,
-          streamData = streamData,
-          thumbnail = thumbnail,
-          showPlayerThumbnail = showPlayerThumbnail,
-          showPlayerLoading = showPlayerLoading,
-          isCollapsed = isCollapsed
-        )
-      }
-      if (isCollapsed) {
-        Row(
-          modifier = Modifier.height(110.dp - 48.dp),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          val color = MaterialTheme.colorScheme.onBackground
-          val colorFilter = ColorFilter.tint(color = color)
-          IconButton(onClick = togglePlayPause) {
-            val playerIcon = when (isPlaying) {
-              true -> Default.Pause
-              else -> Default.PlayArrow
-            }
-            Image(
-              imageVector = playerIcon,
-              contentDescription = "play/pause",
-              colorFilter = colorFilter
-            )
-          }
-          IconButton(onClick = closeVideo) {
-            Image(
-              imageVector = Default.Close,
-              contentDescription = "close video",
-              colorFilter = colorFilter
-            )
-          }
-        }
-      }
-    }
-  }
-}
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun topAppBarScrollBehavior(
   isCompactDisplay: Boolean,
   topAppBarState: TopAppBarState,
-  searchBar: Any?
+  searchBar: SearchBar?
 ): TopAppBarScrollBehavior = when {
   isCompactDisplay && searchBar == null -> {
     LaunchedEffect(Unit) {
@@ -257,6 +134,7 @@ fun TyApp(
   val appScope = rememberCoroutineScope()
   LaunchedEffect(Unit) {
     regAppFx(navController, appScope)
+
     regCofx(start_destination) { cofx ->
       cofx.assoc(
         start_destination,
@@ -268,6 +146,12 @@ fun TyApp(
   val isCompactSize = isCompact(windowSizeClass)
 
   TyTheme(isCompact = isCompactSize) {
+    val systemUiController = rememberSystemUiController()
+    val colors = MaterialTheme.colorScheme
+    SideEffect {
+      systemUiController.setSystemBarsColor(color = colors.background)
+    }
+
     val colorScheme = MaterialTheme.colorScheme
     val sb = watch<SearchBar?>(v(search.search_bar))
     val topBarState = rememberTopAppBarState()
@@ -276,53 +160,62 @@ fun TyApp(
     regCofx(common.coroutine_scope) { cofx ->
       cofx.assoc(common.coroutine_scope, appScope)
     }
+
     val orientation = LocalConfiguration.current.orientation
 
-    val streamData =
-      watch<IPersistentMap<Any, Any>?>(query = v("currently_playing"))
+    val playbackFsm =
+      watch<IPersistentMap<Any, Any>>(query = v("playback_fsm"))
+    val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val playerRegion = get<PlayerState>(playbackMachine, ":player")
 
-    val sheetState =
-      rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val sheetScaffoldState = rememberBottomSheetScaffoldState(sheetState)
-    val isCollapsed =
-      sheetScaffoldState.bottomSheetState.currentValue.ordinal == 2
-    val isPlaying = watch<Boolean>(query = v("is_playing"))
-    val thumbnail = watch<String?>(query = v("current_video_thumbnail"))
-    val showPlayerThumbnail = watch<Boolean>(query = v("show_player_thumbnail"))
-    val showPlayerLoading = watch<Boolean>(query = v("show_player_loading"))
+    val streamData = watch<IPersistentMap<Any, Any>?>(v("currently_playing"))
+    val playerSheetRegion =
+      get<PlayerSheetState>(playbackMachine, ":player_sheet")
+    val isCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED
 
-    if (orientation == ORIENTATION_LANDSCAPE && streamData != null) {
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+      bottomSheetState = rememberModalBottomSheetState(false)
+    )
+    val playerSheetState = bottomSheetScaffoldState.bottomSheetState
+    val playerSheetValue = playerSheetState.currentValue
+
+    val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
+
+    val thumbnail = get<VideoViewModel>(playbackFsm, "videoVm")?.thumbnail
+
+    if (orientation == ORIENTATION_LANDSCAPE && playerRegion != null) {
       LaunchedEffect(Unit) {
         dispatch(v(":player_fullscreen_landscape"))
       }
 
-      VideoView(
-        modifier = Modifier.fillMaxSize(),
+      VideoPlayer(
         streamData = streamData,
-        thumbnail = thumbnail,
-        showPlayerThumbnail = showPlayerThumbnail,
-        showPlayerLoading = showPlayerLoading,
-        isCollapsed = isCollapsed
+        useController = !isCollapsed,
+        isCollapsed = isCollapsed,
+        playerState = playerRegion,
+        showThumbnail = showThumbnail,
+        thumbnail = thumbnail
       )
+
       return@TyTheme
     }
 
     Scaffold(
       bottomBar = {
-        TyBottomNavigationBar(
-          navItems = watch(v(common.navigation_items)),
-          isCompact = isCompactSize,
-          colorScheme = colorScheme
-        ) { dispatch(v(common.on_click_nav_item, it)) }
-      }
-    ) { p1 ->
-      LaunchedEffect(Unit) {
-        snapshotFlow { sheetState.isVisible }.collect { isVisible ->
-          if (!isVisible) {
-            dispatchSync(v(close_stream))
-          }
+        if (playerSheetState.currentValue != SheetValue.Expanded) {
+          TyBottomNavigationBar(
+            navItems = watch(v(common.navigation_items)),
+            isCompact = isCompactSize,
+            colorScheme = colorScheme
+          ) { dispatch(v(common.on_click_nav_item, it)) }
         }
       }
+    ) { p1 ->
+      LaunchedEffect(playerSheetValue) {
+        dispatch(v("playback_fsm", playerSheetValue))
+      }
+
+      RegPlayerSheetEffects(playerSheetState)
 
       BottomSheetScaffold(
         modifier = Modifier
@@ -333,62 +226,64 @@ fun TyApp(
             // Allows to use testTag() for UiAutomator resource-id.
             testTagsAsResourceId = true
           },
-        scaffoldState = sheetScaffoldState,
-        sheetPeekHeight = 110.dp,
+        scaffoldState = bottomSheetScaffoldState,
+        sheetPeekHeight = if (streamData == null) 0.dp else 110.dp,
         sheetDragHandle = null,
         sheetShape = RoundedCornerShape(0.dp),
         sheetContent = {
-          val sheetScope = rememberCoroutineScope()
-          LaunchedEffect(Unit) {
-            dispatch(v(":player_portrait"))
-            regFx(common.play_new_stream) {
-              sheetScope.launch { sheetState.expand() }
-              dispatchSync(v(common.close_player))
-            }
+          val playerScope = rememberCoroutineScope()
+          regCofx("player_scope") { cofx ->
+            cofx.assoc("player_scope", playerScope)
+          }
 
-            regFx(expand_player_sheet) {
-              sheetScope.launch { sheetState.expand() }
-            }
-
-            regFx("hide_player_sheet") {
-              sheetScope.launch { sheetState.hide() }
-            }
-
-            regEventFx(expand_player_sheet) { _, _ ->
-              m(fx to v(v(expand_player_sheet)))
-            }
-
-            regEventFx(close_stream) { cofx, _ ->
-              val appDb = appDbBy(cofx = cofx)
-                .dissoc("current_video_stream")
-                .assoc("is_player_sheet_visible", false)
-
-              val newAppDb = updateIn(
-                appDb,
-                l(common.active_stream),
-                { map: IPersistentMap<Any?, *> -> map.dissoc("videoId") }
+          Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .clickable(isCollapsed) {
+                dispatch(v("playback_fsm", common.expand_player_sheet))
+              }
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+              VideoPlayer(
+                streamData = streamData,
+                useController = !isCollapsed,
+                isCollapsed = isCollapsed,
+                playerState = playerRegion,
+                showThumbnail = showThumbnail,
+                thumbnail = thumbnail
               )
-              m(
-                recompose.db to newAppDb,
-                fx to v(v("hide_player_sheet"), v(common.close_player))
+
+              if (isCollapsed || playerSheetRegion == HIDDEN) {
+                MiniPlayerControls(
+                  isPlaying = playerRegion == PlayerState.PLAYING,
+                  onClosePlayer = {
+                    dispatchSync(v("playback_fsm", "close_player"))
+                  }
+                ) {
+                  dispatchSync(v("playback_fsm", "toggle_play_pause"))
+                }
+              }
+            }
+
+            if (streamData == null) return@BottomSheetScaffold
+
+            Column(
+              modifier = Modifier.padding(
+                horizontal = 8.dp,
+                vertical = 12.dp
+              )
+            ) {
+              Text(
+                text = get<String>(streamData, Stream.title)!!,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
               )
             }
           }
-          val isPlayerVisible = watch<Boolean>(v("is_player_sheet_visible"))
-          PlaybackBottomSheet(
-            streamData = streamData,
-            isCollapsed = isCollapsed,
-            isPlaying = isPlaying,
-            thumbnail = thumbnail,
-            isPlayerVisible = isPlayerVisible,
-            showPlayerThumbnail = showPlayerThumbnail,
-            showPlayerLoading = showPlayerLoading,
-            closeVideo = { dispatchSync(v(close_stream)) },
-            togglePlayPause = { dispatchSync(v(common.toggle_player)) },
-            onTapMiniPlayer = {
-              dispatch(v(expand_player_sheet))
-            }
-          )
         }
       ) {
         Scaffold(

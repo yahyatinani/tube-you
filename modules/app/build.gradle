@@ -14,6 +14,8 @@ dependencies {
   implementation deps.androidx.datastore.prefrences
   implementation deps.bundles.recompose
 
+  implementation "com.google.accompanist:accompanist-systemuicontroller:0.31.5-beta"
+
   testImplementation deps.bundles.kotest
   androidTestImplementation deps.androidx.compose.ui.test
   debugImplementation deps.androidx.compose.ui.tooling

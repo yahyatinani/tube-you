@@ -231,7 +231,7 @@ fun TyApp(
             testTagsAsResourceId = true
           },
         scaffoldState = bottomSheetScaffoldState,
-        sheetPeekHeight = if (streamData == null) 0.dp else 110.dp,
+        sheetPeekHeight = if (playerRegion == null ) 0.dp else 110.dp,
         sheetDragHandle = null,
         sheetShape = RoundedCornerShape(0.dp),
         sheetContent = {

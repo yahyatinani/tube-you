@@ -154,12 +154,12 @@ fun VideoPlayer(
 
     AndroidView(
       modifier = modifier
+        .fillMaxWidth()
         .apply {
           if (orientation == ORIENTATION_LANDSCAPE) {
             padding(start = 26.dp)
           }
-        }
-        .fillMaxWidth(),
+        },
       factory = {
         regPlaybackFxs(scope)
         regPlaybackEvents()

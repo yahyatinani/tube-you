@@ -2,7 +2,6 @@ package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import androidx.compose.runtime.Immutable
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.active_stream
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.playbackMachine
 import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
@@ -10,12 +9,8 @@ import io.github.yahyatinani.recompose.fsm.trigger
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.ids.recompose
-import io.github.yahyatinani.recompose.regEventDb
 import io.github.yahyatinani.recompose.regEventFx
-import io.github.yahyatinani.y.core.assocIn
 import io.github.yahyatinani.y.core.get
-import io.github.yahyatinani.y.core.getIn
-import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 import io.ktor.http.HttpMethod
@@ -24,7 +19,7 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-data class VideoStream(
+data class StreamDetails(
   val url: String,
   val format: String,
   val mimeType: String,
@@ -33,18 +28,14 @@ data class VideoStream(
   val videoOnly: Boolean,
   val contentLength: Long,
   val width: Int,
-  val height: Int
-)
-
-@Immutable
-@Serializable
-data class AudioStream(
-  val url: String,
-  val format: String,
-  val quality: String,
-  val mimeType: String,
-  val codec: String,
-  val bitrate: Long
+  val height: Int,
+  val bitrate: Long,
+  val initStart: Int? = null,
+  val initEnd: Int? = null,
+  val indexStart: Int? = null,
+  val indexEnd: Int? = null,
+  val fps: Int? = null,
+  val audioTrackId: String? = null
 )
 
 @Immutable
@@ -58,6 +49,7 @@ data class StreamData(
   val uploaderAvatar: String,
   val thumbnailUrl: String,
   val hls: String?,
+  val dash: String?,
   val category: String,
   val uploaderVerified: Boolean,
   val duration: Long,
@@ -65,8 +57,8 @@ data class StreamData(
   val likes: Long,
   val dislikes: Long,
   val uploaderSubscriberCount: Long,
-  val videoStreams: List<VideoStream>,
-  val audioStreams: List<AudioStream>,
+  val videoStreams: List<StreamDetails>,
+  val audioStreams: List<StreamDetails>,
   val livestream: Boolean
 )
 

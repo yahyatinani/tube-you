@@ -1,25 +1,56 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer
 
 import android.content.Context
+import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.annotation.UiThread
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.cronet.CronetDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
+import com.google.net.cronet.okhttptransport.CronetCallFactory
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.v
+import org.chromium.net.CronetEngine
+import java.util.concurrent.Executors
+
+/**
+ * Using Cronet for dash to work.
+ */
+object CronetHelper {
+  private var cronetEngine: CronetEngine? = null
+
+  fun cronetEngine(context: Context): CronetEngine {
+    if (cronetEngine == null) {
+      cronetEngine = CronetEngine.Builder(context)
+        .enableHttp2(true)
+        .enableQuic(true)
+        .enableBrotli(true)
+        .enableHttpCache(
+          CronetEngine.Builder.HTTP_CACHE_IN_MEMORY,
+          1024L * 1024L
+        ) // 1MiB
+        .build()
+    }
+
+    return cronetEngine!!
+  }
+
+  val callFactory: CronetCallFactory by lazy {
+    CronetCallFactory.newBuilder(cronetEngine).build()
+  }
+}
 
 @OptIn(UnstableApi::class)
 object TyPlayer {
@@ -49,6 +80,13 @@ object TyPlayer {
 
   fun initInstance(context: Context) {
     if (exoPlayer == null) {
+      val cronetDataSourceFactory = CronetDataSource.Factory(
+        CronetHelper.cronetEngine(context),
+        Executors.newCachedThreadPool()
+      )
+      val dataSourceFactory =
+        DefaultDataSource.Factory(context, cronetDataSourceFactory)
+
       trackSelector =
         DefaultTrackSelector(context, AdaptiveTrackSelection.Factory())
 
@@ -59,16 +97,11 @@ object TyPlayer {
 
       exoPlayer = ExoPlayer.Builder(context)
         .setTrackSelector(trackSelector!!)
-        .setMediaSourceFactory(
-          DefaultMediaSourceFactory(DefaultHttpDataSource.Factory())
-        )
+        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
         .setSeekForwardIncrementMs(5000L)
         .setSeekBackIncrementMs(5000L)
         .setHandleAudioBecomingNoisy(true)
         .build()
-    }
-    exoPlayer!!.apply {
-      playWhenReady = true
     }
   }
 
@@ -86,8 +119,8 @@ object TyPlayer {
   fun playNewVideo(streamData: IPersistentMap<Any, Any>?) {
     if (streamData == null) return
     val mediaItem = MediaItem.Builder()
-      .setUri(get<String>(streamData, Stream.video_uri)!!.toUri())
-      .setMimeType(MimeTypes.APPLICATION_M3U8)
+      .setUri(get<Uri>(streamData, Stream.video_uri))
+      .setMimeType(get<String>(streamData, Stream.mime_type)!!)
 //      .setMimeType(MimeTypes.VIDEO_VP9)
 //    .setSubtitleConfigurations(subtitles)
       .setMediaMetadata(mediaMetadata(streamData))

@@ -47,6 +47,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
@@ -168,7 +169,10 @@ fun TyApp(
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
     val playerRegion = get<PlayerState>(playbackMachine, ":player")
 
-    val streamData = watch<IPersistentMap<Any, Any>?>(v("currently_playing"))
+    val context = LocalContext.current
+    val streamData =
+      watch<IPersistentMap<Any, Any>?>(v("currently_playing", context))
+
     val playerSheetRegion =
       get<PlayerSheetState>(playbackMachine, ":player_sheet")
     val isCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED

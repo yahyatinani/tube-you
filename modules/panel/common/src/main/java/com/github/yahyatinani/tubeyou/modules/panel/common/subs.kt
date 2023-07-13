@@ -1,6 +1,10 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
+import android.content.Context
+import androidx.core.net.toUri
+import androidx.media3.common.MimeTypes
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.createDashSource
 import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.recompose.subs.Query
@@ -17,7 +21,8 @@ enum class Stream {
   aspect_ratio,
   thumbnail,
   quality_list,
-  current_quality
+  current_quality,
+  mime_type
 }
 
 private fun ratio(streamData: StreamData): Float {
@@ -39,14 +44,14 @@ fun regCommonSubs() {
     queryId = "currently_playing",
     initialValue = null,
     inputSignal = v("playback_fsm")
-  ) { playbackFsm: IPersistentMap<Any, Any>?, _, _ ->
+  ) { playbackFsm: IPersistentMap<Any, Any>?, _, (_, context) ->
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
     val playerRegion = get<Any>(playbackMachine, ":player")
-    val streamData = playbackFsm?.get("stream_data") as StreamData?
+    val stream = playbackFsm?.get("stream_data") as StreamData?
 
     if (playerRegion == null || playerRegion == PlayerState.LOADING ||
       playbackFsm == null ||
-      streamData == null
+      stream == null
     ) {
       return@regSub null
     }
@@ -62,16 +67,27 @@ fun regCommonSubs() {
 
     val cq = if (currentQuality == null) "" else "${currentQuality}p"
 
-    val ratio = if (streamData.livestream) 16 / 9f else ratio(streamData)
-
-    m(
-      Stream.title to streamData.title,
-      Stream.uploader to streamData.uploader,
-      Stream.video_uri to streamData.hls,
-      Stream.thumbnail to streamData.thumbnailUrl,
+    val m = m<Stream, Any?>(
+      Stream.title to stream.title,
+      Stream.uploader to stream.uploader,
+      Stream.thumbnail to stream.thumbnailUrl,
       Stream.quality_list to qualityList,
       Stream.current_quality to cq,
-      Stream.aspect_ratio to ratio
+      Stream.aspect_ratio to if (stream.livestream) 16 / 9f else ratio(stream)
     )
+
+    if (stream.videoStreams.isNotEmpty()) {
+      if (stream.livestream && stream.dash != null) {
+        m.assoc(Stream.video_uri, stream.dash.toUri())
+      } else {
+        m.assoc(
+          Stream.video_uri,
+          createDashSource(stream, context as Context)
+        )
+      }.assoc(Stream.mime_type, MimeTypes.APPLICATION_MPD)
+    } else {
+      m.assoc(Stream.video_uri, stream.hls!!.toUri())
+        .assoc(Stream.mime_type, MimeTypes.APPLICATION_M3U8)
+    }
   }
 }

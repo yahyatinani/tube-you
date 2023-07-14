@@ -77,7 +77,7 @@ fun regAppFx(navController: NavController, appScope: CoroutineScope) {
   }
 
   regFx(common.pop_back_stack) {
-    appScope.launch(Dispatchers.Main.immediate) {
+    appScope.launch {
       navController.popBackStack()
     }
   }

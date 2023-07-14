@@ -187,6 +187,13 @@ fun VideoPlayer(
     var showQualitiesSheet: Boolean by remember { mutableStateOf(false) }
 
     val ratio by remember { mutableFloatStateOf(16 / 9f) }
+
+    val controllerVisibilityListener = remember {
+      PlayerView.ControllerVisibilityListener { visibility: Int ->
+        showQualityControl = visibility == View.VISIBLE
+      }
+    }
+
     Box(
       modifier = Modifier
         .then(
@@ -233,11 +240,7 @@ fun VideoPlayer(
           regPlaybackFxs(scope)
           regPlaybackEvents()
           PlayerView(context).apply {
-            setControllerVisibilityListener(
-              PlayerView.ControllerVisibilityListener { visibility: Int ->
-                showQualityControl = visibility == View.VISIBLE
-              }
-            )
+            setControllerVisibilityListener(controllerVisibilityListener)
             player = TyPlayer.getInstance()
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
           }

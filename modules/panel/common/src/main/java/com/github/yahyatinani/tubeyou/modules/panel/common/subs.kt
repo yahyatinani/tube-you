@@ -35,7 +35,8 @@ enum class Stream {
   date,
   avatar,
   sub_count,
-  channel_name
+  channel_name,
+  likes_count
 }
 
 private fun ratio(streamData: StreamData): Float {
@@ -123,7 +124,8 @@ fun regCommonSubs() {
       Stream.date to shorten(viewModel.uploaded),
       Stream.channel_name to viewModel.uploaderName,
       Stream.avatar to stream.uploaderAvatar,
-      Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount)
+      Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
+      Stream.likes_count to formatViews(stream.likes)
     )
 
     if (stream.videoStreams.isNotEmpty()) {

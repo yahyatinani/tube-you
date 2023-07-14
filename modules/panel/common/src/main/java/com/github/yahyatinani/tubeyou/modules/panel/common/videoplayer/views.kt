@@ -3,6 +3,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.view.View
 import android.view.Window
@@ -10,12 +11,16 @@ import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,15 +31,23 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.LibraryAdd
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -58,7 +71,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.buildAnnotatedString
@@ -68,13 +80,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.DialogWindowProvider
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelAvatar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import io.github.yahyatinani.recompose.dispatch
@@ -434,6 +446,118 @@ fun ChannelSection(
 }
 
 @Composable
+fun LikeSection(
+  modifier: Modifier = Modifier,
+  likesCount: String
+) {
+  val colorScheme = MaterialTheme.colorScheme
+  val alpha = if (isSystemInDarkTheme()) .09f else .05f
+  val containerColor = colorScheme.onBackground.copy(alpha)
+
+  val size = 18.dp
+  val textStyle = MaterialTheme.typography.labelMedium
+
+  Row(modifier = modifier.horizontalScroll(rememberScrollState())) {
+    val horizontal = 10.dp
+    val vertical = 7.dp
+    Surface(
+      color = containerColor,
+      shape = RoundedCornerShape(20.dp)
+    ) {
+      Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+        TyIconRoundedButton(
+          text = likesCount,
+          textStyle = textStyle,
+          containerColor = Color.Transparent,
+          onClick = { /* todo: */ },
+          horizontal = horizontal,
+          vertical = vertical
+        ) {
+          Icon(
+            modifier = Modifier.size(size),
+            imageVector = Icons.Outlined.ThumbUp,
+            contentDescription = ""
+          )
+        }
+
+        Divider(
+          modifier = Modifier
+            .width(1.dp)
+            .fillMaxHeight(),
+          color = colorScheme.onBackground.copy(.1f)
+        )
+
+        TyIconRoundedButton(
+          text = "-1",
+          textStyle = textStyle,
+          containerColor = Color.Transparent,
+          onClick = { /* todo: */ },
+          horizontal = horizontal,
+          vertical = vertical
+        ) {
+          Icon(
+            modifier = Modifier.size(size),
+            imageVector = Icons.Outlined.ThumbDown,
+            contentDescription = ""
+          )
+        }
+      }
+    }
+
+    Spacer(modifier = Modifier.width(16.dp))
+
+    TyIconRoundedButton(
+      text = "Share",
+      textStyle = textStyle,
+      containerColor = containerColor,
+      onClick = { /* todo: */ },
+      horizontal = horizontal,
+      vertical = vertical
+    ) {
+      Icon(
+        modifier = Modifier.size(size),
+        imageVector = Icons.Outlined.Share,
+        contentDescription = ""
+      )
+    }
+
+    Spacer(modifier = Modifier.width(16.dp))
+
+    TyIconRoundedButton(
+      text = "Download",
+      textStyle = textStyle,
+      containerColor = containerColor,
+      onClick = { /* todo: */ },
+      horizontal = horizontal,
+      vertical = vertical
+    ) {
+      Icon(
+        modifier = Modifier.size(size),
+        imageVector = Icons.Outlined.Download,
+        contentDescription = ""
+      )
+    }
+
+    Spacer(modifier = Modifier.width(16.dp))
+
+    TyIconRoundedButton(
+      text = "Save",
+      textStyle = textStyle,
+      containerColor = containerColor,
+      onClick = { /* todo: */ },
+      horizontal = horizontal,
+      vertical = vertical
+    ) {
+      Icon(
+        modifier = Modifier.size(size),
+        imageVector = Icons.Outlined.LibraryAdd,
+        contentDescription = ""
+      )
+    }
+  }
+}
+
+@Composable
 fun PlaybackBottomSheet(
   isCollapsed: Boolean,
   onCollapsedClick: () -> Unit,
@@ -458,23 +582,32 @@ fun PlaybackBottomSheet(
 
     if (streamData == null) return@Column
 
+    val modifier = Modifier
+      .fillMaxWidth()
+      .clickable { }
+      .padding(horizontal = 12.dp)
+
     DescriptionSection(
-      modifier = Modifier
-        .fillMaxWidth()
-        .clickable { }
-        .padding(horizontal = 12.dp),
+      modifier = modifier,
       streamTitle = get<String>(streamData, Stream.title)!!,
       views = get<String>(streamData, Stream.views)!!,
       date = get<String>(streamData, Stream.date)!!
     )
 
     ChannelSection(
-      modifier = Modifier
-        .clickable { }
-        .padding(horizontal = 12.dp),
+      modifier = modifier,
       channelName = get<String>(streamData, Stream.channel_name)!!,
       channelAvatar = get<String>(streamData, Stream.avatar)!!,
       subscribersCount = get<String>(streamData, Stream.sub_count)!!
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    LikeSection(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp),
+      likesCount = get<String>(streamData, Stream.likes_count)!!
     )
   }
 }
@@ -512,4 +645,10 @@ fun StreamChannel2Preview() {
     channelAvatar = "Channel Name",
     subscribersCount = "48M"
   )
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun LikeSectionPreview() {
+  LikeSection(likesCount = "25K")
 }

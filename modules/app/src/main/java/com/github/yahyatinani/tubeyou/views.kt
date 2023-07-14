@@ -2,11 +2,7 @@ package com.github.yahyatinani.tubeyou
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -28,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
@@ -42,6 +37,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -50,7 +46,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -66,17 +61,17 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.search.clear_search_
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.show_search_bar
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.update_search_input
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.BOTTOM_BAR_HEIGHT
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyBottomNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.thumbnailHeight
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
-import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBar
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.MiniPlayerControls
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.MINI_PLAYER_HEIGHT
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlaybackBottomSheet
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerSheetState
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerSheetState.HIDDEN
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.RegPlayerSheetEffects
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.VideoPlayer
@@ -221,9 +216,23 @@ fun TyApp(
 
       RegPlayerSheetEffects(playerSheetState)
 
+      val sheetPeekHeight = remember(playerRegion) {
+        when (playerRegion) {
+          null -> 0.dp
+          else -> MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT
+        }
+      }
+
       BottomSheetScaffold(
         modifier = Modifier
           .padding(p1)
+          .then(
+            if (playerSheetRegion == PlayerSheetState.COLLAPSED) {
+              Modifier.padding(bottom = MINI_PLAYER_HEIGHT)
+            } else {
+              Modifier
+            }
+          )
           .fillMaxSize()
           .nestedScroll(scrollBehavior.nestedScrollConnection)
           .semantics {
@@ -231,7 +240,7 @@ fun TyApp(
             testTagsAsResourceId = true
           },
         scaffoldState = bottomSheetScaffoldState,
-        sheetPeekHeight = if (playerRegion == null ) 0.dp else 110.dp,
+        sheetPeekHeight = sheetPeekHeight,
         sheetDragHandle = null,
         sheetShape = RoundedCornerShape(0.dp),
         sheetContent = {
@@ -240,54 +249,17 @@ fun TyApp(
             cofx.assoc("player_scope", playerScope)
           }
 
-          Column(
-            modifier = Modifier
-              .fillMaxSize()
-              .clickable(isCollapsed) {
-                dispatch(v("playback_fsm", common.expand_player_sheet))
-              }
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-              VideoPlayer(
-                streamData = streamData,
-                useController = !isCollapsed,
-                isCollapsed = isCollapsed,
-                playerState = playerRegion,
-                showThumbnail = showThumbnail,
-                thumbnail = thumbnail
-              )
-
-              if (isCollapsed || playerSheetRegion == HIDDEN) {
-                MiniPlayerControls(
-                  isPlaying = playerRegion == PlayerState.PLAYING,
-                  onClosePlayer = {
-                    dispatchSync(v("playback_fsm", "close_player"))
-                  }
-                ) {
-                  dispatchSync(v("playback_fsm", "toggle_play_pause"))
-                }
-              }
-            }
-
-            if (streamData == null) return@BottomSheetScaffold
-
-            Column(
-              modifier = Modifier.padding(
-                horizontal = 8.dp,
-                vertical = 12.dp
-              )
-            ) {
-              Text(
-                text = get<String>(streamData, Stream.title)!!,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-              )
-            }
+          val onCollapsedClick = {
+            dispatch(v("playback_fsm", common.expand_player_sheet))
           }
+          PlaybackBottomSheet(
+            isCollapsed,
+            onCollapsedClick,
+            streamData,
+            playerRegion,
+            showThumbnail,
+            thumbnail
+          )
         }
       ) {
         Scaffold(

@@ -5,13 +5,18 @@ import android.view.View
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,11 +55,18 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelAvatar
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
@@ -99,163 +111,6 @@ fun DragHandle(modifier: Modifier = Modifier) {
 }
 
 @Composable
-@OptIn(UnstableApi::class)
-@kotlin.OptIn(ExperimentalMaterial3Api::class)
-fun VideoPlayer(
-  modifier: Modifier = Modifier,
-  streamData: IPersistentMap<Any, Any>?,
-  useController: Boolean = true,
-  isCollapsed: Boolean,
-  playerState: PlayerState?,
-  showThumbnail: Boolean?,
-  thumbnail: String?
-) {
-  val context = LocalContext.current
-  val scope = rememberCoroutineScope()
-  val orientation = LocalConfiguration.current.orientation
-
-  var showQualityControl: Boolean by remember { mutableStateOf(false) }
-  var showQualitiesSheet: Boolean by remember { mutableStateOf(false) }
-
-  val ratio by remember { mutableFloatStateOf(16 / 9f) }
-  Box(
-    modifier = Modifier
-      .then(
-        if (orientation != ORIENTATION_LANDSCAPE) {
-          if (isCollapsed) {
-            Modifier
-              .height(110.dp - 48.dp)
-              .aspectRatio(ratio)
-          } else if (streamData != null) {
-            Modifier
-              .fillMaxWidth()
-              .aspectRatio(get(streamData, Stream.aspect_ratio)!!)
-          } else {
-            Modifier
-              .fillMaxWidth()
-              .aspectRatio(ratio)
-          }
-        } else {
-          Modifier
-        }
-      )
-  ) {
-    LaunchedEffect(streamData) {
-      TyPlayer.playNewVideo(streamData)
-    }
-
-    LaunchedEffect(orientation) {
-      if (orientation == ORIENTATION_LANDSCAPE) {
-        dispatch(v(":player_fullscreen_landscape"))
-      } else {
-        dispatch(v(":player_portrait"))
-      }
-    }
-
-    AndroidView(
-      modifier = modifier
-        .fillMaxWidth()
-        .apply {
-          if (orientation == ORIENTATION_LANDSCAPE) {
-            padding(start = 26.dp)
-          }
-        },
-      factory = {
-        regPlaybackFxs(scope)
-        regPlaybackEvents()
-        PlayerView(context).apply {
-          setControllerVisibilityListener(
-            PlayerView.ControllerVisibilityListener { visibility: Int ->
-              showQualityControl = visibility == View.VISIBLE
-            }
-          )
-          player = TyPlayer.getInstance()
-          resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-        }
-      }
-    ) {
-      // setBackgroundColor(ContextCompat.getColor(context, R.color.black))
-      it.useController = useController
-    }
-
-    if (showThumbnail == true) {
-      Thumbnail(
-        modifier = Modifier.wrapContentSize(),
-        url = thumbnail
-      )
-    }
-
-    if (
-      playerState == PlayerState.LOADING ||
-      playerState == PlayerState.BUFFERING
-    ) {
-      CircularProgressIndicator(
-        modifier = Modifier
-          .align(Alignment.Center)
-          .size(64.dp),
-        color = Grey300.copy(alpha = .4f)
-      )
-    }
-
-    if (showQualityControl && streamData != null) {
-      TextButton(
-        modifier = Modifier.align(Alignment.TopEnd),
-        colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-        onClick = {
-          dispatch(v("playback_fsm", "generate_quality_list"))
-          showQualitiesSheet = true
-        }
-      ) {
-        Text(text = get<String>(streamData, Stream.current_quality)!!)
-      }
-
-      IconButton(
-        modifier = Modifier
-          .align(Alignment.BottomEnd)
-          .padding(end = 40.dp, bottom = 6.dp),
-        onClick = { dispatchSync(v(":toggle_orientation")) }
-      ) {
-        Image(
-          imageVector = Icons.Default.Fullscreen,
-          contentDescription = "",
-          colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-        )
-      }
-    }
-  }
-
-  if (showQualitiesSheet) {
-    val sheetState =
-      rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    LaunchedEffect(Unit) {
-      val offset = sheetState.requireOffset()
-      println("sjdfjsdfj $offset")
-    }
-
-    val containerColor = Color(0xFF212121)
-    ModalBottomSheet(
-      modifier = Modifier
-//          .offset(y = (-24).dp)
-        .padding(horizontal = 10.dp)
-        .fillMaxWidth()
-        .wrapContentHeight(),
-      dragHandle = { DragHandle(modifier) },
-      shape = RoundedCornerShape(10.dp),
-      containerColor = containerColor,
-      onDismissRequest = { showQualitiesSheet = false },
-      sheetState = sheetState
-    ) {
-      val resolutions =
-        get<List<Pair<String, Int>>>(streamData, Stream.quality_list)!!
-      QualityList(
-        resolutions = resolutions,
-        containerColor = containerColor
-      )
-    }
-  }
-}
-
-@Composable
 fun MiniPlayerControls(
   isPlaying: Boolean,
   onClosePlayer: () -> Unit = { },
@@ -287,4 +142,352 @@ fun MiniPlayerControls(
       )
     }
   }
+}
+
+@Composable
+@OptIn(UnstableApi::class)
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+fun VideoPlayer(
+  modifier: Modifier = Modifier,
+  streamData: IPersistentMap<Any, Any>?,
+  useController: Boolean = true,
+  isCollapsed: Boolean,
+  playerState: PlayerState?,
+  showThumbnail: Boolean?,
+  thumbnail: String?
+) {
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceBetween
+  ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val orientation = LocalConfiguration.current.orientation
+
+    var showQualityControl: Boolean by remember { mutableStateOf(false) }
+    var showQualitiesSheet: Boolean by remember { mutableStateOf(false) }
+
+    val ratio by remember { mutableFloatStateOf(16 / 9f) }
+    Box(
+      modifier = Modifier
+        .then(
+          if (orientation != ORIENTATION_LANDSCAPE) {
+            if (isCollapsed) {
+              Modifier
+                .height(110.dp - 48.dp)
+                .aspectRatio(ratio)
+            } else if (streamData != null) {
+              Modifier
+                .fillMaxWidth()
+                .aspectRatio(get(streamData, Stream.aspect_ratio)!!)
+            } else {
+              Modifier
+                .fillMaxWidth()
+                .aspectRatio(ratio)
+            }
+          } else {
+            Modifier
+          }
+        )
+    ) {
+      LaunchedEffect(streamData) {
+        TyPlayer.playNewVideo(streamData)
+      }
+
+      LaunchedEffect(orientation) {
+        if (orientation == ORIENTATION_LANDSCAPE) {
+          dispatch(v(":player_fullscreen_landscape"))
+        } else {
+          dispatch(v(":player_portrait"))
+        }
+      }
+
+      AndroidView(
+        modifier = modifier
+          .fillMaxWidth()
+          .apply {
+            if (orientation == ORIENTATION_LANDSCAPE) {
+              padding(start = 26.dp)
+            }
+          },
+        factory = {
+          regPlaybackFxs(scope)
+          regPlaybackEvents()
+          PlayerView(context).apply {
+            setControllerVisibilityListener(
+              PlayerView.ControllerVisibilityListener { visibility: Int ->
+                showQualityControl = visibility == View.VISIBLE
+              }
+            )
+            player = TyPlayer.getInstance()
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+          }
+        }
+      ) {
+        // setBackgroundColor(ContextCompat.getColor(context, R.color.black))
+        it.useController = useController
+      }
+
+      if (showThumbnail == true) {
+        Thumbnail(
+          modifier = Modifier.wrapContentSize(),
+          url = thumbnail
+        )
+      }
+
+      if (
+        playerState == PlayerState.LOADING ||
+        playerState == PlayerState.BUFFERING
+      ) {
+        CircularProgressIndicator(
+          modifier = Modifier
+            .align(Alignment.Center)
+            .size(64.dp),
+          color = Grey300.copy(alpha = .4f)
+        )
+      }
+
+      if (showQualityControl && streamData != null) {
+        TextButton(
+          modifier = Modifier.align(Alignment.TopEnd),
+          colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+          onClick = {
+            dispatch(v("playback_fsm", "generate_quality_list"))
+            showQualitiesSheet = true
+          }
+        ) {
+          Text(text = get<String>(streamData, Stream.current_quality)!!)
+        }
+
+        IconButton(
+          modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(end = 40.dp, bottom = 6.dp),
+          onClick = { dispatchSync(v(":toggle_orientation")) }
+        ) {
+          Image(
+            imageVector = Icons.Default.Fullscreen,
+            contentDescription = "",
+            colorFilter = ColorFilter.tint(
+              MaterialTheme.colorScheme.onBackground
+            )
+          )
+        }
+      }
+    }
+
+    if (showQualitiesSheet) {
+      val sheetState =
+        rememberModalBottomSheetState(skipPartiallyExpanded = true)
+      LaunchedEffect(Unit) {
+        val offset = sheetState.requireOffset()
+        println("sjdfjsdfj $offset")
+      }
+
+      val containerColor = Color(0xFF212121)
+      ModalBottomSheet(
+        modifier = Modifier
+//          .offset(y = (-24).dp)
+          .padding(horizontal = 10.dp)
+          .fillMaxWidth()
+          .wrapContentHeight(),
+        dragHandle = { DragHandle(modifier) },
+        shape = RoundedCornerShape(10.dp),
+        containerColor = containerColor,
+        onDismissRequest = { showQualitiesSheet = false },
+        sheetState = sheetState
+      ) {
+        val resolutions =
+          get<List<Pair<String, Int>>>(streamData, Stream.quality_list)!!
+        QualityList(
+          resolutions = resolutions,
+          containerColor = containerColor
+        )
+      }
+    }
+
+    if (isCollapsed) {
+      MiniPlayerControls(
+        isPlaying = playerState == PlayerState.PLAYING,
+        onClosePlayer = {
+          dispatchSync(v("playback_fsm", "close_player"))
+        }
+      ) {
+        dispatchSync(v("playback_fsm", "toggle_play_pause"))
+      }
+    }
+  }
+}
+
+@Composable
+fun DescriptionSection(
+  modifier: Modifier = Modifier,
+  streamTitle: String,
+  views: String,
+  date: String
+) {
+  Column(
+    modifier = modifier.padding(top = 12.dp, bottom = 2.dp)
+  ) {
+    val typography = MaterialTheme.typography
+    Text(
+      text = streamTitle,
+      style = typography.titleMedium,
+      maxLines = 2,
+      overflow = TextOverflow.Ellipsis
+    )
+    val color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)
+    val string = buildAnnotatedString {
+      withStyle(
+        style = typography.bodySmall.copy(color = color).toSpanStyle()
+      ) {
+        append("$views  $date")
+      }
+      append(" ")
+      withStyle(
+        style = typography.bodySmall.copy(
+          fontWeight = FontWeight.Bold
+        ).toSpanStyle()
+      ) {
+        append("...more")
+      }
+    }
+    Text(text = string)
+  }
+}
+
+@Composable
+fun ChannelSection(
+  modifier: Modifier = Modifier,
+  channelName: String,
+  channelAvatar: String,
+  subscribersCount: String
+) {
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    val typography = MaterialTheme.typography
+
+    Row(
+      modifier = Modifier.weight(1f),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      ChannelAvatar(
+        url = channelAvatar,
+        size = 32.dp
+      )
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Text(
+        modifier = Modifier.weight(1f, false),
+        text = channelName,
+        style = typography.bodyMedium.copy(fontWeight = FontWeight.W500),
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1
+      )
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      val color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)
+      Text(
+        text = subscribersCount,
+        style = typography.bodySmall.copy(color = color)
+      )
+    }
+
+    Spacer(modifier = Modifier.width(16.dp))
+
+    val colorScheme = MaterialTheme.colorScheme
+
+    SubscribeButton(
+      containerColor = colorScheme.onSurface,
+      contentColor = colorScheme.surface
+    ) {
+      // TODO:
+    }
+  }
+}
+
+@Composable
+fun PlaybackBottomSheet(
+  isCollapsed: Boolean,
+  onCollapsedClick: () -> Unit,
+  streamData: IPersistentMap<Any, Any>?,
+  playerRegion: PlayerState?,
+  showThumbnail: Boolean?,
+  thumbnail: String?
+) {
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .clickable(isCollapsed, onClick = onCollapsedClick)
+  ) {
+    VideoPlayer(
+      streamData = streamData,
+      useController = !isCollapsed,
+      isCollapsed = isCollapsed,
+      playerState = playerRegion,
+      showThumbnail = showThumbnail,
+      thumbnail = thumbnail
+    )
+
+    if (streamData == null) return@Column
+
+    DescriptionSection(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clickable { }
+        .padding(horizontal = 12.dp),
+      streamTitle = get<String>(streamData, Stream.title)!!,
+      views = get<String>(streamData, Stream.views)!!,
+      date = get<String>(streamData, Stream.date)!!
+    )
+
+    ChannelSection(
+      modifier = Modifier
+        .clickable { }
+        .padding(horizontal = 12.dp),
+      channelName = get<String>(streamData, Stream.channel_name)!!,
+      channelAvatar = get<String>(streamData, Stream.avatar)!!,
+      subscribersCount = get<String>(streamData, Stream.sub_count)!!
+    )
+  }
+}
+
+val MINI_PLAYER_HEIGHT = 62.dp
+
+// -- Previews -----------------------------------------------------------------
+
+@Preview(showBackground = true)
+@Composable
+fun StreamDescriptionPreview() {
+  DescriptionSection(
+    streamTitle = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
+      "sed do eiusmod tempor incididunt ut labore et dolore magna ",
+    views = "4.6M",
+    date = "3y ago"
+  )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StreamChannel1Preview() {
+  ChannelSection(
+    channelName = "Lorem",
+    channelAvatar = "Channel Name",
+    subscribersCount = "48M"
+  )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StreamChannel2Preview() {
+  ChannelSection(
+    channelName = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet,",
+    channelAvatar = "Channel Name",
+    subscribersCount = "48M"
+  )
 }

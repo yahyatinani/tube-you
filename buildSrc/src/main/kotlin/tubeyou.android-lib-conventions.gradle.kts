@@ -9,7 +9,7 @@ plugins {
 
 android {
 //  namespace = APP_ID
-  compileSdk = 33
+  compileSdk = 34
 
   buildFeatures {
     compose = true
@@ -17,7 +17,6 @@ android {
 
   defaultConfig {
     minSdk = 23
-    targetSdk = 33
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     consumerProguardFiles("consumer-rules.pro")
     aarMetadata {

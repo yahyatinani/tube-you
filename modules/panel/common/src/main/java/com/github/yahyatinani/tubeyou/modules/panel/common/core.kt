@@ -41,9 +41,11 @@ fun formatVideo(video: Video, resources: Resources): VideoViewModel {
   val isLiveStream = video.duration == -1L
   val authorId = video.uploaderUrl!!
   val isUpcoming = video.views == -1L && video.duration == -1L
+  val uploaded = video.uploadedDate
+  val uploaderName = video.uploaderName!!
   val info = if (isUpcoming) {
     formatVideoInfo(
-      author = video.uploaderName!!,
+      author = uploaderName,
       authorId = authorId,
       text1 = resources.getString(R.string.scheduled_for),
       text2 = convertTimestamp(video.uploaded)
@@ -52,14 +54,14 @@ fun formatVideo(video: Video, resources: Resources): VideoViewModel {
     val viewCount = formatViews(video.views!!)
     when {
       isLiveStream -> formatVideoInfo(
-        author = video.uploaderName!!,
+        author = uploaderName,
         authorId = authorId,
         text1 = viewCount,
         text2 = resources.getString(R.string.watching)
       )
 
       else -> formatVideoInfo(
-        author = video.uploaderName!!,
+        author = uploaderName,
         authorId = authorId,
         text1 = viewCount,
         text2 = resources.getString(R.string.views_label),
@@ -70,9 +72,11 @@ fun formatVideo(video: Video, resources: Resources): VideoViewModel {
   return VideoViewModel(
     id = video.url,
     authorId = authorId,
+    uploaderName = uploaderName,
     title = video.title,
     thumbnail = highQuality(video.thumbnail),
     length = formatSeconds(video.duration),
+    uploaded = uploaded ?: "",
     info = info,
     uploaderAvatar = video.uploaderAvatar,
     isUpcoming = isUpcoming,

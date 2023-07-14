@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,8 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
@@ -37,14 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.yahyatinani.tubeyou.modules.designsystem.R
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.ChannelVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.PlaylistVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
@@ -236,22 +231,7 @@ fun ChannelItem(
       Text(text = vm.handle, style = textStyle)
       Spacer(modifier = Modifier.height(4.dp))
       Text(text = "${vm.subCount} subscribers", style = textStyle)
-      val colorScheme = MaterialTheme.colorScheme
-      Button(
-        modifier = Modifier
-          .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-        onClick = { /*TODO*/ },
-        colors = ButtonDefaults.buttonColors(
-          containerColor = colorScheme.onSurface,
-          contentColor = colorScheme.surface
-        ),
-        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
-      ) {
-        Text(
-          text = stringResource(R.string.subscribe),
-          style = typography.labelMedium
-        )
-      }
+      SubscribeButton()
     }
   )
 }

@@ -7,9 +7,11 @@ import io.github.yahyatinani.y.core.l
 data class VideoViewModel(
   val id: String,
   val authorId: String,
+  val uploaderName: String = "",
   val title: String,
   val thumbnail: String,
   val length: String,
+  val uploaded: String = "",
   val info: AnnotatedString,
   val isUpcoming: Boolean = false,
   val isShort: Boolean = false,

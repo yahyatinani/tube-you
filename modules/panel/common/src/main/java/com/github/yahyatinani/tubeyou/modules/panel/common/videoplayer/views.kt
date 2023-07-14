@@ -1,7 +1,12 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -53,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.buildAnnotatedString
@@ -62,6 +68,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -110,12 +117,24 @@ fun DragHandle(modifier: Modifier = Modifier) {
   }
 }
 
+private fun Context.findWindow(): Window? {
+  var context = this
+  while (context is ContextWrapper) {
+    if (context is Activity) return context.window
+    context = context.baseContext
+  }
+  return null
+}
+
 @Composable
 fun MiniPlayerControls(
   isPlaying: Boolean,
   onClosePlayer: () -> Unit = { },
   playPausePlayer: () -> Unit = { }
 ) {
+  with(LocalContext.current.findWindow()) {
+    this?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+  }
   Row(
     modifier = Modifier.height(110.dp - 48.dp),
     verticalAlignment = Alignment.CenterVertically

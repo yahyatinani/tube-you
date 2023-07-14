@@ -21,7 +21,6 @@
         android:supportsPictureInPicture="true"
         android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
         android:resizeableActivity="true"
-        android:windowSoftInputMode="adjustResize"
         android:exported="true"
       android:theme="@style/Theme.Ty.Splash">
       <intent-filter>

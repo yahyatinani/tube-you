@@ -91,7 +91,7 @@ val MINI_AVATAR = 40.dp
 val MINI_AVATAR_LIVE = 44.dp
 
 @Composable
-fun ChannelAvatar(
+fun AuthorAvatar(
   url: String?,
   modifier: Modifier = Modifier,
   size: Dp = MINI_AVATAR
@@ -150,7 +150,7 @@ fun ChannelAvatarLive(
 @Preview(showBackground = true)
 @Composable
 fun ChannelAvatarDarkPreview() {
-  ChannelAvatar(url = "")
+  AuthorAvatar(url = "")
 }
 
 @Preview(showBackground = true)

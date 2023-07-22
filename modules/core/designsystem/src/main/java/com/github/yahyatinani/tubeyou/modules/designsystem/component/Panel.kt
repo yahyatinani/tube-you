@@ -4,8 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -33,23 +31,13 @@ fun Panel(
   panelVm: PanelVm,
   content: @Composable (
     videos: Videos,
-    triggerAppending: Any?,
     appendLoader: @Composable () -> Unit
   ) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    content(panelVm.videos, panelVm.appendEvent) {
+    content(panelVm.videos) {
       if (panelVm.isAppending) {
-        Box(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-        ) {
-          CircularProgressIndicator(
-            modifier = Modifier.align(Alignment.Center),
-            color = Blue300
-          )
-        }
+        AppendingLoader()
       }
     }
 
@@ -75,7 +63,7 @@ fun PullRefreshPanel(
   onRefresh: () -> Unit = {},
   content: @Composable (videos: Videos) -> Unit
 ) {
-  Panel(modifier = modifier, panelVm = panelVm) { videos, _, _ ->
+  Panel(modifier = modifier, panelVm = panelVm) { videos, _ ->
     SwipeRefresh(
       modifier = Modifier.testTag("swipe_refresh"),
       swipeEnabled = !panelVm.isLoading,

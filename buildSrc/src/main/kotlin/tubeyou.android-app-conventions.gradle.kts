@@ -14,12 +14,12 @@ plugins {
 android {
   namespace = APP_ID
 
-  compileSdk = 34
+  compileSdk = 33
 
   defaultConfig {
     applicationId = APP_ID
     minSdk = 23
-    targetSdk = 34
+    targetSdk = 33
     versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
     versionName = "$versionMajor.$versionMinor.$versionPatch"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

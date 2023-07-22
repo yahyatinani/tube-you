@@ -69,7 +69,7 @@ fun regSearchSubs() {
         when {
           error != null -> PanelVm.Error(error as Int?)
           else -> {
-            val (id, items) = get<IPersistentVector<Any>>(
+            val items = get<IPersistentVector<Any>>(
               sb,
               searchBar.results
             )!!
@@ -78,7 +78,6 @@ fun regSearchSubs() {
                 items as PersistentVector<SearchResult>,
                 resources
               ),
-              appendEvent = id
             )
           }
         }

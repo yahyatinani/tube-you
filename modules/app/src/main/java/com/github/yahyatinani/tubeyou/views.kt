@@ -31,12 +31,11 @@ import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -44,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
@@ -79,7 +79,6 @@ import com.github.yahyatinani.tubeyou.modules.panel.home.homeGraph
 import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
 import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
 import com.github.yahyatinani.tubeyou.nav.NavigationChangedListenerEffect
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
@@ -128,6 +127,13 @@ fun TyApp(
   NavigationChangedListenerEffect(navController)
 
   val appScope = rememberCoroutineScope()
+  val density = LocalDensity.current
+  val configuration = LocalConfiguration.current
+
+  val pairWh = with(density) {
+    configuration.screenWidthDp.dp.toPx() to
+      configuration.screenHeightDp.dp.toPx()
+  }
   LaunchedEffect(Unit) {
     regAppFx(navController, appScope)
 
@@ -137,17 +143,14 @@ fun TyApp(
         navController.graph.findStartDestination().id
       )
     }
+    regCofx(":screen_dimen_px") { coeffects ->
+      coeffects.assoc(":screen_dimen_px", pairWh)
+    }
   }
 
   val isCompactSize = isCompact(windowSizeClass)
 
   TyTheme(isCompact = isCompactSize) {
-    val systemUiController = rememberSystemUiController()
-    val colors = MaterialTheme.colorScheme
-    SideEffect {
-      systemUiController.setSystemBarsColor(color = colors.background)
-    }
-
     val colorScheme = MaterialTheme.colorScheme
     val sb = watch<SearchBar?>(v(search.search_bar))
     val topBarState = rememberTopAppBarState()
@@ -156,8 +159,6 @@ fun TyApp(
     regCofx(common.coroutine_scope) { cofx ->
       cofx.assoc(common.coroutine_scope, appScope)
     }
-
-    val orientation = LocalConfiguration.current.orientation
 
     val playbackFsm =
       watch<IPersistentMap<Any, Any>>(query = v("playback_fsm"))
@@ -172,16 +173,16 @@ fun TyApp(
       get<PlayerSheetState>(playbackMachine, ":player_sheet")
     val isCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED
 
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-      bottomSheetState = rememberModalBottomSheetState(false)
-    )
-    val playerSheetState = bottomSheetScaffoldState.bottomSheetState
-    val playerSheetValue = playerSheetState.currentValue
-
     val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
-
     val thumbnail = get<VideoViewModel>(playbackFsm, "videoVm")?.thumbnail
 
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+      bottomSheetState = rememberStandardBottomSheetState(
+        SheetValue.Hidden,
+        skipHiddenState = false
+      )
+    )
+    val orientation = LocalConfiguration.current.orientation
     if (orientation == ORIENTATION_LANDSCAPE && playerRegion != null) {
       LaunchedEffect(Unit) {
         dispatch(v(":player_fullscreen_landscape"))
@@ -198,27 +199,34 @@ fun TyApp(
 
       return@TyTheme
     }
+    val playerSheetState = bottomSheetScaffoldState.bottomSheetState
+    val playbackTargetValue = playerSheetState.targetValue
 
     Scaffold(
       bottomBar = {
-        if (playerSheetState.currentValue != SheetValue.Expanded) {
-          TyBottomNavigationBar(
-            navItems = watch(v(common.navigation_items)),
-            isCompact = isCompactSize,
-            colorScheme = colorScheme
-          ) { dispatch(v(common.on_click_nav_item, it)) }
+        if (playbackTargetValue == SheetValue.Expanded) {
+          return@Scaffold
         }
+
+        TyBottomNavigationBar(
+          navItems = watch(v(common.navigation_items)),
+          isCompact = isCompactSize,
+          colorScheme = colorScheme
+        ) { dispatch(v(common.on_click_nav_item, it)) }
       }
     ) { p1 ->
+      val playerSheetValue = playerSheetState.currentValue
       LaunchedEffect(playerSheetValue) {
         dispatch(v("playback_fsm", playerSheetValue))
       }
 
       RegPlayerSheetEffects(playerSheetState)
 
-      val sheetPeekHeight = remember(playerRegion) {
-        when (playerRegion) {
-          null -> 0.dp
+      val sheetPeekHeight = remember(playbackTargetValue, playerSheetValue) {
+        when {
+          playbackTargetValue == SheetValue.Hidden &&
+            playerSheetValue == SheetValue.Hidden -> 0.dp
+
           else -> MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT
         }
       }
@@ -226,13 +234,6 @@ fun TyApp(
       BottomSheetScaffold(
         modifier = Modifier
           .padding(p1)
-          .then(
-            if (playerSheetRegion == PlayerSheetState.COLLAPSED) {
-              Modifier.padding(bottom = MINI_PLAYER_HEIGHT)
-            } else {
-              Modifier
-            }
-          )
           .fillMaxSize()
           .nestedScroll(scrollBehavior.nestedScrollConnection)
           .semantics {
@@ -245,20 +246,28 @@ fun TyApp(
         sheetShape = RoundedCornerShape(0.dp),
         sheetContent = {
           val playerScope = rememberCoroutineScope()
-          regCofx("player_scope") { cofx ->
-            cofx.assoc("player_scope", playerScope)
+          LaunchedEffect(Unit) {
+            regCofx("player_scope") { cofx ->
+              cofx.assoc("player_scope", playerScope)
+            }
           }
 
-          val onCollapsedClick = {
-            dispatch(v("playback_fsm", common.expand_player_sheet))
+          val peekHeight = with(LocalDensity.current) {
+            get<Float>(playbackFsm, ":desc_sheet_height")?.toDp() ?: 0.toDp()
           }
+
+//          if (playerRegion == null) return@BottomSheetScaffold
+
           PlaybackBottomSheet(
-            isCollapsed,
-            onCollapsedClick,
-            streamData,
-            playerRegion,
-            showThumbnail,
-            thumbnail
+            isCollapsed = isCollapsed,
+            onCollapsedClick = {
+              dispatch(v<Any>("playback_fsm", common.expand_player_sheet))
+            },
+            streamData = streamData,
+            playerRegion = playerRegion,
+            showThumbnail = showThumbnail,
+            thumbnail = thumbnail,
+            sheetPeekHeight = peekHeight
           )
         }
       ) {

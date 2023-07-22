@@ -27,7 +27,7 @@ val TypographyExpanded = Typography(
     fontSize = 12.sp
   ),
   titleMedium = TextStyle(
-    fontSize = 18.sp,
+    fontSize = 20.sp,
     fontWeight = FontWeight.Bold
   )
   /* Other default text styles to override

@@ -71,9 +71,11 @@ fun regSearchEvents() {
             "pageName" to "nextpage",
             "nextUrl" to "$api/nextpage/search?q=$sq&filter=all",
             "eventId" to get_search_results,
+            paging.append_id to "append_search_results",
             ktor.coroutine_scope to cofx[search.coroutine_scope],
             ktor.response_type_info to typeInfo<SearchResponse>(),
-            ktor.on_success to handleResultsEvent,
+            ktor.on_success to v("todo: ignore this"),
+            paging.on_page_success to handleResultsEvent,
             "on_appending" to v(search.panel_fsm),
             ktor.on_failure to handleResultsEvent
           )

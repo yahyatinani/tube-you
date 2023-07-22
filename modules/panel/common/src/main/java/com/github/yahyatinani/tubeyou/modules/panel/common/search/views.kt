@@ -104,7 +104,6 @@ fun LandscapeListItem(
 fun SearchPanel(
   listState: LazyListState,
   videos: Videos,
-  triggerAppending: Any?,
   isPortrait: Boolean,
   thumbnailHeight: Dp,
   appendLoader: @Composable () -> Unit
@@ -116,7 +115,7 @@ fun SearchPanel(
       .fillMaxSize()
   ) {
     itemsIndexed(items = videos.value) { index: Int, vm: Any ->
-      dispatch(v(triggerAppending!!, index))
+      dispatch(v("append_search_results", index))
       when {
         isPortrait -> PortraitListItem(
           vm = vm,
@@ -141,11 +140,10 @@ fun NavGraphBuilder.searchPanel(
     val panelVm =
       watch<PanelVm>(v(search.view_model, LocalContext.current.resources))
 
-    Panel(panelVm = panelVm) { videos, triggerAppending, appendLoader ->
+    Panel(panelVm = panelVm) { videos, appendLoader ->
       SearchPanel(
         listState = rememberLazyListState(),
         videos = videos,
-        triggerAppending = triggerAppending,
         isPortrait = orientation == ORIENTATION_PORTRAIT,
         thumbnailHeight = thumbnailHeight,
         appendLoader = appendLoader

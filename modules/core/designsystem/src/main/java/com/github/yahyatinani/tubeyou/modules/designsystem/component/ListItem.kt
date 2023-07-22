@@ -144,7 +144,7 @@ fun VideoItemPortrait(
     channelAvatar = {
       when {
         viewModel.isLiveStream -> ChannelAvatarLive(viewModel.uploaderAvatar)
-        else -> ChannelAvatar(url = viewModel.uploaderAvatar)
+        else -> AuthorAvatar(url = viewModel.uploaderAvatar)
       }
       Spacer(modifier = Modifier.width(16.dp))
     },
@@ -169,7 +169,7 @@ fun VideoItemLandscapeCompact(
 
     when {
       viewModel.isLiveStream -> ChannelAvatarLive(viewModel.uploaderAvatar)
-      else -> ChannelAvatar(url = viewModel.uploaderAvatar)
+      else -> AuthorAvatar(url = viewModel.uploaderAvatar)
     }
   }
 }
@@ -213,7 +213,7 @@ fun ChannelItem(
   ListItem(
     modifier = modifier,
     leadingContent = {
-      ChannelAvatar(
+      AuthorAvatar(
         url = vm.avatar,
         modifier = Modifier
           .padding(avatarPaddingValues)

@@ -2,7 +2,6 @@ package com.github.yahyatinani.tubeyou.modules.designsystem.data
 
 sealed class PanelVm(
   open val videos: Videos = Videos(),
-  open val appendEvent: Any? = null,
   val isLoading: Boolean = false,
   open val isAppending: Boolean = false,
   val isRefreshing: Boolean = false,
@@ -16,7 +15,6 @@ sealed class PanelVm(
   data class Loaded(
     override val videos: Videos = Videos(),
     override val isAppending: Boolean = false,
-    override val appendEvent: Any? = null
   ) : PanelVm(videos = videos, isAppending = isAppending)
 
   data class Error(override val error: Int?) : PanelVm(error = error)

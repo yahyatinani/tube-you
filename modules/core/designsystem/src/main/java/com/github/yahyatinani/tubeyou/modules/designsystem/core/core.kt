@@ -90,6 +90,7 @@ fun formatViews(viewsCount: Long): String = when {
 
 // TODO: Refactor
 fun formatSubCount(subCount: Long): String = when {
+  subCount == 0L -> ""
   subCount < 1000 -> "$subCount"
   subCount < 10_000 -> {
     val x = subCount / 1000f

@@ -111,11 +111,8 @@ fun regCommonEvents() {
     interceptors = v(injectCofx("player_scope"))
   ) { cofx: Coeffects, (_, videoId) ->
     val appDbBy = appDbBy(cofx)
-
     val appDb = appDbBy.dissoc("current_video_stream")
     val id = (videoId as String).replace("/watch?v=", "")
-    val api = appDbBy(cofx)[common.api_url]
-    val commentsEvent = v("playback_fsm", "set_stream_comments")
     m(
       fx to v(
         v(
@@ -129,7 +126,20 @@ fun regCommonEvents() {
             ktor.on_success to v("playback_fsm", "launch_stream"),
             ktor.on_failure to v("todo")
           )
-        ),
+        )
+      )
+    )
+  }
+
+  regEventFx(
+    id = "load_stream_comments",
+    interceptors = v(injectCofx("player_scope"))
+  ) { cofx: Coeffects, (_, videoId) ->
+    val id = (videoId as String).replace("/watch?v=", "")
+    val api = appDbBy(cofx)[common.api_url]
+    val commentsEvent = v("playback_fsm", "set_stream_comments")
+    m(
+      fx to v(
         v(
           paging.fx,
           m(

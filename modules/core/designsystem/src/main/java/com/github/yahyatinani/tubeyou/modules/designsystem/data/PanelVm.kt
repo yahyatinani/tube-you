@@ -14,7 +14,7 @@ sealed class PanelVm(
 
   data class Loaded(
     override val videos: Videos = Videos(),
-    override val isAppending: Boolean = false,
+    override val isAppending: Boolean = false
   ) : PanelVm(videos = videos, isAppending = isAppending)
 
   data class Error(override val error: Int?) : PanelVm(error = error)

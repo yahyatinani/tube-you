@@ -190,11 +190,6 @@ fun regCommonSubs() {
     inputSignal = v("playback_fsm")
   ) { playbackFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    println(
-      "sdlkfjdsjf ${
-        get<CommentsSheetState>(playbackMachine, ":comments_sheet")
-      }"
-    )
 
     when (get<CommentsSheetState>(playbackMachine, ":comments_sheet")) {
       null, CommentsSheetState.LOADING -> AppendingPanelVm.Loading
@@ -216,7 +211,10 @@ fun regCommonSubs() {
         AppendingPanelVm.Loaded(items = Items(ret))
       }
 
-      CommentsSheetState.REFRESHING -> TODO()
+      CommentsSheetState.REFRESHING -> {
+        AppendingPanelVm.Refreshing((prev as AppendingPanelVm.Loaded).items)
+      }
+
       CommentsSheetState.APPENDING -> {
         (prev as AppendingPanelVm.Loaded).copy(isAppending = true)
       }
@@ -242,7 +240,7 @@ sealed class AppendingPanelVm(
 
   data class Loaded(
     override val items: Items = Items(),
-    override val isAppending: Boolean = false,
+    override val isAppending: Boolean = false
   ) : AppendingPanelVm(items = items, isAppending = isAppending)
 
   data class Error(override val error: Int?) : AppendingPanelVm(error = error)

@@ -40,12 +40,23 @@ fun fetchStream(
     fsm.state_map to state!!
       .assoc("videoVm", videoViewModel)
       .assoc("show_player_thumbnail", true)
-      .dissoc("stream_data")
-      .dissoc("stream_comments"),
+      .dissoc("stream_data"),
     fx to v(
       v(dispatch, v("load_stream", videoViewModel.id)),
       v("remove_track")
     )
+  )
+}
+
+fun fetchStreamComments(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects {
+  val videoViewModel = state!!["videoVm"] as VideoViewModel
+  return m(
+    fsm.state_map to state.dissoc("stream_comments"),
+    fx to v(v(dispatch, v("load_stream_comments", videoViewModel.id)))
   )
 }
 
@@ -124,7 +135,7 @@ val playerMachine = m<Any?, Any?>(
   null to m(
     common.play_video to m(
       target to PlayerState.LOADING,
-      actions to ::fetchStream
+      actions to v(::fetchStream)
     )
   ),
   PlayerState.LOADING to m(
@@ -150,7 +161,7 @@ val playerMachine = m<Any?, Any?>(
       m(target to fsm.ALL, guard to ::isSameVideoAlreadyPlaying),
       m(
         target to PlayerState.LOADING,
-        actions to v(::fetchStream, ::pausePlayer)
+        actions to v(::fetchStream, ::fetchStreamComments, ::pausePlayer)
       )
     ),
     common.release_player to m(target to null, actions to ::releasePlayer),
@@ -225,7 +236,8 @@ fun appendStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
 
   return m(
     fsm.state_map to state.assoc(
-      "stream_comments", streamComments.copy(
+      "stream_comments",
+      streamComments.copy(
         comments = comments as PersistentVector<StreamComment>
       )
     )
@@ -239,7 +251,8 @@ enum class CommentsSheetState {
 val commentsMachine = m(
   null to m(
     common.play_video to m(
-      target to CommentsSheetState.LOADING
+      target to CommentsSheetState.LOADING,
+      actions to ::fetchStreamComments
     )
   ),
   CommentsSheetState.LOADING to m(
@@ -251,7 +264,16 @@ val commentsMachine = m(
     common.play_video to m(
       target to CommentsSheetState.LOADING
     ),
-    Loading to m(target to CommentsSheetState.APPENDING)
+    Loading to m(target to CommentsSheetState.APPENDING),
+    "refresh_comments" to m(
+      target to CommentsSheetState.REFRESHING,
+      actions to ::fetchStreamComments
+    )
+  ),
+  CommentsSheetState.REFRESHING to m(
+    "set_stream_comments" to m(
+      target to CommentsSheetState.LOADED
+    )
   ),
   CommentsSheetState.APPENDING to m(
     "append_comments_page" to m(

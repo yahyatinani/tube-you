@@ -13,7 +13,6 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.annotation.OptIn
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -37,7 +35,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -54,7 +51,6 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -65,8 +61,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.Surface
@@ -119,6 +114,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLo
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AuthorAvatar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.CountText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableText
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.HeadedSheetColumn
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
@@ -126,13 +122,15 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppendingPanelVm
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.v
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -694,96 +692,6 @@ fun CommentsSection(
   }
 }
 
-@kotlin.OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun HeadedSheet(
-  modifier: Modifier = Modifier,
-  headerTitle: String,
-  close: () -> Unit = { },
-  onTapHeader: () -> Unit = {},
-  content: LazyListScope.() -> Unit
-) {
-  LazyColumn(
-    modifier = modifier
-      .fillMaxSize()
-      .nestedScroll(
-        object : NestedScrollConnection {
-          var lasPos: NestedScrollSource? = null
-          var consume: Offset? = null
-          override fun onPostScroll(
-            consumed: Offset,
-            available: Offset,
-            source: NestedScrollSource
-          ): Offset {
-            if (source == NestedScrollSource.Fling) {
-              lasPos = null
-              consume = null
-            }
-
-            return if (consumed.x == 0f &&
-              consumed.y == 0f &&
-              lasPos == null
-            ) {
-              super.onPostScroll(consumed, available, source)
-            } else {
-              if (lasPos == null && source != NestedScrollSource.Fling) {
-                lasPos = source
-                consume = consumed
-              }
-              available
-            }
-          }
-        }
-      )
-  ) {
-    stickyHeader {
-      val density = LocalDensity.current
-      val px = with(density) {
-        LocalConfiguration.current.screenWidthDp.dp.toPx()
-      }
-      Surface {
-        Column {
-          Row(
-            modifier = Modifier
-              .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                  val width = with(density) { 50.dp.toPx() }
-                  val fl = width / 2
-                  if (offset.x > (px / 2) - fl && offset.x < (px / 2) + fl) {
-                    onTapHeader()
-                  }
-                }
-              }
-              .fillMaxWidth()
-              .padding(start = 16.dp, end = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Text(
-              text = headerTitle,
-              style = MaterialTheme.typography.titleMedium
-            )
-            IconButton(onClick = { close() }) {
-              Icon(
-                modifier = Modifier.size(32.dp),
-                imageVector = Icons.Default.Close,
-                contentDescription = ""
-              )
-            }
-          }
-          Divider(modifier = Modifier.fillMaxWidth())
-        }
-      }
-    }
-
-    content()
-
-    item {
-      /* todo: appendLoader()*/
-    }
-  }
-}
-
 private fun TextView.setupClickableLinks() {
   autoLinkMask = Linkify.WEB_URLS
   linksClickable = true
@@ -807,138 +715,76 @@ fun Html(text: String?) {
   }
 }
 
-/*
-@kotlin.OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CommentsList(
-  modifier: Modifier = Modifier,
-  comments: Comments = Comments()
+fun SheetHeader(
+  onTapHeader: () -> Unit,
+  headerTitle: String,
+  closeSheet: () -> Unit
 ) {
-  LazyColumn(modifier = modifier.fillMaxWidth()) {
-    stickyHeader {
-      val density = LocalDensity.current
-      val px = with(density) {
-        LocalConfiguration.current.screenWidthDp.dp.toPx()
-      }
-      Surface {
-        Column {
-          Row(
-            modifier = Modifier
-              .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                  val width = with(density) { 50.dp.toPx() }
-                  val fl = width / 2
-                  if (offset.x > (px / 2) - fl && offset.x < (px / 2) + fl) {
-                  }
-                }
-              }
-              .fillMaxWidth()
-              .padding(start = 16.dp, end = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Text(
-              text = "Comments",
-              style = MaterialTheme.typography.titleMedium
-            )
-            IconButton(onClick = { }) {
-              Icon(
-                modifier = Modifier.size(32.dp),
-                imageVector = Icons.Default.Close,
-                contentDescription = ""
-              )
+  val density = LocalDensity.current
+  val px = with(density) {
+    LocalConfiguration.current.screenWidthDp.dp.toPx()
+  }
+  Column {
+    Row(
+      modifier = Modifier
+        .pointerInput(Unit) {
+          detectTapGestures { offset ->
+            val width = with(density) { 50.dp.toPx() }
+            val fl = width / 2
+            if (offset.x > (px / 2) - fl && offset.x < (px / 2) + fl) {
+              onTapHeader()
             }
           }
-          Divider(modifier = Modifier.fillMaxWidth())
         }
+        .fillMaxWidth()
+        .padding(start = 16.dp, end = 4.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        text = headerTitle,
+        style = MaterialTheme.typography.titleMedium
+      )
+      IconButton(onClick = closeSheet) {
+        Icon(
+          modifier = Modifier.size(32.dp),
+          imageVector = Icons.Default.Close,
+          contentDescription = ""
+        )
       }
     }
-    itemsIndexed(items = comments.list) { index: Int, comment: Any ->
-      val authorHandle: String = get(comment, "author")!!
-      val authorAvatar: String = get(comment, "author_avatar")!!
-      val commentText: Spanned = get(comment, "comment_text")!!
-      val likesCount: String = get(comment, "likes_count")!!
-      val repliesCount: Int = get(comment, "replies_count")!!
+    Divider(modifier = Modifier.fillMaxWidth())
+  }
+}
 
-      val typography = MaterialTheme.typography
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .wrapContentHeight()
-          .clickable { }
-          .padding(12.dp)
-//        verticalAlignment = Alignment.CenterVertically
-      ) {
-        AuthorAvatar(url = authorAvatar, size = 24.dp)
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-          val colorScheme = MaterialTheme.colorScheme
-          Text(
-            text = authorHandle,
-            style = typography.bodySmall.copy(
-              color = colorScheme.onSurface.copy(alpha = .6f)
-            )
-          )
-          Spacer(modifier = Modifier.height(2.dp))
-
-          val typeface: Typeface = viewTypeface(style = typography.bodyMedium)
-
-          AndroidView(
-            factory = { context ->
-              TextView(context).apply {
-                textSize = typography.bodyMedium.fontSize.value
-                maxLines = 4
-                ellipsize = TextUtils.TruncateAt.END
-                setTypeface(typeface)
-                setupClickableLinks()
-              }
-            }
-          ) {
-            it.setTextColor(colorScheme.onSurface.toArgb())
-            it.text = commentText
-          }
-          */
-/*     Text(
-                 text = commentText,
-                 maxLines = 4,
-                 overflow = TextOverflow.Ellipsis,
-                 style = typography.bodyMedium
-               )*//*
-
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          Row {
-            val size = 16.dp
-            Icon(
-              modifier = Modifier.size(size),
-              imageVector = Icons.Outlined.ThumbUp,
-              contentDescription = ""
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = likesCount,
-              style = typography.labelMedium
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(
-              modifier = Modifier.size(size),
-              imageVector = Icons.Outlined.ThumbDown,
-              contentDescription = ""
-            )
-          }
-        }
-      }
+class BottomSheetNestedScrollConnection : NestedScrollConnection {
+  private var lasPos: NestedScrollSource? = null
+  var consume: Offset? = null
+  override fun onPostScroll(
+    consumed: Offset,
+    available: Offset,
+    source: NestedScrollSource
+  ): Offset {
+    if (source == NestedScrollSource.Fling) {
+      lasPos = null
+      consume = null
     }
-    item {
-      */
-/* todo: appendLoader()*//*
 
+    return if (consumed.x == 0f &&
+      consumed.y == 0f &&
+      lasPos == null
+    ) {
+      super.onPostScroll(consumed, available, source)
+    } else {
+      if (lasPos == null && source != NestedScrollSource.Fling) {
+        lasPos = source
+        consume = consumed
+      }
+      available
     }
   }
 }
-*/
 
 @Composable
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
@@ -956,11 +802,9 @@ fun PlaybackBottomSheet(
     skipHiddenState = false
   )
   val descScaffoldState = rememberBottomSheetScaffoldState(descSheetState)
-  val streamDescription = get<String>(streamData, Stream.description)
   val playbackScope = rememberCoroutineScope()
   val decSheetValue = descSheetState.currentValue
   val descTargetValue = descSheetState.targetValue
-
   val descSheetPeekHeight = remember(decSheetValue, descTargetValue) {
     when {
       descTargetValue == Hidden && decSheetValue == Hidden -> 0.dp
@@ -969,16 +813,41 @@ fun PlaybackBottomSheet(
     }
   }
 
-  StreamBottomSheetScaffold(
+  BottomSheetScaffold(
     scaffoldState = descScaffoldState,
     sheetPeekHeight = descSheetPeekHeight,
-    sheetState = descSheetState,
-    headerTitle = "Description",
-    closeSheet = { playbackScope.launch { descSheetState.hide() } },
-    rememberCoroutineScope = playbackScope,
+    sheetDragHandle = { DragHandle() },
     sheetContent = {
-      if (streamDescription != null) {
-        item { Html(text = streamDescription) }
+      HeadedSheetColumn(
+        sheetState = descSheetState,
+        sheetPeekHeight = sheetPeekHeight,
+        header = {
+          SheetHeader(
+            onTapHeader = {
+              playbackScope.launch {
+                if (descSheetState.currentValue == PartiallyExpanded) {
+                  descSheetState.expand()
+                } else if (descSheetState.currentValue == Expanded) {
+                  descSheetState.partialExpand()
+                }
+              }
+            },
+            headerTitle = "Description"
+          ) {
+            playbackScope.launch { descSheetState.hide() }
+          }
+        }
+      ) {
+        val streamDescription = get<String>(streamData, Stream.description)
+        if (streamDescription != null) {
+          LazyColumn(
+            modifier = Modifier
+              .fillMaxSize()
+              .nestedScroll(BottomSheetNestedScrollConnection())
+          ) {
+            item { Html(text = streamDescription) }
+          }
+        }
       }
     }
   ) {
@@ -987,7 +856,7 @@ fun PlaybackBottomSheet(
       skipHiddenState = false
     )
     val commentsScaffoldState = rememberBottomSheetScaffoldState(
-      commentsSheetState
+      bottomSheetState = commentsSheetState
     )
     val commentsSheetValue = commentsSheetState.currentValue
     val commentsTargetValue = commentsSheetState.targetValue
@@ -1000,119 +869,156 @@ fun PlaybackBottomSheet(
         }
       }
 
-    val appendingPanelVm = watch<AppendingPanelVm>(query = v("comments"))
-    val comments = appendingPanelVm.items
-
-    StreamBottomSheetScaffold(
+    BottomSheetScaffold(
       scaffoldState = commentsScaffoldState,
       sheetPeekHeight = commentsSheetPeekHeight,
-      sheetState = commentsSheetState,
-      headerTitle = "Comments",
-      closeSheet = {
-        playbackScope.launch { commentsSheetState.hide() }
-      },
-      rememberCoroutineScope = playbackScope,
+      sheetDragHandle = { DragHandle() },
       sheetContent = {
-        itemsIndexed(items = comments.list) { index: Int, comment: Any ->
-          dispatch(v("append_comments", index))
-
-          val authorHandle: String = get(comment, "author")!!
-          val authorAvatar: String = get(comment, "author_avatar")!!
-          val commentText: Spanned = get(comment, "comment_text")!!
-          val likesCount: String = get(comment, "likes_count")!!
-          val repliesCount: Int = get(comment, "replies_count")!!
-
-          val typography = MaterialTheme.typography
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .wrapContentHeight()
-              .clickable { }
-              .padding(12.dp)
-//        verticalAlignment = Alignment.CenterVertically
-          ) {
-            AuthorAvatar(url = authorAvatar, size = 24.dp)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-              val colorScheme = MaterialTheme.colorScheme
-              Text(
-                text = authorHandle,
-                style = typography.bodySmall.copy(
-                  color = colorScheme.onSurface.copy(alpha = .6f)
-                )
-              )
-              Spacer(modifier = Modifier.height(2.dp))
-
-              /* val typeface: Typeface =
-                 viewTypeface(style = typography.bodyMedium)
-
-               AndroidView(
-                 factory = { context ->
-                   TextView(context).apply {
-                     textSize = typography.bodyMedium.fontSize.value
-                     maxLines = 4
-                     ellipsize = TextUtils.TruncateAt.END
-                     setTypeface(typeface)
-                     setupClickableLinks()
-                   }
-                 }
-               ) {
-                 it.setTextColor(colorScheme.onSurface.toArgb())
-                 it.text = commentText
-               }*/
-
-              // FIXME: Make links clickable
-              ExpandableText(
-                text = commentText.toString(),
-                modifier = Modifier,
-                minimizedMaxLines = 4,
-                style = typography.bodyMedium
-              )
-              /*     Text(
-                     text = commentText,
-                     maxLines = 4,
-                     overflow = TextOverflow.Ellipsis,
-                     style = typography.bodyMedium
-                   )*/
-
-              Spacer(modifier = Modifier.height(16.dp))
-
-              Row {
-                val size = 16.dp
-                Icon(
-                  modifier = Modifier.size(size),
-                  imageVector = Icons.Outlined.ThumbUp,
-                  contentDescription = ""
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                  text = likesCount,
-                  style = typography.labelMedium
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-                Icon(
-                  modifier = Modifier.size(size),
-                  imageVector = Icons.Outlined.ThumbDown,
-                  contentDescription = ""
-                )
-              }
+        HeadedSheetColumn(
+          sheetState = commentsSheetState,
+          sheetPeekHeight = sheetPeekHeight,
+          header = {
+            SheetHeader(
+              onTapHeader = {
+                playbackScope.launch {
+                  if (commentsSheetState.currentValue == PartiallyExpanded) {
+                    commentsSheetState.expand()
+                  } else if (commentsSheetState.currentValue == Expanded) {
+                    commentsSheetState.partialExpand()
+                  }
+                }
+              },
+              headerTitle = "Comments"
+            ) {
+              playbackScope.launch { commentsSheetState.hide() }
             }
           }
-          if (repliesCount > 0) {
-            Text(
+        ) {
+          val appendingPanelVm = watch<AppendingPanelVm>(query = v("comments"))
+          SwipeRefresh(
+            state = rememberSwipeRefreshState(
+              isRefreshing = appendingPanelVm.isRefreshing
+            ),
+            onRefresh = { dispatch(v("playback_fsm", "refresh_comments")) },
+            indicator = { state, refreshTrigger ->
+              val colorScheme = MaterialTheme.colorScheme
+              SwipeRefreshIndicator(
+                state = state,
+                refreshTriggerDistance = refreshTrigger,
+                backgroundColor = colorScheme.primaryContainer,
+                contentColor = colorScheme.onBackground,
+                elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+              )
+            }
+          ) {
+            LazyColumn(
               modifier = Modifier
-                .padding(start = 40.dp)
-                .clickable { }
-                .padding(12.dp),
-              text = "$repliesCount replies",
-              style = typography.labelLarge.copy(color = Blue300)
-            )
-          }
-        }
-        if (appendingPanelVm.isAppending) {
-          item {
-            AppendingLoader()
+                .fillMaxSize()
+                .nestedScroll(BottomSheetNestedScrollConnection())
+            ) {
+              val comments = appendingPanelVm.items
+              itemsIndexed(items = comments.list) { index: Int, comment: Any ->
+                dispatch(v("append_comments", index))
+
+                val authorHandle: String = get(comment, "author")!!
+                val authorAvatar: String = get(comment, "author_avatar")!!
+                val commentText: Spanned = get(comment, "comment_text")!!
+                val likesCount: String = get(comment, "likes_count")!!
+                val repliesCount: Int = get(comment, "replies_count")!!
+
+                val typography = MaterialTheme.typography
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .clickable { }
+                    .padding(12.dp)
+                ) {
+                  AuthorAvatar(url = authorAvatar, size = 24.dp)
+                  Spacer(modifier = Modifier.width(16.dp))
+                  Column {
+                    val colorScheme = MaterialTheme.colorScheme
+                    Text(
+                      text = authorHandle,
+                      style = typography.bodySmall.copy(
+                        color = colorScheme.onSurface.copy(alpha = .6f)
+                      )
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    /* val typeface: Typeface =
+                       viewTypeface(style = typography.bodyMedium)
+
+                     AndroidView(
+                       factory = { context ->
+                         TextView(context).apply {
+                           textSize = typography.bodyMedium.fontSize.value
+                           maxLines = 4
+                           ellipsize = TextUtils.TruncateAt.END
+                           setTypeface(typeface)
+                           setupClickableLinks()
+                         }
+                       }
+                     ) {
+                       it.setTextColor(colorScheme.onSurface.toArgb())
+                       it.text = commentText
+                     }*/
+
+                    // FIXME: Make links clickable
+                    ExpandableText(
+                      text = commentText.toString(),
+                      modifier = Modifier,
+                      minimizedMaxLines = 4,
+                      style = typography.bodyMedium
+                    )
+                    /*     Text(
+                           text = commentText,
+                           maxLines = 4,
+                           overflow = TextOverflow.Ellipsis,
+                           style = typography.bodyMedium
+                         )*/
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row {
+                      val size = 16.dp
+                      Icon(
+                        modifier = Modifier.size(size),
+                        imageVector = Icons.Outlined.ThumbUp,
+                        contentDescription = ""
+                      )
+                      Spacer(modifier = Modifier.width(4.dp))
+                      Text(
+                        text = likesCount,
+                        style = typography.labelMedium
+                      )
+
+                      Spacer(modifier = Modifier.width(16.dp))
+                      Icon(
+                        modifier = Modifier.size(size),
+                        imageVector = Icons.Outlined.ThumbDown,
+                        contentDescription = ""
+                      )
+                    }
+                  }
+                }
+                if (repliesCount > 0) {
+                  Text(
+                    modifier = Modifier
+                      .padding(start = 40.dp)
+                      .clickable { }
+                      .padding(12.dp),
+                    text = "$repliesCount replies",
+                    style = typography.labelLarge.copy(color = Blue300)
+                  )
+                }
+              }
+              if (appendingPanelVm.isAppending) {
+                item {
+                  AppendingLoader()
+                }
+              }
+            }
           }
         }
       }
@@ -1190,51 +1096,6 @@ fun PlaybackBottomSheet(
       }
     }
   }
-}
-
-@Composable
-@kotlin.OptIn(ExperimentalMaterial3Api::class)
-fun StreamBottomSheetScaffold(
-  scaffoldState: BottomSheetScaffoldState,
-  sheetPeekHeight: Dp,
-  sheetState: SheetState,
-  headerTitle: String,
-  closeSheet: () -> Unit = {},
-  rememberCoroutineScope: CoroutineScope,
-  sheetContent: LazyListScope.() -> Unit,
-  content: @Composable (PaddingValues) -> Unit
-) {
-  BottomSheetScaffold(
-    scaffoldState = scaffoldState,
-    sheetPeekHeight = sheetPeekHeight,
-    sheetDragHandle = { DragHandle() },
-    sheetContent = {
-      val height = remember(sheetPeekHeight) { sheetPeekHeight - 24.dp }
-      HeadedSheet(
-        modifier = Modifier
-          .then(
-            if (sheetState.currentValue == PartiallyExpanded) {
-              Modifier.height(height)
-            } else {
-              Modifier
-            }
-          ),
-        headerTitle = headerTitle,
-        close = closeSheet,
-        onTapHeader = {
-          rememberCoroutineScope.launch {
-            if (sheetState.currentValue == PartiallyExpanded) {
-              sheetState.expand()
-            } else if (sheetState.currentValue == SheetValue.Expanded) {
-              sheetState.partialExpand()
-            }
-          }
-        },
-        content = sheetContent
-      )
-    },
-    content = content
-  )
 }
 
 val MINI_PLAYER_HEIGHT = 62.dp

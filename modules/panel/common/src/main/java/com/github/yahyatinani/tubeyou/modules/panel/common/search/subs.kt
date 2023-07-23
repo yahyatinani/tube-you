@@ -77,7 +77,7 @@ fun regSearchSubs() {
               videos = formatSearch(
                 items as PersistentVector<SearchResult>,
                 resources
-              ),
+              )
             )
           }
         }

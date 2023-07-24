@@ -243,6 +243,7 @@ fun TyApp(
         scaffoldState = bottomSheetScaffoldState,
         sheetPeekHeight = sheetPeekHeight,
         sheetDragHandle = null,
+//        sheetSwipeEnabled = false,
         sheetShape = RoundedCornerShape(0.dp),
         sheetContent = {
           val playerScope = rememberCoroutineScope()

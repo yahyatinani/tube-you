@@ -1068,10 +1068,15 @@ fun PlaybackBottomSheet(
         }
       }
     ) {
+      val colorScheme = MaterialTheme.colorScheme
+      val alpha = if (isSystemInDarkTheme()) .09f else .05f
+      val buttonsColor: Color = colorScheme.onBackground.copy(alpha)
+
       Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .clickable(isCollapsed, onClick = onCollapsedClick)
+        modifier = Modifier.clickable(
+          enabled = isCollapsed,
+          onClick = onCollapsedClick
+        )
       ) {
         VideoPlayer(
           streamData = streamData,
@@ -1082,67 +1087,99 @@ fun PlaybackBottomSheet(
           thumbnail = thumbnail
         )
 
-        if (streamData == null) return@Column
-
-        DescriptionSection(
+        LazyColumn(
           modifier = Modifier
-            .fillMaxWidth()
-            .clickable { dispatch(v("playback_fsm", "half_expand_desc_sheet")) }
-            .padding(horizontal = 12.dp),
-          streamTitle = get<String>(streamData, Stream.title)!!,
-          views = get<String>(streamData, Stream.views)!!,
-          date = get<String>(streamData, Stream.date)!!
-        )
-
-        ChannelSection(
-          modifier = Modifier
-            .fillMaxWidth()
-            .clickable { }
-            .padding(horizontal = 12.dp),
-          channelName = get<String>(streamData, Stream.channel_name)!!,
-          channelAvatar = get<String>(streamData, Stream.avatar)!!,
-          subscribersCount = get<String>(streamData, Stream.sub_count)!!
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val colorScheme = MaterialTheme.colorScheme
-        val alpha = if (isSystemInDarkTheme()) .09f else .05f
-        val buttonsColor: Color = colorScheme.onBackground.copy(alpha)
-        LikeSection(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
-          likesCount = get<String>(streamData, Stream.likes_count)!!,
-          buttonsColor = buttonsColor
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val commentsSection =
-          get<IPersistentMap<Any, Any>>(data, "comments_section")
-        val highlightedComment =
-          get<Spanned>(commentsSection, Stream.highlight_comment)
-        val commentAvatar =
-          get<String>(commentsSection, Stream.highlight_comment_avatar)
-        val commentsCount = (
-          get<String>(commentsSection, Stream.comments_count)
-            ?: ""
-          )
-        val commentsDisabled =
-          get<Boolean>(commentsSection, Stream.comments_disabled) ?: false
-
-        CommentsSection(
-          modifier = Modifier
-            .padding(horizontal = 12.dp)
-            .fillMaxWidth(),
-          highlightedComment = highlightedComment,
-          containerColor = buttonsColor,
-          commentsCount = commentsCount,
-          commentAvatar = commentAvatar,
-          commentsDisabled = commentsDisabled
+            .fillMaxSize()
+            .nestedScroll(
+              object : NestedScrollConnection {
+                override fun onPostScroll(
+                  consumed: Offset,
+                  available: Offset,
+                  source: NestedScrollSource
+                ): Offset {
+                  return available
+                }
+              }
+            )
         ) {
-          dispatch(v("playback_fsm", "half_expand_comments_sheet"))
+          if (streamData == null) return@LazyColumn
+          
+          item {
+            DescriptionSection(
+              modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                  dispatch(
+                    v(
+                      "playback_fsm",
+                      "half_expand_desc_sheet"
+                    )
+                  )
+                }
+                .padding(horizontal = 12.dp),
+              streamTitle = get<String>(streamData, Stream.title)!!,
+              views = get<String>(streamData, Stream.views)!!,
+              date = get<String>(streamData, Stream.date)!!
+            )
+          }
+
+          item {
+            ChannelSection(
+              modifier = Modifier
+                .fillMaxWidth()
+                .clickable { }
+                .padding(horizontal = 12.dp),
+              channelName = get<String>(streamData, Stream.channel_name)!!,
+              channelAvatar = get<String>(streamData, Stream.avatar)!!,
+              subscribersCount = get<String>(streamData, Stream.sub_count)!!
+            )
+          }
+
+          item {
+            Spacer(modifier = Modifier.height(8.dp))
+          }
+
+          item {
+            LikeSection(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+              likesCount = get<String>(streamData, Stream.likes_count)!!,
+              buttonsColor = buttonsColor
+            )
+          }
+
+          item {
+            Spacer(modifier = Modifier.height(16.dp))
+          }
+
+          item {
+            val commentsSection =
+              get<IPersistentMap<Any, Any>>(data, "comments_section")
+            val highlightedComment =
+              get<Spanned>(commentsSection, Stream.highlight_comment)
+            val commentAvatar =
+              get<String>(commentsSection, Stream.highlight_comment_avatar)
+            val commentsCount = (
+              get<String>(commentsSection, Stream.comments_count)
+                ?: ""
+              )
+            val commentsDisabled =
+              get<Boolean>(commentsSection, Stream.comments_disabled) ?: false
+
+            CommentsSection(
+              modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .fillMaxWidth(),
+              highlightedComment = highlightedComment,
+              containerColor = buttonsColor,
+              commentsCount = commentsCount,
+              commentAvatar = commentAvatar,
+              commentsDisabled = commentsDisabled
+            ) {
+              dispatch(v("playback_fsm", "half_expand_comments_sheet"))
+            }
+          }
         }
       }
     }

@@ -93,6 +93,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -122,6 +123,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRound
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppendingPanelVm
+import com.github.yahyatinani.tubeyou.modules.panel.common.R
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -617,6 +619,7 @@ fun CommentsSection(
   containerColor: Color,
   commentsCount: String,
   commentAvatar: String? = null,
+  commentsDisabled: Boolean,
   onClick: () -> Unit = { }
 ) {
   Surface(
@@ -626,7 +629,7 @@ fun CommentsSection(
   ) {
     Box(
       modifier = Modifier
-        .clickable(onClick = onClick)
+        .clickable(onClick = onClick, enabled = !commentsDisabled)
         .padding(vertical = 8.dp, horizontal = 12.dp)
         .padding(bottom = 4.dp)
     ) {
@@ -658,28 +661,34 @@ fun CommentsSection(
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Row(
-            modifier = Modifier.weight(.9f),
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            AuthorAvatar(url = commentAvatar, size = 24.dp)
-            Spacer(modifier = Modifier.width(8.dp))
-
-            val typeface: Typeface = viewTypeface(style = bodySmall)
-
-            AndroidView(
-              factory = { context ->
-                TextView(context).apply {
-                  textSize = bodySmall.fontSize.value
-                  maxLines = 2
-                  ellipsize = TextUtils.TruncateAt.END
-                  setTypeface(typeface)
-                  setupClickableLinks()
-                }
-              }
+          if (commentsDisabled) {
+            Text(
+              text = stringResource(R.string.comments_are_turned_off),
+              style = bodySmall
+            )
+          } else {
+            Row(
+              modifier = Modifier.weight(.9f),
+              verticalAlignment = Alignment.CenterVertically
             ) {
-              it.setTextColor(onSurface.toArgb())
-              it.text = highlightedComment
+              AuthorAvatar(url = commentAvatar, size = 24.dp)
+              Spacer(modifier = Modifier.width(8.dp))
+              val typeface: Typeface = viewTypeface(style = bodySmall)
+              AndroidView(
+                factory = { context ->
+                  TextView(context).apply {
+                    textSize = bodySmall.fontSize.value
+                    maxLines = 2
+                    ellipsize = TextUtils.TruncateAt.END
+                    setTypeface(typeface)
+                    setupClickableLinks()
+                  }
+                }
+              ) {
+                it.setTextColor(onSurface.toArgb())
+                it.text = highlightedComment
+              }
+
             }
           }
           Spacer(modifier = Modifier.padding(start = 12.dp))
@@ -1111,6 +1120,7 @@ fun PlaybackBottomSheet(
           get<Spanned>(streamData, Stream.highlight_comment)
         val commentAvatar =
           get<String>(streamData, Stream.highlight_comment_avatar)
+
         CommentsSection(
           highlightedComment = highlightedComment,
           modifier = Modifier
@@ -1118,7 +1128,9 @@ fun PlaybackBottomSheet(
             .fillMaxWidth(),
           containerColor = buttonsColor,
           commentsCount = get<String>(streamData, Stream.comments_count) ?: "",
-          commentAvatar = commentAvatar
+          commentAvatar = commentAvatar,
+          commentsDisabled = get<Boolean>(streamData, Stream.comments_disabled)
+            ?: false
         ) {
           dispatch(v("playback_fsm", "half_expand_comments_sheet"))
 //          playbackScope.launch { commentsSheetState.partialExpand() }

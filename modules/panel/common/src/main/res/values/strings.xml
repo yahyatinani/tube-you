@@ -2,4 +2,5 @@
   <string name="views_label">views</string>
   <string name="watching">watching</string>
   <string name="scheduled_for">Scheduled for</string>
+    <string name="comments_are_turned_off">Comments are turned off.</string>
 </resources>

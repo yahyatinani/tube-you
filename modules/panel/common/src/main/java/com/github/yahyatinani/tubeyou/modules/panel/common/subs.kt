@@ -49,7 +49,8 @@ enum class Stream {
   comments,
   comments_count,
   highlight_comment,
-  highlight_comment_avatar
+  highlight_comment_avatar,
+  comments_disabled
 }
 
 fun ratio(streamData: StreamData): Float {
@@ -140,15 +141,27 @@ fun regCommonSubs() {
     val comments = get<StreamComments>(playbackFsm, "stream_comments")
 
     val comment = if (comments != null) {
-      val fc = comments.comments[0]
-      m(
-        Stream.comments_count to formatSubCount(comments.commentCount),
-        Stream.highlight_comment to HtmlCompat.fromHtml(
-          fc.commentText,
-          HtmlCompat.FROM_HTML_MODE_LEGACY
-        ),
-        Stream.highlight_comment_avatar to fc.thumbnail
-      )
+      if (comments.disabled) {
+        m(
+          Stream.comments_disabled to true,
+          Stream.comments_count to ""
+        )
+      } else if (comments.comments.isEmpty()) {
+        m(
+          Stream.comments_count to "",
+          Stream.highlight_comment to ""
+        )
+      } else {
+        val fc = comments.comments[0]
+        m(
+          Stream.comments_count to formatSubCount(comments.commentCount),
+          Stream.highlight_comment to HtmlCompat.fromHtml(
+            fc.commentText,
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+          ),
+          Stream.highlight_comment_avatar to fc.thumbnail
+        )
+      }
     } else {
       m()
     }

@@ -275,7 +275,8 @@ val commentsListMachine = m(
       target to CommentsListState.LOADING,
       actions to ::fetchStreamComments
     ),
-    "close_player" to m(target to null)
+    "close_player" to m(target to null),
+    common.release_player to m(target to null)
   )
 )
 

@@ -80,7 +80,7 @@ data class Playlist(
   val name: String,
   val thumbnail: String,
   val uploaderName: String,
-  val uploaderUrl: String,
+  val uploaderUrl: String? = null,
   val uploaderVerified: Boolean,
   val playlistType: String,
   val videos: Int

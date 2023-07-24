@@ -1125,8 +1125,10 @@ fun PlaybackBottomSheet(
           get<Spanned>(commentsSection, Stream.highlight_comment)
         val commentAvatar =
           get<String>(commentsSection, Stream.highlight_comment_avatar)
-        val commentsCount = (get<String>(commentsSection, Stream.comments_count)
-          ?: "")
+        val commentsCount = (
+          get<String>(commentsSection, Stream.comments_count)
+            ?: ""
+          )
         val commentsDisabled =
           get<Boolean>(commentsSection, Stream.comments_disabled) ?: false
 

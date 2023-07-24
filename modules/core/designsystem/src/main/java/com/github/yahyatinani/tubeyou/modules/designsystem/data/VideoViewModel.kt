@@ -39,8 +39,7 @@ data class PlaylistVm(
   val title: String,
   val playlistId: String,
   val author: String,
-  val authorId: String,
-  val authorUrl: String,
+  val authorUrl: String?,
   val videoCount: String,
   val thumbnailUrl: String
 )

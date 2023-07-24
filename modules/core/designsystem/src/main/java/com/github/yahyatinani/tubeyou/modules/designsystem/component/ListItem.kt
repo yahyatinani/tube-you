@@ -380,7 +380,6 @@ fun PlayListPortraitPreview() {
   PlayListPortrait(
     viewModel = PlaylistVm(
       author = "author",
-      authorId = "id",
       title = "Title",
       videoCount = "13",
       thumbnailUrl = "",
@@ -397,7 +396,6 @@ fun PlayListLandscapePreview() {
   PlayListLandscape(
     viewModel = PlaylistVm(
       author = "author",
-      authorId = "id",
       title = "Title",
       videoCount = "13",
       thumbnailUrl = "",

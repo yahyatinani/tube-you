@@ -103,7 +103,6 @@ fun formatChannel(channel: Channel) = ChannelVm(
 fun formatPlayList(r: Playlist) = PlaylistVm(
   title = r.name,
   author = r.uploaderName,
-  authorId = r.uploaderUrl,
   authorUrl = r.uploaderUrl,
   playlistId = r.url,
   thumbnailUrl = highQuality(r.thumbnail),

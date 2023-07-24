@@ -688,7 +688,6 @@ fun CommentsSection(
                 it.setTextColor(onSurface.toArgb())
                 it.text = highlightedComment
               }
-
             }
           }
           Spacer(modifier = Modifier.padding(start = 12.dp))
@@ -911,6 +910,9 @@ fun PlaybackBottomSheet(
       }
     }
 
+    val commentsVm = watch<AppendingPanelVm>(query = v(Stream.comments))
+    val data = commentsVm.data?.value as IPersistentMap<Any, Any>?
+
     BottomSheetScaffold(
       scaffoldState = commentsScaffoldState,
       sheetPeekHeight = commentsSheetPeekHeight,
@@ -936,10 +938,9 @@ fun PlaybackBottomSheet(
             }
           }
         ) {
-          val appendingPanelVm = watch<AppendingPanelVm>(query = v("comments"))
           SwipeRefresh(
             state = rememberSwipeRefreshState(
-              isRefreshing = appendingPanelVm.isRefreshing
+              isRefreshing = commentsVm.isRefreshing
             ),
             onRefresh = { dispatch(v("playback_fsm", "refresh_comments")) },
             indicator = { state, refreshTrigger ->
@@ -958,8 +959,10 @@ fun PlaybackBottomSheet(
                 .fillMaxSize()
                 .nestedScroll(BottomSheetNestedScrollConnection())
             ) {
-              val comments = appendingPanelVm.items
-              itemsIndexed(items = comments.list) { index: Int, comment: Any ->
+              if (commentsVm.isLoading) return@LazyColumn
+
+              val commentsList = get<List<Any>>(data, "comments_list")!!
+              itemsIndexed(items = commentsList) { index: Int, comment: Any ->
                 dispatch(v("append_comments", index))
 
                 val authorHandle: String = get(comment, "author")!!
@@ -1055,7 +1058,7 @@ fun PlaybackBottomSheet(
                   )
                 }
               }
-              if (appendingPanelVm.isAppending) {
+              if (commentsVm.isAppending) {
                 item {
                   AppendingLoader()
                 }
@@ -1116,24 +1119,28 @@ fun PlaybackBottomSheet(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val commentsSection =
+          get<IPersistentMap<Any, Any>>(data, "comments_section")
         val highlightedComment =
-          get<Spanned>(streamData, Stream.highlight_comment)
+          get<Spanned>(commentsSection, Stream.highlight_comment)
         val commentAvatar =
-          get<String>(streamData, Stream.highlight_comment_avatar)
+          get<String>(commentsSection, Stream.highlight_comment_avatar)
+        val commentsCount = (get<String>(commentsSection, Stream.comments_count)
+          ?: "")
+        val commentsDisabled =
+          get<Boolean>(commentsSection, Stream.comments_disabled) ?: false
 
         CommentsSection(
-          highlightedComment = highlightedComment,
           modifier = Modifier
             .padding(horizontal = 12.dp)
             .fillMaxWidth(),
+          highlightedComment = highlightedComment,
           containerColor = buttonsColor,
-          commentsCount = get<String>(streamData, Stream.comments_count) ?: "",
+          commentsCount = commentsCount,
           commentAvatar = commentAvatar,
-          commentsDisabled = get<Boolean>(streamData, Stream.comments_disabled)
-            ?: false
+          commentsDisabled = commentsDisabled
         ) {
           dispatch(v("playback_fsm", "half_expand_comments_sheet"))
-//          playbackScope.launch { commentsSheetState.partialExpand() }
         }
       }
     }

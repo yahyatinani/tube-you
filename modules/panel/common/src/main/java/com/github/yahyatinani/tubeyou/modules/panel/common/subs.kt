@@ -21,7 +21,6 @@ import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
-import io.github.yahyatinani.y.core.merge
 import io.github.yahyatinani.y.core.v
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -138,52 +137,21 @@ fun regCommonSubs() {
       "$views views"
     }
 
-    val comments = get<StreamComments>(playbackFsm, "stream_comments")
-
-    val comment = if (comments != null) {
-      if (comments.disabled) {
-        m(
-          Stream.comments_disabled to true,
-          Stream.comments_count to ""
-        )
-      } else if (comments.comments.isEmpty()) {
-        m(
-          Stream.comments_count to "",
-          Stream.highlight_comment to ""
-        )
-      } else {
-        val fc = comments.comments[0]
-        m(
-          Stream.comments_count to formatSubCount(comments.commentCount),
-          Stream.highlight_comment to HtmlCompat.fromHtml(
-            fc.commentText,
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-          ),
-          Stream.highlight_comment_avatar to fc.thumbnail
-        )
-      }
-    } else {
-      m()
-    }
-
-    val m = merge(
-      comment,
-      m<Any, Any?>(
-        Stream.title to stream.title,
-        Stream.uploader to stream.uploader,
-        Stream.thumbnail to stream.thumbnailUrl,
-        Stream.quality_list to qualityList,
-        Stream.current_quality to cq,
-        Stream.aspect_ratio to ratio(stream),
-        Stream.views to views1,
-        Stream.date to shorten(viewModel.uploaded),
-        Stream.channel_name to viewModel.uploaderName,
-        Stream.avatar to stream.uploaderAvatar,
-        Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
-        Stream.likes_count to formatViews(stream.likes),
-        Stream.description to stream.description
-      )
-    )!!
+    val m = m<Any, Any?>(
+      Stream.title to stream.title,
+      Stream.uploader to stream.uploader,
+      Stream.thumbnail to stream.thumbnailUrl,
+      Stream.quality_list to qualityList,
+      Stream.current_quality to cq,
+      Stream.aspect_ratio to ratio(stream),
+      Stream.views to views1,
+      Stream.date to shorten(viewModel.uploaded),
+      Stream.channel_name to viewModel.uploaderName,
+      Stream.avatar to stream.uploaderAvatar,
+      Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
+      Stream.likes_count to formatViews(stream.likes),
+      Stream.description to stream.description
+    )
 
     if (stream.videoStreams.isNotEmpty()) {
       if (stream.livestream && stream.dash != null) {
@@ -201,7 +169,7 @@ fun regCommonSubs() {
   }
 
   regSub<IPersistentMap<Any, Any>, Any>(
-    queryId = "comments",
+    queryId = Stream.comments,
     initialValue = AppendingPanelVm.Loading,
     inputSignal = v("playback_fsm")
   ) { playbackFsm: IPersistentMap<Any, Any>?, prev, _ ->
@@ -211,6 +179,31 @@ fun regCommonSubs() {
       null, CommentsListState.LOADING -> AppendingPanelVm.Loading
       CommentsListState.LOADED -> {
         val comments = get<StreamComments>(playbackFsm, "stream_comments")!!
+
+        val commentsSection = when {
+          comments.disabled -> m(
+            Stream.comments_disabled to true,
+            Stream.comments_count to ""
+          )
+
+          comments.comments.isEmpty() -> m(
+            Stream.comments_count to "",
+            Stream.highlight_comment to ""
+          )
+
+          else -> {
+            val firstComment = comments.comments[0]
+            m(
+              Stream.comments_count to formatSubCount(comments.commentCount),
+              Stream.highlight_comment to HtmlCompat.fromHtml(
+                firstComment.commentText,
+                HtmlCompat.FROM_HTML_MODE_LEGACY
+              ),
+              Stream.highlight_comment_avatar to firstComment.thumbnail
+            )
+          }
+        }
+
         val ret = comments.comments.map { comment ->
           m(
             "author" to "${comment.author} $VIDEO_INFO_DIVIDER " +
@@ -224,11 +217,19 @@ fun regCommonSubs() {
             "replies_count" to comment.replyCount
           )
         }
-        AppendingPanelVm.Loaded(items = Items(ret))
+
+        AppendingPanelVm.Loaded(
+          data = Data(
+            m(
+              "comments_list" to ret,
+              "comments_section" to commentsSection
+            )
+          )
+        )
       }
 
       CommentsListState.REFRESHING -> {
-        AppendingPanelVm.Refreshing((prev as AppendingPanelVm.Loaded).items)
+        AppendingPanelVm.Refreshing((prev as AppendingPanelVm.Loaded).data)
       }
 
       CommentsListState.APPENDING -> {
@@ -258,8 +259,11 @@ fun regCommonSubs() {
 data class Items(val list: List<Any> = v())
 
 @Immutable
+data class Data(val value: Any)
+
+@Immutable
 sealed class AppendingPanelVm(
-  open val items: Items = Items(),
+  open val data: Data? = null,
   val isLoading: Boolean = false,
   open val isAppending: Boolean = false,
   val isRefreshing: Boolean = false,
@@ -267,13 +271,13 @@ sealed class AppendingPanelVm(
 ) {
   object Loading : AppendingPanelVm(isLoading = true)
 
-  data class Refreshing(override val items: Items) :
-    AppendingPanelVm(items = items, isRefreshing = true)
+  data class Refreshing(override val data: Data) :
+    AppendingPanelVm(data = data, isRefreshing = true)
 
   data class Loaded(
-    override val items: Items = Items(),
+    override val data: Data,
     override val isAppending: Boolean = false
-  ) : AppendingPanelVm(items = items, isAppending = isAppending)
+  ) : AppendingPanelVm(data = data, isAppending = isAppending)
 
   data class Error(override val error: Int?) : AppendingPanelVm(error = error)
 }

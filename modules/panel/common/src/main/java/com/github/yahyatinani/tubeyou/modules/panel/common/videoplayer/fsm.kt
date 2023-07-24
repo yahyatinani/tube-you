@@ -48,18 +48,6 @@ fun fetchStream(
   )
 }
 
-fun fetchStreamComments(
-  appDb: AppDb,
-  state: State?,
-  event: Event
-): Effects {
-  val videoViewModel = state!!["videoVm"] as VideoViewModel
-  return m(
-    fsm.state_map to state.dissoc("stream_comments"),
-    fx to v(v(dispatch, v("load_stream_comments", videoViewModel.id)))
-  )
-}
-
 fun pausePlayer(
   appDb: AppDb,
   state: State?,
@@ -127,7 +115,6 @@ fun setStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
   if (state!!.containsKey("stream_comments")) return m()
 
   val (_, comments) = event
-  println("djsflkjsdfj ${event.count}")
   return m(fsm.state_map to state.assoc("stream_comments", comments))
 }
 
@@ -161,7 +148,7 @@ val playerMachine = m<Any?, Any?>(
       m(target to fsm.ALL, guard to ::isSameVideoAlreadyPlaying),
       m(
         target to PlayerState.LOADING,
-        actions to v(::fetchStream, ::fetchStreamComments, ::pausePlayer)
+        actions to v(::fetchStream, ::pausePlayer)
       )
     ),
     common.release_player to m(target to null, actions to ::releasePlayer),
@@ -246,22 +233,23 @@ fun appendStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
 
 enum class CommentsListState { LOADING, REFRESHING, LOADED, APPENDING }
 
+fun fetchStreamComments(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects {
+  val videoViewModel = state!!["videoVm"] as VideoViewModel
+  return m(
+    fsm.state_map to state.dissoc("stream_comments"),
+    fx to v(v(dispatch, v("load_stream_comments", videoViewModel.id)))
+  )
+}
+
 val commentsListMachine = m(
-  null to m(
-    common.play_video to m(
-      target to CommentsListState.LOADING,
-      actions to ::fetchStreamComments
-    )
-  ),
   CommentsListState.LOADING to m(
-    "set_stream_comments" to m(
-      target to CommentsListState.LOADED
-    )
+    "set_stream_comments" to m(target to CommentsListState.LOADED)
   ),
   CommentsListState.LOADED to m(
-    common.play_video to m(
-      target to CommentsListState.LOADING
-    ),
     Loading to m(target to CommentsListState.APPENDING),
     "refresh_comments" to m(
       target to CommentsListState.REFRESHING,
@@ -283,6 +271,10 @@ val commentsListMachine = m(
     )
   ),
   fsm.ALL to m(
+    common.play_video to m(
+      target to CommentsListState.LOADING,
+      actions to ::fetchStreamComments
+    ),
     "close_player" to m(target to null)
   )
 )

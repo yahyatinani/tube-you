@@ -25,7 +25,7 @@ dependencies {
   implementation deps.coil
 
   implementation deps.cronet.okhttp
-  def media3 = "1.1.0-rc01"
+  def media3 = "1.1.0"
   implementation "androidx.media3:media3-exoplayer:" + media3
   implementation "androidx.media3:media3-exoplayer-hls:" + media3
   implementation "androidx.media3:media3-exoplayer-dash:" + media3

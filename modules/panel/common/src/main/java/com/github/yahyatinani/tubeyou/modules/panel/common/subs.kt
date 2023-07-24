@@ -1,6 +1,8 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import android.content.Context
+import android.text.Spanned
+import android.text.SpannedString
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
@@ -188,7 +190,7 @@ fun regCommonSubs() {
 
           comments.comments.isEmpty() -> m(
             Stream.comments_count to "",
-            Stream.highlight_comment to ""
+            Stream.highlight_comment to SpannedString("")
           )
 
           else -> {

@@ -1103,18 +1103,13 @@ fun PlaybackBottomSheet(
             )
         ) {
           if (streamData == null) return@LazyColumn
-          
+
           item {
             DescriptionSection(
               modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                  dispatch(
-                    v(
-                      "playback_fsm",
-                      "half_expand_desc_sheet"
-                    )
-                  )
+                  dispatch(v("playback_fsm", "half_expand_desc_sheet"))
                 }
                 .padding(horizontal = 12.dp),
               streamTitle = get<String>(streamData, Stream.title)!!,

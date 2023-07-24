@@ -1,6 +1,8 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import android.content.Context
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
@@ -9,7 +11,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.core.VIDEO_INFO_DIVID
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatSubCount
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatViews
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.CommentsSheetState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.CommentsListState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.createDashSource
 import io.github.yahyatinani.recompose.fsm.fsm
@@ -92,6 +94,7 @@ private fun shorten(uploaded: String): String = uploaded
   .replace(" days", "d")
   .replace(" hours", "h")
 
+@OptIn(ExperimentalMaterial3Api::class)
 fun regCommonSubs() {
   regSub("playback_fsm") { db: AppDb, _: Query ->
     db["playback_fsm"]
@@ -191,9 +194,9 @@ fun regCommonSubs() {
   ) { playbackFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
 
-    when (get<CommentsSheetState>(playbackMachine, ":comments_sheet")) {
-      null, CommentsSheetState.LOADING -> AppendingPanelVm.Loading
-      CommentsSheetState.LOADED -> {
+    when (get<CommentsListState>(playbackMachine, ":comments_list")) {
+      null, CommentsListState.LOADING -> AppendingPanelVm.Loading
+      CommentsListState.LOADED -> {
         val comments = get<StreamComments>(playbackFsm, "stream_comments")!!
         val ret = comments.comments.map { comment ->
           m(
@@ -211,14 +214,30 @@ fun regCommonSubs() {
         AppendingPanelVm.Loaded(items = Items(ret))
       }
 
-      CommentsSheetState.REFRESHING -> {
+      CommentsListState.REFRESHING -> {
         AppendingPanelVm.Refreshing((prev as AppendingPanelVm.Loaded).items)
       }
 
-      CommentsSheetState.APPENDING -> {
+      CommentsListState.APPENDING -> {
         (prev as AppendingPanelVm.Loaded).copy(isAppending = true)
       }
     }
+  }
+
+  regSub("comments_sheet") { db: AppDb, _: Query ->
+    val playbackFsm = db["playback_fsm"]
+    val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val commentsSheet =
+      get<SheetValue>(playbackMachine, ":comments_sheet")
+    commentsSheet ?: SheetValue.Hidden
+  }
+
+  regSub("description_sheet") { db: AppDb, _: Query ->
+    val playbackFsm = db["playback_fsm"]
+    val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val commentsSheet =
+      get<SheetValue>(playbackMachine, ":description_sheet")
+    commentsSheet ?: SheetValue.Hidden
   }
 }
 

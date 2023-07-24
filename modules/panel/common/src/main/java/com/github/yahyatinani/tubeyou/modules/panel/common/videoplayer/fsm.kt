@@ -244,48 +244,106 @@ fun appendStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
   )
 }
 
-enum class CommentsSheetState {
-  LOADING, REFRESHING, LOADED, APPENDING
-}
+enum class CommentsListState { LOADING, REFRESHING, LOADED, APPENDING }
 
-val commentsMachine = m(
+val commentsListMachine = m(
   null to m(
     common.play_video to m(
-      target to CommentsSheetState.LOADING,
+      target to CommentsListState.LOADING,
       actions to ::fetchStreamComments
     )
   ),
-  CommentsSheetState.LOADING to m(
+  CommentsListState.LOADING to m(
     "set_stream_comments" to m(
-      target to CommentsSheetState.LOADED
+      target to CommentsListState.LOADED
     )
   ),
-  CommentsSheetState.LOADED to m(
+  CommentsListState.LOADED to m(
     common.play_video to m(
-      target to CommentsSheetState.LOADING
+      target to CommentsListState.LOADING
     ),
-    Loading to m(target to CommentsSheetState.APPENDING),
+    Loading to m(target to CommentsListState.APPENDING),
     "refresh_comments" to m(
-      target to CommentsSheetState.REFRESHING,
+      target to CommentsListState.REFRESHING,
       actions to ::fetchStreamComments
     )
   ),
-  CommentsSheetState.REFRESHING to m(
+  CommentsListState.REFRESHING to m(
     "set_stream_comments" to m(
-      target to CommentsSheetState.LOADED
+      target to CommentsListState.LOADED
     )
   ),
-  CommentsSheetState.APPENDING to m(
+  CommentsListState.APPENDING to m(
     "append_comments_page" to m(
-      target to CommentsSheetState.LOADED,
+      target to CommentsListState.LOADED,
       actions to ::appendStreamComments
     ),
     NotLoading(endOfPaginationReached = true) to m(
-      target to CommentsSheetState.LOADED
+      target to CommentsListState.LOADED
     )
   ),
   fsm.ALL to m(
     "close_player" to m(target to null)
+  )
+)
+
+// -------------
+
+fun expandCommentsSheet(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects = m(fx to v(v("half_expand_comments_sheet")))
+
+fun closeCommentsSheet(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects = m(fx to v(v("close_comments_sheet")))
+
+@OptIn(ExperimentalMaterial3Api::class)
+val commentsSheetMachine = m(
+  null to m(),
+  SheetValue.Hidden to m(),
+  fsm.ALL to m(
+    "half_expand_comments_sheet" to m(
+      target to SheetValue.PartiallyExpanded,
+      actions to ::expandCommentsSheet
+    ),
+    "close_comments_sheet" to m(
+      target to SheetValue.Hidden,
+      actions to ::closeCommentsSheet
+    )
+  )
+)
+
+// -------------
+
+fun expandDescriptionSheet(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects = m(fx to v(v("half_expand_desc_sheet")))
+
+fun closeDescriptionSheet(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects = m(fx to v(v("close_desc_sheet")))
+
+@OptIn(ExperimentalMaterial3Api::class)
+val descriptionSheetMachine = m(
+  null to m(),
+  SheetValue.Hidden to m(),
+  fsm.ALL to m(
+    "half_expand_desc_sheet" to m(
+      target to SheetValue.PartiallyExpanded,
+      actions to ::expandDescriptionSheet
+    ),
+    "close_desc_sheet" to m(
+      target to SheetValue.Hidden,
+      actions to ::closeDescriptionSheet
+    )
   )
 )
 
@@ -296,6 +354,8 @@ val playbackMachine = m(
   fsm.regions to v(
     v(":player", playerMachine),
     v(":player_sheet", bottomSheetMachine),
-    v(":comments_sheet", commentsMachine)
+    v(":comments_list", commentsListMachine),
+    v(":comments_sheet", commentsSheetMachine),
+    v(":description_sheet", descriptionSheetMachine)
   )
 )

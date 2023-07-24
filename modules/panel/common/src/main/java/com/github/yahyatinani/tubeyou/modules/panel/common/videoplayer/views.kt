@@ -61,6 +61,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.SheetValue.PartiallyExpanded
@@ -127,6 +128,7 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
+import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
@@ -803,13 +805,28 @@ fun PlaybackBottomSheet(
   )
   val descScaffoldState = rememberBottomSheetScaffoldState(descSheetState)
   val playbackScope = rememberCoroutineScope()
-  val decSheetValue = descSheetState.currentValue
+  val descriptionSheetValue = watch<SheetValue>(query = v("description_sheet"))
+  val descSheetValue = descSheetState.currentValue
   val descTargetValue = descSheetState.targetValue
-  val descSheetPeekHeight = remember(decSheetValue, descTargetValue) {
-    when {
-      descTargetValue == Hidden && decSheetValue == Hidden -> 0.dp
+  val descSheetPeekHeight =
+    remember(descriptionSheetValue, descTargetValue, descSheetValue) {
+      if (descriptionSheetValue == Hidden) {
+        0.dp
+      } else if (descSheetValue == Hidden && descTargetValue == Hidden) {
+        dispatch(v("playback_fsm", "close_desc_sheet"))
+        0.dp
+      } else {
+        sheetPeekHeight
+      }
+    }
 
-      else -> sheetPeekHeight
+  LaunchedEffect(Unit) {
+    regFx(id = "half_expand_desc_sheet") {
+      playbackScope.launch { descSheetState.partialExpand() }
+    }
+
+    regFx(id = "close_desc_sheet") {
+      playbackScope.launch { descSheetState.hide() }
     }
   }
 
@@ -825,16 +842,16 @@ fun PlaybackBottomSheet(
           SheetHeader(
             onTapHeader = {
               playbackScope.launch {
-                if (descSheetState.currentValue == PartiallyExpanded) {
+                if (descSheetValue == PartiallyExpanded) {
                   descSheetState.expand()
-                } else if (descSheetState.currentValue == Expanded) {
+                } else if (descSheetValue == Expanded) {
                   descSheetState.partialExpand()
                 }
               }
             },
             headerTitle = "Description"
           ) {
-            playbackScope.launch { descSheetState.hide() }
+            dispatch(v("playback_fsm", "close_desc_sheet"))
           }
         }
       ) {
@@ -858,16 +875,32 @@ fun PlaybackBottomSheet(
     val commentsScaffoldState = rememberBottomSheetScaffoldState(
       bottomSheetState = commentsSheetState
     )
-    val commentsSheetValue = commentsSheetState.currentValue
+    val commentsSheetValue = watch<SheetValue>(query = v("comments_sheet"))
     val commentsTargetValue = commentsSheetState.targetValue
+    val commentsCurrentValue = commentsSheetState.currentValue
     val commentsSheetPeekHeight =
-      remember(commentsSheetValue, commentsTargetValue) {
-        when {
-          commentsTargetValue == Hidden && commentsSheetValue == Hidden -> 0.dp
-
-          else -> sheetPeekHeight
+      remember(commentsSheetValue, commentsTargetValue, commentsCurrentValue) {
+        if (commentsSheetValue == Hidden) {
+          0.dp
+        } else if (commentsTargetValue == Hidden &&
+          commentsCurrentValue == Hidden
+        ) {
+          dispatch(v("playback_fsm", "close_comments_sheet"))
+          0.dp
+        } else {
+          sheetPeekHeight
         }
       }
+
+    LaunchedEffect(Unit) {
+      regFx(id = "half_expand_comments_sheet") {
+        playbackScope.launch { commentsSheetState.partialExpand() }
+      }
+
+      regFx(id = "close_comments_sheet") {
+        playbackScope.launch { commentsSheetState.hide() }
+      }
+    }
 
     BottomSheetScaffold(
       scaffoldState = commentsScaffoldState,
@@ -890,7 +923,7 @@ fun PlaybackBottomSheet(
               },
               headerTitle = "Comments"
             ) {
-              playbackScope.launch { commentsSheetState.hide() }
+              dispatch(v("playback_fsm", "close_comments_sheet"))
             }
           }
         ) {
@@ -1042,9 +1075,7 @@ fun PlaybackBottomSheet(
         DescriptionSection(
           modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-              playbackScope.launch { descSheetState.show() }
-            }
+            .clickable { dispatch(v("playback_fsm", "half_expand_desc_sheet")) }
             .padding(horizontal = 12.dp),
           streamTitle = get<String>(streamData, Stream.title)!!,
           views = get<String>(streamData, Stream.views)!!,
@@ -1089,9 +1120,8 @@ fun PlaybackBottomSheet(
           commentsCount = get<String>(streamData, Stream.comments_count) ?: "",
           commentAvatar = commentAvatar
         ) {
-          playbackScope.launch {
-            commentsSheetState.partialExpand()
-          }
+          dispatch(v("playback_fsm", "half_expand_comments_sheet"))
+//          playbackScope.launch { commentsSheetState.partialExpand() }
         }
       }
     }

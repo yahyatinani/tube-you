@@ -4,6 +4,7 @@ import android.text.format.DateFormat
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.SMALL_BULLET
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
 import java.math.RoundingMode.FLOOR
 import java.text.DecimalFormat
@@ -20,8 +21,6 @@ fun formatSeconds(durationInSeconds: Long): String {
   }
 }
 
-const val VIDEO_INFO_DIVIDER = " · "
-
 fun formatVideoInfo(
   author: String,
   authorId: String,
@@ -29,10 +28,10 @@ fun formatVideoInfo(
   text2: String,
   publishedText: String? = null
 ): AnnotatedString = buildAnnotatedString {
-  append("\u200F$author\u200E$VIDEO_INFO_DIVIDER$text1 $text2")
+  append("\u200F$author\u200E$SMALL_BULLET$text1 $text2")
 
   if (publishedText != null) {
-    append("$VIDEO_INFO_DIVIDER$publishedText")
+    append("$SMALL_BULLET$publishedText")
   }
 
   val endIndex = author.length + 1

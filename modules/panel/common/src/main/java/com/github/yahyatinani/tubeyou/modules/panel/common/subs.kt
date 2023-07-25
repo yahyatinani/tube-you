@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.media3.common.MimeTypes
-import com.github.yahyatinani.tubeyou.modules.designsystem.core.VIDEO_INFO_DIVIDER
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.MEDIUM_BULLET
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatSubCount
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatViews
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
@@ -183,12 +183,29 @@ fun regCommonSubs() {
     }
   }
 
+  regSub("comments_sheet") { db: AppDb, _: Query ->
+    val playbackFsm = db["playback_fsm"]
+    val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val commentsSheet =
+      get<SheetValue>(playbackMachine, ":comments_sheet")
+    commentsSheet ?: SheetValue.Hidden
+  }
+
+  regSub("description_sheet") { db: AppDb, _: Query ->
+    val playbackFsm = db["playback_fsm"]
+    val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val commentsSheet =
+      get<SheetValue>(playbackMachine, ":description_sheet")
+    commentsSheet ?: SheetValue.Hidden
+  }
+
   regSub<IPersistentMap<Any, Any>, Any>(
     queryId = Stream.comments,
     initialValue = AppendingPanelVm.Loading,
     inputSignal = v("playback_fsm")
   ) { playbackFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val stream = get<StreamData>(playbackFsm, "stream_data")
 
     when (get<CommentsListState>(playbackMachine, ":comments_list")) {
       null, CommentsListState.LOADING -> AppendingPanelVm.Loading
@@ -225,12 +242,17 @@ fun regCommonSubs() {
             HtmlCompat.FROM_HTML_MODE_LEGACY
           )
           m(
-            "author" to "${comment.author} $VIDEO_INFO_DIVIDER " +
-              comment.commentedTime,
+            "author" to comment.author,
+            "commentedTime" to "$MEDIUM_BULLET ${comment.commentedTime}",
             "author_avatar" to comment.thumbnail,
             "comment_text" to spanned.toAnnotatedString(),
             "likes_count" to formatSubCount(comment.likeCount),
-            "replies_count" to comment.replyCount
+            "replies_count" to comment.replyCount,
+            "verified" to comment.verified,
+            "pinned" to comment.pinned,
+            "hearted" to comment.hearted,
+            "uploader" to " " + (stream?.uploader ?: "this channel"),
+            "uploader_avatar" to (stream?.uploaderAvatar ?: ""),
           )
         }
 
@@ -252,22 +274,6 @@ fun regCommonSubs() {
         (prev as AppendingPanelVm.Loaded).copy(isAppending = true)
       }
     }
-  }
-
-  regSub("comments_sheet") { db: AppDb, _: Query ->
-    val playbackFsm = db["playback_fsm"]
-    val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val commentsSheet =
-      get<SheetValue>(playbackMachine, ":comments_sheet")
-    commentsSheet ?: SheetValue.Hidden
-  }
-
-  regSub("description_sheet") { db: AppDb, _: Query ->
-    val playbackFsm = db["playback_fsm"]
-    val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val commentsSheet =
-      get<SheetValue>(playbackMachine, ":description_sheet")
-    commentsSheet ?: SheetValue.Hidden
   }
 }
 
@@ -378,9 +384,6 @@ private enum class SpanCopier {
     destination: AnnotatedString.Builder
   )
 }
-
-@Immutable
-data class Items(val list: List<Any> = v())
 
 @Immutable
 data class Data(val value: Any)

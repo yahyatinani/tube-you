@@ -55,6 +55,9 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.R
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 
+const val SMALL_BULLET = " · "
+const val MEDIUM_BULLET = " • "
+
 val roundedCornerShape = RoundedCornerShape(4.dp)
 
 @Composable

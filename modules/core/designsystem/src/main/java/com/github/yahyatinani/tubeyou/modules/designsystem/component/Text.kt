@@ -37,7 +37,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -196,7 +195,6 @@ fun CountText(subscribersCount: String) {
   )
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun ExpandableText(
   text: AnnotatedString,
@@ -240,11 +238,19 @@ fun ExpandableText(
   Box(modifier) {
     val charSequence = when (cutText) {
       null -> text
-      else -> AnnotatedString(
-        text = cutText!!,
-        spanStyles = text.spanStyles,
-        paragraphStyles = text.paragraphStyles
-      )
+      else -> {
+        val list = text.spanStyles.map {
+          when {
+            it.end > cutText!!.length -> it.copy(end = cutText!!.length)
+            else -> it
+          }
+        }
+
+        AnnotatedString(
+          text = cutText!!,
+          spanStyles = list
+        )
+      }
     }
     val uriHandler = LocalUriHandler.current
 

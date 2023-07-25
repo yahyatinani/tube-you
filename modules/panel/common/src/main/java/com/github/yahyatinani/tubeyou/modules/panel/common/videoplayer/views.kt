@@ -96,6 +96,7 @@ import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -120,7 +121,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.HeadedSheet
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
-import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
+import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppendingPanelVm
 import com.github.yahyatinani.tubeyou.modules.panel.common.R
@@ -706,7 +707,7 @@ private fun TextView.setupClickableLinks() {
   autoLinkMask = Linkify.WEB_URLS
   linksClickable = true
   // setting the color to use for highlighting the links
-  setLinkTextColor(Blue300.toArgb())
+  setLinkTextColor(Blue400.toArgb())
 }
 
 @Composable
@@ -967,7 +968,8 @@ fun PlaybackBottomSheet(
 
                 val authorHandle: String = get(comment, "author")!!
                 val authorAvatar: String = get(comment, "author_avatar")!!
-                val commentText: Spanned = get(comment, "comment_text")!!
+                val commentText: AnnotatedString =
+                  get(comment, "comment_text")!!
                 val likesCount: String = get(comment, "likes_count")!!
                 val repliesCount: Int = get(comment, "replies_count")!!
 
@@ -981,7 +983,9 @@ fun PlaybackBottomSheet(
                 ) {
                   AuthorAvatar(url = authorAvatar, size = 24.dp)
                   Spacer(modifier = Modifier.width(16.dp))
-                  Column {
+                  Column(
+                    modifier = Modifier.padding(end = 24.dp)
+                  ) {
                     val colorScheme = MaterialTheme.colorScheme
                     Text(
                       text = authorHandle,
@@ -991,37 +995,14 @@ fun PlaybackBottomSheet(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    /* val typeface: Typeface =
-                       viewTypeface(style = typography.bodyMedium)
-
-                     AndroidView(
-                       factory = { context ->
-                         TextView(context).apply {
-                           textSize = typography.bodyMedium.fontSize.value
-                           maxLines = 4
-                           ellipsize = TextUtils.TruncateAt.END
-                           setTypeface(typeface)
-                           setupClickableLinks()
-                         }
-                       }
-                     ) {
-                       it.setTextColor(colorScheme.onSurface.toArgb())
-                       it.text = commentText
-                     }*/
-
-                    // FIXME: Make links clickable
                     ExpandableText(
-                      text = commentText.toString(),
+                      text = commentText,
                       modifier = Modifier,
-                      minimizedMaxLines = 4,
-                      style = typography.bodyMedium
+                      minimizedMaxLines = 3,
+                      style = typography.bodyMedium.copy(
+                        color = colorScheme.onSurface
+                      )
                     )
-                    /*     Text(
-                           text = commentText,
-                           maxLines = 4,
-                           overflow = TextOverflow.Ellipsis,
-                           style = typography.bodyMedium
-                         )*/
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -1054,7 +1035,7 @@ fun PlaybackBottomSheet(
                       .clickable { }
                       .padding(12.dp),
                     text = "$repliesCount replies",
-                    style = typography.labelLarge.copy(color = Blue300)
+                    style = typography.labelLarge.copy(color = Blue400)
                   )
                 }
               }

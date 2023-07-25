@@ -34,13 +34,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -192,12 +193,11 @@ fun CountText(subscribersCount: String) {
   )
 }
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun ExpandableText(
-  text: String,
+  text: AnnotatedString,
   modifier: Modifier = Modifier,
-  fontSize: TextUnit = TextUnit.Unspecified,
-  fontStyle: FontStyle? = null,
   minimizedMaxLines: Int = 1,
   style: TextStyle = LocalTextStyle.current
 ) {
@@ -235,15 +235,44 @@ fun ExpandableText(
   }
 
   Box(modifier) {
-    Text(
-      text = cutText ?: text,
-      maxLines = if (expanded) Int.MAX_VALUE else minimizedMaxLines,
-      overflow = TextOverflow.Ellipsis,
-      fontSize = fontSize,
-      fontStyle = fontStyle,
-      onTextLayout = { textLayoutResultState.value = it },
-      style = style
-    )
+    val charSequence = when (cutText) {
+      null -> text
+      else -> AnnotatedString(
+        text = cutText!!,
+        spanStyles = text.spanStyles,
+        paragraphStyles = text.paragraphStyles
+      )
+    }
+    val uriHandler = LocalUriHandler.current
+
+    val urlAnnotations =
+      charSequence.getStringAnnotations("URL", 0, charSequence.length)
+
+    if (urlAnnotations.isEmpty()) {
+      Text(
+        text = charSequence,
+        maxLines = if (expanded) Int.MAX_VALUE else minimizedMaxLines,
+        overflow = TextOverflow.Ellipsis,
+        onTextLayout = { textLayoutResultState.value = it },
+        style = style
+      )
+    } else {
+      ClickableText(
+        text = charSequence,
+        onClick = {
+          charSequence
+            .getStringAnnotations("URL", it, it)
+            .firstOrNull()?.let { stringAnnotation ->
+              uriHandler.openUri(stringAnnotation.item)
+            }
+        },
+        maxLines = if (expanded) Int.MAX_VALUE else minimizedMaxLines,
+        overflow = TextOverflow.Ellipsis,
+        onTextLayout = { textLayoutResultState.value = it },
+        style = style
+      )
+    }
+
     if (!expanded) {
       val density = LocalDensity.current
       val labelLarge = MaterialTheme.typography.bodyMedium

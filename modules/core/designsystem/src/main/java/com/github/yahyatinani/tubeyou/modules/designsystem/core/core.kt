@@ -4,7 +4,7 @@ import android.text.format.DateFormat
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
+import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
 import java.math.RoundingMode.FLOOR
 import java.text.DecimalFormat
 import java.util.Date
@@ -37,7 +37,7 @@ fun formatVideoInfo(
 
   val endIndex = author.length + 1
   addStyle(
-    style = SpanStyle(color = Blue300),
+    style = SpanStyle(color = Blue400),
     start = 0,
     end = endIndex
   )

@@ -9,7 +9,7 @@ plugins {
 
 android {
 //  namespace = APP_ID
-  compileSdk = 33
+  compileSdk = 34
 
   buildFeatures {
     compose = true

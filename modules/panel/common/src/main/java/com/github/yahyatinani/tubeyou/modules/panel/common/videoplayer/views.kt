@@ -64,6 +64,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.SheetValue.Hidden
@@ -73,6 +74,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberPlainTooltipState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -1023,7 +1025,7 @@ fun PlaybackBottomSheet(
                         )
 
                         Text(
-                          text = uploader,
+                          text = " $uploader",
                           style = textStyle
                         )
                       }
@@ -1088,62 +1090,85 @@ fun PlaybackBottomSheet(
                       )
 
                       if (hearted) {
-                        val uploaderAvatar: String =
-                          get(comment, "uploader_avatar")!!
+                        Spacer(modifier = Modifier.width(20.dp))
 
-                        Spacer(modifier = Modifier.width(24.dp))
+                        val tooltipState = rememberPlainTooltipState()
 
-                        IconButton(onClick = { /*TODO*/ }) {
-                          Layout(
-                            content = {
-                              AuthorAvatar(url = uploaderAvatar, size = 16.dp)
-                              Box(modifier = Modifier) {
-                                val imageVector = Icons.Default.Favorite
-                                Icon(
-                                  modifier = Modifier
-                                    .size(14.dp)
-                                    .align(Alignment.Center),
-                                  imageVector = imageVector,
-                                  contentDescription = "",
-                                  tint = colorScheme.surface
-                                )
-                                Icon(
-                                  modifier = Modifier
-                                    .size(12.dp)
-                                    .align(Alignment.Center),
-                                  imageVector = imageVector,
-                                  contentDescription = "",
-                                  tint = Color.Red
-                                )
-                              }
+                        val scope = rememberCoroutineScope()
+
+                        val uploader: String = get(comment, "uploader")!!
+                        PlainTooltipBox(
+                          tooltip = {
+                            Text(
+                              text = "❤\uFE0F by $uploader",
+                              modifier = Modifier.padding(10.dp),
+                              style = typography.bodyMedium
+                            )
+                          },
+                          tooltipState = tooltipState,
+                          containerColor = colorScheme.onSurface
+                        ) {
+                          IconButton(
+                            onClick = {
+                              scope.launch { tooltipState.show() }
                             }
-                          ) { measurables, constraints ->
-                            require(measurables.size == 2)
-                            val placeables: List<Placeable> =
-                              measurables.map { measurable: Measurable ->
-                                measurable.measure(
-                                  constraints.copy(minWidth = 0, minHeight = 0)
+                          ) {
+                            Layout(
+                              content = {
+                                val uploaderAvatar: String =
+                                  get(comment, "uploader_avatar")!!
+                                AuthorAvatar(url = uploaderAvatar, size = 16.dp)
+                                Box {
+                                  val imageVector = Icons.Default.Favorite
+                                  Icon(
+                                    modifier = Modifier
+                                      .size(14.dp)
+                                      .align(Alignment.Center),
+                                    imageVector = imageVector,
+                                    contentDescription = "",
+                                    tint = colorScheme.surface
+                                  )
+                                  Icon(
+                                    modifier = Modifier
+                                      .size(12.dp)
+                                      .align(Alignment.Center),
+                                    imageVector = imageVector,
+                                    contentDescription = "",
+                                    tint = Color.Red
+                                  )
+                                }
+                              }
+                            ) { measurables, constraints ->
+                              require(measurables.size == 2)
+                              val placeables: List<Placeable> =
+                                measurables.map { measurable: Measurable ->
+                                  measurable.measure(
+                                    constraints.copy(
+                                      minWidth = 0,
+                                      minHeight = 0
+                                    )
+                                  )
+                                }
+                              val avatar = placeables.first()
+                              val heart = placeables.last()
+
+                              val width = constraints.maxWidth
+                              val height = constraints.maxHeight
+                              layout(
+                                width = width,
+                                height = height
+                              ) {
+                                val centerX = width / 2
+                                val centerY = height / 2
+                                avatar.placeRelative(
+                                  x = centerX - (avatar.width / 2),
+                                  y = centerY - (avatar.height / 2)
+                                )
+                                heart.placeRelative(
+                                  x = centerX,
+                                  y = centerY
                                 )
                               }
-                            val avatar = placeables.first()
-                            val heart = placeables.last()
-
-                            val width = constraints.maxWidth
-                            val height = constraints.maxHeight
-                            layout(
-                              width = width,
-                              height = height
-                            ) {
-                              val centerX = width / 2
-                              val centerY = height / 2
-                              avatar.placeRelative(
-                                x = centerX - (avatar.width / 2),
-                                y = centerY - (avatar.height / 2)
-                              )
-                              heart.placeRelative(
-                                x = centerX,
-                                y = centerY
-                              )
                             }
                           }
                         }

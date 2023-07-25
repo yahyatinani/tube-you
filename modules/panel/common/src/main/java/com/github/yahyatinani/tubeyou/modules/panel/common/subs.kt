@@ -251,7 +251,7 @@ fun regCommonSubs() {
             "verified" to comment.verified,
             "pinned" to comment.pinned,
             "hearted" to comment.hearted,
-            "uploader" to " " + (stream?.uploader ?: "this channel"),
+            "uploader" to (stream?.uploader ?: "this channel"),
             "uploader_avatar" to (stream?.uploaderAvatar ?: "")
           )
         }

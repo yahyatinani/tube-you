@@ -239,16 +239,16 @@ fun ExpandableText(
     val charSequence = when (cutText) {
       null -> text
       else -> {
-        val list = text.spanStyles.map {
-          when {
-            it.end > cutText!!.length -> it.copy(end = cutText!!.length)
-            else -> it
-          }
-        }
-
         AnnotatedString(
           text = cutText!!,
-          spanStyles = list
+          spanStyles = text.spanStyles
+            .filter { it.start <= cutText!!.length }
+            .map {
+              when {
+                it.end > cutText!!.length -> it.copy(end = cutText!!.length)
+                else -> it
+              }
+            }
         )
       }
     }

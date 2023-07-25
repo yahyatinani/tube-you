@@ -126,6 +126,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.AuthorAvata
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.CountText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.HeadedSheetColumn
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
@@ -806,6 +807,234 @@ class BottomSheetNestedScrollConnection : NestedScrollConnection {
 }
 
 @Composable
+private fun HeartedAvatar(content: @Composable () -> Unit) {
+  Layout(
+    content = content
+  ) { measurables, constraints ->
+    require(measurables.size == 2)
+    val placeables: List<Placeable> =
+      measurables.map { measurable: Measurable ->
+        measurable.measure(
+          constraints.copy(
+            minWidth = 0,
+            minHeight = 0
+          )
+        )
+      }
+    val avatar = placeables.first()
+    val heart = placeables.last()
+
+    val width = constraints.maxWidth
+    val height = constraints.maxHeight
+    layout(
+      width = width,
+      height = height
+    ) {
+      val centerX = width / 2
+      val centerY = height / 2
+      avatar.placeRelative(
+        x = centerX - (avatar.width / 2),
+        y = centerY - (avatar.height / 2)
+      )
+      heart.placeRelative(
+        x = centerX,
+        y = centerY
+      )
+    }
+  }
+}
+
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CommentsList(commentsVm: AppendingPanelVm) {
+  LazyColumn(
+    modifier = Modifier
+      .fillMaxSize()
+      .nestedScroll(BottomSheetNestedScrollConnection())
+  ) {
+    if (commentsVm.isLoading) return@LazyColumn
+
+    val commentsList = get<List<Any>>(commentsVm.data?.value, "comments_list")!!
+    itemsIndexed(items = commentsList) { index: Int, comment: Any ->
+      dispatch(v("append_comments", index))
+
+      val author: String = get(comment, "author")!!
+      val commentedTime: String = get(comment, "commentedTime")!!
+      val authorAvatar: String = get(comment, "author_avatar")!!
+      val commentText: AnnotatedString =
+        get(comment, "comment_text")!!
+      val likesCount: String = get(comment, "likes_count")!!
+      val repliesCount: Int = get(comment, "replies_count")!!
+      val verified: Boolean = get(comment, "verified")!!
+      val pinned: Boolean = get(comment, "pinned")!!
+      val hearted: Boolean = get(comment, "hearted")!!
+
+      val typography = MaterialTheme.typography
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .wrapContentHeight()
+          .clickable { }
+          .padding(12.dp)
+      ) {
+        AuthorAvatar(url = authorAvatar, size = 24.dp)
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(
+          modifier = Modifier.padding(end = 24.dp)
+        ) {
+          val colorScheme = MaterialTheme.colorScheme
+          val color = colorScheme.onSurface.copy(alpha = .6f)
+          val iconSize = 12.dp
+          val textStyle = typography.bodySmall.copy(
+            color = color
+          )
+
+          if (pinned) {
+            val uploader: String = get(comment, "uploader")!!
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                modifier = Modifier.size(iconSize),
+                imageVector = Icons.Default.PushPin,
+                contentDescription = "",
+                tint = color
+              )
+
+              Spacer(modifier = Modifier.width(4.dp))
+
+              Text(
+                text = stringResource(R.string.pinned_by),
+                style = textStyle
+              )
+
+              Text(
+                text = " $uploader",
+                style = textStyle
+              )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+          }
+
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+              text = author,
+              style = textStyle
+            )
+
+            Spacer(modifier = Modifier.width(1.dp))
+
+            if (verified) {
+              Icon(
+                modifier = Modifier.size(iconSize),
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = "",
+                tint = color
+              )
+            }
+
+            Text(
+              text = commentedTime,
+              style = textStyle
+            )
+          }
+
+          Spacer(modifier = Modifier.height(2.dp))
+
+          ExpandableText(
+            text = commentText,
+            modifier = Modifier,
+            minimizedMaxLines = 3,
+            style = typography.bodyMedium.copy(
+              color = colorScheme.onSurface
+            )
+          )
+
+          Spacer(modifier = Modifier.height(16.dp))
+
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            val size = 16.dp
+            Icon(
+              modifier = Modifier.size(size),
+              imageVector = Icons.Outlined.ThumbUp,
+              contentDescription = ""
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Text(
+              text = likesCount,
+              style = typography.labelMedium
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(
+              modifier = Modifier.size(size),
+              imageVector = Icons.Outlined.ThumbDown,
+              contentDescription = ""
+            )
+
+            if (hearted) {
+              Spacer(modifier = Modifier.width(20.dp))
+
+              val tooltipState = rememberPlainTooltipState()
+              val uploader: String = get(comment, "uploader")!!
+
+              PlainTooltipBox(
+                tooltip = {
+                  Text(
+                    text = "❤\uFE0F by $uploader",
+                    modifier = Modifier.padding(10.dp),
+                    style = typography.bodyMedium
+                  )
+                },
+                tooltipState = tooltipState,
+                containerColor = colorScheme.onSurface
+              ) {
+                val scope = rememberCoroutineScope()
+                IconButton(
+                  onClick = { scope.launch { tooltipState.show() } }
+                ) {
+                  HeartedAvatar {
+                    AuthorAvatar(
+                      url = get<String>(comment, "uploader_avatar")!!,
+                      size = 16.dp
+                    )
+                    IconBorder(
+                      imageVector = Icons.Default.Favorite,
+                      colorScheme = colorScheme,
+                      tint = Color.Red
+                    )
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (repliesCount > 0) {
+        Text(
+          modifier = Modifier
+            .padding(start = 40.dp)
+            .clickable { }
+            .padding(12.dp),
+          text = "$repliesCount replies",
+          style = typography.labelLarge.copy(color = Blue400)
+        )
+      }
+    }
+
+    if (commentsVm.isAppending) {
+      item {
+        AppendingLoader()
+      }
+    }
+  }
+}
+
+@Composable
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 fun PlaybackBottomSheet(
   isCollapsed: Boolean,
@@ -920,7 +1149,6 @@ fun PlaybackBottomSheet(
     }
 
     val commentsVm = watch<AppendingPanelVm>(query = v(Stream.comments))
-    val data = commentsVm.data?.value as IPersistentMap<Any, Any>?
 
     BottomSheetScaffold(
       scaffoldState = commentsScaffoldState,
@@ -963,236 +1191,7 @@ fun PlaybackBottomSheet(
               )
             }
           ) {
-            LazyColumn(
-              modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(BottomSheetNestedScrollConnection())
-            ) {
-              if (commentsVm.isLoading) return@LazyColumn
-
-              val commentsList = get<List<Any>>(data, "comments_list")!!
-              itemsIndexed(items = commentsList) { index: Int, comment: Any ->
-                dispatch(v("append_comments", index))
-
-                val author: String = get(comment, "author")!!
-                val commentedTime: String = get(comment, "commentedTime")!!
-                val authorAvatar: String = get(comment, "author_avatar")!!
-                val commentText: AnnotatedString =
-                  get(comment, "comment_text")!!
-                val likesCount: String = get(comment, "likes_count")!!
-                val repliesCount: Int = get(comment, "replies_count")!!
-                val verified: Boolean = get(comment, "verified")!!
-                val pinned: Boolean = get(comment, "pinned")!!
-                val hearted: Boolean = get(comment, "hearted")!!
-
-                val typography = MaterialTheme.typography
-                Row(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .clickable { }
-                    .padding(12.dp)
-                ) {
-                  AuthorAvatar(url = authorAvatar, size = 24.dp)
-
-                  Spacer(modifier = Modifier.width(16.dp))
-
-                  Column(
-                    modifier = Modifier.padding(end = 24.dp)
-                  ) {
-                    val colorScheme = MaterialTheme.colorScheme
-                    val color = colorScheme.onSurface.copy(alpha = .6f)
-                    val iconSize = 12.dp
-                    val textStyle = typography.bodySmall.copy(
-                      color = color
-                    )
-
-                    if (pinned) {
-                      val uploader: String = get(comment, "uploader")!!
-                      Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                          modifier = Modifier.size(iconSize),
-                          imageVector = Icons.Default.PushPin,
-                          contentDescription = "",
-                          tint = color
-                        )
-
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                          text = stringResource(R.string.pinned_by),
-                          style = textStyle
-                        )
-
-                        Text(
-                          text = " $uploader",
-                          style = textStyle
-                        )
-                      }
-
-                      Spacer(modifier = Modifier.height(6.dp))
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                      Text(
-                        text = author,
-                        style = textStyle
-                      )
-
-                      Spacer(modifier = Modifier.width(1.dp))
-
-                      if (verified) {
-                        Icon(
-                          modifier = Modifier.size(iconSize),
-                          imageVector = Icons.Default.CheckCircle,
-                          contentDescription = "",
-                          tint = color
-                        )
-                      }
-
-                      Text(
-                        text = commentedTime,
-                        style = textStyle
-                      )
-                    }
-
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    ExpandableText(
-                      text = commentText,
-                      modifier = Modifier,
-                      minimizedMaxLines = 3,
-                      style = typography.bodyMedium.copy(
-                        color = colorScheme.onSurface
-                      )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                      val size = 16.dp
-                      Icon(
-                        modifier = Modifier.size(size),
-                        imageVector = Icons.Outlined.ThumbUp,
-                        contentDescription = ""
-                      )
-                      Spacer(modifier = Modifier.width(4.dp))
-                      Text(
-                        text = likesCount,
-                        style = typography.labelMedium
-                      )
-
-                      Spacer(modifier = Modifier.width(16.dp))
-                      Icon(
-                        modifier = Modifier.size(size),
-                        imageVector = Icons.Outlined.ThumbDown,
-                        contentDescription = ""
-                      )
-
-                      if (hearted) {
-                        Spacer(modifier = Modifier.width(20.dp))
-
-                        val tooltipState = rememberPlainTooltipState()
-
-                        val scope = rememberCoroutineScope()
-
-                        val uploader: String = get(comment, "uploader")!!
-                        PlainTooltipBox(
-                          tooltip = {
-                            Text(
-                              text = "❤\uFE0F by $uploader",
-                              modifier = Modifier.padding(10.dp),
-                              style = typography.bodyMedium
-                            )
-                          },
-                          tooltipState = tooltipState,
-                          containerColor = colorScheme.onSurface
-                        ) {
-                          IconButton(
-                            onClick = {
-                              scope.launch { tooltipState.show() }
-                            }
-                          ) {
-                            Layout(
-                              content = {
-                                val uploaderAvatar: String =
-                                  get(comment, "uploader_avatar")!!
-                                AuthorAvatar(url = uploaderAvatar, size = 16.dp)
-                                Box {
-                                  val imageVector = Icons.Default.Favorite
-                                  Icon(
-                                    modifier = Modifier
-                                      .size(14.dp)
-                                      .align(Alignment.Center),
-                                    imageVector = imageVector,
-                                    contentDescription = "",
-                                    tint = colorScheme.surface
-                                  )
-                                  Icon(
-                                    modifier = Modifier
-                                      .size(12.dp)
-                                      .align(Alignment.Center),
-                                    imageVector = imageVector,
-                                    contentDescription = "",
-                                    tint = Color.Red
-                                  )
-                                }
-                              }
-                            ) { measurables, constraints ->
-                              require(measurables.size == 2)
-                              val placeables: List<Placeable> =
-                                measurables.map { measurable: Measurable ->
-                                  measurable.measure(
-                                    constraints.copy(
-                                      minWidth = 0,
-                                      minHeight = 0
-                                    )
-                                  )
-                                }
-                              val avatar = placeables.first()
-                              val heart = placeables.last()
-
-                              val width = constraints.maxWidth
-                              val height = constraints.maxHeight
-                              layout(
-                                width = width,
-                                height = height
-                              ) {
-                                val centerX = width / 2
-                                val centerY = height / 2
-                                avatar.placeRelative(
-                                  x = centerX - (avatar.width / 2),
-                                  y = centerY - (avatar.height / 2)
-                                )
-                                heart.placeRelative(
-                                  x = centerX,
-                                  y = centerY
-                                )
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-                if (repliesCount > 0) {
-                  Text(
-                    modifier = Modifier
-                      .padding(start = 40.dp)
-                      .clickable { }
-                      .padding(12.dp),
-                    text = "$repliesCount replies",
-                    style = typography.labelLarge.copy(color = Blue400)
-                  )
-                }
-              }
-              if (commentsVm.isAppending) {
-                item {
-                  AppendingLoader()
-                }
-              }
-            }
+            CommentsList(commentsVm = commentsVm)
           }
         }
       }
@@ -1278,6 +1277,16 @@ fun PlaybackBottomSheet(
           }
 
           item {
+            if (commentsVm.isLoading) {
+              Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = buttonsColor,
+                shape = RoundedCornerShape(12.dp)
+              ) { }
+              return@item
+            }
+
+            val data = commentsVm.data?.value as IPersistentMap<Any, Any>?
             val commentsSection =
               get<IPersistentMap<Any, Any>>(data, "comments_section")
             val highlightedComment =

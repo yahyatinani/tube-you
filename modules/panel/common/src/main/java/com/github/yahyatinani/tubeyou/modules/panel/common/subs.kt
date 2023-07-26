@@ -1,23 +1,9 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import android.content.Context
-import android.graphics.Typeface
-import android.text.Spanned
 import android.text.SpannedString
-import android.text.style.CharacterStyle
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
-import android.text.style.URLSpan
-import android.text.style.UnderlineSpan
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
-import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.media3.common.MimeTypes
@@ -26,7 +12,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.MEDIUM_BULL
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatSubCount
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatViews
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
-import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
+import com.github.yahyatinani.tubeyou.modules.panel.common.html.toAnnotatedString
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.createDashSource
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.CommentsListState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
@@ -207,16 +193,17 @@ fun regCommonSubs() {
     commentsSheet ?: SheetValue.Hidden
   }
 
-  regSub<IPersistentMap<Any, Any>, Any>(
+  val loadingState = UIState(m(common.state to CommentsListState.LOADING))
+  regSub<IPersistentMap<Any, Any>, UIState>(
     queryId = Stream.comments,
-    initialValue = AppendingPanelVm.Loading,
+    initialValue = loadingState,
     inputSignal = v("stream_panel_fsm")
   ) { playbackFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
     val stream = get<StreamData>(playbackFsm, "stream_data")
 
     when (get<CommentsListState>(playbackMachine, ":comments_list")) {
-      null, CommentsListState.LOADING -> AppendingPanelVm.Loading
+      null, CommentsListState.LOADING -> loadingState
       CommentsListState.LOADED -> {
         val comments = get<StreamComments>(playbackFsm, "stream_comments")!!
 
@@ -264,158 +251,32 @@ fun regCommonSubs() {
           )
         }
 
-        AppendingPanelVm.Loaded(
-          data = Data(
-            m(
-              "comments_list" to ret,
-              "comments_section" to commentsSection
-            )
+        UIState(
+          m(
+            common.state to CommentsListState.LOADED,
+            "comments_list" to ret,
+            "comments_section" to commentsSection
           )
         )
       }
 
       CommentsListState.REFRESHING -> {
-        AppendingPanelVm.Refreshing((prev as AppendingPanelVm.Loaded).data)
+        UIState(
+          (prev.data as IPersistentMap<Any?, Any?>).assoc(
+            common.state,
+            CommentsListState.REFRESHING
+          )
+        )
       }
 
       CommentsListState.APPENDING -> {
-        (prev as AppendingPanelVm.Loaded).copy(isAppending = true)
+        UIState(
+          (prev.data as IPersistentMap<Any?, Any?>).assoc(
+            common.state,
+            CommentsListState.APPENDING
+          )
+        )
       }
     }
   }
 }
-
-/**
- * Source: https://stackoverflow.com/questions/73989319/how-to-convert-spannable-to-annotatedstring-in-android
- */
-fun Spanned.toAnnotatedString(): AnnotatedString {
-  val builder = AnnotatedString.Builder(this.toString())
-  SpanCopier.values().forEach { copier ->
-    getSpans(0, length, copier.spanClass).forEach { span ->
-      copier.copySpan(
-        span,
-        getSpanStart(span),
-        getSpanEnd(span),
-        builder
-      )
-    }
-  }
-  return builder.toAnnotatedString()
-}
-
-private enum class SpanCopier {
-  URL {
-    override val spanClass = URLSpan::class.java
-    override fun copySpan(
-      span: Any,
-      start: Int,
-      end: Int,
-      destination: AnnotatedString.Builder
-    ) {
-      val urlSpan = span as URLSpan
-      destination.addStringAnnotation(
-        tag = "URL",
-        annotation = urlSpan.url,
-        start = start,
-        end = end
-      )
-      destination.addStyle(
-        style = SpanStyle(color = Blue400),
-        start = start,
-        end = end
-      )
-    }
-  },
-  FOREGROUND_COLOR {
-    override val spanClass = ForegroundColorSpan::class.java
-    override fun copySpan(
-      span: Any,
-      start: Int,
-      end: Int,
-      destination: AnnotatedString.Builder
-    ) {
-      val colorSpan = span as ForegroundColorSpan
-      destination.addStyle(
-        style = SpanStyle(color = Color(colorSpan.foregroundColor)),
-        start = start,
-        end = end
-      )
-    }
-  },
-  UNDERLINE {
-    override val spanClass = UnderlineSpan::class.java
-    override fun copySpan(
-      span: Any,
-      start: Int,
-      end: Int,
-      destination: AnnotatedString.Builder
-    ) {
-      destination.addStyle(
-        style = SpanStyle(textDecoration = TextDecoration.Underline),
-        start = start,
-        end = end
-      )
-    }
-  },
-  STYLE {
-    override val spanClass = StyleSpan::class.java
-    override fun copySpan(
-      span: Any,
-      start: Int,
-      end: Int,
-      destination: AnnotatedString.Builder
-    ) {
-      val styleSpan = span as StyleSpan
-
-      destination.addStyle(
-        style = when (styleSpan.style) {
-          Typeface.ITALIC -> SpanStyle(fontStyle = FontStyle.Italic)
-          Typeface.BOLD -> SpanStyle(fontWeight = FontWeight.Bold)
-          Typeface.BOLD_ITALIC -> SpanStyle(
-            fontWeight = FontWeight.Bold,
-            fontStyle = FontStyle.Italic
-          )
-
-          else -> SpanStyle()
-        },
-        start = start,
-        end = end
-      )
-    }
-  };
-
-  abstract val spanClass: Class<out CharacterStyle>
-  abstract fun copySpan(
-    span: Any,
-    start: Int,
-    end: Int,
-    destination: AnnotatedString.Builder
-  )
-}
-
-@Immutable
-data class Data(val value: Any)
-
-@Immutable
-sealed class AppendingPanelVm(
-  open val data: Data? = null,
-  val isLoading: Boolean = false,
-  open val isAppending: Boolean = false,
-  val isRefreshing: Boolean = false,
-  open val error: Int? = null
-) {
-  object Loading : AppendingPanelVm(isLoading = true)
-
-  data class Refreshing(override val data: Data) :
-    AppendingPanelVm(data = data, isRefreshing = true)
-
-  data class Loaded(
-    override val data: Data,
-    override val isAppending: Boolean = false
-  ) : AppendingPanelVm(data = data, isAppending = isAppending)
-
-  data class Error(override val error: Int?) : AppendingPanelVm(error = error)
-}
-
-@Immutable
-data class UIState(val data: Any = m<Any, Any>())

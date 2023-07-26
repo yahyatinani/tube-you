@@ -139,10 +139,10 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRound
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
-import com.github.yahyatinani.tubeyou.modules.panel.common.AppendingPanelVm
 import com.github.yahyatinani.tubeyou.modules.panel.common.R
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import com.github.yahyatinani.tubeyou.modules.panel.common.UIState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.CommentsListState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -806,15 +806,21 @@ private fun HeartedAvatar(content: @Composable () -> Unit) {
 
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommentsList(commentsVm: AppendingPanelVm) {
+fun CommentsList(uiState: UIState) {
+  val commentsState = uiState.data
+  val isLoading = get<CommentsListState>(
+    commentsState,
+    common.state
+  ) == CommentsListState.LOADING
+
   LazyColumn(
     modifier = Modifier
       .fillMaxSize()
       .nestedScroll(BottomSheetNestedScrollConnection())
   ) {
-    if (commentsVm.isLoading) return@LazyColumn
+    if (isLoading) return@LazyColumn
 
-    val commentsList = get<List<Any>>(commentsVm.data?.value, "comments_list")!!
+    val commentsList = get<List<Any>>(commentsState, "comments_list")!!
     itemsIndexed(items = commentsList) { index: Int, comment: Any ->
       dispatch(v("append_comments", index))
 
@@ -986,7 +992,11 @@ fun CommentsList(commentsVm: AppendingPanelVm) {
       }
     }
 
-    if (commentsVm.isAppending) {
+    val isAppending = get<CommentsListState>(
+      commentsState,
+      common.state
+    ) == CommentsListState.APPENDING
+    if (isAppending) {
       item {
         AppendingLoader()
       }
@@ -1054,8 +1064,14 @@ private fun CommentsSheet(
   commentsSheetState: SheetState,
   sheetPeekHeight: Dp,
   playbackScope: CoroutineScope,
-  commentsVm: AppendingPanelVm
+  uiState: UIState
 ) {
+  val commentsStateData = uiState.data as IPersistentMap<Any?, Any?>
+  val isRefreshing = get<CommentsListState>(
+    commentsStateData,
+    common.state
+  ) == CommentsListState.REFRESHING
+
   HeadedSheetColumn(
     sheetState = commentsSheetState,
     sheetPeekHeight = sheetPeekHeight,
@@ -1078,7 +1094,8 @@ private fun CommentsSheet(
   ) {
     SwipeRefresh(
       state = rememberSwipeRefreshState(
-        isRefreshing = commentsVm.isRefreshing
+        isRefreshing = isRefreshing
+
       ),
       onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
       indicator = { state, refreshTrigger ->
@@ -1092,11 +1109,10 @@ private fun CommentsSheet(
         )
       }
     ) {
-      CommentsList(commentsVm = commentsVm)
+      CommentsList(uiState = uiState)
     }
   }
 }
-
 
 @Composable
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
@@ -1194,7 +1210,7 @@ fun PlaybackBottomSheet(
       }
     }
 
-    val commentsVm = watch<AppendingPanelVm>(query = v(Stream.comments))
+    val commentsState = watch<UIState>(query = v(Stream.comments))
 
     BottomSheetScaffold(
       scaffoldState = commentsScaffoldState,
@@ -1205,7 +1221,7 @@ fun PlaybackBottomSheet(
           commentsSheetState = commentsSheetState,
           sheetPeekHeight = sheetPeekHeight,
           playbackScope = playbackScope,
-          commentsVm = commentsVm
+          uiState = commentsState
         )
       }
     ) {
@@ -1403,8 +1419,14 @@ fun PlaybackBottomSheet(
 
           item { Spacer(modifier = Modifier.height(16.dp)) }
 
+          val commentsStateData =
+            commentsState.data as IPersistentMap<Any?, Any?>
           item {
-            if (commentsVm.isLoading) {
+            if (get<CommentsListState>(
+                commentsStateData,
+                common.state
+              ) == CommentsListState.LOADING
+            ) {
               Surface(
                 modifier = Modifier
                   .padding(horizontal = 12.dp)
@@ -1418,9 +1440,10 @@ fun PlaybackBottomSheet(
               return@item
             }
 
-            val data = commentsVm.data?.value as IPersistentMap<Any, Any>?
-            val commentsSection =
-              get<IPersistentMap<Any, Any>>(data, "comments_section")
+            val commentsSection = get<IPersistentMap<Any, Any>>(
+              commentsStateData,
+              "comments_section"
+            )
             val highlightedComment =
               get<Spanned>(commentsSection, Stream.highlight_comment)
             val commentAvatar =
@@ -1458,7 +1481,6 @@ fun PlaybackBottomSheet(
     }
   }
 }
-
 
 val MINI_PLAYER_HEIGHT = 62.dp
 

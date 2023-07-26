@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -99,7 +100,7 @@ import io.github.yahyatinani.y.core.v
 fun topAppBarScrollBehavior(
   isCompactDisplay: Boolean,
   topAppBarState: TopAppBarState,
-  searchBar: SearchBar?,
+  searchBar: SearchBar?
 ): TopAppBarScrollBehavior = when {
   isCompactDisplay && searchBar == null -> {
     LaunchedEffect(Unit) {
@@ -124,7 +125,7 @@ fun topAppBarScrollBehavior(
 @Composable
 fun TyApp(
   windowSizeClass: WindowSizeClass,
-  navController: NavHostController = rememberNavController(),
+  navController: NavHostController = rememberNavController()
 ) {
   NavigationChangedListenerEffect(navController)
 
@@ -153,13 +154,6 @@ fun TyApp(
   val isCompactSize = isCompact(windowSizeClass)
 
   TyTheme(isCompact = isCompactSize) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    val systemUiController = rememberSystemUiController()
-    LaunchedEffect(isSystemInDarkTheme()) {
-      systemUiController.setSystemBarsColor(color = colorScheme.surface)
-    }
-
     val sb = watch<SearchBar?>(v(search.search_bar))
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = topAppBarScrollBehavior(isCompactSize, topBarState, sb)
@@ -174,6 +168,18 @@ fun TyApp(
 
     val playerSheetRegion =
       get<PlayerSheetState>(playbackMachine, ":player_sheet")
+
+    val colorScheme = MaterialTheme.colorScheme
+
+    val systemUiController = rememberSystemUiController()
+    LaunchedEffect(isSystemInDarkTheme(), playerSheetRegion) {
+      if (playerSheetRegion == PlayerSheetState.EXPANDED) {
+        systemUiController.setStatusBarColor(Color.Black)
+      } else {
+        systemUiController.setSystemBarsColor(color = colorScheme.surface)
+      }
+    }
+
     val isCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED
 
     val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
@@ -315,7 +321,11 @@ fun TyApp(
                 ) { selectedSuggestion ->
                   // FIXME: Move cursor to the end of text.
                   dispatchSync(
-                    v(search.panel_fsm, update_search_input, selectedSuggestion)
+                    v(
+                      search.panel_fsm,
+                      update_search_input,
+                      selectedSuggestion
+                    )
                   )
                 }
 

@@ -159,7 +159,7 @@ import kotlinx.coroutines.launch
 fun QualityList(
   modifier: Modifier = Modifier,
   resolutions: List<Pair<String, Int>>,
-  containerColor: Color,
+  containerColor: Color
 ) {
   LazyColumn(modifier = modifier.padding(bottom = 16.dp)) {
     items(items = resolutions) { res ->
@@ -202,7 +202,7 @@ private fun Context.findWindow(): Window? {
 fun MiniPlayerControls(
   isPlaying: Boolean,
   onClosePlayer: () -> Unit = { },
-  playPausePlayer: () -> Unit = { },
+  playPausePlayer: () -> Unit = { }
 ) {
   with(LocalContext.current.findWindow()) {
     this?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
@@ -243,7 +243,7 @@ fun VideoPlayer(
   stream: UIState,
   useController: Boolean = true,
   showThumbnail: Boolean?,
-  thumbnail: String?,
+  thumbnail: String?
 ) {
   val streamData = stream.data as IPersistentMap<Any, Any>
 
@@ -377,7 +377,7 @@ fun DescriptionSection(
   modifier: Modifier = Modifier,
   streamTitle: String,
   views: String,
-  date: String,
+  date: String
 ) {
   Column(
     modifier = modifier.padding(top = 12.dp, bottom = 2.dp)
@@ -411,7 +411,7 @@ fun ChannelSection(
   modifier: Modifier = Modifier,
   channelName: String,
   channelAvatar: String,
-  subscribersCount: String,
+  subscribersCount: String
 ) {
   Row(
     modifier = modifier.fillMaxWidth(),
@@ -462,7 +462,7 @@ fun ChannelSection(
 fun LikeSection(
   modifier: Modifier = Modifier,
   likesCount: String,
-  buttonsColor: Color,
+  buttonsColor: Color
 ) {
   val size = 18.dp
   val textStyle = MaterialTheme.typography.labelMedium
@@ -588,7 +588,7 @@ fun CommentsSection(
   commentsCount: String,
   commentAvatar: String? = null,
   commentsDisabled: Boolean,
-  onClick: () -> Unit = { },
+  onClick: () -> Unit = { }
 ) {
   Surface(
     modifier = modifier.fillMaxWidth(),
@@ -697,7 +697,7 @@ fun Html(text: String) {
 fun SheetHeader(
   onTapHeader: () -> Unit,
   headerTitle: String,
-  closeSheet: () -> Unit,
+  closeSheet: () -> Unit
 ) {
   val density = LocalDensity.current
   val px = with(density) {
@@ -742,7 +742,7 @@ class BottomSheetNestedScrollConnection : NestedScrollConnection {
   override fun onPostScroll(
     consumed: Offset,
     available: Offset,
-    source: NestedScrollSource,
+    source: NestedScrollSource
   ): Offset {
     if (source == NestedScrollSource.Fling) {
       lasPos = null
@@ -1010,7 +1010,7 @@ private fun DescriptionSheet(
   playbackScope: CoroutineScope,
   descSheetValue: SheetValue,
   isLoading: Boolean,
-  streamData: Any,
+  streamData: Any
 ) {
   HeadedSheetColumn(
     sheetState = descSheetState,
@@ -1052,7 +1052,7 @@ private fun CommentsSheet(
   commentsSheetState: SheetState,
   sheetPeekHeight: Dp,
   playbackScope: CoroutineScope,
-  commentsVm: AppendingPanelVm,
+  commentsVm: AppendingPanelVm
 ) {
   HeadedSheetColumn(
     sheetState = commentsSheetState,
@@ -1103,7 +1103,7 @@ fun PlaybackBottomSheet(
   activeStream: UIState,
   activeStreamCache: VideoViewModel,
   showThumbnail: Boolean?,
-  sheetPeekHeight: Dp,
+  sheetPeekHeight: Dp
 ) {
   val descSheetState = rememberStandardBottomSheetState(
     initialValue = Hidden,
@@ -1257,7 +1257,7 @@ fun PlaybackBottomSheet(
                 override fun onPostScroll(
                   consumed: Offset,
                   available: Offset,
-                  source: NestedScrollSource,
+                  source: NestedScrollSource
                 ): Offset {
                   return available
                 }

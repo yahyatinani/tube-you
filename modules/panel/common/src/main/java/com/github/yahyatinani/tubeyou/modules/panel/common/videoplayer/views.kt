@@ -38,7 +38,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -127,11 +126,14 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.R.string
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AuthorAvatar
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.AvatarLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.CountText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.HeadedSheetColumn
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.StreamLoaderPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.TextLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
@@ -1095,6 +1097,7 @@ private fun CommentsSheet(
   }
 }
 
+
 @Composable
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 fun PlaybackBottomSheet(
@@ -1262,7 +1265,8 @@ fun PlaybackBottomSheet(
                   return available
                 }
               }
-            )
+            ),
+          userScrollEnabled = false // fixme:
         ) {
           item {
             if (isLoading) {
@@ -1300,22 +1304,16 @@ fun PlaybackBottomSheet(
                   horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                   Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
+                    AvatarLoader(
                       modifier = Modifier.size(size = 32.dp),
-                      shape = CircleShape,
-                      color = containerColor,
-                      content = {}
+                      containerColor = containerColor
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Surface(
-                      modifier = Modifier
-                        .width(width = 128.dp)
-                        .height(16.dp),
-                      shape = RoundedCornerShape(6.dp),
-                      color = containerColor,
-                      content = {}
+                    TextLoader(
+                      modifier = Modifier.width(128.dp),
+                      containerColor = containerColor
                     )
                   }
 
@@ -1323,7 +1321,7 @@ fun PlaybackBottomSheet(
                     modifier = Modifier
                       .width(72.dp)
                       .height(32.dp),
-                    shape = roundedCornerShape,
+                    shape = RoundedCornerShape(20.dp),
                     color = containerColor,
                     content = {}
                   )
@@ -1450,19 +1448,9 @@ fun PlaybackBottomSheet(
 
           item { Spacer(modifier = Modifier.height(16.dp)) }
 
-          item {
-            // TODO: video loader
-            Column {
-              Surface(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .aspectRatio(16 / 9f),
-                color = containerColor,
-                content = {}
-              )
-              Spacer(modifier = Modifier.height(8.dp))
-              Row {
-              }
+          repeat(2) {
+            item {
+              StreamLoaderPortrait(containerColor)
             }
           }
         }
@@ -1470,6 +1458,7 @@ fun PlaybackBottomSheet(
     }
   }
 }
+
 
 val MINI_PLAYER_HEIGHT = 62.dp
 

@@ -2,6 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
 import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.State
@@ -33,6 +34,10 @@ val commentsSheetMachine = m(
       fsm.actions to ::expandCommentsSheet
     ),
     "close_comments_sheet" to m(
+      fsm.target to SheetValue.Hidden,
+      fsm.actions to ::closeCommentsSheet
+    ),
+    common.close_player to m(
       fsm.target to SheetValue.Hidden,
       fsm.actions to ::closeCommentsSheet
     )

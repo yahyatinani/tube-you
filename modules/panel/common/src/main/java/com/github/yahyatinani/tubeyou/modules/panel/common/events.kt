@@ -2,7 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import androidx.compose.runtime.Immutable
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.playbackMachine
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.playbackMachine
 import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
 import io.github.yahyatinani.recompose.fsm.trigger
@@ -45,25 +45,25 @@ data class StreamDetails(
 @Immutable
 @Serializable
 data class StreamData(
-  val title: String,
-  val description: String,
-  val uploadDate: String,
-  val uploader: String,
-  val uploaderUrl: String,
-  val uploaderAvatar: String,
-  val thumbnailUrl: String,
-  val hls: String?,
-  val dash: String?,
-  val category: String,
-  val uploaderVerified: Boolean,
-  val duration: Long,
-  val views: Long,
-  val likes: Long,
-  val dislikes: Long,
-  val uploaderSubscriberCount: Long,
-  val videoStreams: List<StreamDetails>,
-  val audioStreams: List<StreamDetails>,
-  val livestream: Boolean
+  val title: String = "",
+  val description: String = "",
+  val uploadDate: String = "",
+  val uploader: String = "",
+  val uploaderUrl: String = "",
+  val uploaderAvatar: String = "",
+  val thumbnailUrl: String = "",
+  val hls: String? = null,
+  val dash: String? = null,
+  val category: String = "",
+  val uploaderVerified: Boolean = false,
+  val duration: Long = 0,
+  val views: Long = 0,
+  val likes: Long = 0,
+  val dislikes: Long = 0,
+  val uploaderSubscriberCount: Long = 0,
+  val videoStreams: List<StreamDetails> = v(),
+  val audioStreams: List<StreamDetails> = v(),
+  val livestream: Boolean = false
 )
 
 @Serializable
@@ -123,7 +123,7 @@ fun regCommonEvents() {
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx["player_scope"],
             ktor.response_type_info to typeInfo<StreamData>(),
-            ktor.on_success to v("playback_fsm", "launch_stream"),
+            ktor.on_success to v("stream_panel_fsm", "launch_stream"),
             ktor.on_failure to v("todo")
           )
         )
@@ -137,7 +137,7 @@ fun regCommonEvents() {
   ) { cofx: Coeffects, (_, videoId) ->
     val id = (videoId as String).replace("/watch?v=", "")
     val api = appDbBy(cofx)[common.api_url]
-    val commentsEvent = v("playback_fsm", "set_stream_comments")
+    val commentsEvent = v("stream_panel_fsm", "set_stream_comments")
     m(
       fx to v(
         v(
@@ -153,8 +153,11 @@ fun regCommonEvents() {
             ktor.coroutine_scope to cofx["player_scope"],
             ktor.response_type_info to typeInfo<StreamComments>(),
             ktor.on_success to commentsEvent,
-            paging.on_page_success to v("playback_fsm", "append_comments_page"),
-            "on_appending" to v("playback_fsm"),
+            paging.on_page_success to v(
+              "stream_panel_fsm",
+              "append_comments_page"
+            ),
+            "on_appending" to v("stream_panel_fsm"),
             ktor.on_failure to v(""),
             paging.page_size to 5
           )
@@ -164,7 +167,7 @@ fun regCommonEvents() {
   }
 
   regEventFx(
-    id = "playback_fsm",
+    id = "stream_panel_fsm",
     interceptors = v(injectCofx(":screen_dimen_px"))
   ) { cofx, e ->
     println("playback_fsm $e")
@@ -175,7 +178,7 @@ fun regCommonEvents() {
     trigger(
       playbackMachine,
       m(recompose.db to appDb),
-      v("playback_fsm"),
+      v("stream_panel_fsm"),
       e.subvec(1, e.count)
     )
   }

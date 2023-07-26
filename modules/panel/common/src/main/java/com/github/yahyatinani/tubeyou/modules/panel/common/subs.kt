@@ -21,14 +21,15 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.media3.common.MimeTypes
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.MEDIUM_BULLET
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatSubCount
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatViews
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.CommentsListState
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.createDashSource
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.CommentsListState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
 import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.recompose.subs.Query
@@ -111,30 +112,30 @@ private fun shorten(uploaded: String): String = uploaded
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun regCommonSubs() {
-  regSub("playback_fsm") { db: AppDb, _: Query ->
-    db["playback_fsm"]
+  regSub(queryId = "active_stream_vm") { db: AppDb, _: Query ->
+    get<VideoViewModel>(db["stream_panel_fsm"], "active_stream")
+      ?: VideoViewModel()
   }
 
-  regSub<IPersistentMap<Any, Any>, Any?>(
-    queryId = "currently_playing",
-    initialValue = null,
-    inputSignal = v("playback_fsm")
-  ) { playbackFsm: IPersistentMap<Any, Any>?, _, (_, context) ->
-    val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val playerRegion = get<Any>(playbackMachine, ":player")
-    val stream = get<StreamData>(playbackFsm, "stream_data")
+  regSub(queryId = "stream_panel_fsm") { db: AppDb, _: Query ->
+    db["stream_panel_fsm"]
+  }
 
-    if (playerRegion == null || playerRegion == PlayerState.LOADING ||
-      playbackFsm == null ||
-      stream == null
-    ) {
-      return@regSub null
+  regSub<IPersistentMap<Any, Any>, UIState>(
+    queryId = "active_stream",
+    initialValue = UIState(m(common.state to StreamState.LOADING)),
+    inputSignal = v("stream_panel_fsm")
+  ) { streamPanelFsm: IPersistentMap<Any, Any>?, _, (_, context) ->
+    val playbackMachine = get<Any>(streamPanelFsm, fsm._state)
+    val playerRegion = get<Any>(playbackMachine, ":player")
+
+    if (playerRegion == null || playerRegion == StreamState.LOADING) {
+      return@regSub UIState(m(common.state to StreamState.LOADING))
     }
 
-    println("playerRegion $playerRegion")
-
-    val currentQuality = playbackFsm["current_quality"]
-    val ql = get<List<Pair<String, Int>>>(playbackFsm, "quality_list") ?: l()
+    val stream = get<StreamData>(streamPanelFsm, "stream_data")
+    val currentQuality = streamPanelFsm!!["current_quality"]
+    val ql = get<List<Pair<String, Int>>>(streamPanelFsm, "quality_list") ?: l()
     val qualityList = ql.map {
       val a = if (currentQuality == it.second) "${it.first} ✓" else it.first
       a to it.second
@@ -142,9 +143,9 @@ fun regCommonSubs() {
 
     val cq = if (currentQuality == null) "" else "${currentQuality}p"
 
-    val viewModel = get<VideoViewModel>(playbackFsm, "videoVm")!!
+    val viewModel = get<VideoViewModel>(streamPanelFsm, "active_stream")!!
 
-    val views = formatViews(stream.views)
+    val views = formatViews(stream!!.views)
 
     val views1 = if (viewModel.isLiveStream) {
       views + " watching" + " Started ${timeAgoFormat(stream.uploadDate)}"
@@ -153,6 +154,7 @@ fun regCommonSubs() {
     }
 
     val m = m<Any, Any?>(
+      common.state to playerRegion,
       Stream.title to stream.title,
       Stream.uploader to stream.uploader,
       Stream.thumbnail to stream.thumbnailUrl,
@@ -168,23 +170,29 @@ fun regCommonSubs() {
       Stream.description to stream.description
     )
 
-    if (stream.videoStreams.isNotEmpty()) {
-      if (stream.livestream && stream.dash != null) {
-        m.assoc(Stream.video_uri, stream.dash.toUri())
+    UIState(
+      data = if (stream.videoStreams.isNotEmpty()) {
+        when {
+          stream.livestream && stream.dash != null -> {
+            m.assoc(Stream.video_uri, stream.dash.toUri())
+          }
+
+          else -> {
+            m.assoc(
+              Stream.video_uri,
+              createDashSource(stream, context as Context)
+            )
+          }
+        }.assoc(Stream.mime_type, MimeTypes.APPLICATION_MPD)
       } else {
-        m.assoc(
-          Stream.video_uri,
-          createDashSource(stream, context as Context)
-        )
-      }.assoc(Stream.mime_type, MimeTypes.APPLICATION_MPD)
-    } else {
-      m.assoc(Stream.video_uri, stream.hls!!.toUri())
-        .assoc(Stream.mime_type, MimeTypes.APPLICATION_M3U8)
-    }
+        m.assoc(Stream.video_uri, stream.hls!!.toUri())
+          .assoc(Stream.mime_type, MimeTypes.APPLICATION_M3U8)
+      }
+    )
   }
 
   regSub("comments_sheet") { db: AppDb, _: Query ->
-    val playbackFsm = db["playback_fsm"]
+    val playbackFsm = db["stream_panel_fsm"]
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
     val commentsSheet =
       get<SheetValue>(playbackMachine, ":comments_sheet")
@@ -192,7 +200,7 @@ fun regCommonSubs() {
   }
 
   regSub("description_sheet") { db: AppDb, _: Query ->
-    val playbackFsm = db["playback_fsm"]
+    val playbackFsm = db["stream_panel_fsm"]
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
     val commentsSheet =
       get<SheetValue>(playbackMachine, ":description_sheet")
@@ -202,7 +210,7 @@ fun regCommonSubs() {
   regSub<IPersistentMap<Any, Any>, Any>(
     queryId = Stream.comments,
     initialValue = AppendingPanelVm.Loading,
-    inputSignal = v("playback_fsm")
+    inputSignal = v("stream_panel_fsm")
   ) { playbackFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
     val stream = get<StreamData>(playbackFsm, "stream_data")
@@ -408,3 +416,6 @@ sealed class AppendingPanelVm(
 
   data class Error(override val error: Int?) : AppendingPanelVm(error = error)
 }
+
+@Immutable
+data class UIState(val data: Any = m<Any, Any>())

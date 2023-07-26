@@ -38,6 +38,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -65,6 +66,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PlainTooltipBox
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.SheetValue.Hidden
@@ -79,7 +81,6 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -116,11 +117,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.core.text.HtmlCompat.fromHtml
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common
+import com.github.yahyatinani.tubeyou.modules.designsystem.R.string
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AuthorAvatar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.CountText
@@ -130,11 +134,14 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppendingPanelVm
 import com.github.yahyatinani.tubeyou.modules.panel.common.R
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
+import com.github.yahyatinani.tubeyou.modules.panel.common.UIState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -145,13 +152,14 @@ import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.v
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun QualityList(
   modifier: Modifier = Modifier,
   resolutions: List<Pair<String, Int>>,
-  containerColor: Color
+  containerColor: Color,
 ) {
   LazyColumn(modifier = modifier.padding(bottom = 16.dp)) {
     items(items = resolutions) { res ->
@@ -194,7 +202,7 @@ private fun Context.findWindow(): Window? {
 fun MiniPlayerControls(
   isPlaying: Boolean,
   onClosePlayer: () -> Unit = { },
-  playPausePlayer: () -> Unit = { }
+  playPausePlayer: () -> Unit = { },
 ) {
   with(LocalContext.current.findWindow()) {
     this?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
@@ -232,182 +240,134 @@ fun MiniPlayerControls(
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 fun VideoPlayer(
   modifier: Modifier = Modifier,
-  streamData: IPersistentMap<Any, Any>?,
+  stream: UIState,
   useController: Boolean = true,
-  isCollapsed: Boolean,
-  playerState: PlayerState?,
   showThumbnail: Boolean?,
-  thumbnail: String?
+  thumbnail: String?,
 ) {
-  Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.SpaceBetween
-  ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val orientation = LocalConfiguration.current.orientation
+  val streamData = stream.data as IPersistentMap<Any, Any>
 
-    var showQualityControl: Boolean by remember { mutableStateOf(false) }
-    var showQualitiesSheet: Boolean by remember { mutableStateOf(false) }
+  val playerState = get<StreamState>(stream.data, common.state)
+  val context = LocalContext.current
+  val scope = rememberCoroutineScope()
+  val orientation = LocalConfiguration.current.orientation
 
-    val ratio by remember { mutableFloatStateOf(16 / 9f) }
+  var showQualityControl: Boolean by remember { mutableStateOf(false) }
+  var showQualitiesSheet: Boolean by remember { mutableStateOf(false) }
 
-    val controllerVisibilityListener = remember {
-      PlayerView.ControllerVisibilityListener { visibility: Int ->
-        showQualityControl = visibility == View.VISIBLE
-      }
+  val controllerVisibilityListener = remember {
+    PlayerView.ControllerVisibilityListener { visibility: Int ->
+      showQualityControl = visibility == View.VISIBLE
     }
+  }
 
-    Box(
-      modifier = Modifier
-        .then(
-          if (orientation != ORIENTATION_LANDSCAPE) {
-            if (isCollapsed) {
-              Modifier
-                .height(110.dp - 48.dp)
-                .aspectRatio(ratio)
-            } else if (streamData != null) {
-              Modifier
-                .fillMaxWidth()
-                .aspectRatio(get(streamData, Stream.aspect_ratio)!!)
-            } else {
-              Modifier
-                .fillMaxWidth()
-                .aspectRatio(ratio)
-            }
-          } else {
-            Modifier
-          }
-        )
-    ) {
-      LaunchedEffect(streamData) {
+  Box(modifier = modifier) {
+    LaunchedEffect(streamData) {
+      if (streamData[common.state] != StreamState.LOADING) {
         TyPlayer.playNewVideo(streamData)
       }
+    }
 
-      LaunchedEffect(orientation) {
-        if (orientation == ORIENTATION_LANDSCAPE) {
-          dispatch(v(":player_fullscreen_landscape"))
-        } else {
-          dispatch(v(":player_portrait"))
-        }
-      }
-
-      LaunchedEffect(Unit) {
-        regPlaybackFxs(scope)
-        regPlaybackEvents()
-      }
-
-      AndroidView(
-        modifier = modifier
-          .fillMaxWidth()
-          .apply {
-            if (orientation == ORIENTATION_LANDSCAPE) {
-              padding(start = 26.dp)
-            }
-          },
-        factory = {
-          PlayerView(context).apply {
-            setControllerVisibilityListener(controllerVisibilityListener)
-            player = TyPlayer.getInstance()
-            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-          }
-        }
-      ) {
-        // setBackgroundColor(ContextCompat.getColor(context, R.color.black))
-        it.useController = useController
-      }
-
-      if (showThumbnail == true) {
-        Thumbnail(
-          modifier = Modifier.wrapContentSize(),
-          url = thumbnail
-        )
-      }
-
-      if (
-        playerState == PlayerState.LOADING ||
-        playerState == PlayerState.BUFFERING
-      ) {
-        CircularProgressIndicator(
-          modifier = Modifier
-            .align(Alignment.Center)
-            .size(64.dp),
-          color = Grey300.copy(alpha = .4f)
-        )
-      }
-
-      if (showQualityControl && streamData != null) {
-        TextButton(
-          modifier = Modifier.align(Alignment.TopEnd),
-          colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-          onClick = {
-            dispatch(v("playback_fsm", "generate_quality_list"))
-            showQualitiesSheet = true
-          }
-        ) {
-          Text(text = get<String>(streamData, Stream.current_quality)!!)
-        }
-
-        IconButton(
-          modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(end = 40.dp, bottom = 6.dp),
-          onClick = { dispatchSync(v(":toggle_orientation")) }
-        ) {
-          Image(
-            imageVector = Icons.Default.Fullscreen,
-            contentDescription = "",
-            colorFilter = ColorFilter.tint(
-              MaterialTheme.colorScheme.onBackground
-            )
-          )
-        }
+    LaunchedEffect(orientation) {
+      if (orientation == ORIENTATION_LANDSCAPE) {
+        dispatch(v(":player_fullscreen_landscape"))
+      } else {
+        dispatch(v(":player_portrait"))
       }
     }
 
-    if (showQualitiesSheet) {
-      val sheetState =
-        rememberModalBottomSheetState(skipPartiallyExpanded = true)
-      val containerColor = Color(0xFF212121)
-      ModalBottomSheet(
+    LaunchedEffect(Unit) {
+      regPlaybackFxs(scope)
+      regPlaybackEvents()
+    }
+
+    AndroidView(
+      modifier = Modifier.fillMaxWidth(),
+      factory = {
+        PlayerView(context).apply {
+          setControllerVisibilityListener(controllerVisibilityListener)
+          player = TyPlayer.getInstance()
+          resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+          if (orientation == ORIENTATION_LANDSCAPE) {
+            setBackgroundColor(ContextCompat.getColor(context, R.color.black))
+          }
+        }
+      }
+    ) {
+      it.useController = useController
+    }
+
+    if (showThumbnail == true) {
+      Thumbnail(
+        modifier = Modifier.wrapContentSize(),
+        url = thumbnail
+      )
+    }
+
+    if (
+      playerState == null ||
+      playerState == StreamState.LOADING ||
+      playerState == StreamState.BUFFERING
+    ) {
+      CircularProgressIndicator(
         modifier = Modifier
-//          .offset(y = (-24).dp)
-          .padding(horizontal = 10.dp)
-          .fillMaxWidth()
-          .wrapContentHeight(),
-        dragHandle = null,
-        shape = RoundedCornerShape(10.dp),
-        containerColor = containerColor,
-        onDismissRequest = { showQualitiesSheet = false },
-        sheetState = sheetState
+          .align(Alignment.Center)
+          .size(64.dp),
+        color = Grey300.copy(alpha = .4f)
+      )
+    }
+
+    if (showQualityControl && playerState != null) {
+      TextButton(
+        modifier = Modifier.align(Alignment.TopEnd),
+        colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+        onClick = {
+          dispatch(v("stream_panel_fsm", "generate_quality_list"))
+          showQualitiesSheet = true
+        }
       ) {
-        val resolutions =
-          get<List<Pair<String, Int>>>(streamData, Stream.quality_list)!!
-        QualityList(
-          resolutions = resolutions,
-          containerColor = containerColor
+        Text(text = get<String>(streamData, Stream.current_quality)!!)
+      }
+
+      IconButton(
+        modifier = Modifier
+          .align(Alignment.BottomEnd)
+          .padding(end = 40.dp, bottom = 6.dp),
+        onClick = { dispatchSync(v(":toggle_orientation")) }
+      ) {
+        Image(
+          imageVector = Icons.Default.Fullscreen,
+          contentDescription = "",
+          colorFilter = ColorFilter.tint(
+            MaterialTheme.colorScheme.onBackground
+          )
         )
       }
     }
+  }
 
-    if (isCollapsed) {
-      MiniPlayerControls(
-        isPlaying = playerState == PlayerState.PLAYING,
-        onClosePlayer = {
-          dispatchSync(v("playback_fsm", "close_player"))
-        }
-      ) {
-        dispatchSync(v("playback_fsm", "toggle_play_pause"))
-      }
-    } else {
-      // FIXME:
-      /*val systemUiController = rememberSystemUiController()
-      val inDarkTheme = isSystemInDarkTheme()
-      LaunchedEffect(inDarkTheme) {
-        systemUiController.setSystemBarsColor(
-          color = if (inDarkTheme) Color.Black else Color.White
-        )
-      }*/
+  if (showQualitiesSheet) {
+    val sheetState =
+      rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val containerColor = Color(0xFF212121)
+    ModalBottomSheet(
+      modifier = Modifier
+//          .offset(y = (-24).dp)
+        .padding(horizontal = 10.dp)
+        .fillMaxWidth()
+        .wrapContentHeight(),
+      dragHandle = null,
+      shape = RoundedCornerShape(10.dp),
+      containerColor = containerColor,
+      onDismissRequest = { showQualitiesSheet = false },
+      sheetState = sheetState
+    ) {
+      val resolutions =
+        get<List<Pair<String, Int>>>(streamData, Stream.quality_list)!!
+      QualityList(
+        resolutions = resolutions,
+        containerColor = containerColor
+      )
     }
   }
 }
@@ -417,18 +377,14 @@ fun DescriptionSection(
   modifier: Modifier = Modifier,
   streamTitle: String,
   views: String,
-  date: String
+  date: String,
 ) {
   Column(
     modifier = modifier.padding(top = 12.dp, bottom = 2.dp)
   ) {
+    StreamPanelTitle(streamTitle)
+
     val typography = MaterialTheme.typography
-    Text(
-      text = streamTitle,
-      style = typography.titleMedium,
-      maxLines = 2,
-      overflow = TextOverflow.Ellipsis
-    )
     val color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)
     val string = buildAnnotatedString {
       withStyle(
@@ -436,11 +392,12 @@ fun DescriptionSection(
       ) {
         append("$views  $date")
       }
+
       append(" ")
+
       withStyle(
-        style = typography.bodySmall.copy(
-          fontWeight = FontWeight.Bold
-        ).toSpanStyle()
+        style = typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+          .toSpanStyle()
       ) {
         append("...more")
       }
@@ -454,7 +411,7 @@ fun ChannelSection(
   modifier: Modifier = Modifier,
   channelName: String,
   channelAvatar: String,
-  subscribersCount: String
+  subscribersCount: String,
 ) {
   Row(
     modifier = modifier.fillMaxWidth(),
@@ -472,7 +429,7 @@ fun ChannelSection(
         size = 32.dp
       )
 
-      Spacer(modifier = Modifier.width(16.dp))
+      Spacer(modifier = Modifier.width(12.dp))
 
       Text(
         modifier = Modifier.weight(1f, false),
@@ -492,6 +449,7 @@ fun ChannelSection(
     val colorScheme = MaterialTheme.colorScheme
 
     SubscribeButton(
+      text = stringResource(string.subscribe),
       containerColor = colorScheme.onSurface,
       contentColor = colorScheme.surface
     ) {
@@ -504,7 +462,7 @@ fun ChannelSection(
 fun LikeSection(
   modifier: Modifier = Modifier,
   likesCount: String,
-  buttonsColor: Color
+  buttonsColor: Color,
 ) {
   val size = 18.dp
   val textStyle = MaterialTheme.typography.labelMedium
@@ -630,7 +588,7 @@ fun CommentsSection(
   commentsCount: String,
   commentAvatar: String? = null,
   commentsDisabled: Boolean,
-  onClick: () -> Unit = { }
+  onClick: () -> Unit = { },
 ) {
   Surface(
     modifier = modifier.fillMaxWidth(),
@@ -720,7 +678,7 @@ private fun TextView.setupClickableLinks() {
 }
 
 @Composable
-fun Html(text: String?) {
+fun Html(text: String) {
   AndroidView(
     factory = { context ->
       TextView(context).apply {
@@ -731,7 +689,7 @@ fun Html(text: String?) {
       .padding(horizontal = 12.dp)
       .padding(top = 8.dp)
   ) {
-    it.text = fromHtml(text ?: "", FROM_HTML_MODE_LEGACY)
+    it.text = fromHtml(text, FROM_HTML_MODE_LEGACY)
   }
 }
 
@@ -739,7 +697,7 @@ fun Html(text: String?) {
 fun SheetHeader(
   onTapHeader: () -> Unit,
   headerTitle: String,
-  closeSheet: () -> Unit
+  closeSheet: () -> Unit,
 ) {
   val density = LocalDensity.current
   val px = with(density) {
@@ -784,7 +742,7 @@ class BottomSheetNestedScrollConnection : NestedScrollConnection {
   override fun onPostScroll(
     consumed: Offset,
     available: Offset,
-    source: NestedScrollSource
+    source: NestedScrollSource,
   ): Offset {
     if (source == NestedScrollSource.Fling) {
       lasPos = null
@@ -1035,15 +993,117 @@ fun CommentsList(commentsVm: AppendingPanelVm) {
 }
 
 @Composable
+fun StreamPanelTitle(streamTitle: String) {
+  Text(
+    text = streamTitle,
+    style = MaterialTheme.typography.titleMedium,
+    maxLines = 2,
+    overflow = TextOverflow.Ellipsis
+  )
+}
+
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DescriptionSheet(
+  descSheetState: SheetState,
+  sheetPeekHeight: Dp,
+  playbackScope: CoroutineScope,
+  descSheetValue: SheetValue,
+  isLoading: Boolean,
+  streamData: Any,
+) {
+  HeadedSheetColumn(
+    sheetState = descSheetState,
+    sheetPeekHeight = sheetPeekHeight,
+    header = {
+      SheetHeader(
+        onTapHeader = {
+          playbackScope.launch {
+            if (descSheetValue == PartiallyExpanded) {
+              descSheetState.expand()
+            } else if (descSheetValue == Expanded) {
+              descSheetState.partialExpand()
+            }
+          }
+        },
+        headerTitle = "Description"
+      ) {
+        dispatch(v("stream_panel_fsm", "close_desc_sheet"))
+      }
+    }
+  ) {
+    if (!isLoading) {
+      LazyColumn(
+        modifier = Modifier
+          .fillMaxSize()
+          .nestedScroll(BottomSheetNestedScrollConnection())
+      ) {
+        item {
+          Html(text = get(streamData, Stream.description)!!)
+        }
+      }
+    }
+  }
+}
+
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CommentsSheet(
+  commentsSheetState: SheetState,
+  sheetPeekHeight: Dp,
+  playbackScope: CoroutineScope,
+  commentsVm: AppendingPanelVm,
+) {
+  HeadedSheetColumn(
+    sheetState = commentsSheetState,
+    sheetPeekHeight = sheetPeekHeight,
+    header = {
+      SheetHeader(
+        onTapHeader = {
+          playbackScope.launch {
+            if (commentsSheetState.currentValue == PartiallyExpanded) {
+              commentsSheetState.expand()
+            } else if (commentsSheetState.currentValue == Expanded) {
+              commentsSheetState.partialExpand()
+            }
+          }
+        },
+        headerTitle = "Comments"
+      ) {
+        dispatch(v("stream_panel_fsm", "close_comments_sheet"))
+      }
+    }
+  ) {
+    SwipeRefresh(
+      state = rememberSwipeRefreshState(
+        isRefreshing = commentsVm.isRefreshing
+      ),
+      onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
+      indicator = { state, refreshTrigger ->
+        val colorScheme = MaterialTheme.colorScheme
+        SwipeRefreshIndicator(
+          state = state,
+          refreshTriggerDistance = refreshTrigger,
+          backgroundColor = colorScheme.primaryContainer,
+          contentColor = colorScheme.onBackground,
+          elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+        )
+      }
+    ) {
+      CommentsList(commentsVm = commentsVm)
+    }
+  }
+}
+
+@Composable
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 fun PlaybackBottomSheet(
   isCollapsed: Boolean,
   onCollapsedClick: () -> Unit,
-  streamData: IPersistentMap<Any, Any>?,
-  playerRegion: PlayerState?,
+  activeStream: UIState,
+  activeStreamCache: VideoViewModel,
   showThumbnail: Boolean?,
-  thumbnail: String?,
-  sheetPeekHeight: Dp
+  sheetPeekHeight: Dp,
 ) {
   val descSheetState = rememberStandardBottomSheetState(
     initialValue = Hidden,
@@ -1059,7 +1119,7 @@ fun PlaybackBottomSheet(
       if (descriptionSheetValue == Hidden) {
         0.dp
       } else if (descSheetValue == Hidden && descTargetValue == Hidden) {
-        dispatch(v("playback_fsm", "close_desc_sheet"))
+        dispatch(v("stream_panel_fsm", "close_desc_sheet"))
         0.dp
       } else {
         sheetPeekHeight
@@ -1076,42 +1136,25 @@ fun PlaybackBottomSheet(
     }
   }
 
+  val streamData = activeStream.data
+  val streamState = remember(activeStream) {
+    get<StreamState>(streamData, common.state)!!
+  }
+  val isLoading = remember(streamState) { streamState == StreamState.LOADING }
+
   BottomSheetScaffold(
     scaffoldState = descScaffoldState,
     sheetPeekHeight = descSheetPeekHeight,
     sheetDragHandle = { DragHandle() },
     sheetContent = {
-      HeadedSheetColumn(
-        sheetState = descSheetState,
+      DescriptionSheet(
+        descSheetState = descSheetState,
         sheetPeekHeight = sheetPeekHeight,
-        header = {
-          SheetHeader(
-            onTapHeader = {
-              playbackScope.launch {
-                if (descSheetValue == PartiallyExpanded) {
-                  descSheetState.expand()
-                } else if (descSheetValue == Expanded) {
-                  descSheetState.partialExpand()
-                }
-              }
-            },
-            headerTitle = "Description"
-          ) {
-            dispatch(v("playback_fsm", "close_desc_sheet"))
-          }
-        }
-      ) {
-        val streamDescription = get<String>(streamData, Stream.description)
-        if (streamDescription != null) {
-          LazyColumn(
-            modifier = Modifier
-              .fillMaxSize()
-              .nestedScroll(BottomSheetNestedScrollConnection())
-          ) {
-            item { Html(text = streamDescription) }
-          }
-        }
-      }
+        playbackScope = playbackScope,
+        descSheetValue = descSheetValue,
+        isLoading = isLoading,
+        streamData = streamData
+      )
     }
   ) {
     val commentsSheetState = rememberStandardBottomSheetState(
@@ -1126,15 +1169,15 @@ fun PlaybackBottomSheet(
     val commentsCurrentValue = commentsSheetState.currentValue
     val commentsSheetPeekHeight =
       remember(commentsSheetValue, commentsTargetValue, commentsCurrentValue) {
-        if (commentsSheetValue == Hidden) {
-          0.dp
-        } else if (commentsTargetValue == Hidden &&
-          commentsCurrentValue == Hidden
-        ) {
-          dispatch(v("playback_fsm", "close_comments_sheet"))
-          0.dp
-        } else {
-          sheetPeekHeight
+        when {
+          commentsSheetValue == Hidden -> 0.dp
+          commentsTargetValue == Hidden &&
+            commentsCurrentValue == Hidden -> {
+            dispatch(v("stream_panel_fsm", "close_comments_sheet"))
+            0.dp
+          }
+
+          else -> sheetPeekHeight
         }
       }
 
@@ -1155,65 +1198,56 @@ fun PlaybackBottomSheet(
       sheetPeekHeight = commentsSheetPeekHeight,
       sheetDragHandle = { DragHandle() },
       sheetContent = {
-        HeadedSheetColumn(
-          sheetState = commentsSheetState,
+        CommentsSheet(
+          commentsSheetState = commentsSheetState,
           sheetPeekHeight = sheetPeekHeight,
-          header = {
-            SheetHeader(
-              onTapHeader = {
-                playbackScope.launch {
-                  if (commentsSheetState.currentValue == PartiallyExpanded) {
-                    commentsSheetState.expand()
-                  } else if (commentsSheetState.currentValue == Expanded) {
-                    commentsSheetState.partialExpand()
-                  }
-                }
-              },
-              headerTitle = "Comments"
-            ) {
-              dispatch(v("playback_fsm", "close_comments_sheet"))
-            }
-          }
-        ) {
-          SwipeRefresh(
-            state = rememberSwipeRefreshState(
-              isRefreshing = commentsVm.isRefreshing
-            ),
-            onRefresh = { dispatch(v("playback_fsm", "refresh_comments")) },
-            indicator = { state, refreshTrigger ->
-              val colorScheme = MaterialTheme.colorScheme
-              SwipeRefreshIndicator(
-                state = state,
-                refreshTriggerDistance = refreshTrigger,
-                backgroundColor = colorScheme.primaryContainer,
-                contentColor = colorScheme.onBackground,
-                elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
-              )
-            }
-          ) {
-            CommentsList(commentsVm = commentsVm)
-          }
-        }
+          playbackScope = playbackScope,
+          commentsVm = commentsVm
+        )
       }
     ) {
       val colorScheme = MaterialTheme.colorScheme
       val alpha = if (isSystemInDarkTheme()) .09f else .05f
-      val buttonsColor: Color = colorScheme.onBackground.copy(alpha)
+      val containerColor: Color = colorScheme.onBackground.copy(alpha)
 
-      Column(
-        modifier = Modifier.clickable(
-          enabled = isCollapsed,
-          onClick = onCollapsedClick
-        )
-      ) {
-        VideoPlayer(
-          streamData = streamData,
-          useController = !isCollapsed,
-          isCollapsed = isCollapsed,
-          playerState = playerRegion,
-          showThumbnail = showThumbnail,
-          thumbnail = thumbnail
-        )
+      Column {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = isCollapsed, onClick = onCollapsedClick),
+          horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+          val ratio = remember { 16 / 9f }
+          VideoPlayer(
+            modifier = Modifier.then(
+              if (isCollapsed) {
+                Modifier
+                  .height(110.dp - 48.dp)
+                  .aspectRatio(ratio)
+              } else {
+                Modifier
+                  .fillMaxWidth()
+                  .aspectRatio(get(streamData, Stream.aspect_ratio, ratio)!!)
+              }
+            ),
+            stream = activeStream,
+            useController = !isCollapsed,
+            showThumbnail = showThumbnail,
+            thumbnail = activeStreamCache.thumbnail
+          )
+
+          if (isCollapsed) {
+            val playerState = get<StreamState>(activeStream.data, common.state)
+            MiniPlayerControls(
+              isPlaying = playerState == StreamState.PLAYING,
+              onClosePlayer = {
+                dispatchSync(v("stream_panel_fsm", "close_player"))
+              }
+            ) {
+              dispatchSync(v("stream_panel_fsm", "toggle_play_pause"))
+            }
+          }
+        }
 
         LazyColumn(
           modifier = Modifier
@@ -1223,66 +1257,166 @@ fun PlaybackBottomSheet(
                 override fun onPostScroll(
                   consumed: Offset,
                   available: Offset,
-                  source: NestedScrollSource
+                  source: NestedScrollSource,
                 ): Offset {
                   return available
                 }
               }
             )
         ) {
-          if (streamData == null) return@LazyColumn
-
           item {
-            DescriptionSection(
-              modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                  dispatch(v("playback_fsm", "half_expand_desc_sheet"))
+            if (isLoading) {
+              Column(modifier = Modifier.fillMaxSize()) {
+                Surface(
+                  modifier = Modifier
+                    .padding(horizontal = 6.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                  shape = RoundedCornerShape(12.dp),
+                  color = containerColor
+                ) {
+                  Column(
+                    modifier = Modifier.padding(
+                      horizontal = 6.dp,
+                      vertical = 4.dp
+                    )
+                  ) {
+                    StreamPanelTitle(streamTitle = activeStreamCache.title)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                      text = activeStreamCache.viewCount,
+                      style = MaterialTheme.typography.bodySmall.copy(
+                        colorScheme.onSurface.copy(alpha = .6f)
+                      )
+                    )
+                  }
                 }
-                .padding(horizontal = 12.dp),
-              streamTitle = get<String>(streamData, Stream.title)!!,
-              views = get<String>(streamData, Stream.views)!!,
-              date = get<String>(streamData, Stream.date)!!
-            )
+
+                val roundedCornerShape = RoundedCornerShape(20.dp)
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                      modifier = Modifier.size(size = 32.dp),
+                      shape = CircleShape,
+                      color = containerColor,
+                      content = {}
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Surface(
+                      modifier = Modifier
+                        .width(width = 128.dp)
+                        .height(16.dp),
+                      shape = RoundedCornerShape(6.dp),
+                      color = containerColor,
+                      content = {}
+                    )
+                  }
+
+                  Surface(
+                    modifier = Modifier
+                      .width(72.dp)
+                      .height(32.dp),
+                    shape = roundedCornerShape,
+                    color = containerColor,
+                    content = {}
+                  )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                  modifier = Modifier
+                    .horizontalScroll(rememberScrollState(), enabled = false)
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                ) {
+                  Surface(
+                    modifier = Modifier
+                      .width(128.dp)
+                      .height(30.dp),
+                    shape = roundedCornerShape,
+                    color = containerColor,
+                    content = {}
+                  )
+
+                  repeat(3) {
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Surface(
+                      modifier = Modifier
+                        .width(80.dp)
+                        .height(30.dp),
+                      shape = roundedCornerShape,
+                      color = containerColor,
+                      content = {}
+                    )
+                  }
+                }
+              }
+
+              return@item
+            }
+
+            Column {
+              DescriptionSection(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .clickable {
+                    dispatch(
+                      v(
+                        "stream_panel_fsm",
+                        "half_expand_desc_sheet"
+                      )
+                    )
+                  }
+                  .padding(horizontal = 12.dp),
+                streamTitle = get<String>(streamData, Stream.title)!!,
+                views = get<String>(streamData, Stream.views)!!,
+                date = get(streamData, Stream.date)!!
+              )
+
+              ChannelSection(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .clickable { }
+                  .padding(horizontal = 12.dp),
+                channelName = get(streamData, Stream.channel_name)!!,
+                channelAvatar = get(streamData, Stream.avatar)!!,
+                subscribersCount = get(streamData, Stream.sub_count)!!
+              )
+
+              Spacer(modifier = Modifier.height(8.dp))
+
+              LikeSection(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(horizontal = 12.dp),
+                likesCount = get<String>(streamData, Stream.likes_count)!!,
+                buttonsColor = containerColor
+              )
+            }
           }
 
-          item {
-            ChannelSection(
-              modifier = Modifier
-                .fillMaxWidth()
-                .clickable { }
-                .padding(horizontal = 12.dp),
-              channelName = get<String>(streamData, Stream.channel_name)!!,
-              channelAvatar = get<String>(streamData, Stream.avatar)!!,
-              subscribersCount = get<String>(streamData, Stream.sub_count)!!
-            )
-          }
-
-          item {
-            Spacer(modifier = Modifier.height(8.dp))
-          }
-
-          item {
-            LikeSection(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-              likesCount = get<String>(streamData, Stream.likes_count)!!,
-              buttonsColor = buttonsColor
-            )
-          }
-
-          item {
-            Spacer(modifier = Modifier.height(16.dp))
-          }
+          item { Spacer(modifier = Modifier.height(16.dp)) }
 
           item {
             if (commentsVm.isLoading) {
               Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = buttonsColor,
-                shape = RoundedCornerShape(12.dp)
-              ) { }
+                modifier = Modifier
+                  .padding(horizontal = 12.dp)
+                  .fillMaxWidth()
+                  .height(88.dp),
+                color = containerColor,
+                shape = RoundedCornerShape(12.dp),
+                content = { }
+              )
+
               return@item
             }
 
@@ -1305,12 +1439,30 @@ fun PlaybackBottomSheet(
                 .padding(horizontal = 12.dp)
                 .fillMaxWidth(),
               highlightedComment = highlightedComment,
-              containerColor = buttonsColor,
+              containerColor = containerColor,
               commentsCount = commentsCount,
               commentAvatar = commentAvatar,
               commentsDisabled = commentsDisabled
             ) {
-              dispatch(v("playback_fsm", "half_expand_comments_sheet"))
+              dispatch(v("stream_panel_fsm", "half_expand_comments_sheet"))
+            }
+          }
+
+          item { Spacer(modifier = Modifier.height(16.dp)) }
+
+          item {
+            // TODO: video loader
+            Column {
+              Surface(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .aspectRatio(16 / 9f),
+                color = containerColor,
+                content = {}
+              )
+              Spacer(modifier = Modifier.height(8.dp))
+              Row {
+              }
             }
           }
         }

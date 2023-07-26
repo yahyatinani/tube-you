@@ -107,6 +107,12 @@ class MainActivity : ComponentActivity() {
 
     regFx(":player_fullscreen_landscape") {
       runOnUiThread {
+        val bm =
+          Bitmap.createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply {
+            eraseColor(ContextCompat.getColor(this@MainActivity, R.color.black))
+          }
+        window.setBackgroundDrawable(BitmapDrawable(resources, bm))
+
         with(WindowCompat.getInsetsController(window, window.decorView)) {
           systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
           hide(WindowInsetsCompat.Type.systemBars())

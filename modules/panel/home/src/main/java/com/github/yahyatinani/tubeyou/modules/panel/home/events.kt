@@ -26,7 +26,7 @@ fun regHomeEvents() {
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    val popularVideosEndpoint = "${appDb[common.api_url]}/trending?region=US"
+    val popularVideosEndpoint = "${appDb[common.api_url]}/trending?region=RU"
     m<Any, Any>(
       db to appDb,
       fx to v(

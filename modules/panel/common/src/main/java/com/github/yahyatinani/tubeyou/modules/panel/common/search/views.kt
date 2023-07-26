@@ -52,7 +52,7 @@ fun PortraitListItem(
         viewModel = vm,
         thumbnailHeight = thumbnailHeight
       ) {
-        dispatch(v("playback_fsm", common.play_video, vm))
+        dispatch(v("stream_panel_fsm", common.play_video, vm))
       }
     }
 

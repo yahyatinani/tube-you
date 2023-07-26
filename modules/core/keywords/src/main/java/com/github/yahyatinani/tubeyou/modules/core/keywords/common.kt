@@ -28,12 +28,11 @@ enum class common {
   play_video,
   expand_player_sheet,
   coroutine_scope,
-  release_player,
   toggle_player,
-  play_new_stream,
   active_stream,
-  pause_player,
-  hide_player_sheet;
+  close_player,
+  hide_player_sheet,
+  state;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

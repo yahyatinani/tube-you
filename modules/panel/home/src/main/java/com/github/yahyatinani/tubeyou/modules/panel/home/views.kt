@@ -60,7 +60,7 @@ fun NavGraphBuilder.home(orientation: Int, thumbnailHeight: Dp) =
       videos = videos,
       thumbnailHeight = thumbnailHeight
     ) {
-      dispatch(v("playback_fsm", common.play_video, it))
+      dispatch(v("stream_panel_fsm", common.play_video, it))
     }
   }
 

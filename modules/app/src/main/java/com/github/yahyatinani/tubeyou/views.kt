@@ -2,6 +2,7 @@ package com.github.yahyatinani.tubeyou
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
@@ -68,17 +69,18 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.thumbnailHe
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
+import com.github.yahyatinani.tubeyou.modules.panel.common.UIState
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchBar
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.MINI_PLAYER_HEIGHT
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlaybackBottomSheet
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerSheetState
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.PlayerState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.RegPlayerSheetEffects
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.VideoPlayer
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.PlayerSheetState
 import com.github.yahyatinani.tubeyou.modules.panel.home.homeGraph
 import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
 import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
 import com.github.yahyatinani.tubeyou.nav.NavigationChangedListenerEffect
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
@@ -97,7 +99,7 @@ import io.github.yahyatinani.y.core.v
 fun topAppBarScrollBehavior(
   isCompactDisplay: Boolean,
   topAppBarState: TopAppBarState,
-  searchBar: SearchBar?
+  searchBar: SearchBar?,
 ): TopAppBarScrollBehavior = when {
   isCompactDisplay && searchBar == null -> {
     LaunchedEffect(Unit) {
@@ -122,7 +124,7 @@ fun topAppBarScrollBehavior(
 @Composable
 fun TyApp(
   windowSizeClass: WindowSizeClass,
-  navController: NavHostController = rememberNavController()
+  navController: NavHostController = rememberNavController(),
 ) {
   NavigationChangedListenerEffect(navController)
 
@@ -152,6 +154,12 @@ fun TyApp(
 
   TyTheme(isCompact = isCompactSize) {
     val colorScheme = MaterialTheme.colorScheme
+
+    val systemUiController = rememberSystemUiController()
+    LaunchedEffect(isSystemInDarkTheme()) {
+      systemUiController.setSystemBarsColor(color = colorScheme.surface)
+    }
+
     val sb = watch<SearchBar?>(v(search.search_bar))
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = topAppBarScrollBehavior(isCompactSize, topBarState, sb)
@@ -161,44 +169,47 @@ fun TyApp(
     }
 
     val playbackFsm =
-      watch<IPersistentMap<Any, Any>>(query = v("playback_fsm"))
+      watch<IPersistentMap<Any, Any>>(query = v("stream_panel_fsm"))
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val playerRegion = get<PlayerState>(playbackMachine, ":player")
-
-    val context = LocalContext.current
-    val streamData =
-      watch<IPersistentMap<Any, Any>?>(v("currently_playing", context))
 
     val playerSheetRegion =
       get<PlayerSheetState>(playbackMachine, ":player_sheet")
     val isCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED
 
     val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
-    val thumbnail = get<VideoViewModel>(playbackFsm, "videoVm")?.thumbnail
 
+    val context = LocalContext.current
+    val activeStream = watch<UIState>(v("active_stream", context))
+
+    val activeStreamVm = watch<VideoViewModel>(v("active_stream_vm"))
+    val orientation = LocalConfiguration.current.orientation
+
+    // WARNING: this must be called before landscape video player
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
       bottomSheetState = rememberStandardBottomSheetState(
-        SheetValue.Hidden,
+        initialValue = SheetValue.Hidden,
         skipHiddenState = false
       )
     )
-    val orientation = LocalConfiguration.current.orientation
-    if (orientation == ORIENTATION_LANDSCAPE && playerRegion != null) {
+
+    if (
+      orientation == ORIENTATION_LANDSCAPE &&
+      playerSheetRegion != PlayerSheetState.HIDDEN
+    ) {
       LaunchedEffect(Unit) {
         dispatch(v(":player_fullscreen_landscape"))
       }
-
       VideoPlayer(
-        streamData = streamData,
+        modifier = Modifier.padding(start = 24.dp),
+        stream = activeStream,
         useController = !isCollapsed,
-        isCollapsed = isCollapsed,
-        playerState = playerRegion,
         showThumbnail = showThumbnail,
-        thumbnail = thumbnail
+        thumbnail = activeStreamVm.thumbnail
       )
 
       return@TyTheme
     }
+
     val playerSheetState = bottomSheetScaffoldState.bottomSheetState
     val playbackTargetValue = playerSheetState.targetValue
 
@@ -217,13 +228,15 @@ fun TyApp(
     ) { p1 ->
       val playerSheetValue = playerSheetState.currentValue
       LaunchedEffect(playerSheetValue) {
-        dispatch(v("playback_fsm", playerSheetValue))
+        dispatch(v("stream_panel_fsm", playerSheetValue))
       }
 
       RegPlayerSheetEffects(playerSheetState)
 
       val sheetPeekHeight = remember(playbackTargetValue, playerSheetValue) {
         when {
+          orientation == ORIENTATION_LANDSCAPE -> 0.dp
+          playerSheetRegion == PlayerSheetState.HIDDEN -> 0.dp
           playbackTargetValue == SheetValue.Hidden &&
             playerSheetValue == SheetValue.Hidden -> 0.dp
 
@@ -246,6 +259,8 @@ fun TyApp(
 //        sheetSwipeEnabled = false,
         sheetShape = RoundedCornerShape(0.dp),
         sheetContent = {
+          if (orientation == ORIENTATION_LANDSCAPE) return@BottomSheetScaffold
+
           val playerScope = rememberCoroutineScope()
           LaunchedEffect(Unit) {
             regCofx("player_scope") { cofx ->
@@ -257,17 +272,14 @@ fun TyApp(
             get<Float>(playbackFsm, ":desc_sheet_height")?.toDp() ?: 0.toDp()
           }
 
-//          if (playerRegion == null) return@BottomSheetScaffold
-
           PlaybackBottomSheet(
             isCollapsed = isCollapsed,
             onCollapsedClick = {
-              dispatch(v<Any>("playback_fsm", common.expand_player_sheet))
+              dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
             },
-            streamData = streamData,
-            playerRegion = playerRegion,
+            activeStream = activeStream,
+            activeStreamCache = activeStreamVm,
             showThumbnail = showThumbnail,
-            thumbnail = thumbnail,
             sheetPeekHeight = peekHeight
           )
         }

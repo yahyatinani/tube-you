@@ -14,22 +14,13 @@ import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
 fun regPlaybackFxs(scope: CoroutineScope) {
-  regFx(common.release_player) {
-    GlobalScope.launch(Dispatchers.Main) {
-      TyPlayer.close()
-//      closePlayer()
-    }
-  }
-
-  regFx(common.pause_player) {
+  regFx(common.close_player) {
     scope.launch {
-      TyPlayer.pause()
+      TyPlayer.close()
     }
   }
 
@@ -41,7 +32,7 @@ fun regPlaybackFxs(scope: CoroutineScope) {
     scope.launch {
       dispatch(
         v(
-          "playback_fsm",
+          "stream_panel_fsm",
           "set_quality_list",
           TyPlayer.availableResolutions(),
           TyPlayer.currentResolution()
@@ -68,9 +59,11 @@ fun RegPlayerSheetEffects(playerSheetState: SheetState) {
 
     regFx(common.hide_player_sheet) {
       playerSheetScope.launch {
-        dispatchSync(v(common.pause_player))
+        dispatchSync(v(common.close_player))
+      }
+      playerSheetScope.launch {
         playerSheetState.hide()
-        dispatch(v("playback_fsm", common.release_player))
+        dispatch(v("stream_panel_fsm", common.close_player))
       }
     }
   }

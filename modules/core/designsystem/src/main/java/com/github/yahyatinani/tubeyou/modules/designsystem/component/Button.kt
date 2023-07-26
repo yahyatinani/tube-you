@@ -86,6 +86,7 @@ fun TyRoundedButton(
 
 @Composable
 fun SubscribeButton(
+  text: String,
   modifier: Modifier = Modifier,
   containerColor: Color,
   contentColor: Color,
@@ -99,7 +100,7 @@ fun SubscribeButton(
   ) {
     Text(
       modifier = modifier.padding(horizontal = 10.dp, vertical = 7.dp),
-      text = stringResource(R.string.subscribe),
+      text = text,
       style = MaterialTheme.typography.labelMedium
     )
   }

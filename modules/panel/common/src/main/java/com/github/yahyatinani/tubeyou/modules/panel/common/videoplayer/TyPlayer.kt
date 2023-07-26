@@ -16,6 +16,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import com.google.net.cronet.okhttptransport.CronetCallFactory
 import io.github.yahyatinani.recompose.dispatch
@@ -60,7 +61,12 @@ object TyPlayer {
   private val listener = object : Player.Listener {
     override fun onIsPlayingChanged(isPlaying: Boolean) {
       if (exoPlayer!!.playbackState != Player.STATE_BUFFERING) {
-        dispatch(v("playback_fsm", if (isPlaying) "on_play" else "on_pause"))
+        dispatch(
+          v(
+            "stream_panel_fsm",
+            if (isPlaying) "on_play" else "on_pause"
+          )
+        )
       }
     }
 
@@ -71,9 +77,9 @@ object TyPlayer {
     override fun onPlaybackStateChanged(playbackState: Int) {
       if (playbackState == Player.STATE_READY) {
         val currentQuality = exoPlayer!!.videoSize.height
-        dispatch(v("playback_fsm", Player.STATE_READY, currentQuality))
+        dispatch(v("stream_panel_fsm", Player.STATE_READY, currentQuality))
       } else if (playbackState == Player.STATE_BUFFERING) {
-        dispatch(v("playback_fsm", Player.STATE_BUFFERING))
+        dispatch(v("stream_panel_fsm", Player.STATE_BUFFERING))
       }
     }
   }
@@ -116,8 +122,7 @@ object TyPlayer {
       .build()
 
   @UiThread
-  fun playNewVideo(streamData: IPersistentMap<Any, Any>?) {
-    if (streamData == null) return
+  fun playNewVideo(streamData: IPersistentMap<Any, Any>) {
     val mediaItem = MediaItem.Builder()
       .setUri(get<Uri>(streamData, Stream.video_uri))
       .setMimeType(get<String>(streamData, Stream.mime_type)!!)

@@ -37,39 +37,17 @@ inline fun <T> T.letIf(b: Boolean, block: (T) -> T): T {
 private fun highQuality(thumbnail: String) =
   thumbnail.replace("hqdefault.jpg", "sddefault.jpg")
 
-fun formatVideo(video: Video, resources: Resources): VideoViewModel {
-  val isLiveStream = video.duration == -1L
-  val authorId = video.uploaderUrl!!
+fun formatVideo(
+  video: Video,
+  resources: Resources
+): VideoViewModel {
   val isUpcoming = video.views == -1L && video.duration == -1L
+  val authorId = video.uploaderUrl!!
+  val isLiveStream = video.duration == -1L
   val uploaded = video.uploadedDate
   val uploaderName = video.uploaderName!!
-  val info = if (isUpcoming) {
-    formatVideoInfo(
-      author = uploaderName,
-      authorId = authorId,
-      text1 = resources.getString(R.string.scheduled_for),
-      text2 = convertTimestamp(video.uploaded)
-    )
-  } else {
-    val viewCount = formatViews(video.views!!)
-    when {
-      isLiveStream -> formatVideoInfo(
-        author = uploaderName,
-        authorId = authorId,
-        text1 = viewCount,
-        text2 = resources.getString(R.string.watching)
-      )
 
-      else -> formatVideoInfo(
-        author = uploaderName,
-        authorId = authorId,
-        text1 = viewCount,
-        text2 = resources.getString(R.string.views_label),
-        publishedText = video.uploadedDate
-      )
-    }
-  }
-  return VideoViewModel(
+  val vm = VideoViewModel(
     id = video.url,
     authorId = authorId,
     uploaderName = uploaderName,
@@ -77,12 +55,52 @@ fun formatVideo(video: Video, resources: Resources): VideoViewModel {
     thumbnail = highQuality(video.thumbnail),
     length = formatSeconds(video.duration),
     uploaded = uploaded ?: "",
-    info = info,
     uploaderAvatar = video.uploaderAvatar,
     isUpcoming = isUpcoming,
     isLiveStream = isLiveStream,
     isShort = video.isShort
   )
+
+  return if (isUpcoming) {
+    vm.copy(
+      info = formatVideoInfo(
+        author = uploaderName,
+        authorId = authorId,
+        text1 = resources.getString(R.string.scheduled_for),
+        text2 = convertTimestamp(video.uploaded)
+      )
+    )
+  } else {
+    val viewCount = formatViews(video.views!!)
+    when {
+      isLiveStream -> {
+        val label = resources.getString(R.string.watching)
+        vm.copy(
+          info = formatVideoInfo(
+            author = uploaderName,
+            authorId = authorId,
+            text1 = viewCount,
+            text2 = label
+          ),
+          viewCount = "$viewCount $label"
+        )
+      }
+
+      else -> {
+        val label = resources.getString(R.string.views_label)
+        vm.copy(
+          info = formatVideoInfo(
+            author = uploaderName,
+            authorId = authorId,
+            text1 = viewCount,
+            text2 = label,
+            publishedText = video.uploadedDate
+          ),
+          viewCount = "$viewCount $label"
+        )
+      }
+    }
+  }
 }
 
 fun formatVideos(

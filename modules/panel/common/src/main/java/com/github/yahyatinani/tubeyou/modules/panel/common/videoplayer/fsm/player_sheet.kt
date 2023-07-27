@@ -23,10 +23,17 @@ fun expandPlayerSheet(
 fun hidePlayerSheet(appDb: AppDb, state: State?, event: Event): Effects =
   m(fx to v(v(common.hide_player_sheet)))
 
+fun collapsePlayerSheet(appDb: AppDb, state: State?, event: Event): Effects =
+  m(fx to v(v(common.collapse_player_sheet)))
+
 @OptIn(ExperimentalMaterial3Api::class)
 val bottomSheetMachine = m(
   PlayerSheetState.EXPANDED to m(
-    SheetValue.PartiallyExpanded to m(fsm.target to PlayerSheetState.COLLAPSED)
+    SheetValue.PartiallyExpanded to m(fsm.target to PlayerSheetState.COLLAPSED),
+    common.minimize_player to m(
+      fsm.target to PlayerSheetState.COLLAPSED,
+      fsm.actions to ::collapsePlayerSheet
+    )
   ),
   PlayerSheetState.COLLAPSED to m(
     common.expand_player_sheet to m(

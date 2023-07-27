@@ -57,6 +57,10 @@ fun RegPlayerSheetEffects(playerSheetState: SheetState) {
       playerSheetScope.launch { playerSheetState.expand() }
     }
 
+    regFx(common.collapse_player_sheet) {
+      playerSheetScope.launch { playerSheetState.partialExpand() }
+    }
+
     regFx(common.hide_player_sheet) {
       playerSheetScope.launch {
         dispatchSync(v(common.close_player))

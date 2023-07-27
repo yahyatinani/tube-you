@@ -12,10 +12,10 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -93,13 +93,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -122,6 +120,9 @@ import androidx.core.text.HtmlCompat.fromHtml
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.R.string
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
@@ -154,7 +155,6 @@ import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.v
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -179,15 +179,20 @@ fun QualityList(
 }
 
 @Composable
-fun DragHandle(modifier: Modifier = Modifier) {
+fun DragHandle(modifier: Modifier = Modifier, onClick: () -> Unit = { }) {
   Surface(
     modifier = modifier
+      .wrapContentSize()
       .padding(top = 8.dp, bottom = 2.dp)
       .semantics { contentDescription = "dragHandleDescription" },
     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .2f),
     shape = MaterialTheme.shapes.extraLarge
   ) {
-    Box(Modifier.size(width = 40.0.dp, height = 4.0.dp))
+    Box(
+      Modifier
+        .clickable(onClick = onClick)
+        .size(width = 40.0.dp, height = 4.0.dp)
+    )
   }
 }
 
@@ -695,28 +700,16 @@ fun Html(text: String) {
   }
 }
 
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SheetHeader(
-  onTapHeader: () -> Unit,
   headerTitle: String,
+  sheetState: SheetValue,
   closeSheet: () -> Unit
 ) {
-  val density = LocalDensity.current
-  val px = with(density) {
-    LocalConfiguration.current.screenWidthDp.dp.toPx()
-  }
   Column {
     Row(
       modifier = Modifier
-        .pointerInput(Unit) {
-          detectTapGestures { offset ->
-            val width = with(density) { 50.dp.toPx() }
-            val fl = width / 2
-            if (offset.x > (px / 2) - fl && offset.x < (px / 2) + fl) {
-              onTapHeader()
-            }
-          }
-        }
         .fillMaxWidth()
         .padding(start = 16.dp, end = 4.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
@@ -735,6 +728,10 @@ fun SheetHeader(
       }
     }
     Divider(modifier = Modifier.fillMaxWidth())
+  }
+
+  BackHandler(enabled = sheetState != Hidden) {
+    closeSheet()
   }
 }
 
@@ -804,9 +801,60 @@ private fun HeartedAvatar(content: @Composable () -> Unit) {
   }
 }
 
+@Composable
+fun StreamPanelTitle(streamTitle: String) {
+  Text(
+    text = streamTitle,
+    style = MaterialTheme.typography.titleMedium,
+    maxLines = 2,
+    overflow = TextOverflow.Ellipsis
+  )
+}
+
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommentsList(uiState: UIState) {
+private fun DescriptionSheet(
+  descSheetState: SheetState,
+  sheetPeekHeight: Dp,
+  isLoading: Boolean,
+  streamData: Any
+) {
+  HeadedSheetColumn(
+    sheetState = descSheetState,
+    sheetPeekHeight = sheetPeekHeight,
+    header = {
+      SheetHeader(
+        headerTitle = "Description",
+        sheetState = descSheetState.currentValue
+      ) {
+        dispatch(v("stream_panel_fsm", "close_desc_sheet"))
+      }
+    }
+  ) {
+    if (!isLoading) {
+      LazyColumn(
+        modifier = Modifier
+          .fillMaxSize()
+          .nestedScroll(BottomSheetNestedScrollConnection())
+      ) {
+        item {
+          Html(text = get(streamData, Stream.description)!!)
+        }
+      }
+    }
+  }
+
+  BackHandler(enabled = descSheetState.currentValue != Hidden) {
+    dispatch(v("stream_panel_fsm", "close_desc_sheet"))
+  }
+}
+
+const val COMMENTS_ROUTE = "comments_route"
+const val REPLIES_ROUTE = "replies_route"
+
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CommentsList(uiState: UIState, onNavReplies: (Int) -> Unit = { }) {
   val commentsState = uiState.data
   val isLoading = get<CommentsListState>(
     commentsState,
@@ -834,13 +882,13 @@ fun CommentsList(uiState: UIState) {
       val verified: Boolean = get(comment, "verified")!!
       val pinned: Boolean = get(comment, "pinned")!!
       val hearted: Boolean = get(comment, "hearted")!!
-
       val typography = MaterialTheme.typography
+
       Row(
         modifier = Modifier
           .fillMaxWidth()
           .wrapContentHeight()
-          .clickable { }
+          .clickable(onClick = { onNavReplies(index) })
           .padding(12.dp)
       ) {
         AuthorAvatar(url = authorAvatar, size = 24.dp)
@@ -984,7 +1032,7 @@ fun CommentsList(uiState: UIState) {
         Text(
           modifier = Modifier
             .padding(start = 40.dp)
-            .clickable { }
+            .clickable(onClick = { onNavReplies(index) })
             .padding(12.dp),
           text = "$repliesCount replies",
           style = typography.labelLarge.copy(color = Blue400)
@@ -1004,66 +1052,11 @@ fun CommentsList(uiState: UIState) {
   }
 }
 
-@Composable
-fun StreamPanelTitle(streamTitle: String) {
-  Text(
-    text = streamTitle,
-    style = MaterialTheme.typography.titleMedium,
-    maxLines = 2,
-    overflow = TextOverflow.Ellipsis
-  )
-}
-
-@kotlin.OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DescriptionSheet(
-  descSheetState: SheetState,
-  sheetPeekHeight: Dp,
-  playbackScope: CoroutineScope,
-  descSheetValue: SheetValue,
-  isLoading: Boolean,
-  streamData: Any
-) {
-  HeadedSheetColumn(
-    sheetState = descSheetState,
-    sheetPeekHeight = sheetPeekHeight,
-    header = {
-      SheetHeader(
-        onTapHeader = {
-          playbackScope.launch {
-            if (descSheetValue == PartiallyExpanded) {
-              descSheetState.expand()
-            } else if (descSheetValue == Expanded) {
-              descSheetState.partialExpand()
-            }
-          }
-        },
-        headerTitle = "Description"
-      ) {
-        dispatch(v("stream_panel_fsm", "close_desc_sheet"))
-      }
-    }
-  ) {
-    if (!isLoading) {
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxSize()
-          .nestedScroll(BottomSheetNestedScrollConnection())
-      ) {
-        item {
-          Html(text = get(streamData, Stream.description)!!)
-        }
-      }
-    }
-  }
-}
-
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CommentsSheet(
   commentsSheetState: SheetState,
   sheetPeekHeight: Dp,
-  playbackScope: CoroutineScope,
   uiState: UIState
 ) {
   val commentsStateData = uiState.data as IPersistentMap<Any?, Any?>
@@ -1072,44 +1065,82 @@ private fun CommentsSheet(
     common.state
   ) == CommentsListState.REFRESHING
 
+  val commentsNavController = rememberNavController()
+
+  LaunchedEffect(Unit) {
+    regFx("nav_comment_replies") {
+      commentsNavController.navigate(REPLIES_ROUTE)
+    }
+  }
+
   HeadedSheetColumn(
     sheetState = commentsSheetState,
     sheetPeekHeight = sheetPeekHeight,
     header = {
       SheetHeader(
-        onTapHeader = {
-          playbackScope.launch {
-            if (commentsSheetState.currentValue == PartiallyExpanded) {
-              commentsSheetState.expand()
-            } else if (commentsSheetState.currentValue == Expanded) {
-              commentsSheetState.partialExpand()
-            }
-          }
-        },
-        headerTitle = "Comments"
+        headerTitle = "Comments",
+        sheetState = commentsSheetState.currentValue
       ) {
         dispatch(v("stream_panel_fsm", "close_comments_sheet"))
       }
     }
   ) {
-    SwipeRefresh(
-      state = rememberSwipeRefreshState(
-        isRefreshing = isRefreshing
-
-      ),
-      onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
-      indicator = { state, refreshTrigger ->
-        val colorScheme = MaterialTheme.colorScheme
-        SwipeRefreshIndicator(
-          state = state,
-          refreshTriggerDistance = refreshTrigger,
-          backgroundColor = colorScheme.primaryContainer,
-          contentColor = colorScheme.onBackground,
-          elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
-        )
-      }
+    NavHost(
+      modifier = Modifier.fillMaxSize(),
+      navController = commentsNavController,
+      startDestination = COMMENTS_ROUTE
     ) {
-      CommentsList(uiState = uiState)
+      composable(COMMENTS_ROUTE) {
+        SwipeRefresh(
+          state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+          onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
+          indicator = { state, refreshTrigger ->
+            val colorScheme = MaterialTheme.colorScheme
+            SwipeRefreshIndicator(
+              state = state,
+              refreshTriggerDistance = refreshTrigger,
+              backgroundColor = colorScheme.primaryContainer,
+              contentColor = colorScheme.onBackground,
+              elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+            )
+          }
+        ) {
+          CommentsList(uiState = uiState) {
+            commentsNavController.navigate(REPLIES_ROUTE)
+          }
+        }
+      }
+
+      /*
+            composable(
+              route = REPLIES_ROUTE,
+              enterTransition = {
+                slideInHorizontally(initialOffsetX = { it })
+              },
+              exitTransition = {
+                slideOutHorizontally(targetOffsetX = { it })
+              }
+            ) {
+              SwipeRefresh(
+                state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+                onRefresh = { */
+      /* todo *//*
+ },
+          indicator = { state, refreshTrigger ->
+            val colorScheme = MaterialTheme.colorScheme
+            SwipeRefreshIndicator(
+              state = state,
+              refreshTriggerDistance = refreshTrigger,
+              backgroundColor = colorScheme.primaryContainer,
+              contentColor = colorScheme.onBackground,
+              elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+            )
+          }
+        ) {
+          Text(text = "many replies")
+        }
+      }
+*/
     }
   }
 }
@@ -1164,13 +1195,21 @@ fun PlaybackBottomSheet(
   BottomSheetScaffold(
     scaffoldState = descScaffoldState,
     sheetPeekHeight = descSheetPeekHeight,
-    sheetDragHandle = { DragHandle() },
+    sheetDragHandle = {
+      DragHandle {
+        playbackScope.launch {
+          if (descSheetValue == PartiallyExpanded) {
+            descSheetState.expand()
+          } else if (descSheetValue == Expanded) {
+            descSheetState.partialExpand()
+          }
+        }
+      }
+    },
     sheetContent = {
       DescriptionSheet(
         descSheetState = descSheetState,
         sheetPeekHeight = sheetPeekHeight,
-        playbackScope = playbackScope,
-        descSheetValue = descSheetValue,
         isLoading = isLoading,
         streamData = streamData
       )
@@ -1215,12 +1254,21 @@ fun PlaybackBottomSheet(
     BottomSheetScaffold(
       scaffoldState = commentsScaffoldState,
       sheetPeekHeight = commentsSheetPeekHeight,
-      sheetDragHandle = { DragHandle() },
+      sheetDragHandle = {
+        DragHandle {
+          playbackScope.launch {
+            if (commentsSheetState.currentValue == PartiallyExpanded) {
+              commentsSheetState.expand()
+            } else if (commentsSheetState.currentValue == Expanded) {
+              commentsSheetState.partialExpand()
+            }
+          }
+        }
+      },
       sheetContent = {
         CommentsSheet(
           commentsSheetState = commentsSheetState,
           sheetPeekHeight = sheetPeekHeight,
-          playbackScope = playbackScope,
           uiState = commentsState
         )
       }
@@ -1490,79 +1538,79 @@ val MINI_PLAYER_HEIGHT = 62.dp
 @Preview(showBackground = true)
 @Composable
 fun StreamDescriptionPreview() {
-  DescriptionSection(
-    streamTitle = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-      "sed do eiusmod tempor incididunt ut labore et dolore magna ",
-    views = "4.6M",
-    date = "3y ago"
-  )
+DescriptionSection(
+  streamTitle = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
+    "sed do eiusmod tempor incididunt ut labore et dolore magna ",
+  views = "4.6M",
+  date = "3y ago"
+)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun StreamChannel1Preview() {
-  ChannelSection(
-    channelName = "Lorem",
-    channelAvatar = "Channel Name",
-    subscribersCount = "48M"
-  )
+ChannelSection(
+  channelName = "Lorem",
+  channelAvatar = "Channel Name",
+  subscribersCount = "48M"
+)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun StreamChannel2Preview() {
-  ChannelSection(
-    channelName = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet,",
-    channelAvatar = "Channel Name",
-    subscribersCount = "48M"
-  )
+ChannelSection(
+  channelName = "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet,",
+  channelAvatar = "Channel Name",
+  subscribersCount = "48M"
+)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun LikeSectionPreview() {
-  val colorScheme = MaterialTheme.colorScheme
-  val buttonsColor: Color = colorScheme.onBackground.copy(.05f)
-  LikeSection(likesCount = "25K", buttonsColor = buttonsColor)
+val colorScheme = MaterialTheme.colorScheme
+val buttonsColor: Color = colorScheme.onBackground.copy(.05f)
+LikeSection(likesCount = "25K", buttonsColor = buttonsColor)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun CommentsSectionPreview() {
-  TyTheme(darkTheme = true) {
-    val colorScheme = MaterialTheme.colorScheme
-    val buttonsColor: Color = colorScheme.onBackground.copy(.2f)
+TyTheme(darkTheme = true) {
+  val colorScheme = MaterialTheme.colorScheme
+  val buttonsColor: Color = colorScheme.onBackground.copy(.2f)
 
-    CommentsSection(
-      highlightedComment = fromHtml(
-        "Lorem ipsum dolor sit amet Lorem ipsum dolor sit" +
-          " amet, sit amet Lorem \uD83D\uDC90 ipsum dolor sit amet Lorem ipsum" +
-          " dolor sit amet" +
-          " Lorem ipsum dolor ",
-        FROM_HTML_MODE_LEGACY
-      ),
-      containerColor = buttonsColor,
-      commentsCount = "21K"
-    )
-  }
+  CommentsSection(
+    highlightedComment = fromHtml(
+      "Lorem ipsum dolor sit amet Lorem ipsum dolor sit" +
+        " amet, sit amet Lorem \uD83D\uDC90 ipsum dolor sit amet Lorem ipsum" +
+        " dolor sit amet" +
+        " Lorem ipsum dolor ",
+      FROM_HTML_MODE_LEGACY
+    ),
+    containerColor = buttonsColor,
+    commentsCount = "21K"
+  )
+}
 }
 
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun CommentsListPreview() {
-  CommentsList(
-    comments = Comments(
-      v(
-        m(
-          "author" to "@john_doe $VIDEO_INFO_DIVIDER 3w ago",
-          "author_avatar" to "url",
-          "comment_text" to "Lorem ipsum dolor sit amet Lorem ipsum dolor",
-          "likes_count" to "1.9k",
-          "replies_count" to 0
-        )
+CommentsList(
+  comments = Comments(
+    v(
+      m(
+        "author" to "@john_doe $VIDEO_INFO_DIVIDER 3w ago",
+        "author_avatar" to "url",
+        "comment_text" to "Lorem ipsum dolor sit amet Lorem ipsum dolor",
+        "likes_count" to "1.9k",
+        "replies_count" to 0
       )
     )
   )
+)
 }
 */

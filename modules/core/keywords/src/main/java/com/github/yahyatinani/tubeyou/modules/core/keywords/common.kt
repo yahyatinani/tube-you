@@ -32,7 +32,9 @@ enum class common {
   active_stream,
   close_player,
   hide_player_sheet,
-  state;
+  state,
+  minimize_player,
+  collapse_player_sheet;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

@@ -288,6 +288,10 @@ fun TyApp(
             showThumbnail = showThumbnail,
             sheetPeekHeight = peekHeight
           )
+
+          BackHandler(playerSheetValue == SheetValue.Expanded) {
+            dispatch(v<Any>("stream_panel_fsm", common.minimize_player))
+          }
         }
       ) {
         Scaffold(

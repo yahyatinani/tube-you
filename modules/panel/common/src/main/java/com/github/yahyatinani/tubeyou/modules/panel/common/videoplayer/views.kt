@@ -14,6 +14,8 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -1084,9 +1086,11 @@ private fun CommentsSheet(
         dispatch(v("stream_panel_fsm", "close_comments_sheet"))
       }
     }
-  ) {
+  ) { padding ->
     NavHost(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier
+        .padding(padding)
+        .fillMaxWidth(),
       navController = commentsNavController,
       startDestination = COMMENTS_ROUTE
     ) {
@@ -1111,21 +1115,18 @@ private fun CommentsSheet(
         }
       }
 
-      /*
-            composable(
-              route = REPLIES_ROUTE,
-              enterTransition = {
-                slideInHorizontally(initialOffsetX = { it })
-              },
-              exitTransition = {
-                slideOutHorizontally(targetOffsetX = { it })
-              }
-            ) {
-              SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
-                onRefresh = { */
-      /* todo *//*
- },
+      composable(
+        route = REPLIES_ROUTE,
+        enterTransition = {
+          slideInHorizontally(initialOffsetX = { it })
+        },
+        exitTransition = {
+          slideOutHorizontally(targetOffsetX = { it })
+        }
+      ) {
+        SwipeRefresh(
+          state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+          onRefresh = { /* todo */ },
           indicator = { state, refreshTrigger ->
             val colorScheme = MaterialTheme.colorScheme
             SwipeRefreshIndicator(
@@ -1137,10 +1138,10 @@ private fun CommentsSheet(
             )
           }
         ) {
-          Text(text = "many replies")
+          Surface(modifier = Modifier.fillMaxSize()) {
+          }
         }
       }
-*/
     }
   }
 }

@@ -1,19 +1,22 @@
 package com.github.yahyatinani.tubeyou
 
 import android.app.Application
+import android.content.pm.ActivityInfo
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR
-import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.provider.Settings
 import android.view.OrientationEventListener
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -72,6 +75,8 @@ class TyApplication : Application() {
 // -- Entry Point --------------------------------------------------------------
 
 class MainActivity : ComponentActivity() {
+  lateinit var orientationEventListener: OrientationEventListener
+
   @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen().apply {
@@ -79,23 +84,53 @@ class MainActivity : ComponentActivity() {
     }
     super.onCreate(savedInstanceState)
 
-    val orientationEventListener: OrientationEventListener =
-      object : OrientationEventListener(this) {
-        override fun onOrientationChanged(orientation: Int) {
-          val epsilon = 10
-          val leftLandscape = 90
-          val rightLandscape = 270
-          if (epsilonCheck(orientation, leftLandscape, epsilon) ||
+    orientationEventListener = object : OrientationEventListener(this) {
+      private fun epsilonCheck(
+        orientation: Int,
+        degree: Int,
+        epsilon: Int
+      ): Boolean {
+        return orientation > degree - epsilon && orientation < degree + epsilon
+      }
+
+      private fun epsilonCheckP(
+        orientation: Int,
+        degree: Int,
+        epsilon: Int
+      ): Boolean {
+        return orientation > degree - epsilon && orientation < degree + epsilon
+      }
+
+      override fun onOrientationChanged(orientation: Int) {
+        val epsilon = 5
+        val leftLandscape = 90
+        val rightLandscape = 270
+        val currentOrientation = this@MainActivity.requestedOrientation
+
+        if (isAutoRotate()) {
+          if (epsilonCheck(orientation, 0, epsilon) ||
+            epsilonCheck(orientation, 180, epsilon)
+          ) {
+            // portrait
+            if (currentOrientation == SCREEN_ORIENTATION_PORTRAIT) {
+              this@MainActivity.requestedOrientation =
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            }
+          } else if (epsilonCheck(orientation, leftLandscape, epsilon) ||
             epsilonCheck(orientation, rightLandscape, epsilon)
           ) {
-            this@MainActivity.requestedOrientation = SCREEN_ORIENTATION_SENSOR
-          }
-        }
+            // landscape
 
-        private fun epsilonCheck(a: Int, b: Int, epsilon: Int): Boolean {
-          return a > b - epsilon && a < b + epsilon
+            if (currentOrientation == SCREEN_ORIENTATION_LANDSCAPE) {
+              this@MainActivity.requestedOrientation =
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            }
+          }
+        } else {
+          this@MainActivity.requestedOrientation = currentOrientation
         }
       }
+    }
     orientationEventListener.enable()
 
     val bitmap = Bitmap.createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply {
@@ -129,19 +164,6 @@ class MainActivity : ComponentActivity() {
       }
     }
 
-    regFx(":toggle_orientation") {
-      when (resources.configuration.orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> {
-          requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
-        }
-
-        else -> {
-          requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
-          requestedOrientation = SCREEN_ORIENTATION_UNSPECIFIED
-        }
-      }
-    }
-
     regEventFx(":player_fullscreen_landscape") { _, _ ->
       m(BuiltInFx.fx to v(v(":player_fullscreen_landscape")))
     }
@@ -155,6 +177,22 @@ class MainActivity : ComponentActivity() {
     }
 
     setContent {
+      val orientation = LocalConfiguration.current.orientation
+      val context = LocalContext.current
+      LaunchedEffect(key1 = orientation) {
+        regFx(":toggle_orientation") {
+          when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> {
+              requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
+            }
+
+            else -> {
+              requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
+            }
+          }
+        }
+      }
+
       TyApp(windowSizeClass = calculateWindowSizeClass(this))
     }
   }
@@ -164,4 +202,10 @@ class MainActivity : ComponentActivity() {
 
     dispatch(v(common.expand_top_app_bar))
   }
+
+  private fun isAutoRotate() = Settings.System.getInt(
+    contentResolver,
+    Settings.System.ACCELEROMETER_ROTATION,
+    0
+  ) == 1
 }

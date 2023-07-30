@@ -141,7 +141,8 @@ private fun mapComment(
   "pinned" to comment.pinned,
   "hearted" to comment.hearted,
   "uploader" to (stream?.uploader ?: "this channel"),
-  "uploader_avatar" to (stream?.uploaderAvatar ?: "")
+  "uploader_avatar" to (stream?.uploaderAvatar ?: ""),
+  "by_uploader" to (comment.commentorUrl == stream?.uploaderUrl)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -251,7 +252,6 @@ fun regCommonSubs() {
     val fsmStates = get<Any>(panelFsm, fsm._state)
     val commentsListState =
       get(fsmStates, ":comments_list") ?: CommentsListState.LOADING
-
     val commentsState: IPersistentMap<Any?, Any?> = when (commentsListState) {
       CommentsListState.LOADING -> m()
       CommentsListState.REFRESHING, CommentsListState.APPENDING -> {

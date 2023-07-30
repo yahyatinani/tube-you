@@ -973,6 +973,7 @@ fun Comment(
   val verified: Boolean = get(comment, "verified")!!
   val pinned: Boolean = get(comment, "pinned")!!
   val hearted: Boolean = get(comment, "hearted")!!
+  val byUploader: Boolean = get(comment, "by_uploader")!!
 
   val typography = MaterialTheme.typography
   Row(
@@ -994,9 +995,7 @@ fun Comment(
       val colorScheme = MaterialTheme.colorScheme
       val color = colorScheme.onSurface.copy(alpha = .6f)
       val iconSize = 12.dp
-      val textStyle = typography.bodySmall.copy(
-        color = color
-      )
+      val textStyle = typography.bodySmall.copy(color = color)
 
       if (pinned) {
         val uploader: String = get(comment, "uploader")!!
@@ -1025,18 +1024,38 @@ fun Comment(
       }
 
       Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-          text = author,
-          style = textStyle
-        )
-
-        if (verified) {
-          Icon(
-            modifier = Modifier.size(iconSize),
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = "",
-            tint = color
+        Row(
+          modifier = Modifier
+            .then(
+              if (byUploader) {
+                Modifier
+                  .background(
+                    color = colorScheme.onSurface.copy(.6f),
+                    shape = RoundedCornerShape(12.dp)
+                  )
+                  .padding(horizontal = 6.dp)
+              } else {
+                Modifier
+              }
+            ),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = author,
+            style = when {
+              byUploader -> textStyle.copy(color = Color.White)
+              else -> textStyle
+            }
           )
+
+          if (verified) {
+            Icon(
+              modifier = Modifier.size(iconSize),
+              imageVector = Icons.Default.CheckCircle,
+              contentDescription = "",
+              tint = color
+            )
+          }
         }
 
         Text(
@@ -1402,13 +1421,7 @@ private fun NavGraphBuilder.commentsList(uiState: UIState) {
 
           val indexComment = index to comment
           Comment(state = comment) {
-            dispatch(
-              v(
-                "stream_panel_fsm",
-                "navigate_replies",
-                indexComment
-              )
-            )
+            dispatch(v("stream_panel_fsm", "navigate_replies", indexComment))
           }
 
           val repliesCount: Int = get(comment.data, "replies_count")!!

@@ -94,7 +94,7 @@ fun timeAgoFormat(date: String): String {
   }
 }
 
-private fun shorten(uploaded: String): String = uploaded
+private fun shortenTime(uploaded: String): String = uploaded
   .replace(" years", "y")
   .replace(" months", "m")
   .replace(" days", "d")
@@ -129,7 +129,7 @@ private fun mapComment(
   stream: StreamData?
 ) = m(
   "author" to comment.author,
-  "commentedTime" to " $MEDIUM_BULLET ${comment.commentedTime}",
+  "commentedTime" to " $MEDIUM_BULLET ${shortenTime(comment.commentedTime)}",
   "author_avatar" to comment.thumbnail,
   "comment_text" to HtmlCompat.fromHtml(
     comment.commentText,
@@ -197,7 +197,7 @@ fun regCommonSubs() {
       Stream.current_quality to cq,
       Stream.aspect_ratio to ratio(stream),
       Stream.views to views1,
-      Stream.date to shorten(viewModel.uploaded),
+      Stream.date to shortenTime(viewModel.uploaded),
       Stream.channel_name to viewModel.uploaderName,
       Stream.avatar to stream.uploaderAvatar,
       Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),

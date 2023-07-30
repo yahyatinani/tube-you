@@ -5,4 +5,6 @@
     <string name="comments_are_turned_off">Comments are turned off.</string>
     <string name="pinned_by">Pinned by</string>
     <string name="subscribe">Subscribe</string>
+    <string name="comments_bottom_sheet_title">Comments</string>
+  <string name="replies_bottom_sheet_title">Replies</string>
 </resources>

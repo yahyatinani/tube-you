@@ -26,8 +26,6 @@ fun closeCommentsSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 val commentsSheetMachine = m(
-  null to m(),
-  SheetValue.Hidden to m(),
   fsm.ALL to m(
     "half_expand_comments_sheet" to m(
       fsm.target to SheetValue.PartiallyExpanded,
@@ -38,6 +36,10 @@ val commentsSheetMachine = m(
       fsm.actions to ::closeCommentsSheet
     ),
     common.close_player to m(
+      fsm.target to SheetValue.Hidden,
+      fsm.actions to ::closeCommentsSheet
+    ),
+    common.play_video to m(
       fsm.target to SheetValue.Hidden,
       fsm.actions to ::closeCommentsSheet
     )

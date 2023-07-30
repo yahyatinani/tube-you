@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.8.21"
-gradleplugin = "8.0.2"
+gradleplugin = "8.1.0"
 
 kotest = "5.6.2"
 ktlint = "0.46.1"
@@ -29,12 +29,12 @@ coroutines = "1.7.1"
 mockk = "1.13.1"
 data-store = "1.0.0"
 coil = "2.2.2"
-ktor = "2.0.3"
+ktor = "2.3.2"
 slf4j = "1.3.5"
 datetime = "0.4.0"
 
 ylib = "0.5.0"
-recompose = "0.4.0.87-SNAPSHOT" #FIXME: release the new recompose version.
+recompose = "0.4.0.88-SNAPSHOT" #FIXME: release the new recompose version.
 cronet-okhttp = "0.1.0"
 
 [libraries]
@@ -81,9 +81,11 @@ androidx-datastore-prefrences = { module = "androidx.datastore:datastore-prefere
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-contentnegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
 slf4j = { module = "ch.qos.logback:logback-classic", version.ref = "slf4j" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 
@@ -98,7 +100,7 @@ cronet-okhttp = { group = "com.google.net.cronet", name = "cronet-okhttp", versi
 [bundles]
 compose = ["androidx-compose-ui-ui", "androidx-compose-ui-util", "androidx-compose-ui-tooling", "androidx-compose-material3", "androidx-constraintlayout-compose", "accompanist-swiperefresh", "androidx-compose-material3-windowssizeclass", "androidx-profileinstaller", "androidx-compose-material-icons-ext", "androidx-navigation-compose", "androidx-compose-material3-android"]
 kotest = ["kotest-jvm-runner", "kotest-assertions", "kotlin-reflect"]
-ktor = ["ktor-client-core", "ktor-client-android", "ktor-client-contentnegotiation", "ktor-serialization-json", "ktor-client-logging", "slf4j"]
+ktor = ["ktor-client-core", "ktor-client-android", "ktor-client-contentnegotiation", "ktor-serialization-json", "ktor-client-logging", "slf4j", "ktor-client-encoding"]
 paging = ["androidx-paging-compose", "androidx-paging-runtime"]
 recompose = ["recompose", "recompose-httpfx", "recompose-fsm", "recompose-paging-fx"]
 

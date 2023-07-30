@@ -162,12 +162,14 @@ val searchListMachine = m<Any?, Any?>(
       m(target to SEARCH_RESULTS, guard to ::isQueryBlankOrEmpty),
       m(target to SEARCHING)
     ),
-    Loading to m(target to APPENDING)
+    v("append_search_results", Loading) to m(target to APPENDING)
   ),
   APPENDING to m(
     set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults),
-    Loading to m(target to APPENDING),
-    NotLoading(endOfPaginationReached = true) to m(target to SEARCH_RESULTS),
+    v("append_search_results", Loading) to m(target to APPENDING),
+    v("append_search_results", NotLoading(endOfPaginationReached = true)) to m(
+      target to SEARCH_RESULTS
+    ),
     back_press_search to v(
       m(target to null, guard to v(::isLastSearchBar, ::isSearchBarInactive)),
       m(target to SEARCH_RESULTS)

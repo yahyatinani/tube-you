@@ -3,6 +3,7 @@ package com.github.yahyatinani.tubeyou.modules.designsystem.component
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -54,8 +55,8 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.R
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 
-const val SMALL_BULLET = " · "
-const val MEDIUM_BULLET = " • "
+const val SMALL_BULLET = "·"
+const val MEDIUM_BULLET = "•"
 
 val roundedCornerShape = RoundedCornerShape(4.dp)
 
@@ -200,10 +201,11 @@ fun ExpandableText(
   text: AnnotatedString,
   modifier: Modifier = Modifier,
   minimizedMaxLines: Int = 1,
-  style: TextStyle = LocalTextStyle.current
+  style: TextStyle = LocalTextStyle.current,
+  isExpanded: Boolean = false
 ) {
   var cutText by remember(text) { mutableStateOf<String?>(null) }
-  var expanded by remember { mutableStateOf(false) }
+  var expanded by remember { mutableStateOf(isExpanded) }
   val textLayoutResultState =
     remember { mutableStateOf<TextLayoutResult?>(null) }
   val seeMoreSizeState = remember { mutableStateOf<IntSize?>(null) }
@@ -230,7 +232,7 @@ fun ExpandableText(
         charRect.left > textLayoutResult.size.width - seeMoreSize.width
       )
       seeMoreOffsetState.value =
-        Offset(charRect.left, charRect.bottom - seeMoreSize.height)
+        Offset(charRect.left, charRect.bottom - seeMoreSize.height + 8)
       cutText = text.substring(startIndex = 0, endIndex = lastCharIndex)
     }
   }
@@ -311,7 +313,10 @@ fun ExpandableText(
               Modifier
             }
           )
-          .clickable {
+          .clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+          ) {
             expanded = true
             cutText = null
           }

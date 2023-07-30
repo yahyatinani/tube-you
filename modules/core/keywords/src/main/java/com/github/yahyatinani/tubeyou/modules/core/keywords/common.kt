@@ -34,7 +34,8 @@ enum class common {
   hide_player_sheet,
   state,
   minimize_player,
-  collapse_player_sheet;
+  collapse_player_sheet,
+  comment_replies;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

@@ -62,7 +62,7 @@ fun rememberThumbnailHeightLandscape(
 }
 
 @Composable
-fun thumbnailHeight(orientation: Int) = when (orientation) {
+fun thumbnailHeight(orientation: Int = 1) = when (orientation) {
   ORIENTATION_PORTRAIT -> rememberThumbnailHeightPortrait()
   else -> rememberThumbnailHeightLandscape()
 }

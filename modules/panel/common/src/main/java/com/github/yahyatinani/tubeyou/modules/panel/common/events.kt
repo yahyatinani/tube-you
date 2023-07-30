@@ -2,9 +2,10 @@ package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import androidx.compose.runtime.Immutable
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.playbackMachine
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.streamPanelMachine
 import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
+import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.fsm.trigger
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.ktor
@@ -13,6 +14,8 @@ import io.github.yahyatinani.recompose.pagingfx.Page
 import io.github.yahyatinani.recompose.pagingfx.paging
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.getIn
+import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 import io.ktor.http.HttpMethod
@@ -107,6 +110,24 @@ data class StreamComments(
 
 fun regCommonEvents() {
   regEventFx(
+    id = "stream_panel_fsm",
+    interceptors = v(injectCofx(":screen_dimen_px"))
+  ) { cofx, e ->
+    println("stream_panel_fsm $e")
+    val value = cofx[":screen_dimen_px"]
+    val appDb = appDbBy(cofx).let {
+      if (value == null) it else it.assoc(":screen_dimen_px", value)
+    }
+    println("appDb ${getIn<Any>(appDb, l("stream_panel_fsm", fsm._state))}")
+    trigger(
+      streamPanelMachine,
+      m(recompose.db to appDb),
+      v("stream_panel_fsm"),
+      e.subvec(1, e.count)
+    )
+  }
+
+  regEventFx(
     id = "load_stream",
     interceptors = v(injectCofx("player_scope"))
   ) { cofx: Coeffects, (_, videoId) ->
@@ -148,7 +169,7 @@ fun regCommonEvents() {
             ktor.timeout to 8000,
             "pageName" to "nextpage",
             "nextUrl" to "$api/nextpage/comments/$id",
-            "eventId" to "load_stream",
+            "eventId" to "load_stream_comments",
             paging.append_id to "append_comments",
             ktor.coroutine_scope to cofx["player_scope"],
             ktor.response_type_info to typeInfo<StreamComments>(),
@@ -167,19 +188,35 @@ fun regCommonEvents() {
   }
 
   regEventFx(
-    id = "stream_panel_fsm",
-    interceptors = v(injectCofx(":screen_dimen_px"))
-  ) { cofx, e ->
-    println("playback_fsm $e")
-    val value = cofx[":screen_dimen_px"]
-    val appDb = appDbBy(cofx).let {
-      if (value == null) it else it.assoc(":screen_dimen_px", value)
-    }
-    trigger(
-      playbackMachine,
-      m(recompose.db to appDb),
-      v("stream_panel_fsm"),
-      e.subvec(1, e.count)
+    id = "load_comment_replies",
+    interceptors = v(injectCofx("player_scope"))
+  ) { cofx: Coeffects, (_, videoId, repliesPage) ->
+    val api = appDbBy(cofx)[common.api_url]
+    m(
+      fx to v(
+        v(
+          paging.fx,
+          m(
+            ktor.method to HttpMethod.Get,
+            ktor.url to "$api/nextpage/comments/$videoId?nextpage=$repliesPage",
+            ktor.timeout to 8000,
+            "pageName" to "nextpage",
+            "nextUrl" to "$api/nextpage/comments/$videoId",
+            "eventId" to "load_comment_replies",
+            ktor.coroutine_scope to cofx["player_scope"],
+            ktor.response_type_info to typeInfo<StreamComments>(),
+            ktor.on_success to v("ignore"),
+            ktor.on_failure to v(""),
+            paging.on_page_success to v(
+              "stream_panel_fsm",
+              "append_replies_page"
+            ),
+            paging.append_id to "append_replies",
+            "on_appending" to v("stream_panel_fsm"),
+            paging.page_size to 5
+          )
+        )
+      )
     )
   }
 }

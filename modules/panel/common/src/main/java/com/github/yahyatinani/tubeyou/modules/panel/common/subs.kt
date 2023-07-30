@@ -14,6 +14,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatViews
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.panel.common.html.toAnnotatedString
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.createDashSource
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.COMMENTS_ROUTE
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.CommentsListState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
 import io.github.yahyatinani.recompose.fsm.fsm
@@ -21,6 +22,7 @@ import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.recompose.subs.Query
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
@@ -65,7 +67,9 @@ fun ratio(streamData: StreamData): Float {
 
   val w = stream.width / 240f
   val h = stream.height / 240f
-  return w / h
+
+  val ar = w / h
+  return if (ar < default) ar else default
 }
 
 /**
@@ -95,6 +99,50 @@ private fun shorten(uploaded: String): String = uploaded
   .replace(" months", "m")
   .replace(" days", "d")
   .replace(" hours", "h")
+
+private fun highlightComment(sc: StreamComments) = when {
+  sc.disabled -> m(
+    Stream.comments_disabled to true,
+    Stream.comments_count to ""
+  )
+
+  sc.comments.isEmpty() -> m(
+    Stream.comments_count to "",
+    Stream.highlight_comment to SpannedString("")
+  )
+
+  else -> {
+    val firstComment = sc.comments[0]
+    m(
+      Stream.comments_count to formatSubCount(sc.commentCount),
+      Stream.highlight_comment to HtmlCompat.fromHtml(
+        firstComment.commentText,
+        HtmlCompat.FROM_HTML_MODE_LEGACY
+      ),
+      Stream.highlight_comment_avatar to firstComment.thumbnail
+    )
+  }
+}
+
+private fun mapComment(
+  comment: StreamComment,
+  stream: StreamData?
+) = m(
+  "author" to comment.author,
+  "commentedTime" to " $MEDIUM_BULLET ${comment.commentedTime}",
+  "author_avatar" to comment.thumbnail,
+  "comment_text" to HtmlCompat.fromHtml(
+    comment.commentText,
+    HtmlCompat.FROM_HTML_MODE_LEGACY
+  ).toAnnotatedString(),
+  "likes_count" to formatSubCount(comment.likeCount),
+  "replies_count" to comment.replyCount,
+  "verified" to comment.verified,
+  "pinned" to comment.pinned,
+  "hearted" to comment.hearted,
+  "uploader" to (stream?.uploader ?: "this channel"),
+  "uploader_avatar" to (stream?.uploaderAvatar ?: "")
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun regCommonSubs() {
@@ -194,89 +242,93 @@ fun regCommonSubs() {
   }
 
   val loadingState = UIState(m(common.state to CommentsListState.LOADING))
+
   regSub<IPersistentMap<Any, Any>, UIState>(
     queryId = Stream.comments,
     initialValue = loadingState,
     inputSignal = v("stream_panel_fsm")
-  ) { playbackFsm: IPersistentMap<Any, Any>?, prev, _ ->
-    val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val stream = get<StreamData>(playbackFsm, "stream_data")
+  ) { panelFsm: IPersistentMap<Any, Any>?, prev, _ ->
+    val fsmStates = get<Any>(panelFsm, fsm._state)
+    val commentsListState =
+      get(fsmStates, ":comments_list") ?: CommentsListState.LOADING
 
-    when (get<CommentsListState>(playbackMachine, ":comments_list")) {
-      null, CommentsListState.LOADING -> loadingState
-      CommentsListState.LOADED -> {
-        val comments = get<StreamComments>(playbackFsm, "stream_comments")!!
-
-        val commentsSection = when {
-          comments.disabled -> m(
-            Stream.comments_disabled to true,
-            Stream.comments_count to ""
-          )
-
-          comments.comments.isEmpty() -> m(
-            Stream.comments_count to "",
-            Stream.highlight_comment to SpannedString("")
-          )
-
-          else -> {
-            val firstComment = comments.comments[0]
-            m(
-              Stream.comments_count to formatSubCount(comments.commentCount),
-              Stream.highlight_comment to HtmlCompat.fromHtml(
-                firstComment.commentText,
-                HtmlCompat.FROM_HTML_MODE_LEGACY
-              ),
-              Stream.highlight_comment_avatar to firstComment.thumbnail
-            )
-          }
-        }
-
-        val ret = comments.comments.map { comment ->
-          val spanned = HtmlCompat.fromHtml(
-            comment.commentText,
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-          )
-          m(
-            "author" to comment.author,
-            "commentedTime" to "$MEDIUM_BULLET ${comment.commentedTime}",
-            "author_avatar" to comment.thumbnail,
-            "comment_text" to spanned.toAnnotatedString(),
-            "likes_count" to formatSubCount(comment.likeCount),
-            "replies_count" to comment.replyCount,
-            "verified" to comment.verified,
-            "pinned" to comment.pinned,
-            "hearted" to comment.hearted,
-            "uploader" to (stream?.uploader ?: "this channel"),
-            "uploader_avatar" to (stream?.uploaderAvatar ?: "")
-          )
-        }
-
-        UIState(
-          m(
-            common.state to CommentsListState.LOADED,
-            "comments_list" to ret,
-            "comments_section" to commentsSection
-          )
-        )
+    val commentsState: IPersistentMap<Any?, Any?> = when (commentsListState) {
+      CommentsListState.LOADING -> m()
+      CommentsListState.REFRESHING, CommentsListState.APPENDING -> {
+        prev.data as IPersistentMap<Any?, Any?>
       }
 
-      CommentsListState.REFRESHING -> {
-        UIState(
-          (prev.data as IPersistentMap<Any?, Any?>).assoc(
-            common.state,
-            CommentsListState.REFRESHING
-          )
-        )
-      }
+      CommentsListState.READY -> {
+        val sc = get<StreamComments>(panelFsm, "stream_comments")!!
+        val stream = get<StreamData>(panelFsm, "stream_data")
+        val comments = sc.comments.map { comment ->
+          UIState(mapComment(comment, stream))
+        }
 
-      CommentsListState.APPENDING -> {
-        UIState(
-          (prev.data as IPersistentMap<Any?, Any?>).assoc(
-            common.state,
-            CommentsListState.APPENDING
-          )
+        m(
+          "comments_list" to comments,
+          "comments_section" to highlightComment(sc)
         )
       }
     }
+
+    UIState(data = commentsState.assoc(common.state, commentsListState))
+  }
+
+  regSub<IPersistentMap<Any, Any>, UIState>(
+    queryId = common.comment_replies,
+    initialValue = loadingState,
+    inputSignal = v("stream_panel_fsm")
+  ) { panelFsm: IPersistentMap<Any, Any>?, prev, _ ->
+    val fsmStates = get<Any>(panelFsm, fsm._state)
+    val commentRepliesState =
+      get(fsmStates, ":comment_replies") ?: CommentsListState.LOADING
+
+    val ret: IPersistentMap<Any?, Any?> = when (commentRepliesState) {
+      CommentsListState.LOADING -> m()
+
+      CommentsListState.READY -> {
+        val replies = get<List<StreamComment>>(panelFsm, "comment_replies")
+          ?: v()
+        val stream = get<StreamData>(panelFsm, "stream_data")
+        val comments = replies.map { comment ->
+          UIState(mapComment(comment, stream))
+        }
+
+        val selectedComment =
+          get<Pair<Int, UIState>>(panelFsm, "selected_comment")
+        m(
+          "replies_list" to comments,
+          "selected_comment" to selectedComment!!.second
+        )
+      }
+
+      CommentsListState.REFRESHING, CommentsListState.APPENDING -> {
+        prev.data as IPersistentMap<Any?, Any?>
+      }
+    }
+    UIState(ret.assoc(common.state, commentRepliesState))
+  }
+
+  regSub(queryId = "active_comments_route") { db: AppDb, _: Query ->
+    getIn(db, l("stream_panel_fsm", "comments_panel_route")) ?: COMMENTS_ROUTE
+  }
+
+  regSub(
+    queryId = "comments_panel",
+    initialValue = UIState(
+      m(
+        "current_route" to COMMENTS_ROUTE,
+        "comments" to loadingState,
+        "replies" to loadingState
+      )
+    ),
+    v(Stream.comments),
+    v(common.comment_replies),
+    v("active_comments_route")
+  ) { (comments, replies, route), _, _ ->
+    UIState(
+      m("current_route" to route, "comments" to comments, "replies" to replies)
+    )
   }
 }

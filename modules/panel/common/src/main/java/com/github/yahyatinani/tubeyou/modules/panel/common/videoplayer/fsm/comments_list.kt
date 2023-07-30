@@ -1,6 +1,7 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm
 
 import androidx.paging.LoadState
+import androidx.paging.LoadState.NotLoading
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.panel.common.AppDb
@@ -9,7 +10,10 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.StreamComments
 import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.State
 import io.github.yahyatinani.recompose.fsm.fsm
+import io.github.yahyatinani.recompose.fsm.fsm.actions
+import io.github.yahyatinani.recompose.fsm.fsm.target
 import io.github.yahyatinani.recompose.fx.BuiltInFx
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
 import io.github.yahyatinani.y.core.collections.PersistentVector
 import io.github.yahyatinani.y.core.get
@@ -41,7 +45,7 @@ fun fetchStreamComments(
   val videoViewModel = state!!["active_stream"] as VideoViewModel
   return m(
     fsm.state_map to state.dissoc("stream_comments"),
-    BuiltInFx.fx to v(
+    fx to v(
       v(
         BuiltInFx.dispatch,
         v("load_stream_comments", videoViewModel.id)
@@ -50,39 +54,41 @@ fun fetchStreamComments(
   )
 }
 
-enum class CommentsListState { LOADING, REFRESHING, LOADED, APPENDING }
+enum class CommentsListState { LOADING, REFRESHING, READY, APPENDING }
 
 val commentsListMachine = m(
   CommentsListState.LOADING to m(
-    "set_stream_comments" to m(fsm.target to CommentsListState.LOADED)
+    "set_stream_comments" to m(target to CommentsListState.READY)
   ),
-  CommentsListState.LOADED to m(
-    LoadState.Loading to m(fsm.target to CommentsListState.APPENDING),
+  CommentsListState.READY to m(
+    v("append_comments", LoadState.Loading) to m(
+      target to CommentsListState.APPENDING
+    ),
     "refresh_comments" to m(
-      fsm.target to CommentsListState.REFRESHING,
-      fsm.actions to ::fetchStreamComments
+      target to CommentsListState.REFRESHING,
+      actions to ::fetchStreamComments
     )
   ),
   CommentsListState.REFRESHING to m(
     "set_stream_comments" to m(
-      fsm.target to CommentsListState.LOADED
+      target to CommentsListState.READY
     )
   ),
   CommentsListState.APPENDING to m(
     "append_comments_page" to m(
-      fsm.target to CommentsListState.LOADED,
-      fsm.actions to ::appendStreamComments
+      target to CommentsListState.READY,
+      actions to ::appendStreamComments
     ),
-    LoadState.NotLoading(endOfPaginationReached = true) to m(
-      fsm.target to CommentsListState.LOADED
+    v("append_comments", NotLoading(endOfPaginationReached = true)) to m(
+      target to CommentsListState.READY
     )
   ),
   fsm.ALL to m(
     common.play_video to m(
-      fsm.target to CommentsListState.LOADING,
-      fsm.actions to ::fetchStreamComments
+      target to CommentsListState.LOADING,
+      actions to ::fetchStreamComments
     ),
-    "close_player" to m(fsm.target to null),
-    common.close_player to m(fsm.target to null)
+    "close_player" to m(target to null),
+    common.close_player to m(target to null)
   )
 )

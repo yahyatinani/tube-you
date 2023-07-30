@@ -200,7 +200,8 @@ fun TyApp(
 
     if (
       orientation == ORIENTATION_LANDSCAPE &&
-      playerSheetRegion != PlayerSheetState.HIDDEN
+      playerSheetRegion != PlayerSheetState.HIDDEN &&
+      playerSheetRegion != null
     ) {
       LaunchedEffect(Unit) {
         dispatch(v(":player_fullscreen_landscape"))

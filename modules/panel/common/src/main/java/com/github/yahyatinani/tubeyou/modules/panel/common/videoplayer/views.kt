@@ -9,14 +9,20 @@ import android.text.Spanned
 import android.text.TextUtils
 import android.text.util.Linkify
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,6 +30,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -42,6 +49,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
@@ -55,6 +63,7 @@ import androidx.compose.material.icons.outlined.LibraryAdd
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -67,6 +76,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PlainTooltipBox
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.Expanded
@@ -85,6 +95,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -114,6 +126,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -122,6 +135,10 @@ import androidx.core.text.HtmlCompat.fromHtml
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -132,7 +149,6 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.AuthorAvata
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AvatarLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.CountText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableText
-import com.github.yahyatinani.tubeyou.modules.designsystem.component.HeadedSheetColumn
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.StreamLoaderPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
@@ -140,22 +156,28 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TextLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
+import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import com.github.yahyatinani.tubeyou.modules.panel.common.R
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import com.github.yahyatinani.tubeyou.modules.panel.common.UIState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.COMMENTS_ROUTE
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.CommentsListState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.REPLIES_ROUTE
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
+import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
+import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.launch
 
@@ -291,7 +313,9 @@ fun VideoPlayer(
     }
 
     AndroidView(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+        .fillMaxWidth()
+        .align(Alignment.Center),
       factory = {
         PlayerView(context).apply {
           setControllerVisibilityListener(controllerVisibilityListener)
@@ -303,6 +327,11 @@ fun VideoPlayer(
         }
       }
     ) {
+      if (it.videoSurfaceView != null) {
+        it.videoSurfaceView!!.layoutParams.height =
+          ViewGroup.LayoutParams.MATCH_PARENT
+      }
+
       it.useController = useController
     }
 
@@ -314,7 +343,6 @@ fun VideoPlayer(
     }
 
     if (
-      playerState == null ||
       playerState == StreamState.LOADING ||
       playerState == StreamState.BUFFERING
     ) {
@@ -326,7 +354,7 @@ fun VideoPlayer(
       )
     }
 
-    if (showQualityControl && playerState != null) {
+    if (showQualityControl && playerState != StreamState.LOADING) {
       TextButton(
         modifier = Modifier.align(Alignment.TopEnd),
         colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
@@ -705,22 +733,31 @@ fun Html(text: String) {
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SheetHeader(
-  headerTitle: String,
+  modifier: Modifier = Modifier,
+  headerTitle: String = "",
+  header: (@Composable () -> Unit)? = null,
   sheetState: SheetValue,
   closeSheet: () -> Unit
 ) {
   Column {
     Row(
-      modifier = Modifier
+      modifier = modifier
         .fillMaxWidth()
-        .padding(start = 16.dp, end = 4.dp),
+        .padding(end = 4.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Text(
-        text = headerTitle,
-        style = MaterialTheme.typography.titleMedium
-      )
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        when {
+          header != null -> header()
+          else -> {
+            Text(
+              text = headerTitle,
+              style = MaterialTheme.typography.titleMedium
+            )
+          }
+        }
+      }
       IconButton(onClick = closeSheet) {
         Icon(
           modifier = Modifier.size(32.dp),
@@ -763,6 +800,19 @@ class BottomSheetNestedScrollConnection : NestedScrollConnection {
       available
     }
   }
+
+  override suspend fun onPostFling(
+    consumed: Velocity,
+    available: Velocity
+  ): Velocity = available
+}
+
+object BlockScrolling : NestedScrollConnection {
+  override fun onPostScroll(
+    consumed: Offset,
+    available: Offset,
+    source: NestedScrollSource
+  ): Offset = available
 }
 
 @Composable
@@ -821,10 +871,16 @@ private fun DescriptionSheet(
   isLoading: Boolean,
   streamData: Any
 ) {
-  HeadedSheetColumn(
-    sheetState = descSheetState,
-    sheetPeekHeight = sheetPeekHeight,
-    header = {
+  Scaffold(
+    modifier = Modifier
+      .then(
+        if (descSheetState.currentValue == PartiallyExpanded) {
+          Modifier.height(sheetPeekHeight)
+        } else {
+          Modifier
+        }
+      ),
+    topBar = {
       SheetHeader(
         headerTitle = "Description",
         sheetState = descSheetState.currentValue
@@ -832,10 +888,11 @@ private fun DescriptionSheet(
         dispatch(v("stream_panel_fsm", "close_desc_sheet"))
       }
     }
-  ) {
+  ) { padding ->
     if (!isLoading) {
       LazyColumn(
         modifier = Modifier
+          .padding(padding)
           .fillMaxSize()
           .nestedScroll(BottomSheetNestedScrollConnection())
       ) {
@@ -851,190 +908,37 @@ private fun DescriptionSheet(
   }
 }
 
-const val COMMENTS_ROUTE = "comments_route"
-const val REPLIES_ROUTE = "replies_route"
-
-@kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommentsList(uiState: UIState, onNavReplies: (Int) -> Unit = { }) {
+fun CommentsList(
+  uiState: UIState,
+  navReplies: (Pair<Int, UIState>) -> Unit = { }
+) {
   val commentsState = uiState.data
-  val isLoading = get<CommentsListState>(
-    commentsState,
-    common.state
-  ) == CommentsListState.LOADING
+
+  val commentsListState = get<CommentsListState>(commentsState, common.state)!!
+  println("commentsListState $commentsListState")
 
   LazyColumn(
     modifier = Modifier
       .fillMaxSize()
       .nestedScroll(BottomSheetNestedScrollConnection())
   ) {
-    if (isLoading) return@LazyColumn
+    if (commentsListState == CommentsListState.LOADING) return@LazyColumn
 
-    val commentsList = get<List<Any>>(commentsState, "comments_list")!!
-    itemsIndexed(items = commentsList) { index: Int, comment: Any ->
+    val commentsList = get<List<UIState>>(commentsState, "comments_list")!!
+    itemsIndexed(items = commentsList) { index: Int, comment: UIState ->
       dispatch(v("append_comments", index))
-
-      val author: String = get(comment, "author")!!
-      val commentedTime: String = get(comment, "commentedTime")!!
-      val authorAvatar: String = get(comment, "author_avatar")!!
-      val commentText: AnnotatedString =
-        get(comment, "comment_text")!!
-      val likesCount: String = get(comment, "likes_count")!!
-      val repliesCount: Int = get(comment, "replies_count")!!
-      val verified: Boolean = get(comment, "verified")!!
-      val pinned: Boolean = get(comment, "pinned")!!
-      val hearted: Boolean = get(comment, "hearted")!!
       val typography = MaterialTheme.typography
 
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .wrapContentHeight()
-          .clickable(onClick = { onNavReplies(index) })
-          .padding(12.dp)
-      ) {
-        AuthorAvatar(url = authorAvatar, size = 24.dp)
+      val indexComment = index to comment
+      Comment(state = comment) { navReplies(indexComment) }
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(
-          modifier = Modifier.padding(end = 24.dp)
-        ) {
-          val colorScheme = MaterialTheme.colorScheme
-          val color = colorScheme.onSurface.copy(alpha = .6f)
-          val iconSize = 12.dp
-          val textStyle = typography.bodySmall.copy(
-            color = color
-          )
-
-          if (pinned) {
-            val uploader: String = get(comment, "uploader")!!
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                modifier = Modifier.size(iconSize),
-                imageVector = Icons.Default.PushPin,
-                contentDescription = "",
-                tint = color
-              )
-
-              Spacer(modifier = Modifier.width(4.dp))
-
-              Text(
-                text = stringResource(R.string.pinned_by),
-                style = textStyle
-              )
-
-              Text(
-                text = " $uploader",
-                style = textStyle
-              )
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-          }
-
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-              text = author,
-              style = textStyle
-            )
-
-            Spacer(modifier = Modifier.width(1.dp))
-
-            if (verified) {
-              Icon(
-                modifier = Modifier.size(iconSize),
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = "",
-                tint = color
-              )
-            }
-
-            Text(
-              text = commentedTime,
-              style = textStyle
-            )
-          }
-
-          Spacer(modifier = Modifier.height(2.dp))
-
-          ExpandableText(
-            text = commentText,
-            modifier = Modifier,
-            minimizedMaxLines = 3,
-            style = typography.bodyMedium.copy(
-              color = colorScheme.onSurface
-            )
-          )
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            val size = 16.dp
-            Icon(
-              modifier = Modifier.size(size),
-              imageVector = Icons.Outlined.ThumbUp,
-              contentDescription = ""
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Text(
-              text = likesCount,
-              style = typography.labelMedium
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(
-              modifier = Modifier.size(size),
-              imageVector = Icons.Outlined.ThumbDown,
-              contentDescription = ""
-            )
-
-            if (hearted) {
-              Spacer(modifier = Modifier.width(20.dp))
-
-              val tooltipState = rememberPlainTooltipState()
-              val uploader: String = get(comment, "uploader")!!
-
-              PlainTooltipBox(
-                tooltip = {
-                  Text(
-                    text = "❤\uFE0F by $uploader",
-                    modifier = Modifier.padding(10.dp),
-                    style = typography.bodyMedium
-                  )
-                },
-                tooltipState = tooltipState,
-                containerColor = colorScheme.onSurface
-              ) {
-                val scope = rememberCoroutineScope()
-                IconButton(
-                  onClick = { scope.launch { tooltipState.show() } }
-                ) {
-                  HeartedAvatar {
-                    AuthorAvatar(
-                      url = get<String>(comment, "uploader_avatar")!!,
-                      size = 16.dp
-                    )
-                    IconBorder(
-                      imageVector = Icons.Default.Favorite,
-                      colorScheme = colorScheme,
-                      tint = Color.Red
-                    )
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
+      val repliesCount: Int = get(comment.data, "replies_count")!!
       if (repliesCount > 0) {
         Text(
           modifier = Modifier
             .padding(start = 40.dp)
-            .clickable(onClick = { onNavReplies(index) })
+            .clickable(onClick = { navReplies(indexComment) })
             .padding(12.dp),
           text = "$repliesCount replies",
           style = typography.labelLarge.copy(color = Blue400)
@@ -1042,15 +946,240 @@ fun CommentsList(uiState: UIState, onNavReplies: (Int) -> Unit = { }) {
       }
     }
 
-    val isAppending = get<CommentsListState>(
-      commentsState,
-      common.state
-    ) == CommentsListState.APPENDING
-    if (isAppending) {
-      item {
+    item {
+      if (commentsListState == CommentsListState.APPENDING) {
         AppendingLoader()
       }
     }
+  }
+}
+
+@Composable
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
+fun Comment(
+  modifier: Modifier = Modifier,
+  backgroundColor: Color = MaterialTheme.colorScheme.background,
+  state: UIState,
+  isCommentExpanded: Boolean = false,
+  onClick: () -> Unit = {}
+) {
+  val comment = state.data
+  val author: String = get(comment, "author")!!
+  val commentedTime: String = get(comment, "commentedTime")!!
+  val authorAvatar: String = get(comment, "author_avatar")!!
+  val commentText: AnnotatedString =
+    get(comment, "comment_text")!!
+  val likesCount: String = get(comment, "likes_count")!!
+  val verified: Boolean = get(comment, "verified")!!
+  val pinned: Boolean = get(comment, "pinned")!!
+  val hearted: Boolean = get(comment, "hearted")!!
+
+  val typography = MaterialTheme.typography
+  Row(
+    modifier = Modifier
+      .background(backgroundColor)
+      .fillMaxWidth()
+      .wrapContentHeight()
+      .clickable(onClick = onClick)
+      .padding(12.dp)
+      .then(modifier)
+  ) {
+    AuthorAvatar(url = authorAvatar, size = 24.dp)
+
+    Spacer(modifier = Modifier.width(16.dp))
+
+    Column(
+      modifier = Modifier.padding(end = 24.dp)
+    ) {
+      val colorScheme = MaterialTheme.colorScheme
+      val color = colorScheme.onSurface.copy(alpha = .6f)
+      val iconSize = 12.dp
+      val textStyle = typography.bodySmall.copy(
+        color = color
+      )
+
+      if (pinned) {
+        val uploader: String = get(comment, "uploader")!!
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Icon(
+            modifier = Modifier.size(iconSize),
+            imageVector = Icons.Default.PushPin,
+            contentDescription = "",
+            tint = color
+          )
+
+          Spacer(modifier = Modifier.width(4.dp))
+
+          Text(
+            text = stringResource(R.string.pinned_by),
+            style = textStyle
+          )
+
+          Text(
+            text = " $uploader",
+            style = textStyle
+          )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+      }
+
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+          text = author,
+          style = textStyle
+        )
+
+        if (verified) {
+          Icon(
+            modifier = Modifier.size(iconSize),
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = "",
+            tint = color
+          )
+        }
+
+        Text(
+          text = commentedTime,
+          style = textStyle
+        )
+      }
+
+      Spacer(modifier = Modifier.height(2.dp))
+
+      ExpandableText(
+        text = commentText,
+        modifier = Modifier,
+        minimizedMaxLines = 3,
+        style = typography.bodyMedium.copy(
+          color = colorScheme.onSurface
+        ),
+        isExpanded = isCommentExpanded
+      )
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        val size = 16.dp
+        Icon(
+          modifier = Modifier.size(size),
+          imageVector = Icons.Outlined.ThumbUp,
+          contentDescription = ""
+        )
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Text(
+          text = likesCount,
+          style = typography.labelMedium
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+        Icon(
+          modifier = Modifier.size(size),
+          imageVector = Icons.Outlined.ThumbDown,
+          contentDescription = ""
+        )
+
+        if (hearted) {
+          Spacer(modifier = Modifier.width(20.dp))
+
+          val tooltipState = rememberPlainTooltipState()
+          val uploader: String = get(comment, "uploader")!!
+
+          PlainTooltipBox(
+            tooltip = {
+              Text(
+                text = "❤\uFE0F by $uploader",
+                modifier = Modifier.padding(10.dp),
+                style = typography.bodyMedium
+              )
+            },
+            tooltipState = tooltipState,
+            containerColor = colorScheme.onSurface
+          ) {
+            val scope = rememberCoroutineScope()
+            IconButton(
+              onClick = { scope.launch { tooltipState.show() } }
+            ) {
+              HeartedAvatar {
+                AuthorAvatar(
+                  url = get<String>(comment, "uploader_avatar")!!,
+                  size = 16.dp
+                )
+                IconBorder(
+                  imageVector = Icons.Default.Favorite,
+                  colorScheme = colorScheme,
+                  tint = Color.Red
+                )
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+fun CommentReplies(modifier: Modifier = Modifier, repliesState: UIState) {
+  val commentsState = get<CommentsListState>(repliesState.data, common.state)
+
+  Surface {
+    val theme = LocalRippleTheme.current
+    val highlightColor = theme
+      .defaultColor()
+      .copy(alpha = theme.rippleAlpha().pressedAlpha)
+    Box {
+      LazyColumn(
+        modifier = modifier
+          .fillMaxSize()
+          .nestedScroll(BottomSheetNestedScrollConnection())
+      ) {
+        if (commentsState == CommentsListState.LOADING) {
+          return@LazyColumn
+        }
+
+        item {
+          Comment(
+            backgroundColor = highlightColor,
+            state = get<UIState>(repliesState.data, "selected_comment")!!,
+            isCommentExpanded = true
+          )
+        }
+
+        val repliesList =
+          get<List<UIState>>(repliesState.data, "replies_list")!!
+
+        itemsIndexed(items = repliesList) { index, comment: UIState ->
+          dispatch(v("append_replies", index))
+          Comment(
+            modifier = Modifier.padding(start = 40.dp),
+            state = comment
+          )
+        }
+
+        if (commentsState == CommentsListState.APPENDING) {
+          item { AppendingLoader() }
+        }
+      }
+
+      if (commentsState == CommentsListState.LOADING) {
+        CircularProgressIndicator(
+          modifier = Modifier.align(Alignment.Center),
+          color = Blue300
+        )
+      }
+
+      /* if (panelVm.error != null) {
+         // TODO: Implement proper UI for errors. Also, make it an argument.
+         Text(text = "Request failed! Error: ${panelVm.error}")
+       }*/
+    }
+  }
+
+  BackHandler {
+    dispatchSync(v("nav_back_to_comments"))
   }
 }
 
@@ -1061,32 +1190,109 @@ private fun CommentsSheet(
   sheetPeekHeight: Dp,
   uiState: UIState
 ) {
-  val commentsStateData = uiState.data as IPersistentMap<Any?, Any?>
-  val isRefreshing = get<CommentsListState>(
-    commentsStateData,
-    common.state
-  ) == CommentsListState.REFRESHING
-
-  val commentsNavController = rememberNavController()
-
-  LaunchedEffect(Unit) {
-    regFx("nav_comment_replies") {
-      commentsNavController.navigate(REPLIES_ROUTE)
-    }
-  }
-
-  HeadedSheetColumn(
-    sheetState = commentsSheetState,
-    sheetPeekHeight = sheetPeekHeight,
-    header = {
+  val data = uiState.data
+  val route = get<String>(data, "current_route")!!
+  Scaffold(
+    modifier = Modifier
+      .then(
+        if (commentsSheetState.currentValue == PartiallyExpanded) {
+          Modifier.height(sheetPeekHeight)
+        } else {
+          Modifier
+        }
+      ),
+    topBar = {
+      val isComments = route == COMMENTS_ROUTE
       SheetHeader(
-        headerTitle = "Comments",
+        header = {
+          Box {
+            AnimatedVisibility(
+              modifier = Modifier
+                .padding(start = 16.dp)
+                .align(Alignment.CenterStart),
+              visible = isComments,
+              enter = fadeIn(),
+              exit = fadeOut()
+            ) {
+              Text(
+                text = stringResource(R.string.comments_bottom_sheet_title),
+                style = MaterialTheme.typography.titleMedium
+              )
+            }
+
+            val enter =
+              slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn()
+            val exit =
+              slideOutHorizontally(targetOffsetX = { it / 8 }) + fadeOut()
+            AnimatedVisibility(
+              visible = !isComments,
+              enter = enter,
+              exit = exit
+            ) {
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                  onClick = { dispatchSync(v("nav_back_to_comments")) }
+                ) {
+                  Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = ""
+                  )
+                }
+                Spacer(modifier = Modifier.width(32.dp))
+                Text(
+                  text = stringResource(R.string.replies_bottom_sheet_title),
+                  style = MaterialTheme.typography.titleMedium
+                )
+              }
+            }
+          }
+        },
         sheetState = commentsSheetState.currentValue
       ) {
         dispatch(v("stream_panel_fsm", "close_comments_sheet"))
       }
     }
-  ) { padding ->
+  ) { padding: PaddingValues ->
+    val context = LocalContext.current
+    val commentsNavController = rememberNavController()
+    rememberSaveable(
+      saver = Saver(
+        save = { it.saveState() },
+        restore = {
+          NavHostController(context).apply {
+            navigatorProvider.addNavigator(ComposeNavigator())
+            navigatorProvider.addNavigator(DialogNavigator())
+          }.apply { restoreState(it) }
+        }
+      )
+    ) {
+      NavHostController(context).apply {
+        navigatorProvider.addNavigator(ComposeNavigator())
+        navigatorProvider.addNavigator(DialogNavigator())
+      }
+    }
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+      regFx("nav_comment_replies") {
+        scope.launch {
+          commentsNavController.navigate(REPLIES_ROUTE)
+        }
+      }
+
+      regFx("nav_back_to_comments") {
+        scope.launch {
+          commentsNavController.popBackStack(COMMENTS_ROUTE, inclusive = false)
+          dispatch(v("stream_panel_fsm", "nav_back_to_comments"))
+        }
+      }
+
+      regEventFx("nav_back_to_comments") { _, _ ->
+        m(fx to v(v("nav_back_to_comments")))
+      }
+    }
+
     NavHost(
       modifier = Modifier
         .padding(padding)
@@ -1094,54 +1300,148 @@ private fun CommentsSheet(
       navController = commentsNavController,
       startDestination = COMMENTS_ROUTE
     ) {
-      composable(COMMENTS_ROUTE) {
-        SwipeRefresh(
-          state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
-          onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
-          indicator = { state, refreshTrigger ->
-            val colorScheme = MaterialTheme.colorScheme
-            SwipeRefreshIndicator(
-              state = state,
-              refreshTriggerDistance = refreshTrigger,
-              backgroundColor = colorScheme.primaryContainer,
-              contentColor = colorScheme.onBackground,
-              elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+      commentsList(get<UIState>(data, "comments")!!)
+
+      repliesList(get<UIState>(data, "replies")!!)
+    }
+  }
+}
+
+private fun NavGraphBuilder.repliesList(repliesState: UIState) {
+  composable(
+    route = REPLIES_ROUTE,
+    enterTransition = {
+      slideInHorizontally(
+        tween(500),
+        initialOffsetX = { it }
+      )
+    },
+    exitTransition = {
+      slideOutHorizontally(
+        tween(500),
+        targetOffsetX = { it }
+      )
+    }
+  ) {
+    val commentsState = get<CommentsListState>(repliesState.data, common.state)
+    SwipeRefresh(
+      modifier = Modifier
+        .fillMaxSize()
+        .nestedScroll(BlockScrolling),
+      state = rememberSwipeRefreshState(
+        isRefreshing = commentsState == CommentsListState.REFRESHING
+      ),
+      onRefresh = {
+        dispatch(v("stream_panel_fsm", "refresh_comment_replies"))
+      },
+      indicator = { state, refreshTrigger ->
+        val colorScheme = MaterialTheme.colorScheme
+        SwipeRefreshIndicator(
+          state = state,
+          refreshTriggerDistance = refreshTrigger,
+          backgroundColor = colorScheme.primaryContainer,
+          contentColor = colorScheme.onBackground,
+          elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+        )
+      }
+    ) {
+      CommentReplies(repliesState = repliesState)
+    }
+  }
+}
+
+private fun NavGraphBuilder.commentsList(uiState: UIState) {
+  val commentsStateData = uiState.data as IPersistentMap<Any?, Any?>
+  val commentsListState = get<CommentsListState>(
+    commentsStateData,
+    common.state
+  )
+  println("CommentsSheet: $commentsListState")
+  val isRefreshing = commentsListState == CommentsListState.REFRESHING
+
+  composable(COMMENTS_ROUTE) {
+    SwipeRefresh(
+      modifier = Modifier
+        .fillMaxSize()
+        .nestedScroll(BlockScrolling),
+      state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+      onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
+      indicator = { state, refreshTrigger ->
+        val colorScheme = MaterialTheme.colorScheme
+        SwipeRefreshIndicator(
+          state = state,
+          refreshTriggerDistance = refreshTrigger,
+          backgroundColor = colorScheme.primaryContainer,
+          contentColor = colorScheme.onBackground,
+          elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+        )
+      }
+    ) {
+      val state = get<CommentsListState>(uiState.data, common.state)
+//      val cms = get<UIState>(m, "comments")!!
+      println("uicommmentListswatch, $state")
+
+      val commentsState = uiState.data
+
+      val commentsListState =
+        get<CommentsListState>(commentsState, common.state)!!
+      println("commentsListState $commentsListState")
+
+      LazyColumn(
+        modifier = Modifier
+          .fillMaxSize()
+          .nestedScroll(BottomSheetNestedScrollConnection())
+      ) {
+        if (commentsListState == CommentsListState.LOADING) return@LazyColumn
+
+        val commentsList =
+          get<List<UIState>>(commentsState, "comments_list")!!
+        itemsIndexed(items = commentsList) { index: Int, comment: UIState ->
+          dispatch(v("append_comments", index))
+          val typography = MaterialTheme.typography
+
+          val indexComment = index to comment
+          Comment(state = comment) {
+            dispatch(
+              v(
+                "stream_panel_fsm",
+                "navigate_replies",
+                indexComment
+              )
             )
           }
-        ) {
-          CommentsList(uiState = uiState) {
-            commentsNavController.navigate(REPLIES_ROUTE)
+
+          val repliesCount: Int = get(comment.data, "replies_count")!!
+          if (repliesCount > 0) {
+            Text(
+              modifier = Modifier
+                .padding(start = 40.dp)
+                .clickable(onClick = {
+                  dispatch(
+                    v(
+                      "stream_panel_fsm",
+                      "navigate_replies",
+                      indexComment
+                    )
+                  )
+                })
+                .padding(12.dp),
+              text = "$repliesCount replies",
+              style = typography.labelLarge.copy(color = Blue400)
+            )
+          }
+        }
+
+        item {
+          if (commentsListState == CommentsListState.APPENDING) {
+            AppendingLoader()
           }
         }
       }
 
-      composable(
-        route = REPLIES_ROUTE,
-        enterTransition = {
-          slideInHorizontally(initialOffsetX = { it })
-        },
-        exitTransition = {
-          slideOutHorizontally(targetOffsetX = { it })
-        }
-      ) {
-        SwipeRefresh(
-          state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
-          onRefresh = { /* todo */ },
-          indicator = { state, refreshTrigger ->
-            val colorScheme = MaterialTheme.colorScheme
-            SwipeRefreshIndicator(
-              state = state,
-              refreshTriggerDistance = refreshTrigger,
-              backgroundColor = colorScheme.primaryContainer,
-              contentColor = colorScheme.onBackground,
-              elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
-            )
-          }
-        ) {
-          Surface(modifier = Modifier.fillMaxSize()) {
-          }
-        }
-      }
+      /*          CommentsList(uiState = uiState) { comment ->
+                      dispatch(v("stream_panel_fsm", "navigate_replies", comment))
+                    }*/
     }
   }
 }
@@ -1192,7 +1492,7 @@ fun PlaybackBottomSheet(
     get<StreamState>(streamData, common.state)!!
   }
   val isLoading = remember(streamState) { streamState == StreamState.LOADING }
-
+  val height = remember(sheetPeekHeight) { sheetPeekHeight - 18.dp }
   BottomSheetScaffold(
     scaffoldState = descScaffoldState,
     sheetPeekHeight = descSheetPeekHeight,
@@ -1210,7 +1510,7 @@ fun PlaybackBottomSheet(
     sheetContent = {
       DescriptionSheet(
         descSheetState = descSheetState,
-        sheetPeekHeight = sheetPeekHeight,
+        sheetPeekHeight = height,
         isLoading = isLoading,
         streamData = streamData
       )
@@ -1246,12 +1546,14 @@ fun PlaybackBottomSheet(
       }
 
       regFx(id = "close_comments_sheet") {
-        playbackScope.launch { commentsSheetState.hide() }
+        playbackScope.launch {
+          commentsSheetState.hide()
+          dispatch(v("nav_back_to_comments"))
+        }
       }
     }
 
-    val commentsState = watch<UIState>(query = v(Stream.comments))
-
+    val commentsPanelState = watch<UIState>(query = v("comments_panel"))
     BottomSheetScaffold(
       scaffoldState = commentsScaffoldState,
       sheetPeekHeight = commentsSheetPeekHeight,
@@ -1269,14 +1571,13 @@ fun PlaybackBottomSheet(
       sheetContent = {
         CommentsSheet(
           commentsSheetState = commentsSheetState,
-          sheetPeekHeight = sheetPeekHeight,
-          uiState = commentsState
+          sheetPeekHeight = height,
+          uiState = commentsPanelState
         )
       }
     ) {
       val colorScheme = MaterialTheme.colorScheme
-      val alpha = if (isSystemInDarkTheme()) .09f else .05f
-      val containerColor: Color = colorScheme.onBackground.copy(alpha)
+      val containerColor: Color = colorScheme.primaryContainer
 
       Column {
         Row(
@@ -1287,17 +1588,19 @@ fun PlaybackBottomSheet(
         ) {
           val ratio = remember { 16 / 9f }
           VideoPlayer(
-            modifier = Modifier.then(
-              if (isCollapsed) {
-                Modifier
-                  .height(110.dp - 48.dp)
-                  .aspectRatio(ratio)
-              } else {
-                Modifier
-                  .fillMaxWidth()
-                  .aspectRatio(get(streamData, Stream.aspect_ratio, ratio)!!)
-              }
-            ),
+            modifier = Modifier
+              .background(color = Color.Black)
+              .then(
+                if (isCollapsed) {
+                  Modifier
+                    .height(110.dp - 48.dp)
+                    .aspectRatio(ratio)
+                } else {
+                  Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(get(streamData, Stream.aspect_ratio, ratio)!!)
+                }
+              ),
             stream = activeStream,
             useController = !isCollapsed,
             showThumbnail = showThumbnail,
@@ -1316,22 +1619,10 @@ fun PlaybackBottomSheet(
             }
           }
         }
-
         LazyColumn(
           modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(
-              object : NestedScrollConnection {
-                override fun onPostScroll(
-                  consumed: Offset,
-                  available: Offset,
-                  source: NestedScrollSource
-                ): Offset {
-                  return available
-                }
-              }
-            ),
-          userScrollEnabled = false // fixme:
+            .nestedScroll(BlockScrolling)
         ) {
           item {
             if (isLoading) {
@@ -1469,7 +1760,8 @@ fun PlaybackBottomSheet(
           item { Spacer(modifier = Modifier.height(16.dp)) }
 
           val commentsStateData =
-            commentsState.data as IPersistentMap<Any?, Any?>
+            get<UIState>(commentsPanelState.data, "comments")!!.data
+              as IPersistentMap<Any?, Any?>
           item {
             if (get<CommentsListState>(
                 commentsStateData,

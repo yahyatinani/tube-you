@@ -33,12 +33,20 @@ val bottomSheetMachine = m(
     common.minimize_player to m(
       fsm.target to PlayerSheetState.COLLAPSED,
       fsm.actions to ::collapsePlayerSheet
+    ),
+    SheetValue.Hidden to m(
+      fsm.target to PlayerSheetState.HIDDEN,
+      fsm.actions to ::hidePlayerSheet
     )
   ),
   PlayerSheetState.COLLAPSED to m(
     common.expand_player_sheet to m(
       fsm.target to PlayerSheetState.EXPANDED,
       fsm.actions to ::expandPlayerSheet
+    ),
+    SheetValue.Hidden to m(
+      fsm.target to PlayerSheetState.HIDDEN,
+      fsm.actions to ::hidePlayerSheet
     )
   ),
   fsm.ALL to m(
@@ -51,10 +59,6 @@ val bottomSheetMachine = m(
       fsm.actions to ::expandPlayerSheet
     ),
     "close_player" to m(
-      fsm.target to PlayerSheetState.HIDDEN,
-      fsm.actions to ::hidePlayerSheet
-    ),
-    SheetValue.Hidden to m(
       fsm.target to PlayerSheetState.HIDDEN,
       fsm.actions to ::hidePlayerSheet
     )

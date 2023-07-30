@@ -1,6 +1,7 @@
 package com.github.yahyatinani.tubeyou.modules.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -8,11 +9,13 @@ import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
 val DarkColorPalette = darkColorScheme(
-  primary = Purple200,
-  primaryContainer = Color.Black,
+  primary = Color.White,
+  primaryContainer = primaryContainerDark,
+  onPrimaryContainer = Color.White,
   secondary = Teal200,
   surface = Grey900,
   onSurface = Color.White,
@@ -24,8 +27,9 @@ val DarkColorPalette = darkColorScheme(
 )
 
 val LightColorPalette = lightColorScheme(
-  primary = Purple500,
-  primaryContainer = Color.White,
+  primary = Color.Black,
+  primaryContainer = primaryContainerLight,
+  onPrimaryContainer = Color.Black,
   secondary = Teal200,
   surface = Color.White,
   background = Color.White,
@@ -52,7 +56,11 @@ fun TyTheme(
   MaterialTheme(
     colorScheme = if (darkTheme) DarkColorPalette else LightColorPalette,
     typography = typography,
-    shapes = Shapes,
-    content = content
-  )
+    shapes = Shapes
+  ) {
+    CompositionLocalProvider(
+      LocalRippleTheme provides TyThemeRippleTheme,
+      content = content
+    )
+  }
 }

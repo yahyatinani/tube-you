@@ -992,7 +992,7 @@ fun Comment(
   ) {
     AuthorAvatar(url = authorAvatar, size = 24.dp)
 
-    Spacer(modifier = Modifier.width(16.dp))
+    Spacer(modifier = Modifier.width(12.dp))
 
     Column(
       modifier = Modifier.padding(end = 24.dp)
@@ -1074,7 +1074,7 @@ fun Comment(
       ExpandableText(
         text = commentText,
         modifier = Modifier,
-        minimizedMaxLines = 3,
+        minimizedMaxLines = 4,
         style = typography.bodyMedium.copy(
           color = colorScheme.onSurface
         ),
@@ -1178,7 +1178,7 @@ fun CommentReplies(modifier: Modifier = Modifier, repliesState: UIState) {
         itemsIndexed(items = repliesList) { index, comment: UIState ->
           dispatch(v("append_replies", index))
           Comment(
-            modifier = Modifier.padding(start = 40.dp),
+            modifier = Modifier.padding(start = 36.dp),
             state = comment
           )
         }

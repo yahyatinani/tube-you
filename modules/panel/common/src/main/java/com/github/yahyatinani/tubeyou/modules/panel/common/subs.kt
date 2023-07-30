@@ -94,11 +94,17 @@ fun timeAgoFormat(date: String): String {
   }
 }
 
-private fun shortenTime(uploaded: String): String = uploaded
-  .replace(" years", "y")
-  .replace(" months", "m")
-  .replace(" days", "d")
-  .replace(" hours", "h")
+private fun shortenTime(uploaded: String): String =
+  uploaded.replace(" years", "y")
+    .let { if (it !== uploaded) return it else it }
+    .replace(" year", "y").let { if (it !== uploaded) return it else it }
+    .replace(" months", "m").let { if (it !== uploaded) return it else it }
+    .replace(" month", "m").let { if (it !== uploaded) return it else it }
+    .replace(" days", "d").let { if (it !== uploaded) return it else it }
+    .replace(" day", "d").let { if (it !== uploaded) return it else it }
+    .replace(" hours", "h").let { if (it !== uploaded) return it else it }
+    .replace(" hour", "h").let { if (it !== uploaded) return it else it }
+    .replace("minutes", "min")
 
 private fun highlightComment(sc: StreamComments) = when {
   sc.disabled -> m(

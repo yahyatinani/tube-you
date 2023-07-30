@@ -25,6 +25,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -231,6 +232,7 @@ private fun Context.findWindow(): Window? {
 
 @Composable
 fun MiniPlayerControls(
+  modifier: Modifier = Modifier,
   isPlaying: Boolean,
   onClosePlayer: () -> Unit = { },
   playPausePlayer: () -> Unit = { }
@@ -239,18 +241,20 @@ fun MiniPlayerControls(
     this?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
   }
   Row(
-    modifier = Modifier.height(110.dp - 48.dp),
+    modifier = modifier.height(110.dp - 48.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    val color = MaterialTheme.colorScheme.onBackground
-    val colorFilter = ColorFilter.tint(color = color)
+    val size = 32.dp
+    val colorFilter = ColorFilter.tint(
+      color = MaterialTheme.colorScheme.onBackground
+    )
     IconButton(onClick = playPausePlayer) {
-      val playerIcon = when (isPlaying) {
-        true -> Icons.Default.Pause
-        else -> Icons.Default.PlayArrow
-      }
       Image(
-        imageVector = playerIcon,
+        imageVector = when (isPlaying) {
+          true -> Icons.Default.Pause
+          else -> Icons.Default.PlayArrow
+        },
+        modifier = Modifier.size(size),
         contentDescription = "play/pause",
         colorFilter = colorFilter
       )
@@ -259,6 +263,7 @@ fun MiniPlayerControls(
     IconButton(onClick = onClosePlayer) {
       Image(
         imageVector = Icons.Default.Close,
+        modifier = Modifier.size(size),
         contentDescription = "close video",
         colorFilter = colorFilter
       )
@@ -1593,36 +1598,68 @@ fun PlaybackBottomSheet(
       val containerColor: Color = colorScheme.primaryContainer
 
       Column {
+        val typography = MaterialTheme.typography
+        val bodySmall = typography.bodySmall
         Row(
           modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = isCollapsed, onClick = onCollapsedClick),
+            .clickable(
+              enabled = isCollapsed,
+              indication = null,
+              interactionSource = remember { MutableInteractionSource() },
+              onClick = onCollapsedClick
+            ),
           horizontalArrangement = Arrangement.SpaceBetween
         ) {
           val ratio = remember { 16 / 9f }
-          VideoPlayer(
-            modifier = Modifier
-              .background(color = Color.Black)
-              .then(
-                if (isCollapsed) {
-                  Modifier
-                    .height(110.dp - 48.dp)
-                    .aspectRatio(ratio)
-                } else {
-                  Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(get(streamData, Stream.aspect_ratio, ratio)!!)
+          Row(modifier = Modifier.weight(.8f)) {
+            VideoPlayer(
+              modifier = Modifier
+                .background(color = Color.Black)
+                .then(
+                  if (isCollapsed) {
+                    Modifier
+                      .height(110.dp - 54.dp)
+                      .width(136.dp)
+//                      .aspectRatio(ratio)
+                  } else {
+                    Modifier
+                      .fillMaxWidth()
+                      .aspectRatio(
+                        get(streamData, Stream.aspect_ratio, ratio)!!
+                      )
+                  }
+                ),
+              stream = activeStream,
+              useController = !isCollapsed,
+              showThumbnail = showThumbnail,
+              thumbnail = activeStreamCache.thumbnail
+            )
+            if (isCollapsed) {
+              if (streamState != StreamState.LOADING) {
+                Column(Modifier.padding(8.dp)) {
+                  Text(
+                    text = get<String>(streamData, Stream.title)!!,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = bodySmall
+                  )
+                  Text(
+                    text = get<String>(streamData, Stream.uploader)!!,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = bodySmall.copy(
+                      color = colorScheme.onSurface.copy(alpha = .6f)
+                    )
+                  )
                 }
-              ),
-            stream = activeStream,
-            useController = !isCollapsed,
-            showThumbnail = showThumbnail,
-            thumbnail = activeStreamCache.thumbnail
-          )
-
+              }
+            }
+          }
           if (isCollapsed) {
             val playerState = get<StreamState>(activeStream.data, common.state)
             MiniPlayerControls(
+              modifier = Modifier.weight(.2f),
               isPlaying = playerState == StreamState.PLAYING,
               onClosePlayer = {
                 dispatchSync(v("stream_panel_fsm", "close_player"))
@@ -1657,7 +1694,7 @@ fun PlaybackBottomSheet(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                       text = activeStreamCache.viewCount,
-                      style = MaterialTheme.typography.bodySmall.copy(
+                      style = bodySmall.copy(
                         colorScheme.onSurface.copy(alpha = .6f)
                       )
                     )
@@ -1836,7 +1873,7 @@ fun PlaybackBottomSheet(
   }
 }
 
-val MINI_PLAYER_HEIGHT = 62.dp
+val MINI_PLAYER_HEIGHT = 56.dp
 
 // -- Previews -----------------------------------------------------------------
 

@@ -136,6 +136,12 @@ val playerMachine = m<Any?, Any?>(
     ),
     "on_play" to m(fsm.target to StreamState.PLAYING)
   ),
+  StreamState.BUFFERING to m(
+    Player.STATE_READY to m(
+      fsm.target to StreamState.PLAYING,
+      fsm.actions to v(::hideThumbnail, ::setCurrentQuality)
+    )
+  ),
   fsm.ALL to m(
     common.play_video to v(
       m(fsm.target to fsm.ALL, fsm.guard to ::isSameVideoAlreadyPlaying),
@@ -144,14 +150,7 @@ val playerMachine = m<Any?, Any?>(
         fsm.actions to v(::fetchStream, ::pausePlayer)
       )
     ),
-    common.close_player to m(
-      fsm.target to null,
-      fsm.actions to ::closePlayer
-    ),
-    Player.STATE_READY to m(
-      fsm.target to StreamState.PLAYING,
-      fsm.actions to v(::hideThumbnail, ::setCurrentQuality)
-    ),
+    common.close_player to m(fsm.target to null, fsm.actions to ::closePlayer),
     "generate_quality_list" to m(
       fsm.target to fsm.ALL,
       fsm.actions to ::generateQualityList

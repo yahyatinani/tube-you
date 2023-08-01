@@ -1706,7 +1706,7 @@ fun PlaybackBottomSheet(
               modifier = Modifier.weight(.2f),
               isPlaying = playerState == StreamState.PLAYING,
               onClosePlayer = {
-                dispatchSync(v("stream_panel_fsm", "close_player"))
+                dispatchSync(v("stream_panel_fsm", common.close_player))
               }
             ) {
               dispatchSync(v("stream_panel_fsm", "toggle_play_pause"))

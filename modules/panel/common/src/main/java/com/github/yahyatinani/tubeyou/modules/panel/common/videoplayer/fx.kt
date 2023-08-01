@@ -19,9 +19,7 @@ import kotlinx.coroutines.launch
 @OptIn(UnstableApi::class)
 fun regPlaybackFxs(scope: CoroutineScope) {
   regFx(common.close_player) {
-    scope.launch {
-      TyPlayer.close()
-    }
+    scope.launch { TyPlayer.close() }
   }
 
   regFx(common.toggle_player) {
@@ -62,13 +60,8 @@ fun RegPlayerSheetEffects(playerSheetState: SheetState) {
     }
 
     regFx(common.hide_player_sheet) {
-      playerSheetScope.launch {
-        dispatchSync(v(common.close_player))
-      }
-      playerSheetScope.launch {
-        playerSheetState.hide()
-        dispatch(v("stream_panel_fsm", common.close_player))
-      }
+      playerSheetScope.launch { dispatchSync(v(common.close_player)) }
+      playerSheetScope.launch { playerSheetState.hide() }
     }
   }
 }

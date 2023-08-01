@@ -23,6 +23,7 @@ import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.recompose.subs.Query
 import io.github.yahyatinani.y.core.collections.IPersistentMap
+import io.github.yahyatinani.y.core.collections.PersistentArrayMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
@@ -141,23 +142,30 @@ private fun highlightComment(sc: StreamComments) = when {
 private fun mapComment(
   comment: StreamComment,
   stream: StreamData?
-) = m(
-  "author" to comment.author,
-  "commentedTime" to " $MEDIUM_BULLET ${shortenTime(comment.commentedTime)}",
-  "author_avatar" to comment.thumbnail,
-  "comment_text" to HtmlCompat.fromHtml(
-    comment.commentText,
-    HtmlCompat.FROM_HTML_MODE_LEGACY
-  ).toAnnotatedString(),
-  "likes_count" to formatSubCount(comment.likeCount),
-  "replies_count" to comment.replyCount,
-  "verified" to comment.verified,
-  "pinned" to comment.pinned,
-  "hearted" to comment.hearted,
-  "uploader" to (stream?.uploader ?: "this channel"),
-  "uploader_avatar" to (stream?.uploaderAvatar ?: ""),
-  "by_uploader" to (comment.commentorUrl == stream?.uploaderUrl)
-)
+): PersistentArrayMap<String, Any> {
+  val byUploader = comment.commentorUrl == stream?.uploaderUrl
+  val isVerified = when {
+    byUploader -> stream!!.uploaderVerified
+    else -> comment.verified
+  }
+  return m(
+    "author" to comment.author,
+    "commentedTime" to " $MEDIUM_BULLET ${shortenTime(comment.commentedTime)}",
+    "author_avatar" to comment.thumbnail,
+    "comment_text" to HtmlCompat.fromHtml(
+      comment.commentText,
+      HtmlCompat.FROM_HTML_MODE_LEGACY
+    ).toAnnotatedString(),
+    "likes_count" to formatSubCount(comment.likeCount),
+    "replies_count" to comment.replyCount,
+    "verified" to isVerified,
+    "pinned" to comment.pinned,
+    "hearted" to comment.hearted,
+    "uploader" to (stream?.uploader ?: "this channel"),
+    "uploader_avatar" to (stream?.uploaderAvatar ?: ""),
+    "by_uploader" to byUploader
+  )
+}
 
 fun formatFullViews(number: Long): String {
   val numberFormat = NumberFormat.getNumberInstance(Locale.US)
@@ -325,7 +333,7 @@ fun regCommonSubs() {
     val commentsListState =
       get(fsmStates, ":comments_list") ?: CommentsListState.LOADING
     val commentsState: IPersistentMap<Any?, Any?> = when (commentsListState) {
-      CommentsListState.LOADING -> m<Any?, Any?>()
+      CommentsListState.LOADING -> m()
       CommentsListState.REFRESHING, CommentsListState.APPENDING -> {
         prev.data as IPersistentMap<Any?, Any?>
       }

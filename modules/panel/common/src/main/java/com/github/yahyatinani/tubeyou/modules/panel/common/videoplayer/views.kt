@@ -1110,14 +1110,13 @@ fun Comment(
     ) {
       val colorScheme = MaterialTheme.colorScheme
       val color = colorScheme.onSurface.copy(alpha = .6f)
-      val iconSize = 12.dp
       val textStyle = typography.bodySmall.copy(color = color)
 
       if (pinned) {
         val uploader: String = get(comment, "uploader")!!
         Row(verticalAlignment = Alignment.CenterVertically) {
           Icon(
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier.size(12.dp),
             imageVector = Icons.Default.PushPin,
             contentDescription = "",
             tint = color
@@ -1166,10 +1165,10 @@ fun Comment(
 
           if (verified) {
             Icon(
-              modifier = Modifier.size(iconSize),
+              modifier = Modifier.size(14.dp),
               imageVector = Icons.Default.CheckCircle,
               contentDescription = "",
-              tint = color
+              tint = Color.White
             )
           }
         }

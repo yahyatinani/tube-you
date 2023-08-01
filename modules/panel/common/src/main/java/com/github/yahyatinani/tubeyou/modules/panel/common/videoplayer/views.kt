@@ -1025,52 +1025,6 @@ private fun DescriptionSheet(
 }
 
 @Composable
-fun CommentsList(
-  uiState: UIState,
-  navReplies: (Pair<Int, UIState>) -> Unit = { }
-) {
-  val commentsState = uiState.data
-
-  val commentsListState = get<CommentsListState>(commentsState, common.state)!!
-  println("commentsListState $commentsListState")
-
-  LazyColumn(
-    modifier = Modifier
-      .fillMaxSize()
-      .nestedScroll(BottomSheetNestedScrollConnection())
-  ) {
-    if (commentsListState == CommentsListState.LOADING) return@LazyColumn
-
-    val commentsList = get<List<UIState>>(commentsState, "comments_list")!!
-    itemsIndexed(items = commentsList) { index: Int, comment: UIState ->
-      dispatch(v("append_comments", index))
-      val typography = MaterialTheme.typography
-
-      val indexComment = index to comment
-      Comment(state = comment) { navReplies(indexComment) }
-
-      val repliesCount: Int = get(comment.data, "replies_count")!!
-      if (repliesCount > 0) {
-        Text(
-          modifier = Modifier
-            .padding(start = 40.dp)
-            .clickable(onClick = { navReplies(indexComment) })
-            .padding(12.dp),
-          text = "$repliesCount replies",
-          style = typography.labelLarge.copy(color = Blue400)
-        )
-      }
-    }
-
-    item {
-      if (commentsListState == CommentsListState.APPENDING) {
-        AppendingLoader()
-      }
-    }
-  }
-}
-
-@Composable
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 fun Comment(
   modifier: Modifier = Modifier,
@@ -1457,21 +1411,21 @@ private fun NavGraphBuilder.repliesList(repliesState: UIState) {
       )
     }
   ) {
-    val commentsState = get<CommentsListState>(repliesState.data, common.state)
+    val listState = get<CommentsListState>(repliesState.data, common.state)
     SwipeRefresh(
       modifier = Modifier
         .fillMaxSize()
         .nestedScroll(BlockScrolling),
       state = rememberSwipeRefreshState(
-        isRefreshing = commentsState == CommentsListState.REFRESHING
+        isRefreshing = listState == CommentsListState.REFRESHING
       ),
       onRefresh = {
         dispatch(v("stream_panel_fsm", "refresh_comment_replies"))
       },
-      indicator = { state, refreshTrigger ->
+      indicator = { swipeRefreshState, refreshTrigger ->
         val colorScheme = MaterialTheme.colorScheme
         SwipeRefreshIndicator(
-          state = state,
+          state = swipeRefreshState,
           refreshTriggerDistance = refreshTrigger,
           backgroundColor = colorScheme.primaryContainer,
           contentColor = colorScheme.onBackground,
@@ -1485,25 +1439,21 @@ private fun NavGraphBuilder.repliesList(repliesState: UIState) {
 }
 
 private fun NavGraphBuilder.commentsList(uiState: UIState) {
-  val commentsStateData = uiState.data as IPersistentMap<Any?, Any?>
-  val commentsListState = get<CommentsListState>(
-    commentsStateData,
-    common.state
-  )
-  println("CommentsSheet: $commentsListState")
-  val isRefreshing = commentsListState == CommentsListState.REFRESHING
-
   composable(COMMENTS_ROUTE) {
+    val uiData = uiState.data
+    val state = get<CommentsListState>(uiData, common.state)
     SwipeRefresh(
       modifier = Modifier
         .fillMaxSize()
         .nestedScroll(BlockScrolling),
-      state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+      state = rememberSwipeRefreshState(
+        isRefreshing = state == CommentsListState.REFRESHING
+      ),
       onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
-      indicator = { state, refreshTrigger ->
+      indicator = { refreshState, refreshTrigger ->
         val colorScheme = MaterialTheme.colorScheme
         SwipeRefreshIndicator(
-          state = state,
+          state = refreshState,
           refreshTriggerDistance = refreshTrigger,
           backgroundColor = colorScheme.primaryContainer,
           contentColor = colorScheme.onBackground,
@@ -1511,25 +1461,14 @@ private fun NavGraphBuilder.commentsList(uiState: UIState) {
         )
       }
     ) {
-      val state = get<CommentsListState>(uiState.data, common.state)
-//      val cms = get<UIState>(m, "comments")!!
-      println("uicommmentListswatch, $state")
-
-      val commentsState = uiState.data
-
-      val commentsListState =
-        get<CommentsListState>(commentsState, common.state)!!
-      println("commentsListState $commentsListState")
-
       LazyColumn(
         modifier = Modifier
           .fillMaxSize()
           .nestedScroll(BottomSheetNestedScrollConnection())
       ) {
-        if (commentsListState == CommentsListState.LOADING) return@LazyColumn
+        if (state == CommentsListState.LOADING) return@LazyColumn
 
-        val commentsList =
-          get<List<UIState>>(commentsState, "comments_list")!!
+        val commentsList = get<List<UIState>>(uiData, "comments_list")!!
         itemsIndexed(items = commentsList) { index: Int, comment: UIState ->
           dispatch(v("append_comments", index))
           val typography = MaterialTheme.typography
@@ -1561,15 +1500,11 @@ private fun NavGraphBuilder.commentsList(uiState: UIState) {
         }
 
         item {
-          if (commentsListState == CommentsListState.APPENDING) {
+          if (state == CommentsListState.APPENDING) {
             AppendingLoader()
           }
         }
       }
-
-      /*          CommentsList(uiState = uiState) { comment ->
-                      dispatch(v("stream_panel_fsm", "navigate_replies", comment))
-                    }*/
     }
   }
 }

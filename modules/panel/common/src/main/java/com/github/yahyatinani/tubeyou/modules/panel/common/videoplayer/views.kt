@@ -898,7 +898,7 @@ private fun DescriptionSheet(
     val bodySmall = typography.bodySmall
     val colorScheme = MaterialTheme.colorScheme
 
-    if (get<SheetValue>(sheetData, common.state)!! == Hidden) {
+    if (get<StreamState>(sheetData, common.state)!! == StreamState.LOADING) {
       return@Scaffold
     }
 
@@ -1574,7 +1574,7 @@ fun PlaybackBottomSheet(
       DescriptionSheet(
         descSheetState = descSheetState,
         sheetPeekHeight = height,
-        uiState = watch(v("active_stream_description"))
+        uiState = activeStream
       )
     }
   ) {

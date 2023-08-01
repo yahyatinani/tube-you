@@ -244,7 +244,14 @@ fun regCommonSubs() {
       Stream.channel_name to viewModel.uploaderName,
       Stream.avatar to stream.uploaderAvatar,
       Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
-      Stream.likes_count to formatViews(stream.likes)
+      Stream.likes_count to formatViews(stream.likes),
+      Stream.views_full to formatFullViews(stream.views),
+      Stream.year to stream.uploadDate.toLocalDate().year.toString(),
+      Stream.month_day to formatToMonthDay(stream.uploadDate),
+      Stream.description to HtmlCompat.fromHtml(
+        stream.description,
+        HtmlCompat.FROM_HTML_MODE_LEGACY
+      )
     )
 
     UIState(
@@ -274,44 +281,6 @@ fun regCommonSubs() {
     val commentsSheet =
       get<SheetValue>(playbackMachine, ":description_sheet")
     commentsSheet ?: SheetValue.Hidden
-  }
-
-  regSub(
-    queryId = "active_stream_description",
-    initialValue = UIState(m(common.state to SheetValue.Hidden)),
-    v("stream_panel_fsm"),
-    v("description_sheet")
-  ) { (streamPanelFsm, descMachine), _, _ ->
-    val machineState = get<Any>(streamPanelFsm, fsm._state)
-    val playerMachine = get<Any>(machineState, ":player")
-    if (
-      playerMachine == null ||
-      playerMachine == StreamState.LOADING ||
-      descMachine == null ||
-      descMachine == SheetValue.Hidden
-    ) {
-      return@regSub UIState(m(common.state to SheetValue.Hidden))
-    }
-
-    val stream = get<StreamData>(streamPanelFsm, "stream_data")!!
-    val viewModel = get<VideoViewModel>(streamPanelFsm, "active_stream")!!
-    UIState(
-      m(
-        common.state to descMachine,
-        Stream.title to stream.title,
-        Stream.views_full to formatFullViews(stream.views),
-        Stream.year to stream.uploadDate.toLocalDate().year.toString(),
-        Stream.month_day to formatToMonthDay(stream.uploadDate),
-        Stream.channel_name to viewModel.uploaderName,
-        Stream.avatar to stream.uploaderAvatar,
-        Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
-        Stream.likes_count to formatViews(stream.likes),
-        Stream.description to HtmlCompat.fromHtml(
-          stream.description,
-          HtmlCompat.FROM_HTML_MODE_LEGACY
-        )
-      )
-    )
   }
 
   regSub("comments_sheet") { db: AppDb, _: Query ->

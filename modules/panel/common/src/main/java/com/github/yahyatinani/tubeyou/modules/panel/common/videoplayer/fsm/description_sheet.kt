@@ -40,6 +40,10 @@ val descriptionSheetMachine = m(
     common.close_player to m(
       fsm.target to SheetValue.Hidden,
       fsm.actions to ::closeDescriptionSheet
+    ),
+    common.play_video to m(
+      fsm.target to SheetValue.Hidden,
+      fsm.actions to ::closeDescriptionSheet
     )
   )
 )

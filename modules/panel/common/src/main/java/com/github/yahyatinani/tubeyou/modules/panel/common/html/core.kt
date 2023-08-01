@@ -50,7 +50,10 @@ private enum class SpanCopier {
         end = end
       )
       destination.addStyle(
-        style = SpanStyle(color = Blue400),
+        style = SpanStyle(
+          color = Blue400,
+          textDecoration = TextDecoration.None
+        ),
         start = start,
         end = end
       )

@@ -131,8 +131,6 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
-import androidx.core.text.HtmlCompat.fromHtml
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -720,7 +718,7 @@ private fun TextView.setupClickableLinks() {
 }
 
 @Composable
-fun Html(text: String) {
+fun Html(text: Spanned) {
   AndroidView(
     factory = { context ->
       TextView(context).apply {
@@ -731,7 +729,7 @@ fun Html(text: String) {
       .padding(horizontal = 12.dp)
       .padding(top = 8.dp)
   ) {
-    it.text = fromHtml(text, FROM_HTML_MODE_LEGACY)
+    it.text = text
   }
 }
 
@@ -859,11 +857,11 @@ private fun HeartedAvatar(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun StreamPanelTitle(streamTitle: String) {
+fun StreamPanelTitle(streamTitle: String, maxLines: Int = 2) {
   Text(
     text = streamTitle,
     style = MaterialTheme.typography.titleMedium,
-    maxLines = 2,
+    maxLines = maxLines,
     overflow = TextOverflow.Ellipsis
   )
 }
@@ -873,8 +871,7 @@ fun StreamPanelTitle(streamTitle: String) {
 private fun DescriptionSheet(
   descSheetState: SheetState,
   sheetPeekHeight: Dp,
-  isLoading: Boolean,
-  streamData: Any
+  uiState: UIState
 ) {
   Scaffold(
     modifier = Modifier
@@ -887,6 +884,8 @@ private fun DescriptionSheet(
       ),
     topBar = {
       SheetHeader(
+        modifier = Modifier
+          .padding(start = 16.dp),
         headerTitle = "Description",
         sheetState = descSheetState.currentValue
       ) {
@@ -894,17 +893,129 @@ private fun DescriptionSheet(
       }
     }
   ) { padding ->
-    if (!isLoading) {
-      LazyColumn(
-        modifier = Modifier
-          .padding(padding)
-          .fillMaxSize()
-          .nestedScroll(BottomSheetNestedScrollConnection())
-      ) {
-        item {
-          Html(text = get(streamData, Stream.description)!!)
+    val sheetData = uiState.data
+    val typography = MaterialTheme.typography
+    val bodySmall = typography.bodySmall
+    val colorScheme = MaterialTheme.colorScheme
+
+    if (get<SheetValue>(sheetData, common.state)!! == Hidden) {
+      return@Scaffold
+    }
+
+    LazyColumn(
+      modifier = Modifier
+        .padding(padding)
+        .fillMaxSize()
+        .nestedScroll(BottomSheetNestedScrollConnection())
+    ) {
+      item {
+        Surface(
+          modifier = Modifier.padding(
+            horizontal = 12.dp,
+            vertical = 16.dp
+          )
+        ) {
+          StreamPanelTitle(
+            get<String>(sheetData, Stream.title)!!,
+            maxLines = Int.MAX_VALUE
+          )
         }
       }
+
+      item {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+          horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            StreamPanelTitle(get<String>(sheetData, Stream.likes_count)!!)
+            Text(
+              text = "Likes",
+              style = bodySmall.copy(colorScheme.onSurface.copy(alpha = .6f))
+            )
+          }
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            StreamPanelTitle(get<String>(sheetData, Stream.views_full)!!)
+            Text(
+              text = "Views",
+              style = bodySmall.copy(colorScheme.onSurface.copy(alpha = .6f))
+            )
+          }
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            StreamPanelTitle(get<String>(sheetData, Stream.month_day)!!)
+            Text(
+              text = get<String>(sheetData, Stream.year)!!,
+              style = bodySmall.copy(colorScheme.onSurface.copy(alpha = .6f))
+            )
+          }
+        }
+      }
+
+      item { Spacer(modifier = Modifier.height(16.dp)) }
+
+      item {
+        Divider(
+          modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .fillMaxWidth()
+        )
+      }
+
+      item { Spacer(modifier = Modifier.height(16.dp)) }
+
+      item {
+        Html(text = get(sheetData, Stream.description)!!)
+      }
+
+      item { Spacer(modifier = Modifier.height(16.dp)) }
+
+      item {
+        Divider(
+          modifier = Modifier.fillMaxWidth(),
+          thickness = 8.dp
+        )
+      }
+
+      item { Spacer(modifier = Modifier.height(16.dp)) }
+
+      item {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .clickable { /* todo: */ }
+            .padding(horizontal = 12.dp)
+            .padding(bottom = 8.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          AuthorAvatar(
+            url = get(sheetData, Stream.avatar)!!,
+            size = 56.dp
+          )
+
+          Spacer(modifier = Modifier.width(12.dp))
+
+          Column {
+            Text(
+              text = get<String>(sheetData, Stream.channel_name)!!,
+              style = typography.titleMedium
+            )
+
+            Text(
+              text = get<String>(
+                sheetData,
+                Stream.sub_count
+              )!! + " subscribers",
+              style = MaterialTheme.typography.bodyMedium.copy(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)
+              )
+            )
+          }
+        }
+      }
+
+      item { Spacer(modifier = Modifier.height(16.dp)) }
     }
   }
 
@@ -1480,12 +1591,12 @@ fun PlaybackBottomSheet(
   )
   val descScaffoldState = rememberBottomSheetScaffoldState(descSheetState)
   val playbackScope = rememberCoroutineScope()
-  val descriptionSheetValue = watch<SheetValue>(query = v("description_sheet"))
+  val descriptionSheetState = watch<SheetValue>(query = v("description_sheet"))
   val descSheetValue = descSheetState.currentValue
   val descTargetValue = descSheetState.targetValue
   val descSheetPeekHeight =
-    remember(descriptionSheetValue, descTargetValue, descSheetValue) {
-      if (descriptionSheetValue == Hidden) {
+    remember(descriptionSheetState, descTargetValue, descSheetValue) {
+      if (descriptionSheetState == Hidden) {
         0.dp
       } else if (descSheetValue == Hidden && descTargetValue == Hidden) {
         dispatch(v("stream_panel_fsm", "close_desc_sheet"))
@@ -1529,8 +1640,7 @@ fun PlaybackBottomSheet(
       DescriptionSheet(
         descSheetState = descSheetState,
         sheetPeekHeight = height,
-        isLoading = isLoading,
-        streamData = streamData
+        uiState = watch(v("active_stream_description"))
       )
     }
   ) {

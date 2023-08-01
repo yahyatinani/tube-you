@@ -2,6 +2,8 @@ package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import android.content.Context
 import android.text.SpannedString
+import android.text.TextPaint
+import android.text.style.URLSpan
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.core.net.toUri
@@ -31,6 +33,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.periodUntil
 import kotlinx.datetime.toLocalDate
 import kotlinx.datetime.toLocalDateTime
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 enum class Stream {
   title,
@@ -53,7 +58,10 @@ enum class Stream {
   comments_count,
   highlight_comment,
   highlight_comment_avatar,
-  comments_disabled
+  comments_disabled,
+  views_full,
+  year,
+  month_day
 }
 
 fun ratio(streamData: StreamData): Float {
@@ -151,6 +159,27 @@ private fun mapComment(
   "by_uploader" to (comment.commentorUrl == stream?.uploaderUrl)
 )
 
+fun formatFullViews(number: Long): String {
+  val numberFormat = NumberFormat.getNumberInstance(Locale.US)
+  return numberFormat.format(number)
+}
+
+fun formatToMonthDay(inputDate: String?): String? {
+  if (inputDate == null) return "-"
+  val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+  val outputFormat = SimpleDateFormat("MMM d", Locale.US)
+  val date = inputFormat.parse(inputDate)
+  return outputFormat.format(date!!)
+}
+
+private class URLSpanNoUnderline(url: String?) : URLSpan(url) {
+  override fun updateDrawState(ds: TextPaint) {
+    super.updateDrawState(ds)
+    println("sdjlkfjsdkjf")
+    ds.isUnderlineText = false
+  }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 fun regCommonSubs() {
   regSub(queryId = "active_stream_vm") { db: AppDb, _: Query ->
@@ -167,8 +196,8 @@ fun regCommonSubs() {
     initialValue = UIState(m(common.state to StreamState.LOADING)),
     inputSignal = v("stream_panel_fsm")
   ) { streamPanelFsm: IPersistentMap<Any, Any>?, _, (_, context) ->
-    val playbackMachine = get<Any>(streamPanelFsm, fsm._state)
-    val playerRegion = get<Any>(playbackMachine, ":player")
+    val machineState = get<Any>(streamPanelFsm, fsm._state)
+    val playerRegion = get<Any>(machineState, ":player")
 
     if (playerRegion == null || playerRegion == StreamState.LOADING) {
       return@regSub UIState(m(common.state to StreamState.LOADING))
@@ -186,15 +215,15 @@ fun regCommonSubs() {
 
     val viewModel = get<VideoViewModel>(streamPanelFsm, "active_stream")!!
 
-    val views = formatViews(stream!!.views)
-
-    val views1 = if (viewModel.isLiveStream) {
-      views + " watching" + " Started ${timeAgoFormat(stream.uploadDate)}"
-    } else {
-      "$views views"
+    val views = formatViews(stream!!.views).let {
+      if (viewModel.isLiveStream) {
+        it + " watching" + " Started ${timeAgoFormat(stream.uploadDate)}"
+      } else {
+        "$it views"
+      }
     }
 
-    val m = m<Any, Any?>(
+    val m = m(
       common.state to playerRegion,
       Stream.title to stream.title,
       Stream.uploader to stream.uploader,
@@ -202,13 +231,12 @@ fun regCommonSubs() {
       Stream.quality_list to qualityList,
       Stream.current_quality to cq,
       Stream.aspect_ratio to ratio(stream),
-      Stream.views to views1,
+      Stream.views to views,
       Stream.date to shortenTime(viewModel.uploaded),
       Stream.channel_name to viewModel.uploaderName,
       Stream.avatar to stream.uploaderAvatar,
       Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
-      Stream.likes_count to formatViews(stream.likes),
-      Stream.description to stream.description
+      Stream.likes_count to formatViews(stream.likes)
     )
 
     UIState(
@@ -232,19 +260,57 @@ fun regCommonSubs() {
     )
   }
 
-  regSub("comments_sheet") { db: AppDb, _: Query ->
-    val playbackFsm = db["stream_panel_fsm"]
-    val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val commentsSheet =
-      get<SheetValue>(playbackMachine, ":comments_sheet")
-    commentsSheet ?: SheetValue.Hidden
-  }
-
   regSub("description_sheet") { db: AppDb, _: Query ->
     val playbackFsm = db["stream_panel_fsm"]
     val playbackMachine = get<Any>(playbackFsm, fsm._state)
     val commentsSheet =
       get<SheetValue>(playbackMachine, ":description_sheet")
+    commentsSheet ?: SheetValue.Hidden
+  }
+
+  regSub(
+    queryId = "active_stream_description",
+    initialValue = UIState(m(common.state to SheetValue.Hidden)),
+    v("stream_panel_fsm"),
+    v("description_sheet")
+  ) { (streamPanelFsm, descMachine), _, _ ->
+    val machineState = get<Any>(streamPanelFsm, fsm._state)
+    val playerMachine = get<Any>(machineState, ":player")
+    if (
+      playerMachine == null ||
+      playerMachine == StreamState.LOADING ||
+      descMachine == null ||
+      descMachine == SheetValue.Hidden
+    ) {
+      return@regSub UIState(m(common.state to SheetValue.Hidden))
+    }
+
+    val stream = get<StreamData>(streamPanelFsm, "stream_data")!!
+    val viewModel = get<VideoViewModel>(streamPanelFsm, "active_stream")!!
+    UIState(
+      m(
+        common.state to descMachine,
+        Stream.title to stream.title,
+        Stream.views_full to formatFullViews(stream.views),
+        Stream.year to stream.uploadDate.toLocalDate().year.toString(),
+        Stream.month_day to formatToMonthDay(stream.uploadDate),
+        Stream.channel_name to viewModel.uploaderName,
+        Stream.avatar to stream.uploaderAvatar,
+        Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
+        Stream.likes_count to formatViews(stream.likes),
+        Stream.description to HtmlCompat.fromHtml(
+          stream.description,
+          HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
+      )
+    )
+  }
+
+  regSub("comments_sheet") { db: AppDb, _: Query ->
+    val playbackFsm = db["stream_panel_fsm"]
+    val playbackMachine = get<Any>(playbackFsm, fsm._state)
+    val commentsSheet =
+      get<SheetValue>(playbackMachine, ":comments_sheet")
     commentsSheet ?: SheetValue.Hidden
   }
 
@@ -259,7 +325,7 @@ fun regCommonSubs() {
     val commentsListState =
       get(fsmStates, ":comments_list") ?: CommentsListState.LOADING
     val commentsState: IPersistentMap<Any?, Any?> = when (commentsListState) {
-      CommentsListState.LOADING -> m()
+      CommentsListState.LOADING -> m<Any?, Any?>()
       CommentsListState.REFRESHING, CommentsListState.APPENDING -> {
         prev.data as IPersistentMap<Any?, Any?>
       }
@@ -291,7 +357,7 @@ fun regCommonSubs() {
       get(fsmStates, ":comment_replies") ?: CommentsListState.LOADING
 
     val ret: IPersistentMap<Any?, Any?> = when (commentRepliesState) {
-      CommentsListState.LOADING -> m()
+      CommentsListState.LOADING -> m<Any?, Any?>()
 
       CommentsListState.READY -> {
         val replies = get<List<StreamComment>>(panelFsm, "comment_replies")

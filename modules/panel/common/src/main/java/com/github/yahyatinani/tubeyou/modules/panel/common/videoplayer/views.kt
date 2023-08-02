@@ -1517,7 +1517,8 @@ fun PlaybackBottomSheet(
   activeStream: UIState,
   activeStreamCache: VideoViewModel,
   showThumbnail: Boolean?,
-  sheetPeekHeight: Dp
+  sheetPeekHeight: Dp,
+  onClosePlayer: () -> Unit = { }
 ) {
   val descSheetState = rememberStandardBottomSheetState(
     initialValue = Hidden,
@@ -1705,9 +1706,7 @@ fun PlaybackBottomSheet(
             MiniPlayerControls(
               modifier = Modifier.weight(.2f),
               isPlaying = playerState == StreamState.PLAYING,
-              onClosePlayer = {
-                dispatchSync(v("stream_panel_fsm", common.close_player))
-              }
+              onClosePlayer = onClosePlayer
             ) {
               dispatchSync(v("stream_panel_fsm", "toggle_play_pause"))
             }

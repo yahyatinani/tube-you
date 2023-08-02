@@ -152,7 +152,6 @@ fun TyApp(
   }
 
   val isCompactSize = isCompact(windowSizeClass)
-
   TyTheme(isCompact = isCompactSize) {
     val sb = watch<SearchBar?>(v(search.search_bar))
     val topBarState = rememberTopAppBarState()
@@ -220,6 +219,10 @@ fun TyApp(
     val playerSheetState = bottomSheetScaffoldState.bottomSheetState
     val playbackTargetValue = playerSheetState.targetValue
 
+    val onClosePlayer: () -> Unit = {
+      dispatch(v("stream_panel_fsm", common.close_player))
+    }
+
     Scaffold(
       bottomBar = {
         if (playbackTargetValue == SheetValue.Expanded) {
@@ -236,6 +239,13 @@ fun TyApp(
       val playerSheetValue = playerSheetState.currentValue
       LaunchedEffect(playerSheetValue) {
         dispatch(v("stream_panel_fsm", playerSheetValue))
+      }
+      LaunchedEffect(playbackTargetValue) {
+        if (playbackTargetValue == SheetValue.Hidden &&
+          playerSheetValue != SheetValue.Hidden
+        ) {
+          onClosePlayer()
+        }
       }
 
       RegPlayerSheetEffects(playerSheetState)
@@ -287,7 +297,8 @@ fun TyApp(
             activeStream = activeStream,
             activeStreamCache = activeStreamVm,
             showThumbnail = showThumbnail,
-            sheetPeekHeight = peekHeight
+            sheetPeekHeight = peekHeight,
+            onClosePlayer = onClosePlayer
           )
 
           BackHandler(playerSheetValue == SheetValue.Expanded) {

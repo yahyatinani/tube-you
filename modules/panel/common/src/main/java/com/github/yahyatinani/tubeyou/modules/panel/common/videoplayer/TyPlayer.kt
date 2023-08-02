@@ -16,7 +16,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import com.google.net.cronet.okhttptransport.CronetCallFactory
 import io.github.yahyatinani.recompose.dispatch
@@ -134,6 +133,7 @@ object TyPlayer {
     if (mediaItem == exoPlayer!!.currentMediaItem) return
 
     exoPlayer!!.apply {
+      exoPlayer!!.volume = 1f
       addListener(listener)
       playWhenReady = true
       setMediaItem(mediaItem)
@@ -178,8 +178,13 @@ object TyPlayer {
     )
   }
 
+  fun setVolume() {
+    exoPlayer!!.volume = .4f
+  }
+
   fun close() {
     exoPlayer!!.removeListener(listener)
+    exoPlayer!!.stop()
     exoPlayer!!.removeMediaItems(0, exoPlayer!!.mediaItemCount)
   }
 }

@@ -54,10 +54,6 @@ val bottomSheetMachine = m(
       fsm.target to PlayerSheetState.EXPANDED,
       fsm.actions to ::expandPlayerSheet
     ),
-    SheetValue.Expanded to m(
-      fsm.target to PlayerSheetState.EXPANDED,
-      fsm.actions to ::expandPlayerSheet
-    ),
     common.close_player to m(
       fsm.target to PlayerSheetState.HIDDEN,
       fsm.actions to ::hidePlayerSheet

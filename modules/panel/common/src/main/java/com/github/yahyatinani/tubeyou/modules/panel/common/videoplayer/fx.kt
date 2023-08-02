@@ -10,7 +10,6 @@ import androidx.media3.common.util.UnstableApi
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.expand_player_sheet
 import io.github.yahyatinani.recompose.dispatch
-import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.CoroutineScope
@@ -60,8 +59,12 @@ fun RegPlayerSheetEffects(playerSheetState: SheetState) {
     }
 
     regFx(common.hide_player_sheet) {
-      playerSheetScope.launch { dispatchSync(v(common.close_player)) }
-      playerSheetScope.launch { playerSheetState.hide() }
+      playerSheetScope.launch { TyPlayer.setVolume() }
+      playerSheetScope.launch {
+        TyPlayer.setVolume()
+        playerSheetState.hide()
+        TyPlayer.close()
+      }
     }
   }
 }

@@ -9,6 +9,8 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.ratio
 import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.State
 import io.github.yahyatinani.recompose.fsm.fsm
+import io.github.yahyatinani.recompose.fsm.fsm.actions
+import io.github.yahyatinani.recompose.fsm.fsm.target
 import io.github.yahyatinani.recompose.fx.BuiltInFx
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
@@ -38,12 +40,6 @@ fun fetchStream(
     )
   )
 }
-
-fun pausePlayer(
-  appDb: AppDb,
-  state: State?,
-  event: Event
-): Effects = m(fx to v(v(common.close_player)))
 
 fun playNewStream(
   appDb: AppDb,
@@ -85,6 +81,10 @@ fun closePlayer(appDb: AppDb, state: State?, event: Event): Effects = m(
   fx to v(v(common.close_player))
 )
 
+fun stopPlayer(appDb: AppDb, state: State?, event: Event): Effects = m(
+  fx to v(v(common.close_player))
+)
+
 fun hideThumbnail(appDb: AppDb, state: State?, event: Event): Effects = m(
   fsm.state_map to (state?.dissoc("show_player_thumbnail") ?: state)
 )
@@ -111,57 +111,57 @@ fun setStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
 val playerMachine = m<Any?, Any?>(
   null to m(
     common.play_video to m(
-      fsm.target to StreamState.LOADING,
-      fsm.actions to v(::fetchStream)
+      target to StreamState.LOADING,
+      actions to v(::fetchStream)
     )
   ),
   StreamState.LOADING to m(
     "launch_stream" to m(
-      fsm.target to StreamState.BUFFERING,
-      fsm.actions to ::playNewStream
+      target to StreamState.BUFFERING,
+      actions to ::playNewStream
     )
   ),
   StreamState.PLAYING to m(
     "toggle_play_pause" to m(
-      fsm.target to StreamState.PAUSED,
-      fsm.actions to ::toggle
+      target to StreamState.PAUSED,
+      actions to ::toggle
     ),
-    Player.STATE_BUFFERING to m(fsm.target to StreamState.BUFFERING),
-    "on_pause" to m(fsm.target to StreamState.PAUSED)
+    Player.STATE_BUFFERING to m(target to StreamState.BUFFERING),
+    "on_pause" to m(target to StreamState.PAUSED)
   ),
   StreamState.PAUSED to m(
     "toggle_play_pause" to m(
-      fsm.target to StreamState.PLAYING,
-      fsm.actions to ::toggle
+      target to StreamState.PLAYING,
+      actions to ::toggle
     ),
-    "on_play" to m(fsm.target to StreamState.PLAYING)
+    "on_play" to m(target to StreamState.PLAYING)
   ),
   StreamState.BUFFERING to m(
     Player.STATE_READY to m(
-      fsm.target to StreamState.PLAYING,
-      fsm.actions to v(::hideThumbnail, ::setCurrentQuality)
+      target to StreamState.PLAYING,
+      actions to v(::hideThumbnail, ::setCurrentQuality)
     )
   ),
   fsm.ALL to m(
     common.play_video to v(
-      m(fsm.target to fsm.ALL, fsm.guard to ::isSameVideoAlreadyPlaying),
+      m(target to fsm.ALL, fsm.guard to ::isSameVideoAlreadyPlaying),
       m(
-        fsm.target to StreamState.LOADING,
-        fsm.actions to v(::fetchStream, ::pausePlayer)
+        target to StreamState.LOADING,
+        actions to v(::fetchStream, ::stopPlayer)
       )
     ),
-    common.close_player to m(fsm.target to null, fsm.actions to ::closePlayer),
+    common.close_player to m(target to null),
     "generate_quality_list" to m(
-      fsm.target to fsm.ALL,
-      fsm.actions to ::generateQualityList
+      target to fsm.ALL,
+      actions to ::generateQualityList
     ),
     "set_quality_list" to m(
-      fsm.target to fsm.ALL,
-      fsm.actions to ::setQualityList
+      target to fsm.ALL,
+      actions to ::setQualityList
     ),
     "set_stream_comments" to m(
-      fsm.target to fsm.ALL,
-      fsm.actions to ::setStreamComments
+      target to fsm.ALL,
+      actions to ::setStreamComments
     )
   )
 )

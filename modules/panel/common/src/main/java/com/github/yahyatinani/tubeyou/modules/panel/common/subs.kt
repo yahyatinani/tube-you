@@ -15,9 +15,12 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatSubCount
 import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatViews
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.panel.common.html.toAnnotatedString
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Channel
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Playlist
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Video
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.createDashSource
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.COMMENTS_ROUTE
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.CommentsListState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.ListState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
 import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
@@ -62,7 +65,8 @@ enum class Stream {
   comments_disabled,
   views_full,
   year,
-  month_day
+  month_day,
+  related_streams
 }
 
 fun ratio(streamData: StreamData): Float {
@@ -231,6 +235,13 @@ fun regCommonSubs() {
       }
     }
 
+    val relatedStreams = stream.relatedStreams.map { item ->
+      when (item) {
+        is Video -> formatVideo(item, (context as Context).resources)
+        is Channel -> formatChannel(item)
+        is Playlist -> formatPlayList(item)
+      }
+    }
     val m = m(
       common.state to playerRegion,
       Stream.title to stream.title,
@@ -251,7 +262,8 @@ fun regCommonSubs() {
       Stream.description to HtmlCompat.fromHtml(
         stream.description,
         HtmlCompat.FROM_HTML_MODE_LEGACY
-      )
+      ),
+      Stream.related_streams to relatedStreams
     )
 
     UIState(
@@ -291,7 +303,7 @@ fun regCommonSubs() {
     commentsSheet ?: SheetValue.Hidden
   }
 
-  val loadingState = UIState(m(common.state to CommentsListState.LOADING))
+  val loadingState = UIState(m(common.state to ListState.LOADING))
 
   regSub<IPersistentMap<Any, Any>, UIState>(
     queryId = Stream.comments,
@@ -300,14 +312,14 @@ fun regCommonSubs() {
   ) { panelFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val fsmStates = get<Any>(panelFsm, fsm._state)
     val commentsListState =
-      get(fsmStates, ":comments_list") ?: CommentsListState.LOADING
+      get(fsmStates, ":comments_list") ?: ListState.LOADING
     val commentsState: IPersistentMap<Any?, Any?> = when (commentsListState) {
-      CommentsListState.LOADING -> m()
-      CommentsListState.REFRESHING, CommentsListState.APPENDING -> {
+      ListState.LOADING -> m()
+      ListState.REFRESHING, ListState.APPENDING -> {
         prev.data as IPersistentMap<Any?, Any?>
       }
 
-      CommentsListState.READY -> {
+      ListState.READY -> {
         val sc = get<StreamComments>(panelFsm, "stream_comments")!!
         val stream = get<StreamData>(panelFsm, "stream_data")
         val comments = sc.comments.map { comment ->
@@ -331,12 +343,12 @@ fun regCommonSubs() {
   ) { panelFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val fsmStates = get<Any>(panelFsm, fsm._state)
     val commentRepliesState =
-      get(fsmStates, ":comment_replies") ?: CommentsListState.LOADING
+      get(fsmStates, ":comment_replies") ?: ListState.LOADING
 
     val ret: IPersistentMap<Any?, Any?> = when (commentRepliesState) {
-      CommentsListState.LOADING -> m<Any?, Any?>()
+      ListState.LOADING -> m<Any?, Any?>()
 
-      CommentsListState.READY -> {
+      ListState.READY -> {
         val replies = get<List<StreamComment>>(panelFsm, "comment_replies")
           ?: v()
         val stream = get<StreamData>(panelFsm, "stream_data")
@@ -352,7 +364,7 @@ fun regCommonSubs() {
         )
       }
 
-      CommentsListState.REFRESHING, CommentsListState.APPENDING -> {
+      ListState.REFRESHING, ListState.APPENDING -> {
         prev.data as IPersistentMap<Any?, Any?>
       }
     }

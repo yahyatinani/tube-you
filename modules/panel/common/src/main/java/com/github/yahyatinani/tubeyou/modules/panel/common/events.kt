@@ -2,6 +2,7 @@ package com.github.yahyatinani.tubeyou.modules.panel.common
 
 import androidx.compose.runtime.Immutable
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
+import com.github.yahyatinani.tubeyou.modules.panel.common.search.Item
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.streamPanelMachine
 import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
@@ -66,7 +67,8 @@ data class StreamData(
   val uploaderSubscriberCount: Long = 0,
   val videoStreams: List<StreamDetails> = v(),
   val audioStreams: List<StreamDetails> = v(),
-  val livestream: Boolean = false
+  val livestream: Boolean = false,
+  val relatedStreams: List<Item> = v()
 )
 
 @Serializable

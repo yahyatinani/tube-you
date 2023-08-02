@@ -26,7 +26,7 @@ import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.v
 
 fun formatSearch(
-  search: PersistentVector<SearchResult>,
+  search: PersistentVector<Item>,
   resources: Any
 ): Videos = Videos(
   value = search.fold(v()) { acc, r ->
@@ -75,7 +75,7 @@ fun regSearchSubs() {
             )!!
             Loaded(
               videos = formatSearch(
-                items as PersistentVector<SearchResult>,
+                items as PersistentVector<Item>,
                 resources
               )
             )

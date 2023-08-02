@@ -21,24 +21,24 @@ val defaultSb: IPersistentMap<Any, Any> = m(
 
 val searchModule = SerializersModule {
   polymorphic(
-    baseClass = SearchResult::class,
+    baseClass = Item::class,
     actualClass = Video::class,
     actualSerializer = Video.serializer()
   )
   polymorphic(
-    baseClass = SearchResult::class,
+    baseClass = Item::class,
     actualClass = Channel::class,
     actualSerializer = Channel.serializer()
   )
   polymorphic(
-    baseClass = SearchResult::class,
+    baseClass = Item::class,
     actualClass = Playlist::class,
     actualSerializer = Playlist.serializer()
   )
 }
 
 @Serializable
-sealed interface SearchResult
+sealed interface Item
 
 @Immutable
 @Serializable
@@ -57,7 +57,7 @@ data class Video(
   val uploaded: Long,
   val uploaderVerified: Boolean = false,
   val isShort: Boolean = false
-) : SearchResult
+) : Item
 
 @Immutable
 @SerialName("channel")
@@ -70,7 +70,7 @@ data class Channel(
   val videos: Int,
   val description: String? = null,
   val verified: Boolean
-) : SearchResult
+) : Item
 
 @Immutable
 @SerialName("playlist")
@@ -84,16 +84,16 @@ data class Playlist(
   val uploaderVerified: Boolean,
   val playlistType: String,
   val videos: Int
-) : SearchResult
+) : Item
 
 @Serializable
 data class SearchResponse(
-  val items: PersistentVector<SearchResult>,
+  val items: PersistentVector<Item>,
   val nextpage: String? = null,
   val suggestion: String? = null,
   val corrected: Boolean = false
 ) : Page {
-  override val data: List<SearchResult> = items
+  override val data: List<Item> = items
   override val prevKey: String? = null
   override val nextKey: String? = if (nextpage != "null" && nextpage != null) {
     URLEncoder.encode(nextpage, "UTF-8")

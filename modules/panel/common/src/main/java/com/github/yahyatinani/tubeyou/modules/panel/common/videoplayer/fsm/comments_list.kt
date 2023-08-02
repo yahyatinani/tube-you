@@ -54,38 +54,38 @@ fun fetchStreamComments(
   )
 }
 
-enum class CommentsListState { LOADING, REFRESHING, READY, APPENDING }
+enum class ListState { LOADING, REFRESHING, READY, APPENDING }
 
 val commentsListMachine = m(
-  CommentsListState.LOADING to m(
-    "set_stream_comments" to m(target to CommentsListState.READY)
+  ListState.LOADING to m(
+    "set_stream_comments" to m(target to ListState.READY)
   ),
-  CommentsListState.READY to m(
+  ListState.READY to m(
     v("append_comments", LoadState.Loading) to m(
-      target to CommentsListState.APPENDING
+      target to ListState.APPENDING
     ),
     "refresh_comments" to m(
-      target to CommentsListState.REFRESHING,
+      target to ListState.REFRESHING,
       actions to ::fetchStreamComments
     )
   ),
-  CommentsListState.REFRESHING to m(
+  ListState.REFRESHING to m(
     "set_stream_comments" to m(
-      target to CommentsListState.READY
+      target to ListState.READY
     )
   ),
-  CommentsListState.APPENDING to m(
+  ListState.APPENDING to m(
     "append_comments_page" to m(
-      target to CommentsListState.READY,
+      target to ListState.READY,
       actions to ::appendStreamComments
     ),
     v("append_comments", NotLoading(endOfPaginationReached = true)) to m(
-      target to CommentsListState.READY
+      target to ListState.READY
     )
   ),
   fsm.ALL to m(
     common.play_video to m(
-      target to CommentsListState.LOADING,
+      target to ListState.LOADING,
       actions to ::fetchStreamComments
     ),
     common.close_player to m(target to null)

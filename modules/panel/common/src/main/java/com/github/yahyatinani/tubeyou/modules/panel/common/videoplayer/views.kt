@@ -47,6 +47,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -146,14 +147,20 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.R.string
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AuthorAvatar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AvatarLoader
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.ChannelItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.CountText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.PlayListPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.StreamLoaderPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TextLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoItemPortrait
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.thumbnailHeight
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.ChannelVm
+import com.github.yahyatinani.tubeyou.modules.designsystem.data.PlaylistVm
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
@@ -162,7 +169,7 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.R
 import com.github.yahyatinani.tubeyou.modules.panel.common.Stream
 import com.github.yahyatinani.tubeyou.modules.panel.common.UIState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.COMMENTS_ROUTE
-import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.CommentsListState
+import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.ListState
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.REPLIES_ROUTE
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.StreamState
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -1211,7 +1218,7 @@ fun Comment(
 
 @Composable
 fun CommentReplies(modifier: Modifier = Modifier, repliesState: UIState) {
-  val commentsState = get<CommentsListState>(repliesState.data, common.state)
+  val commentsState = get<ListState>(repliesState.data, common.state)
 
   Surface {
     val theme = LocalRippleTheme.current
@@ -1224,7 +1231,7 @@ fun CommentReplies(modifier: Modifier = Modifier, repliesState: UIState) {
           .fillMaxSize()
           .nestedScroll(BottomSheetNestedScrollConnection())
       ) {
-        if (commentsState == CommentsListState.LOADING) {
+        if (commentsState == ListState.LOADING) {
           return@LazyColumn
         }
 
@@ -1247,12 +1254,12 @@ fun CommentReplies(modifier: Modifier = Modifier, repliesState: UIState) {
           )
         }
 
-        if (commentsState == CommentsListState.APPENDING) {
+        if (commentsState == ListState.APPENDING) {
           item { AppendingLoader() }
         }
       }
 
-      if (commentsState == CommentsListState.LOADING) {
+      if (commentsState == ListState.LOADING) {
         CircularProgressIndicator(
           modifier = Modifier.align(Alignment.Center),
           color = Blue300
@@ -1411,13 +1418,13 @@ private fun NavGraphBuilder.repliesList(repliesState: UIState) {
       )
     }
   ) {
-    val listState = get<CommentsListState>(repliesState.data, common.state)
+    val listState = get<ListState>(repliesState.data, common.state)
     SwipeRefresh(
       modifier = Modifier
         .fillMaxSize()
         .nestedScroll(BlockScrolling),
       state = rememberSwipeRefreshState(
-        isRefreshing = listState == CommentsListState.REFRESHING
+        isRefreshing = listState == ListState.REFRESHING
       ),
       onRefresh = {
         dispatch(v("stream_panel_fsm", "refresh_comment_replies"))
@@ -1441,13 +1448,13 @@ private fun NavGraphBuilder.repliesList(repliesState: UIState) {
 private fun NavGraphBuilder.commentsList(uiState: UIState) {
   composable(COMMENTS_ROUTE) {
     val uiData = uiState.data
-    val state = get<CommentsListState>(uiData, common.state)
+    val state = get<ListState>(uiData, common.state)
     SwipeRefresh(
       modifier = Modifier
         .fillMaxSize()
         .nestedScroll(BlockScrolling),
       state = rememberSwipeRefreshState(
-        isRefreshing = state == CommentsListState.REFRESHING
+        isRefreshing = state == ListState.REFRESHING
       ),
       onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
       indicator = { refreshState, refreshTrigger ->
@@ -1466,7 +1473,7 @@ private fun NavGraphBuilder.commentsList(uiState: UIState) {
           .fillMaxSize()
           .nestedScroll(BottomSheetNestedScrollConnection())
       ) {
-        if (state == CommentsListState.LOADING) return@LazyColumn
+        if (state == ListState.LOADING) return@LazyColumn
 
         val commentsList = get<List<UIState>>(uiData, "comments_list")!!
         itemsIndexed(items = commentsList) { index: Int, comment: UIState ->
@@ -1500,7 +1507,7 @@ private fun NavGraphBuilder.commentsList(uiState: UIState) {
         }
 
         item {
-          if (state == CommentsListState.APPENDING) {
+          if (state == ListState.APPENDING) {
             AppendingLoader()
           }
         }
@@ -1712,10 +1719,16 @@ fun PlaybackBottomSheet(
             }
           }
         }
+        val lazyListState = rememberLazyListState()
+
+        LaunchedEffect(key1 = isLoading) {
+          lazyListState.scrollToItem(0)
+        }
         LazyColumn(
           modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(BlockScrolling)
+            .nestedScroll(BlockScrolling),
+          state = lazyListState
         ) {
           item {
             if (isLoading) {
@@ -1856,10 +1869,10 @@ fun PlaybackBottomSheet(
             get<UIState>(commentsPanelState.data, "comments")!!.data
               as IPersistentMap<Any?, Any?>
           item {
-            if (get<CommentsListState>(
+            if (get<ListState>(
                 commentsStateData,
                 common.state
-              ) == CommentsListState.LOADING
+              ) == ListState.LOADING
             ) {
               Surface(
                 modifier = Modifier
@@ -1903,12 +1916,56 @@ fun PlaybackBottomSheet(
             }
           }
 
-          item { Spacer(modifier = Modifier.height(16.dp)) }
+          item { Spacer(modifier = Modifier.height(24.dp)) }
 
-          repeat(2) {
-            item {
-              StreamLoaderPortrait(containerColor)
+          if (isLoading) {
+            repeat(2) {
+              item {
+                StreamLoaderPortrait(containerColor)
+              }
             }
+
+            return@LazyColumn
+          }
+
+          items(
+            get<List<Any>>(streamData, Stream.related_streams)!!
+          ) { viewModel ->
+
+            when (viewModel) {
+              is VideoViewModel -> {
+                VideoItemPortrait(
+                  viewModel = viewModel,
+                  thumbnailHeight = thumbnailHeight(),
+                  play = {
+                    dispatch(
+                      v(
+                        "stream_panel_fsm",
+                        common.play_video,
+                        viewModel
+                      )
+                    )
+                  }
+                )
+              }
+
+              is ChannelVm -> {
+                ChannelItem(
+                  modifier = Modifier
+                    .clickable { /*TODO*/ }
+                    .fillMaxWidth(),
+                  vm = viewModel
+                )
+              }
+
+              else -> PlayListPortrait(
+                modifier = Modifier.padding(start = 12.dp),
+                viewModel = viewModel as PlaylistVm,
+                thumbnailHeight = thumbnailHeight()
+              )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
           }
         }
       }

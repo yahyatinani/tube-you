@@ -118,44 +118,44 @@ val commentRepliesListMachine = m(
   null to m(
     "navigate_replies" to v(
       m(
-        target to CommentsListState.LOADING,
+        target to ListState.LOADING,
         guard to ::anyReplies,
         actions to v(::selectComment, ::navToReplies, ::fetchCommentReplies)
       ),
       m(
-        target to CommentsListState.READY,
+        target to ListState.READY,
         actions to v(::selectComment, ::navToReplies)
       )
     )
   ),
-  CommentsListState.READY to m(
+  ListState.READY to m(
     v("append_replies", LoadState.Loading) to m(
-      target to CommentsListState.APPENDING
+      target to ListState.APPENDING
     ),
     "refresh_comment_replies" to m(
-      target to CommentsListState.REFRESHING,
+      target to ListState.REFRESHING,
       actions to v(::fetchCommentReplies)
     )
   ),
-  CommentsListState.REFRESHING to m(
+  ListState.REFRESHING to m(
     "append_replies_page" to m(
-      target to CommentsListState.READY,
+      target to ListState.READY,
       actions to ::appendCommentReplies
     )
   ),
-  CommentsListState.LOADING to m(
+  ListState.LOADING to m(
     "append_replies_page" to m(
-      target to CommentsListState.READY,
+      target to ListState.READY,
       actions to ::appendCommentReplies
     )
   ),
-  CommentsListState.APPENDING to m(
+  ListState.APPENDING to m(
     "append_replies_page" to m(
-      target to CommentsListState.READY,
+      target to ListState.READY,
       actions to ::appendCommentReplies
     ),
     v("append_replies", NotLoading(endOfPaginationReached = true)) to m(
-      target to CommentsListState.READY
+      target to ListState.READY
     )
   ),
   fsm.ALL to m(

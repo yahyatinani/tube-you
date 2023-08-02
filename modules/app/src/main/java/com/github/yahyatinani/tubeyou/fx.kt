@@ -10,19 +10,21 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
 import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.y.core.get
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+fun currentDestination(navController: NavController) = navController
+  .currentDestination?.hierarchy?.drop(1)?.first()?.route
 
 object BackStack {
   val queue = ArrayDeque<String>().apply { add(HOME_GRAPH_ROUTE) }
 
-  fun currentDestination(navController: NavController) = navController
-    .currentDestination?.hierarchy?.drop(1)?.first()?.route
-
   fun contains(to: String?) = queue.subList(1, queue.size).contains(to)
 
   fun addDistinct(currentDestination: String?) {
-    if (currentDestination != null && !contains(currentDestination)) {
+    if (
+      currentDestination != null &&
+      !contains(currentDestination)
+    ) {
       queue.add(currentDestination)
     }
   }
@@ -57,16 +59,19 @@ fun regAppFx(navController: NavController, appScope: CoroutineScope) {
     val navOptions = get<NavOptions>(destination, common.navOptions)
 
     if (navOptions != null) {
-      BackStack.addDistinct(BackStack.currentDestination(navController))
+      val currentDestination = currentDestination(navController)
+      println("jfdsfj ${BackStack.queue} $currentDestination")
+      BackStack.addDistinct(currentDestination)
       BackStack.remove(toRoute)
     }
-    appScope.launch(Dispatchers.Main.immediate) {
+    appScope.launch {
       navController.navigate(toRoute, navOptions)
     }
   }
 
   regFx(common.bottom_bar_back_press) {
-    appScope.launch(Dispatchers.Main.immediate) {
+    appScope.launch {
+      println("bottom_bar_back_press ${BackStack.queue}")
       navController.navigate(BackStack.pop(navController)) {
         popUpTo(navController.graph.findStartDestination().id) {
           saveState = true

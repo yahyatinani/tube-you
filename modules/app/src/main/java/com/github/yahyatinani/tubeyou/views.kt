@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
@@ -225,7 +226,7 @@ fun TyApp(
 
     Scaffold(
       bottomBar = {
-        if (playbackTargetValue == SheetValue.Expanded) {
+        if (playbackTargetValue == Expanded) {
           return@Scaffold
         }
 
@@ -300,10 +301,6 @@ fun TyApp(
             sheetPeekHeight = peekHeight,
             onClosePlayer = onClosePlayer
           )
-
-          BackHandler(playerSheetValue == SheetValue.Expanded) {
-            dispatch(v<Any>("stream_panel_fsm", common.minimize_player))
-          }
         }
       ) {
         Scaffold(
@@ -343,10 +340,6 @@ fun TyApp(
                       selectedSuggestion
                     )
                   )
-                }
-
-                BackHandler {
-                  dispatch(v(search.panel_fsm, search.back_press_search))
                 }
               }
 
@@ -388,9 +381,6 @@ fun TyApp(
             }
           }
         ) { p2 ->
-          val enabled = !watch<Boolean>(query = v(common.is_backstack_empty))
-          BackHandler(enabled) { dispatchSync(v(common.bottom_bar_back_press)) }
-
           val thumbnailHeight = thumbnailHeight(orientation)
           NavHost(
             navController = navController,
@@ -403,6 +393,22 @@ fun TyApp(
             homeGraph(isCompactSize, orientation, thumbnailHeight)
             subsGraph(isCompactSize, orientation, thumbnailHeight)
             libraryGraph(isCompactSize, orientation, thumbnailHeight)
+          }
+
+          val backStackNotEmpty =
+            !watch<Boolean>(query = v(common.is_backstack_empty))
+          BackHandler(
+            enabled = backStackNotEmpty && playerSheetValue != Expanded
+          ) {
+            dispatchSync(v(common.bottom_bar_back_press))
+          }
+
+          BackHandler(sb != null) {
+            dispatch(v(search.panel_fsm, search.back_press_search))
+          }
+
+          BackHandler(playerSheetValue == Expanded) {
+            dispatch(v<Any>("stream_panel_fsm", common.minimize_player))
           }
         }
       }

@@ -12,6 +12,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +38,7 @@ fun TySearchBar(
 ) {
   val focusRequester = FocusRequester()
   val placeHolderColor = colorScheme.onSurface.copy(alpha = .6f)
-  androidx.compose.material3.SearchBar(
+  SearchBar(
     query = searchQuery,
     modifier = Modifier
       .fillMaxWidth()

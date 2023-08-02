@@ -334,11 +334,7 @@ fun TyApp(
                 ) { selectedSuggestion ->
                   // FIXME: Move cursor to the end of text.
                   dispatchSync(
-                    v(
-                      search.panel_fsm,
-                      update_search_input,
-                      selectedSuggestion
-                    )
+                    v(search.panel_fsm, update_search_input, selectedSuggestion)
                   )
                 }
               }

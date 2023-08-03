@@ -19,7 +19,7 @@ dependencies {
   testImplementation deps.bundles.kotest
   androidTestImplementation deps.androidx.compose.ui.test
   debugImplementation deps.androidx.compose.ui.tooling
-
+  debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
   coreLibraryDesugaring deps.android.tools.desugar
 
   // androidx.test is forcing JUnit, 4.12. This forces it to use 4.13

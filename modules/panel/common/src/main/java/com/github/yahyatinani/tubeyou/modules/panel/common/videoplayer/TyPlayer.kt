@@ -29,7 +29,7 @@ import java.util.concurrent.Executors
  * Using Cronet for dash to work.
  */
 object CronetHelper {
-  private var cronetEngine: CronetEngine? = null
+  internal var cronetEngine: CronetEngine? = null
 
   fun cronetEngine(context: Context): CronetEngine {
     if (cronetEngine == null) {
@@ -183,8 +183,17 @@ object TyPlayer {
   }
 
   fun close() {
-    exoPlayer!!.removeListener(listener)
-    exoPlayer!!.stop()
-    exoPlayer!!.removeMediaItems(0, exoPlayer!!.mediaItemCount)
+    exoPlayer?.removeListener(listener)
+    exoPlayer?.stop()
+    exoPlayer?.removeMediaItems(0, exoPlayer!!.mediaItemCount)
+  }
+
+  fun release() {
+    exoPlayer?.removeListener(listener)
+    exoPlayer?.removeMediaItems(0, exoPlayer!!.mediaItemCount)
+    exoPlayer?.release()
+    exoPlayer = null
+    trackSelector = null
+    CronetHelper.cronetEngine = null
   }
 }

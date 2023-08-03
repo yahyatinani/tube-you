@@ -1931,7 +1931,6 @@ fun PlaybackBottomSheet(
           items(
             get<List<Any>>(streamData, Stream.related_streams)!!
           ) { viewModel ->
-
             when (viewModel) {
               is VideoViewModel -> {
                 VideoItemPortrait(
@@ -1939,11 +1938,7 @@ fun PlaybackBottomSheet(
                   thumbnailHeight = thumbnailHeight(),
                   play = {
                     dispatch(
-                      v(
-                        "stream_panel_fsm",
-                        common.play_video,
-                        viewModel
-                      )
+                      v("stream_panel_fsm", common.play_video, viewModel)
                     )
                   }
                 )

@@ -1,5 +1,6 @@
 package com.github.yahyatinani.tubeyou.modules.panel.common.search
 
+import androidx.paging.ItemSnapshotList
 import androidx.paging.LoadState.Loading
 import androidx.paging.LoadState.NotLoading
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
@@ -40,7 +41,6 @@ import io.github.yahyatinani.recompose.fx.Effects
 import io.github.yahyatinani.recompose.httpfx.bounce
 import io.github.yahyatinani.y.core.assocIn
 import io.github.yahyatinani.y.core.collections.IPersistentMap
-import io.github.yahyatinani.y.core.collections.IPersistentVector
 import io.github.yahyatinani.y.core.collections.PersistentVector
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn
@@ -99,7 +99,7 @@ fun setResults(appDb: AppDb, state: State?, event: Event): Effects {
   val topSb: SearchBar? = searchStack.peek()
 
   val key = when (results) {
-    is IPersistentVector<*> -> searchBar.results
+    is ItemSnapshotList<*> -> searchBar.results
     else -> searchBar.search_error
   }
 

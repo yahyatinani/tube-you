@@ -18,15 +18,13 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.search.SearchState.SE
 import io.github.yahyatinani.recompose.fsm.State
 import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.regSub
-import io.github.yahyatinani.y.core.collections.IPersistentVector
-import io.github.yahyatinani.y.core.collections.PersistentVector
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.v
 
 fun formatSearch(
-  search: PersistentVector<Item>,
+  search: List<Item>,
   resources: Any
 ): Videos = Videos(
   value = search.fold(v()) { acc, r ->
@@ -69,16 +67,8 @@ fun regSearchSubs() {
         when {
           error != null -> PanelVm.Error(error as Int?)
           else -> {
-            val items = get<IPersistentVector<Any>>(
-              sb,
-              searchBar.results
-            )!!
-            Loaded(
-              videos = formatSearch(
-                items as PersistentVector<Item>,
-                resources
-              )
-            )
+            val items = get<List<Item>>(sb, searchBar.results)!!
+            Loaded(videos = formatSearch(items, resources))
           }
         }
       }

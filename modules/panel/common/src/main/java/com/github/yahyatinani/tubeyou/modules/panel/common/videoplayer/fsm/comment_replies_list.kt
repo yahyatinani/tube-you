@@ -17,7 +17,6 @@ import io.github.yahyatinani.recompose.fsm.fsm.target
 import io.github.yahyatinani.recompose.fx.BuiltInFx
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
-import io.github.yahyatinani.y.core.collections.PersistentVector
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
@@ -86,7 +85,7 @@ fun appendCommentReplies(appDb: AppDb, state: State?, event: Event): Effects {
   return m(
     fsm.state_map to state.assoc(
       "comment_replies",
-      replies as PersistentVector<StreamComment>
+      replies as List<StreamComment>
     )
   )
 }

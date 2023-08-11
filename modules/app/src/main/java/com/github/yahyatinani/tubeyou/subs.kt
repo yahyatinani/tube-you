@@ -13,6 +13,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_selected
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.label_text_id
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigation_items
 import io.github.yahyatinani.recompose.regSub
+import io.github.yahyatinani.recompose.subscribe
 import io.github.yahyatinani.y.core.assoc
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.collections.PersistentArrayMap
@@ -52,7 +53,7 @@ fun activate(selectedItem: IPersistentMap<Any, Any>) = assoc(
   is_selected to true
 )
 
-fun navigationItems(activeNavigationItem: Any) = assoc(
+fun navigationItems(activeNavigationItem: Any): Any = assoc(
   navItems,
   activeNavigationItem to activate(navItems[activeNavigationItem]!!)
 )
@@ -68,6 +69,14 @@ fun regAppSubs() {
     v(active_navigation_item),
     computationFn = ::navigationItems
   )
+
+  regSub<Any, Any>(
+    queryId = navigation_items,
+    initialValue = m<Any, Any>(),
+    inputSignal = { subscribe<Any>(v(active_navigation_item)) }
+  ) { activeNav, _, _ ->
+    assoc(navItems, activeNav to activate(navItems[activeNav]!!))
+  }
 
   regSub(is_backstack_empty, key = is_backstack_empty)
 }

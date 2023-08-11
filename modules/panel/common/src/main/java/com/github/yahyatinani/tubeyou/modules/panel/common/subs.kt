@@ -253,7 +253,7 @@ fun regCommonSubs() {
       Stream.views to views,
       Stream.date to shortenTime(viewModel.uploaded),
       Stream.channel_name to viewModel.uploaderName,
-      Stream.avatar to stream.uploaderAvatar,
+      Stream.avatar to (stream.uploaderAvatar ?: ""),
       Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
       Stream.likes_count to formatViews(stream.likes),
       Stream.views_full to formatFullViews(stream.views),

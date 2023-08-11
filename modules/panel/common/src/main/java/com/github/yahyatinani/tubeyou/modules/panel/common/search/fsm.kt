@@ -145,7 +145,7 @@ val searchListMachine = m<Any?, Any?>(
   SEARCHING to m(
     back_press_search to v(
       m(target to null, guard to ::isSearchStackEmpty),
-      m(target to SEARCH_RESULTS, actions to ::updateSearchBarToMatchTopOfStack)
+      m(target to SEARCH_RESULTS)
     ),
     set_search_results to m(target to SEARCH_RESULTS, actions to ::setResults),
     clear_search_input to v(
@@ -285,7 +285,11 @@ val searchBarMachine = m<Any?, Any?>(
         actions to ::navigateBack
       ),
       v(
-        m(target to INACTIVE, guard to ::isSearching),
+        m(
+          target to INACTIVE,
+          guard to ::isSearching,
+          actions to ::updateSearchBarToMatchTopOfStack
+        ),
         v(
           m(
             target to null,

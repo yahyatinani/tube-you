@@ -242,10 +242,16 @@ fun TyApp(
         dispatch(v("stream_panel_fsm", playerSheetValue))
       }
       LaunchedEffect(playbackTargetValue) {
-        if (playbackTargetValue == SheetValue.Hidden &&
-          playerSheetValue != SheetValue.Hidden
-        ) {
-          onClosePlayer()
+        when {
+          playbackTargetValue == SheetValue.Hidden &&
+            playerSheetValue != SheetValue.Hidden -> {
+            onClosePlayer()
+          }
+
+          playbackTargetValue == Expanded &&
+            playerSheetValue == SheetValue.PartiallyExpanded -> {
+            dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
+          }
         }
       }
 

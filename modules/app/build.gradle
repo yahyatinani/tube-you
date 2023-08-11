@@ -1,5 +1,6 @@
 plugins {
   id 'tubeyou.android-app-conventions'
+  alias(deps.plugins.androidx.baselineprofile)
 }
 
 dependencies {
@@ -15,9 +16,11 @@ dependencies {
   implementation deps.bundles.recompose
 
   implementation "com.google.accompanist:accompanist-systemuicontroller:0.31.5-beta"
+  implementation deps.androidx.profileinstaller
 
   testImplementation deps.bundles.kotest
   androidTestImplementation deps.androidx.compose.ui.test
+  baselineProfile project(':baselineprofile')
   debugImplementation deps.androidx.compose.ui.tooling
   debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
   coreLibraryDesugaring deps.android.tools.desugar

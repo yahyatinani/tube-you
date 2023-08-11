@@ -48,7 +48,7 @@ class TyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
 
-    TyPlayer.initInstance(applicationContext)
+    TyPlayer.initInstance(this)
 
     httpFxClient = tyHttpClient
 
@@ -208,4 +208,10 @@ class MainActivity : ComponentActivity() {
     Settings.System.ACCELEROMETER_ROTATION,
     0
   ) == 1
+
+  /*  override fun onBackPressed() {
+      super.onBackPressed()
+
+      finish()
+    }*/
 }

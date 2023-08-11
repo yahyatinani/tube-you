@@ -36,3 +36,6 @@
 -dontwarn org.openjsse.javax.net.ssl.SSLParameters
 -dontwarn org.openjsse.javax.net.ssl.SSLSocket
 -dontwarn org.openjsse.net.ssl.OpenJSSE
+-dontwarn javax.naming.NamingException
+-dontwarn javax.naming.InitialContext
+-dontwarn javax.naming.Context

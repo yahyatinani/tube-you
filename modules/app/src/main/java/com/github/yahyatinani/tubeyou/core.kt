@@ -14,9 +14,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -30,6 +28,8 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.search.regSearchEvent
 import com.github.yahyatinani.tubeyou.modules.panel.common.search.regSearchSubs
 import com.github.yahyatinani.tubeyou.modules.panel.common.tyHttpClient
 import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.TyPlayer
+import io.github.yahyatinani.recompose.RegFx
+import io.github.yahyatinani.recompose.clearFx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.fx.BuiltInFx
@@ -76,6 +76,12 @@ class TyApplication : Application() {
 
 class MainActivity : ComponentActivity() {
   lateinit var orientationEventListener: OrientationEventListener
+
+  private fun isAutoRotate() = Settings.System.getInt(
+    contentResolver,
+    Settings.System.ACCELEROMETER_ROTATION,
+    0
+  ) == 1
 
   @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -140,6 +146,40 @@ class MainActivity : ComponentActivity() {
 
     WindowCompat.setDecorFitsSystemWindows(window, true)
 
+    regEventFx(":player_fullscreen_landscape") { _, _ ->
+      m(BuiltInFx.fx to v(v(":player_fullscreen_landscape")))
+    }
+
+    regEventFx(":player_portrait") { _, _ ->
+      m(BuiltInFx.fx to v(v(":player_portrait")))
+    }
+
+    regEventFx(":toggle_orientation") { _, _ ->
+      m(BuiltInFx.fx to v(v(":toggle_orientation")))
+    }
+
+    setContent {
+      val orientation = LocalConfiguration.current.orientation
+
+      RegFx(id = ":toggle_orientation", key1 = orientation) {
+        when (resources.configuration.orientation) {
+          Configuration.ORIENTATION_PORTRAIT -> {
+            requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
+          }
+
+          else -> {
+            requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
+          }
+        }
+      }
+
+      TyApp(windowSizeClass = calculateWindowSizeClass(this))
+    }
+  }
+
+  override fun onStart() {
+    super.onStart()
+
     regFx(":player_fullscreen_landscape") {
       runOnUiThread {
         val bm =
@@ -163,38 +203,6 @@ class MainActivity : ComponentActivity() {
         }
       }
     }
-
-    regEventFx(":player_fullscreen_landscape") { _, _ ->
-      m(BuiltInFx.fx to v(v(":player_fullscreen_landscape")))
-    }
-
-    regEventFx(":player_portrait") { _, _ ->
-      m(BuiltInFx.fx to v(v(":player_portrait")))
-    }
-
-    regEventFx(":toggle_orientation") { _, _ ->
-      m(BuiltInFx.fx to v(v(":toggle_orientation")))
-    }
-
-    setContent {
-      val orientation = LocalConfiguration.current.orientation
-      val context = LocalContext.current
-      LaunchedEffect(key1 = orientation) {
-        regFx(":toggle_orientation") {
-          when (resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> {
-              requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
-            }
-
-            else -> {
-              requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
-            }
-          }
-        }
-      }
-
-      TyApp(windowSizeClass = calculateWindowSizeClass(this))
-    }
   }
 
   override fun onResume() {
@@ -203,11 +211,12 @@ class MainActivity : ComponentActivity() {
     dispatch(v(common.expand_top_app_bar))
   }
 
-  private fun isAutoRotate() = Settings.System.getInt(
-    contentResolver,
-    Settings.System.ACCELEROMETER_ROTATION,
-    0
-  ) == 1
+  override fun onStop() {
+    super.onStop()
+
+    clearFx(":player_fullscreen_landscape")
+    clearFx(":player_portrait")
+  }
 
   /*  override fun onBackPressed() {
       super.onBackPressed()

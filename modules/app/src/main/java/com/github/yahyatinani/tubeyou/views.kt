@@ -83,13 +83,13 @@ import com.github.yahyatinani.tubeyou.modules.panel.library.libraryGraph
 import com.github.yahyatinani.tubeyou.modules.panel.subscriptions.subsGraph
 import com.github.yahyatinani.tubeyou.nav.NavigationChangedListenerEffect
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import io.github.yahyatinani.recompose.RegFx
 import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.regEventFx
-import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
@@ -104,10 +104,10 @@ fun topAppBarScrollBehavior(
   searchBar: SearchBar?
 ): TopAppBarScrollBehavior = when {
   isCompactDisplay && searchBar == null -> {
+    RegFx(id = expand_top_app_bar) {
+      topAppBarState.heightOffset = 0f
+    }
     LaunchedEffect(Unit) {
-      regFx(expand_top_app_bar) {
-        topAppBarState.heightOffset = 0f
-      }
       regEventFx(expand_top_app_bar) { _, _ ->
         m(fx to v(v(expand_top_app_bar)))
       }
@@ -138,9 +138,10 @@ fun TyApp(
     configuration.screenWidthDp.dp.toPx() to
       configuration.screenHeightDp.dp.toPx()
   }
-  LaunchedEffect(Unit) {
-    regAppFx(navController, appScope)
 
+  RegNavFx(navController)
+
+  LaunchedEffect(Unit) {
     regCofx(start_destination) { cofx ->
       cofx.assoc(
         start_destination,

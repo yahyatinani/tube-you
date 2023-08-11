@@ -175,11 +175,11 @@ import com.github.yahyatinani.tubeyou.modules.panel.common.videoplayer.fsm.Strea
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import io.github.yahyatinani.recompose.RegFx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.regEventFx
-import io.github.yahyatinani.recompose.regFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
@@ -290,7 +290,6 @@ fun VideoPlayer(
 
   val playerState = get<StreamState>(stream.data, common.state)
   val context = LocalContext.current
-  val scope = rememberCoroutineScope()
   val orientation = LocalConfiguration.current.orientation
 
   var showQualityControl: Boolean by remember { mutableStateOf(false) }
@@ -317,8 +316,9 @@ fun VideoPlayer(
       }
     }
 
+    RegPlaybackFxs()
+
     LaunchedEffect(Unit) {
-      regPlaybackFxs(scope)
       regPlaybackEvents()
     }
 
@@ -1370,21 +1370,21 @@ private fun CommentsSheet(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-      regFx("nav_comment_replies") {
-        scope.launch {
-          commentsNavController.navigate(REPLIES_ROUTE)
-        }
-      }
-
-      regFx("nav_back_to_comments") {
-        scope.launch {
-          commentsNavController.popBackStack(COMMENTS_ROUTE, inclusive = false)
-          dispatch(v("stream_panel_fsm", "nav_back_to_comments"))
-        }
-      }
-
       regEventFx("nav_back_to_comments") { _, _ ->
         m(fx to v(v("nav_back_to_comments")))
+      }
+    }
+
+    RegFx(id = "nav_comment_replies") {
+      scope.launch {
+        commentsNavController.navigate(REPLIES_ROUTE)
+      }
+    }
+
+    RegFx(id = "nav_back_to_comments") {
+      scope.launch {
+        commentsNavController.popBackStack(COMMENTS_ROUTE, inclusive = false)
+        dispatch(v("stream_panel_fsm", "nav_back_to_comments"))
       }
     }
 
@@ -1548,14 +1548,12 @@ fun PlaybackBottomSheet(
       }
     }
 
-  LaunchedEffect(Unit) {
-    regFx(id = "half_expand_desc_sheet") {
-      playbackScope.launch { descSheetState.partialExpand() }
-    }
+  RegFx(id = "half_expand_desc_sheet") {
+    playbackScope.launch { descSheetState.partialExpand() }
+  }
 
-    regFx(id = "close_desc_sheet") {
-      playbackScope.launch { descSheetState.hide() }
-    }
+  RegFx(id = "close_desc_sheet") {
+    playbackScope.launch { descSheetState.hide() }
   }
 
   val streamData = activeStream.data
@@ -1610,16 +1608,13 @@ fun PlaybackBottomSheet(
         }
       }
 
-    LaunchedEffect(Unit) {
-      regFx(id = "half_expand_comments_sheet") {
-        playbackScope.launch { commentsSheetState.partialExpand() }
-      }
-
-      regFx(id = "close_comments_sheet") {
-        playbackScope.launch {
-          commentsSheetState.hide()
-          dispatch(v("nav_back_to_comments"))
-        }
+    RegFx(id = "half_expand_comments_sheet") {
+      playbackScope.launch { commentsSheetState.partialExpand() }
+    }
+    RegFx(id = "close_comments_sheet") {
+      playbackScope.launch {
+        commentsSheetState.hide()
+        dispatch(v("nav_back_to_comments"))
       }
     }
 

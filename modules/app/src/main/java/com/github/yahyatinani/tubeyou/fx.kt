@@ -1,15 +1,17 @@
 package com.github.yahyatinani.tubeyou
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.navigate_to
-import io.github.yahyatinani.recompose.regFx
+import io.github.yahyatinani.recompose.RegFx
 import io.github.yahyatinani.y.core.get
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 fun currentDestination(navController: NavController) = navController
@@ -53,25 +55,26 @@ object BackStack {
   }
 }
 
-fun regAppFx(navController: NavController, appScope: CoroutineScope) {
-  regFx(navigate_to) { destination ->
+@Composable
+fun RegNavFx(navController: NavHostController) {
+  val scope = rememberCoroutineScope()
+
+  RegFx(navigate_to) { destination ->
     val toRoute = get<String>(destination, common.destination)!!
     val navOptions = get<NavOptions>(destination, common.navOptions)
 
     if (navOptions != null) {
       val currentDestination = currentDestination(navController)
-      println("jfdsfj ${BackStack.queue} $currentDestination")
       BackStack.addDistinct(currentDestination)
       BackStack.remove(toRoute)
     }
-    appScope.launch {
+    scope.launch {
       navController.navigate(toRoute, navOptions)
     }
   }
 
-  regFx(common.bottom_bar_back_press) {
-    appScope.launch {
-      println("bottom_bar_back_press ${BackStack.queue}")
+  RegFx(common.bottom_bar_back_press) {
+    scope.launch {
       navController.navigate(BackStack.pop(navController)) {
         popUpTo(navController.graph.findStartDestination().id) {
           saveState = true
@@ -81,8 +84,8 @@ fun regAppFx(navController: NavController, appScope: CoroutineScope) {
     }
   }
 
-  regFx(common.pop_back_stack) {
-    appScope.launch {
+  RegFx(common.pop_back_stack) {
+    scope.launch {
       navController.popBackStack()
     }
   }

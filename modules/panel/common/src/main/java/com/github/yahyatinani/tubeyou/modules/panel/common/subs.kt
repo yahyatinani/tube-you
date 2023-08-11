@@ -187,7 +187,6 @@ fun formatToMonthDay(inputDate: String?): String? {
 private class URLSpanNoUnderline(url: String?) : URLSpan(url) {
   override fun updateDrawState(ds: TextPaint) {
     super.updateDrawState(ds)
-    println("sdjlkfjsdkjf")
     ds.isUnderlineText = false
   }
 }

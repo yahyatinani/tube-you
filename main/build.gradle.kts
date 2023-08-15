@@ -36,17 +36,16 @@ android {
 }
 
 dependencies {
+  implementation(project(":modules:core:designsystem"))
+
   implementation(deps.core.ktx)
   implementation(deps.lifecycle.runtime.ktx)
   implementation(deps.activity.compose)
-//  implementation(deps.ui)
-//  implementation(deps.ui.graphics)
-//  implementation(deps.ui.tooling.preview)
-  implementation(deps.material3)
+  implementation(deps.compose.material3)
   testImplementation(deps.junit)
   androidTestImplementation(deps.androidx.test.ext.junit)
 //  androidTestImplementation(deps.espresso.core)
-  androidTestImplementation(deps.ui.test.junit4)
-  debugImplementation(deps.ui.tooling)
-  debugImplementation(deps.ui.test.manifest)
+  androidTestImplementation(deps.compose.ui.test.junit4)
+  debugImplementation(deps.compose.ui.tooling)
+  debugImplementation(deps.compose.ui.test.manifest)
 }

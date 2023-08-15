@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.github.yahyatinani.tubeyou.modules.designsystem.R
+import io.github.yahyatinani.tubeyou.modules.designsystem.R
 
 const val THUMBNAIL_HEIGHT = 720f
 const val THUMBNAIL_WIDTH = 1280f

@@ -22,7 +22,6 @@ tasks.withType<KotlinCompile>().configureEach {
 dependencies {
   compileOnly(deps.android.gradlePlugin)
   compileOnly(deps.kotlin.gradlePlugin)
-  compileOnly(deps.ksp.gradlePlugin)
 }
 
 gradlePlugin {
@@ -34,6 +33,18 @@ gradlePlugin {
     register("androidApplicationCompose") {
       id = "tubeyou.android.application.compose"
       implementationClass = "AndroidApplicationComposeConventionPlugin"
+    }
+    register("androidLibrary") {
+      id = "tubeyou.android.library"
+      implementationClass = "AndroidLibraryConventionPlugin"
+    }
+    register("androidLibraryCompose") {
+      id = "tubeyou.android.library.compose"
+      implementationClass = "AndroidLibraryComposeConventionPlugin"
+    }
+    register("jvmLibrary") {
+      id = "tubeyou.jvm.library"
+      implementationClass = "JvmLibraryConventionPlugin"
     }
   }
 }

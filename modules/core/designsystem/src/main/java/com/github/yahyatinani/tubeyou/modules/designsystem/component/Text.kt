@@ -51,9 +51,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.yahyatinani.tubeyou.modules.designsystem.R
 import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
+import io.github.yahyatinani.tubeyou.modules.designsystem.R
 
 const val SMALL_BULLET = "·"
 const val MEDIUM_BULLET = "•"

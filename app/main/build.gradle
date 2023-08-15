@@ -4,11 +4,11 @@ plugins {
 }
 
 dependencies {
-  implementation project(':modules:core:designsystem')
-  implementation project(':modules:core:keywords')
-  implementation project(':modules:panel:common')
-  implementation project(':modules:panel:home')
-  implementation project(':modules:panel:library')
+  implementation project(':app:core:designsystem')
+  implementation project(':app:core:keywords')
+  implementation project(':app:panel:common')
+  implementation project(':app:panel:home')
+  implementation project(':app:panel:library')
 
   implementation deps.androidx.appcompat
   implementation deps.androidx.core.splashscreen

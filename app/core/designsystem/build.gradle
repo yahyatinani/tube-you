@@ -11,7 +11,7 @@ android {
 }
 
 dependencies {
-  implementation project(':modules:core:keywords')
+  implementation project(':app:core:keywords')
   implementation deps.androidx.core.ktx
   implementation deps.bundles.compose
   implementation deps.coil

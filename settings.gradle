@@ -20,10 +20,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "TubeYou"
 
-include ':modules:app'
-include ':modules:panel:home'
-include ':modules:core:keywords'
-include ':modules:core:designsystem'
-include ':modules:panel:library'
-include ':modules:panel:common'
+include ':app:main'
+include ':app:panel:home'
+include ':app:core:keywords'
+include ':app:core:designsystem'
+include ':app:panel:library'
+include ':app:panel:common'
 include ':baselineprofile'

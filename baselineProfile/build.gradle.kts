@@ -27,7 +27,7 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  targetProjectPath = ":modules:app"
+  targetProjectPath = ":app:main"
 
 /*  testOptions.managedDevices.devices {
     create<ManagedVirtualDevice>("pixel6Api34") {

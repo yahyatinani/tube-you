@@ -1,4 +1,4 @@
-package com.github.yahyatinani.tubeyou
+package io.github.yahyatinani.tubeyou
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import com.github.yahyatinani.tubeyou.ui.theme.TyTheme
+import io.github.yahyatinani.tubeyou.theme.ui.TyTheme
 
 /*
  * Profiling:

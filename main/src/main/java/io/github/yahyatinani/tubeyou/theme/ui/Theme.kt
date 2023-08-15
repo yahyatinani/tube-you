@@ -1,4 +1,4 @@
-package com.github.yahyatinani.tubeyou.ui.theme
+package io.github.yahyatinani.tubeyou.theme.ui
 
 import android.app.Activity
 import android.os.Build

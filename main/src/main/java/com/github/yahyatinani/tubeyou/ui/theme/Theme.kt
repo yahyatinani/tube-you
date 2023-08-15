@@ -38,8 +38,8 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun TubeYouTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
+fun TyTheme(
+  isDarkTheme: Boolean = isSystemInDarkTheme(),
   // Dynamic color is available on Android 12+
   dynamicColor: Boolean = true,
   content: @Composable () -> Unit
@@ -47,16 +47,14 @@ fun TubeYouTheme(
   val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
       val context = LocalContext.current
-      if (darkTheme) {
+      if (isDarkTheme) {
         dynamicDarkColorScheme(context)
       } else {
-        dynamicLightColorScheme(
-          context
-        )
+        dynamicLightColorScheme(context)
       }
     }
 
-    darkTheme -> DarkColorScheme
+    isDarkTheme -> DarkColorScheme
     else -> LightColorScheme
   }
   val view = LocalView.current
@@ -67,7 +65,7 @@ fun TubeYouTheme(
       WindowCompat.getInsetsController(
         window,
         view
-      ).isAppearanceLightStatusBars = darkTheme
+      ).isAppearanceLightStatusBars = isDarkTheme
     }
   }
 

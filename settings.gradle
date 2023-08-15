@@ -15,15 +15,17 @@ dependencyResolutionManagement {
     mavenCentral()
     mavenLocal()
     maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
   }
 }
 
 rootProject.name = "TubeYou"
 
-include ':app:main'
-include ':app:panel:home'
-include ':app:core:keywords'
-include ':app:core:designsystem'
-include ':app:panel:library'
-include ':app:panel:common'
-include ':baselineprofile'
+include ':main'
+//include ':app:main'
+//include ':app:panel:home'
+//include ':app:core:keywords'
+//include ':app:core:designsystem'
+//include ':app:panel:library'
+//include ':app:panel:common'
+//include ':baselineprofile'

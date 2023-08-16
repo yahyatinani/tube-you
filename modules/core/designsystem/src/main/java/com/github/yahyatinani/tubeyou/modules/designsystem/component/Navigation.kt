@@ -16,25 +16,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
 import androidx.compose.ui.layout.Layout
@@ -43,20 +37,17 @@ import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import io.github.yahyatinani.y.core.get
 
 @Composable
-fun TyNavigationItem(
+fun TyNavigationBarItem(
   selected: Boolean,
   icon: @Composable () -> Unit,
   modifier: Modifier = Modifier,
-  label: @Composable (() -> Unit),
+  selectedIcon: @Composable () -> Unit = icon,
+  label: @Composable () -> Unit,
   onPressColor: Color,
   onClick: () -> Unit
 ) {
@@ -136,7 +127,7 @@ fun TyNavigationItem(
       .padding(horizontal = 12.dp)
   ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      icon()
+      if (selected) selectedIcon() else icon()
       label()
     }
   }
@@ -146,7 +137,7 @@ val BOTTOM_BAR_HEIGHT = 48.dp
 val BOTTOM_BAR_TOP_BORDER_THICKNESS = 1.dp
 
 @Composable
-fun TyNavigationBarCompact(
+private fun TyNavigationBarCompact(
   modifier: Modifier = Modifier,
   content: @Composable (Modifier) -> Unit
 ) {
@@ -162,7 +153,7 @@ fun TyNavigationBarCompact(
 }
 
 @Composable
-fun TyNavigationBarLarge(
+private fun TyNavigationBarLarge(
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit
 ) = Layout(
@@ -203,73 +194,25 @@ fun TyNavigationBarLarge(
 )
 
 @Composable
-fun TyBottomNavigationBar(
+fun TyNavigationBar(
   modifier: Modifier = Modifier,
-  navItems: Map<Any, Any>,
   isCompact: Boolean,
-  colorScheme: ColorScheme,
-  onNavItemPress: (route: Any) -> Unit
+  borderColor: Color,
+  content: @Composable (Modifier) -> Unit
 ) {
   Surface(
     modifier = modifier.windowInsetsPadding(NavigationBarDefaults.windowInsets)
   ) {
-    val content: @Composable (Modifier) -> Unit = {
-      navItems.forEach { (route, navItem) ->
-        val contentDescription = stringResource(
-          get(navItem, common.icon_content_desc_text_id)!!
-        )
-        val text = stringResource(get(navItem, common.label_text_id)!!)
-        val selected: Boolean = get(navItem, common.is_selected)!!
-        val lightGray = colorScheme.onSurface.copy(.12f)
-        TyNavigationItem(
-          selected = selected,
-          icon = {
-            val id = get<Any>(navItem, common.icon)!!
-
-            if (id is Int) {
-              Icon(
-                painter = painterResource(id),
-                contentDescription = contentDescription,
-                tint = colorScheme.onBackground,
-                modifier = Modifier.then(
-                  if (selected) Modifier.size(32.dp) else Modifier
-                )
-              )
-            } else if (id is ImageVector) {
-              Icon(
-                imageVector = id,
-                contentDescription = contentDescription,
-                tint = colorScheme.onBackground,
-                modifier = Modifier.then(
-                  if (selected) Modifier.size(32.dp) else Modifier
-                )
-              )
-            }
-          },
-          label = {
-            val t = MaterialTheme.typography
-            Text(
-              text = text,
-              style = if (selected) t.labelMedium else t.labelSmall
-            )
-          },
-          onPressColor = lightGray,
-          onClick = { onNavItemPress(route) }
-        )
-      }
-    }
-
     Box(contentAlignment = Alignment.TopCenter) {
-      val lightGray = colorScheme.onSurface.copy(.12f)
       Divider(
         modifier = Modifier.fillMaxWidth(),
         thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS,
-        color = lightGray
+        color = borderColor
       )
       if (isCompact) {
         TyNavigationBarCompact(content = content)
       } else {
-        TyNavigationBarLarge { content(Modifier) }
+        TyNavigationBarLarge(content = { content(Modifier) })
       }
     }
   }

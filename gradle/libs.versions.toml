@@ -12,6 +12,7 @@ activity-compose = "1.7.2"
 compose-bom = "2023.08.00"
 androidxComposeCompiler = "1.5.0"
 accompanist = "0.28.0"
+androidxNavigation = "2.7.0"
 
 coil = "2.4.0"
 
@@ -43,6 +44,8 @@ compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4
 android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
+
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
 
 coil-kt = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-kt-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }

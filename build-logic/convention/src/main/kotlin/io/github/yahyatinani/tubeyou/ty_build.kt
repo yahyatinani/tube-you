@@ -10,6 +10,7 @@ import java.util.Base64
 
 object TyBuild {
   const val APP_ID = "io.github.yahyatinani.tubeyou"
+  const val APP_NAME = "TubeYou"
 
   const val versionMajor = 0
   const val versionMinor = 0

@@ -1,4 +1,5 @@
 import io.github.yahyatinani.tubeyou.TyBuild
+import io.github.yahyatinani.tubeyou.TyBuildType
 
 plugins {
   id("tubeyou.android.application")
@@ -20,8 +21,38 @@ android {
   }
 
   buildTypes {
+    debug {
+      applicationIdSuffix = TyBuildType.DEBUG.applicationIdSuffix
+      versionNameSuffix = TyBuildType.DEBUG.versionNameSuffix
+
+      resValue(
+        type = "string",
+        name = "app_version",
+        value = "${defaultConfig.versionName}$versionNameSuffix"
+      )
+
+      resValue(
+        type = "string",
+        name = "app_name",
+        value = TyBuildType.DEBUG.applicationName
+      )
+    }
     release {
-      isMinifyEnabled = false
+      isMinifyEnabled = true
+      isShrinkResources = true
+      applicationIdSuffix = TyBuildType.RELEASE.applicationIdSuffix
+
+      resValue(
+        type = "string",
+        name = "app_version",
+        value = "${defaultConfig.versionName}"
+      )
+      resValue(
+        type = "string",
+        name = "app_name",
+        value = TyBuildType.RELEASE.applicationName
+      )
+
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
@@ -42,6 +73,7 @@ dependencies {
   implementation(deps.lifecycle.runtime.ktx)
   implementation(deps.activity.compose)
   implementation(deps.compose.material3)
+  implementation(deps.androidx.navigation.compose)
   testImplementation(deps.junit)
   androidTestImplementation(deps.androidx.test.ext.junit)
 //  androidTestImplementation(deps.espresso.core)

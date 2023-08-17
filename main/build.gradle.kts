@@ -73,6 +73,7 @@ dependencies {
   implementation(project(":modules:core:designsystem"))
 
   implementation(deps.core.ktx)
+  implementation(deps.androidx.core.splashscreen)
   implementation(deps.lifecycle.runtime.ktx)
   implementation(deps.activity.compose)
   implementation(deps.compose.material3)

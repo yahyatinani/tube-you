@@ -15,6 +15,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -26,13 +27,13 @@ val DarkColorScheme = darkColorScheme(
   primaryContainer = primaryContainerDark,
   onPrimaryContainer = Color.White,
   secondary = Teal200,
-  surface = Grey900,
+  surface = Gray900,
   onSurface = Color.White,
   onSurfaceVariant = Color.White,
-  background = Grey900,
+  background = Gray900,
   surfaceVariant = Color.Cyan,
   onBackground = Color.White,
-  surfaceTint = Grey900
+  surfaceTint = Gray900
 )
 
 val LightColorScheme = lightColorScheme(
@@ -47,15 +48,16 @@ val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun isCompact(windowSizeClass: WindowSizeClass) =
+fun isCompact(windowSizeClass: WindowSizeClass) = remember(windowSizeClass) {
   windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact ||
     windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact
+}
 
 @Composable
 fun TyTheme(
   isDarkTheme: Boolean = isSystemInDarkTheme(),
   // Dynamic color is available on Android 12+
-  dynamicColor: Boolean = true,
+  dynamicColor: Boolean = false,
   isCompact: Boolean = true,
   content: @Composable () -> Unit
 ) {
@@ -76,11 +78,13 @@ fun TyTheme(
   if (!view.isInEditMode) {
     SideEffect {
       val window = (view.context as Activity).window
-      window.statusBarColor = colorScheme.primary.toArgb()
+      window.statusBarColor = colorScheme.surface.toArgb()
+      window.navigationBarColor = colorScheme.surface.toArgb()
+
       WindowCompat.getInsetsController(
         window,
         view
-      ).isAppearanceLightStatusBars = isDarkTheme
+      ).isAppearanceLightStatusBars = !isDarkTheme
     }
   }
 

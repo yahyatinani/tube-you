@@ -7,21 +7,30 @@ import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Vertical
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,11 +38,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.top_level_back_handler_enabled
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBarItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.db.navItems
 import io.github.yahyatinani.tubeyou.fx.BackStack
@@ -44,7 +55,7 @@ import io.github.yahyatinani.tubeyou.navigation.TopLevelNavItems
 import io.github.yahyatinani.tubeyou.navigation.TyNavHost
 import io.github.yahyatinani.y.core.v
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TyApp(navController: NavHostController = rememberNavController()) {
   Scaffold(
@@ -60,35 +71,72 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
       }
     }
   ) { padding ->
-    RegNavFx(navController)
-    LaunchedEffect(Unit) {
-      regCofx(common.start_destination) { cofx ->
-        cofx.assoc(
-          common.start_destination,
-          navController.graph.findStartDestination().id
+    Scaffold(
+      modifier = Modifier.padding(padding),
+      topBar = {
+        val colorScheme = MaterialTheme.colorScheme
+        TopAppBar(
+          modifier = Modifier.fillMaxWidth(),
+          title = { Text(text = "TubeYou", fontWeight = FontWeight.Bold) },
+//          scrollBehavior = scrollBehavior,
+          navigationIcon = {},
+          actions = {
+            IconButton(
+              onClick = {
+                dispatchSync(v(search.panel_fsm, search.show_search_bar))
+              }
+            ) {
+              Icon(
+                imageVector = Icons.Outlined.Search,
+                modifier = Modifier.size(26.dp),
+                contentDescription = "Search a video"
+              )
+            }
+            IconButton(onClick = { /*TODO*/ }) {
+              Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = "profile picture",
+                tint = colorScheme.onSurface
+              )
+            }
+          },
+          colors = TopAppBarDefaults.topAppBarColors(
+            scrolledContainerColor = colorScheme.background
+          )
         )
       }
-      regCofx(common.prev_top_nav_route) { cofx ->
-        val route = BackStack.pop(currentDestination(navController))
-        cofx.assoc(common.prev_top_nav_route, route)
+    ) { paddingTb ->
+      RegNavFx(navController)
+      LaunchedEffect(Unit) {
+        regCofx(common.start_destination) { cofx ->
+          cofx.assoc(
+            common.start_destination,
+            navController.graph.findStartDestination().id
+          )
+        }
+        regCofx(common.prev_top_nav_route) { cofx ->
+          val route = BackStack.pop(currentDestination(navController))
+          cofx.assoc(common.prev_top_nav_route, route)
+        }
+        regCofx(common.is_top_backstack_empty) { cofx ->
+          queue.forEach { print("$it,") }
+          cofx.assoc(common.is_top_backstack_empty, queue.size <= 1)
+        }
       }
-      regCofx(common.is_top_backstack_empty) { cofx ->
-        queue.forEach { print("$it,") }
-        cofx.assoc(common.is_top_backstack_empty, queue.size <= 1)
-      }
+
+      TyNavHost(
+        navController = navController,
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(paddingTb)
+          .consumeWindowInsets(paddingTb)
+          .windowInsetsPadding(
+            WindowInsets.safeDrawing.only(Horizontal + Vertical)
+          )
+      )
     }
 
-    TyNavHost(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(padding)
-        .consumeWindowInsets(padding)
-        .windowInsetsPadding(
-          WindowInsets.safeDrawing.only(Horizontal + Vertical)
-        ),
-      navController = navController
-    )
-
+    // Top-level navigation back handler.
     BackHandler(
       enabled = watch(v(top_level_back_handler_enabled))
     ) {

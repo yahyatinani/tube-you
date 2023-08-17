@@ -30,5 +30,8 @@ dependencyResolutionManagement {
 rootProject.name = "TubeYou"
 
 include(":main")
+include(":modules:feature:home")
+include(":modules:feature:subscriptions")
+include(":modules:feature:library")
 include(":modules:core:designsystem")
 include(":modules:core:keywords")

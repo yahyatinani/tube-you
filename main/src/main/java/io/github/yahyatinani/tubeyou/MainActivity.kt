@@ -4,7 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
-import io.github.yahyatinani.tubeyou.ui.TyApp
+import io.github.yahyatinani.tubeyou.subs.RegTySubs
+import io.github.yahyatinani.tubeyou.views.TyApp
 
 /*
  * Profiling:
@@ -18,6 +19,8 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     setContent {
+      RegTySubs()
+
       TyTheme {
         TyApp()
       }

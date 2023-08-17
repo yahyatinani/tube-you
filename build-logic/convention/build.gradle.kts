@@ -42,6 +42,10 @@ gradlePlugin {
       id = "tubeyou.android.library.compose"
       implementationClass = "AndroidLibraryComposeConventionPlugin"
     }
+    register("androidFeature") {
+      id = "tubeyou.android.feature"
+      implementationClass = "AndroidFeatureConventionPlugin"
+    }
     register("jvmLibrary") {
       id = "tubeyou.jvm.library"
       implementationClass = "JvmLibraryConventionPlugin"

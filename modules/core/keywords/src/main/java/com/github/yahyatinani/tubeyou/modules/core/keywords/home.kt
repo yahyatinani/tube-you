@@ -18,6 +18,3 @@ enum class home {
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }
-
-const val HOME_GRAPH_ROUTE = "home_graph"
-const val HOME_ROUTE = "home_route"

@@ -29,6 +29,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
       }
       dependencies {
         add("api", deps.findLibrary("y-core").get())
+        add("api", deps.findLibrary("recompose").get())
         add("androidTestImplementation", kotlin("test"))
         add("testImplementation", kotlin("test"))
       }

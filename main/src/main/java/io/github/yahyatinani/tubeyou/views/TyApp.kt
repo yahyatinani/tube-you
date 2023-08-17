@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Vertical
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -15,22 +14,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -38,14 +33,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.top_level_back_handler_enabled
-import com.github.yahyatinani.tubeyou.modules.core.keywords.search
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.TopAppBarActionItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBarItem
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyTopAppBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
-import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.watch
+import io.github.yahyatinani.tubeyou.R
 import io.github.yahyatinani.tubeyou.db.navItems
 import io.github.yahyatinani.tubeyou.fx.BackStack
 import io.github.yahyatinani.tubeyou.fx.BackStack.queue
@@ -74,34 +70,23 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
     Scaffold(
       modifier = Modifier.padding(padding),
       topBar = {
-        val colorScheme = MaterialTheme.colorScheme
-        TopAppBar(
-          modifier = Modifier.fillMaxWidth(),
-          title = { Text(text = "TubeYou", fontWeight = FontWeight.Bold) },
-//          scrollBehavior = scrollBehavior,
-          navigationIcon = {},
-          actions = {
-            IconButton(
-              onClick = {
-                dispatchSync(v(search.panel_fsm, search.show_search_bar))
-              }
-            ) {
-              Icon(
-                imageVector = Icons.Outlined.Search,
-                modifier = Modifier.size(26.dp),
-                contentDescription = "Search a video"
-              )
-            }
-            IconButton(onClick = { /*TODO*/ }) {
-              Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = "profile picture",
-                tint = colorScheme.onSurface
-              )
-            }
-          },
-          colors = TopAppBarDefaults.topAppBarColors(
-            scrolledContainerColor = colorScheme.background
+        TyTopAppBar(
+          title = "TubeYou",
+          actions = v(
+            TopAppBarActionItem(
+              icon = Icons.Default.Search,
+              iconContentDescription = stringResource(
+                R.string.top_app_bar_search_action_icon_description
+              ),
+              onActionClick = { /* TODO: search */ }
+            ),
+            TopAppBarActionItem(
+              icon = Icons.Default.MoreVert,
+              iconContentDescription = stringResource(
+                R.string.top_app_bar_more_action_icon_description
+              ),
+              onActionClick = { /* TODO: more */ }
+            )
           )
         )
       }

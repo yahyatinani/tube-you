@@ -134,13 +134,13 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
             WindowInsets.safeDrawing.only(Horizontal + Vertical)
           )
       )
-    }
 
-    // Top-level navigation back handler.
-    BackHandler(
-      enabled = watch(v(top_level_back_handler_enabled))
-    ) {
-      dispatch(v(common.back_press_top_nav))
+      // Top-level navigation back handler.
+      BackHandler(
+        enabled = watch(v(top_level_back_handler_enabled))
+      ) {
+        dispatch(v(common.back_press_top_nav))
+      }
     }
   }
 }

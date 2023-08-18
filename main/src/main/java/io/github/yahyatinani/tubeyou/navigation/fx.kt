@@ -1,4 +1,4 @@
-package io.github.yahyatinani.tubeyou.fx
+package io.github.yahyatinani.tubeyou.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope

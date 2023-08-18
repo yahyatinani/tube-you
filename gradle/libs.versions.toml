@@ -3,6 +3,8 @@ agp = "8.2.0-alpha16"
 kotlin = "1.9.0"
 core-ktx = "1.10.1"
 junit = "4.13.2"
+leakcanaryAndroid = "2.12"
+lifecycleRuntimeCompose = "2.7.0-alpha01"
 spotless = "6.11.0"
 desugar = "2.0.3"
 androidx-test-ext-junit = "1.1.5"
@@ -21,11 +23,13 @@ ylib = "0.5.0"
 recompose = "0.4.0.92-SNAPSHOT" #FIXME: release the new recompose version.
 
 [libraries]
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "androidxCoreSplashscreen" }
+leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanaryAndroid" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }

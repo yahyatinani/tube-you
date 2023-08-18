@@ -9,6 +9,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
+import io.github.yahyatinani.tubeyou.events.regTyEvents
 import io.github.yahyatinani.tubeyou.subs.RegTySubs
 import io.github.yahyatinani.tubeyou.views.TyApp
 
@@ -31,11 +32,19 @@ class MainActivity : ComponentActivity() {
     // theme.
     enableEdgeToEdge()
 
+    regTyEvents() // todo: clear these events when done.
+
     setContent {
       RegTySubs()
       TyTheme(isCompact = isCompact(calculateWindowSizeClass(this))) {
         TyApp()
       }
     }
+  }
+
+  override fun onStop() {
+    super.onStop()
+
+    finish()
   }
 }

@@ -15,20 +15,17 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
@@ -38,22 +35,22 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigatio
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBarItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyTopAppBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
-import io.github.yahyatinani.recompose.cofx.regCofx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.R
 import io.github.yahyatinani.tubeyou.db.navItems
-import io.github.yahyatinani.tubeyou.fx.BackStack
-import io.github.yahyatinani.tubeyou.fx.BackStack.queue
-import io.github.yahyatinani.tubeyou.fx.RegNavFx
-import io.github.yahyatinani.tubeyou.fx.currentDestination
+import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
+import io.github.yahyatinani.tubeyou.navigation.RegNavFx
 import io.github.yahyatinani.tubeyou.navigation.TopLevelNavItems
 import io.github.yahyatinani.tubeyou.navigation.TyNavHost
 import io.github.yahyatinani.y.core.v
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TyApp(navController: NavHostController = rememberNavController()) {
+  RegNavFx(navController)
+  RegNavCofx(navController)
+
   Scaffold(
     modifier = Modifier.fillMaxSize(),
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -91,24 +88,6 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
         )
       }
     ) { paddingTb ->
-      RegNavFx(navController)
-      LaunchedEffect(Unit) {
-        regCofx(common.start_destination) { cofx ->
-          cofx.assoc(
-            common.start_destination,
-            navController.graph.findStartDestination().id
-          )
-        }
-        regCofx(common.prev_top_nav_route) { cofx ->
-          val route = BackStack.pop(currentDestination(navController))
-          cofx.assoc(common.prev_top_nav_route, route)
-        }
-        regCofx(common.is_top_backstack_empty) { cofx ->
-          queue.forEach { print("$it,") }
-          cofx.assoc(common.is_top_backstack_empty, queue.size <= 1)
-        }
-      }
-
       TyNavHost(
         navController = navController,
         modifier = Modifier

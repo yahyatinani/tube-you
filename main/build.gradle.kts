@@ -80,8 +80,8 @@ dependencies {
   implementation(deps.androidx.navigation.compose)
   testImplementation(deps.junit)
   androidTestImplementation(deps.androidx.test.ext.junit)
-//  androidTestImplementation(deps.espresso.core)
   androidTestImplementation(deps.compose.ui.test.junit4)
   debugImplementation(deps.compose.ui.tooling)
   debugImplementation(deps.compose.ui.test.manifest)
+  debugImplementation(deps.leakcanary.android)
 }

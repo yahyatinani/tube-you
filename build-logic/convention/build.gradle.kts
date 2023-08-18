@@ -46,6 +46,10 @@ gradlePlugin {
       id = "tubeyou.android.feature"
       implementationClass = "AndroidFeatureConventionPlugin"
     }
+    register("androidTest") {
+      id = "tubeyou.android.test"
+      implementationClass = "AndroidTestConventionPlugin"
+    }
     register("jvmLibrary") {
       id = "tubeyou.jvm.library"
       implementationClass = "JvmLibraryConventionPlugin"

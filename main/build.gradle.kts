@@ -37,10 +37,16 @@ android {
         value = TyBuildType.DEBUG.applicationName
       )
     }
-    release {
+    val release by getting {
       isMinifyEnabled = true
       isShrinkResources = true
       applicationIdSuffix = TyBuildType.RELEASE.applicationIdSuffix
+      signingConfig = signingConfigs.getByName("debug")
+
+      proguardFiles(
+        getDefaultProguardFile("proguard-android-optimize.txt"),
+        "proguard-rules.pro"
+      )
 
       resValue(
         type = "string",
@@ -52,11 +58,18 @@ android {
         name = "app_name",
         value = TyBuildType.RELEASE.applicationName
       )
+    }
 
-      proguardFiles(
-        getDefaultProguardFile("proguard-android-optimize.txt"),
-        "proguard-rules.pro"
-      )
+    create("benchmark") {
+      // Enable all the optimizations from release build via initWith(release).
+      initWith(release)
+      matchingFallbacks.add("release")
+      // Debug key signing is available to everyone.
+      signingConfig = signingConfigs.getByName("debug")
+      // Only use benchmark proguard rules
+      proguardFiles("benchmark-rules.pro")
+      isMinifyEnabled = true
+      applicationIdSuffix = TyBuildType.BENCHMARK.applicationIdSuffix
     }
   }
   packaging {
@@ -72,16 +85,18 @@ dependencies {
   implementation(project(":modules:feature:library"))
   implementation(project(":modules:core:designsystem"))
 
-  implementation(deps.core.ktx)
-  implementation(deps.androidx.core.splashscreen)
-  implementation(deps.lifecycle.runtime.ktx)
-  implementation(deps.activity.compose)
-  implementation(deps.compose.material3)
-  implementation(deps.androidx.navigation.compose)
   testImplementation(deps.junit)
   androidTestImplementation(deps.androidx.test.ext.junit)
   androidTestImplementation(deps.compose.ui.test.junit4)
   debugImplementation(deps.compose.ui.tooling)
   debugImplementation(deps.compose.ui.test.manifest)
   debugImplementation(deps.leakcanary.android)
+
+  implementation(deps.core.ktx)
+  implementation(deps.androidx.core.splashscreen)
+  implementation(deps.lifecycle.runtime.ktx)
+  implementation(deps.activity.compose)
+  implementation(deps.compose.material3)
+  implementation(deps.androidx.navigation.compose)
+  implementation(deps.androidx.profileinstaller)
 }

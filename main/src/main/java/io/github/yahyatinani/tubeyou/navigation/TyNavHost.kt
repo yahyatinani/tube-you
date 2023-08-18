@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.HOME_GRAPH_ROUTE
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.homeGraph
-import io.github.yahyatinani.tubeyou.modules.feature.library.libraryGraph
+import io.github.yahyatinani.tubeyou.modules.feature.library.youGraph
 import io.github.yahyatinani.tubeyou.modules.feature.subscriptions.subscriptionsGraph
 
 @Composable
@@ -22,6 +22,6 @@ fun TyNavHost(
   ) {
     homeGraph()
     subscriptionsGraph()
-    libraryGraph()
+    youGraph()
   }
 }

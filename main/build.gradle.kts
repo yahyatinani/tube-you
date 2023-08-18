@@ -82,7 +82,7 @@ android {
 dependencies {
   implementation(project(":modules:feature:home"))
   implementation(project(":modules:feature:subscriptions"))
-  implementation(project(":modules:feature:library"))
+  implementation(project(":modules:feature:you"))
   implementation(project(":modules:core:designsystem"))
 
   testImplementation(deps.junit)

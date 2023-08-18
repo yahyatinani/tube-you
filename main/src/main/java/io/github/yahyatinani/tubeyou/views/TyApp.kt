@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,11 +79,11 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
               onActionClick = { /* TODO: search */ }
             ),
             TopAppBarActionItem(
-              icon = Icons.Default.MoreVert,
+              icon = Icons.Outlined.Settings,
               iconContentDescription = stringResource(
-                R.string.top_app_bar_more_action_icon_description
+                R.string.top_app_bar_settings_action_icon_description
               ),
-              onActionClick = { /* TODO: more */ }
+              onActionClick = { /* TODO: settings */ }
             )
           )
         )
@@ -127,21 +128,39 @@ private fun TyBottomBar(
       TyNavigationBarItem(
         selected = selected,
         icon = {
-          Icon(
-            painter = painterResource(navItem.unselectedIcon),
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier
-          )
+          if (navItem.unselectedIcon is Int) {
+            Icon(
+              painter = painterResource(navItem.unselectedIcon),
+              contentDescription = null,
+              tint = tint,
+              modifier = Modifier
+            )
+          } else {
+            Icon(
+              imageVector = navItem.unselectedIcon as ImageVector,
+              contentDescription = null,
+              tint = tint,
+              modifier = Modifier
+            )
+          }
         },
         modifier = itemsModifier,
         selectedIcon = {
-          Icon(
-            painter = painterResource(navItem.selectedIcon),
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(32.dp)
-          )
+          if (navItem.selectedIcon is Int) {
+            Icon(
+              painter = painterResource(navItem.selectedIcon),
+              contentDescription = null,
+              tint = tint,
+              modifier = Modifier.size(32.dp)
+            )
+          } else {
+            Icon(
+              imageVector = navItem.selectedIcon as ImageVector,
+              contentDescription = null,
+              tint = tint,
+              modifier = Modifier.size(32.dp)
+            )
+          }
         },
         label = {
           val type = MaterialTheme.typography

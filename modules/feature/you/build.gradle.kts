@@ -6,5 +6,5 @@ plugins {
 }
 
 android {
-  namespace = "${TyBuild.APP_ID}.modules.feature.library"
+  namespace = "${TyBuild.APP_ID}.modules.feature.you"
 }

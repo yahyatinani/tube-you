@@ -1,14 +1,17 @@
 package io.github.yahyatinani.tubeyou.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.outlined.AccountCircle
 import io.github.yahyatinani.tubeyou.R
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.HOME_GRAPH_ROUTE
-import io.github.yahyatinani.tubeyou.modules.feature.library.LIBRARY_GRAPH_ROUTE
+import io.github.yahyatinani.tubeyou.modules.feature.library.YOU_GRAPH_ROUTE
 import io.github.yahyatinani.tubeyou.modules.feature.subscriptions.SUBSCRIPTIONS_GRAPH_ROUTE
 
 enum class TopLevelNavItems(
   val label: Int,
-  val selectedIcon: Int,
-  val unselectedIcon: Int,
+  val selectedIcon: Any,
+  val unselectedIcon: Any,
   val route: String
 ) {
   Home(
@@ -23,10 +26,10 @@ enum class TopLevelNavItems(
     unselectedIcon = R.drawable.ic_outlined_subs,
     route = SUBSCRIPTIONS_GRAPH_ROUTE
   ),
-  Library(
-    label = R.string.nav_item_label_library,
-    selectedIcon = R.drawable.ic_filled_library,
-    unselectedIcon = R.drawable.ic_outlined_library,
-    route = LIBRARY_GRAPH_ROUTE
+  You(
+    label = R.string.nav_item_label_you,
+    selectedIcon = Icons.Default.AccountCircle,
+    unselectedIcon = Icons.Outlined.AccountCircle,
+    route = YOU_GRAPH_ROUTE
   )
 }

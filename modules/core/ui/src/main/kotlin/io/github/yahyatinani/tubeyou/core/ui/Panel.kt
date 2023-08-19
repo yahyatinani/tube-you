@@ -75,7 +75,7 @@ fun PullRefreshPanel(
         SwipeRefreshIndicator(
           state = state,
           refreshTriggerDistance = refreshTrigger,
-          backgroundColor = colorScheme.primaryContainer,
+          backgroundColor = colorScheme.background,
           contentColor = colorScheme.onBackground,
           elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
         )

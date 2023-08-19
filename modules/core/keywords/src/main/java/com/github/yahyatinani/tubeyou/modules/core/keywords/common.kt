@@ -36,7 +36,8 @@ enum class common {
   collapse_player_sheet,
   comment_replies,
   is_route_active,
-  prev_top_nav_route;
+  prev_top_nav_route,
+  top_app_bar_actions;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

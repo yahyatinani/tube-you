@@ -1,5 +1,6 @@
-package io.github.yahyatinani.tubeyou.views
+package io.github.yahyatinani.tubeyou.ui
 
+import android.content.res.Resources
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,14 +29,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.designsystem.component.TopAppBarActionItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBarItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyTopAppBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.watch
-import io.github.yahyatinani.tubeyou.R
 import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
 import io.github.yahyatinani.tubeyou.navigation.RegNavFx
@@ -68,24 +65,10 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
       modifier = Modifier.padding(bottom = paddingBb.calculateBottomPadding()),
       topBar = {
         // TODO: scrollable top bar.
+        val r: Resources = LocalContext.current.resources
         TyTopAppBar(
           title = "TubeYou",
-          actions = v(
-            TopAppBarActionItem(
-              icon = Icons.Default.Search,
-              iconContentDescription = stringResource(
-                R.string.top_app_bar_search_action_icon_description
-              ),
-              onActionClick = { /* TODO: search */ }
-            ),
-            TopAppBarActionItem(
-              icon = Icons.Outlined.Settings,
-              iconContentDescription = stringResource(
-                R.string.top_app_bar_settings_action_icon_description
-              ),
-              onActionClick = { /* TODO: settings */ }
-            )
-          )
+          actions = watch(query = v(common.top_app_bar_actions, r))
         )
       }
     ) { paddingTb ->

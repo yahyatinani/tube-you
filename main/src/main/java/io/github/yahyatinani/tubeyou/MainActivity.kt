@@ -11,7 +11,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
 import io.github.yahyatinani.tubeyou.events.regTyEvents
 import io.github.yahyatinani.tubeyou.subs.RegTySubs
-import io.github.yahyatinani.tubeyou.views.TyApp
+import io.github.yahyatinani.tubeyou.ui.TyApp
 
 /*
  * Profiling:

@@ -4,5 +4,6 @@ enum class States {
   LOADING,
   LOADED,
   FAILED,
-  REFRESHING
+  REFRESHING,
+  APPENDING
 }

@@ -37,13 +37,13 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.ListItemPor
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import io.github.yahyatinani.tubeyou.core.viewmodels.ChannelVm
 import io.github.yahyatinani.tubeyou.core.viewmodels.PlaylistVm
-import io.github.yahyatinani.tubeyou.core.viewmodels.VideoViewModel
+import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 
 @Composable
 fun VideoItemPortrait(
   modifier: Modifier = Modifier,
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
-  viewModel: VideoViewModel,
+  viewModel: VideoVm,
   onClick: () -> Unit
 ) {
   ListItemPortrait(
@@ -66,7 +66,7 @@ fun VideoItemPortrait(
 
 @Composable
 fun VideoItemLandscapeCompact(
-  viewModel: VideoViewModel,
+  viewModel: VideoVm,
   onClick: () -> Unit
 ) {
   ListItemLandscape(

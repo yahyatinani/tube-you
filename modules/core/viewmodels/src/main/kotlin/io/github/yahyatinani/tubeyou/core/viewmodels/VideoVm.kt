@@ -2,7 +2,7 @@ package io.github.yahyatinani.tubeyou.core.viewmodels
 
 import androidx.compose.ui.text.AnnotatedString
 
-data class VideoViewModel(
+data class VideoVm(
   val id: String = "",
   val authorId: String = "",
   val uploaderName: String = "",

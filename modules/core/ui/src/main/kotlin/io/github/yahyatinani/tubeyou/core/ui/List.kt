@@ -14,16 +14,16 @@ import androidx.compose.ui.unit.dp
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.LiveDurationText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ShortDurationText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoDurationText
-import io.github.yahyatinani.tubeyou.core.viewmodels.VideoViewModel
-import io.github.yahyatinani.tubeyou.core.viewmodels.Videos
+import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
+import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.modules.core.designsystem.R
 
 @Composable
 fun VideosList(
-  orientation: Int = 1,
+  orientation: Int,
   listState: LazyListState,
-  videos: Videos,
-  onClickVideo: (VideoViewModel) -> Unit = {}
+  videos: UIState,
+  onClickVideo: (VideoVm) -> Unit = {}
 ) {
   val isPortrait = orientation == ORIENTATION_PORTRAIT
   LazyColumn(
@@ -34,7 +34,7 @@ fun VideosList(
       .then(if (isPortrait) Modifier else Modifier.padding(horizontal = 16.dp))
   ) {
     items(
-      items = videos.value as List<VideoViewModel>,
+      items = videos.data as List<VideoVm>,
       key = { it.id }
     ) { viewModel ->
       when {
@@ -57,7 +57,7 @@ fun VideosList(
 }
 
 @Composable
-fun ThumbnailContent(viewModel: VideoViewModel) = when {
+fun ThumbnailContent(viewModel: VideoVm) = when {
   viewModel.isLiveStream -> LiveDurationText()
   viewModel.isShort -> ShortDurationText()
   else -> VideoDurationText(

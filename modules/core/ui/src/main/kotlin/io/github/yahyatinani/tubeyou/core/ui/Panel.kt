@@ -1,10 +1,8 @@
 package io.github.yahyatinani.tubeyou.core.ui
 
-import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,37 +10,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.github.yahyatinani.tubeyou.modules.core.keywords.States
+import com.github.yahyatinani.tubeyou.modules.core.keywords.States.APPENDING
+import com.github.yahyatinani.tubeyou.modules.core.keywords.States.FAILED
+import com.github.yahyatinani.tubeyou.modules.core.keywords.States.LOADING
+import com.github.yahyatinani.tubeyou.modules.core.keywords.States.REFRESHING
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
-import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import io.github.yahyatinani.tubeyou.core.viewmodels.PanelVm
-import io.github.yahyatinani.tubeyou.core.viewmodels.VideoViewModel
-import io.github.yahyatinani.tubeyou.core.viewmodels.Videos
-import io.github.yahyatinani.y.core.v
 
 @Composable
 fun Panel(
   modifier: Modifier = Modifier,
-  panelVm: PanelVm,
-  content: @Composable (
-    videos: Videos,
-    appendLoader: @Composable () -> Unit
-  ) -> Unit
+  state: States,
+  error: Int?,
+  content: @Composable (appendLoader: @Composable () -> Unit) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    content(panelVm.videos) {
-      if (panelVm.isAppending) {
+    content {
+      if (state == APPENDING) {
         AppendingLoader()
       }
     }
 
-    if (panelVm.isLoading) {
+    if (state == LOADING) {
       // TODO: if online use placeholder UI loader.
       CircularProgressIndicator(
         modifier = Modifier.align(Alignment.Center),
@@ -50,9 +44,9 @@ fun Panel(
       )
     }
 
-    if (panelVm.error != null) {
+    if (state == FAILED) {
       // TODO: Implement proper UI for errors. Also, make it an argument.
-      Text(text = "Request failed! Error: ${panelVm.error}")
+      Text(text = "Request failed! Error: $error")
     }
   }
 }
@@ -60,15 +54,16 @@ fun Panel(
 @Composable
 fun PullRefreshPanel(
   modifier: Modifier = Modifier,
-  panelVm: PanelVm,
+  state: States,
+  error: Int?,
   onRefresh: () -> Unit = {},
-  content: @Composable (videos: Videos) -> Unit
+  content: @Composable () -> Unit
 ) {
-  Panel(modifier = modifier, panelVm = panelVm) { videos, _ ->
+  Panel(modifier = modifier, state = state, error = error) {
     SwipeRefresh(
       modifier = Modifier.testTag("swipe_refresh"),
-      swipeEnabled = !panelVm.isLoading,
-      state = rememberSwipeRefreshState(panelVm.isRefreshing),
+      swipeEnabled = state != LOADING,
+      state = rememberSwipeRefreshState(isRefreshing = state == REFRESHING),
       onRefresh = onRefresh,
       indicator = { state, refreshTrigger ->
         val colorScheme = MaterialTheme.colorScheme
@@ -81,42 +76,7 @@ fun PullRefreshPanel(
         )
       }
     ) {
-      content(videos)
+      content()
     }
   }
-}
-
-// -- Previews -----------------------------------------------------------------
-
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-  val viewModel = VideoViewModel(
-    id = "#ldfj243kj2r",
-    authorId = "2342lk2sdf",
-    title = "Title",
-    thumbnail = "",
-    length = "2:23",
-    info = AnnotatedString("Jon Deo")
-  )
-
-  TyTheme {
-    PullRefreshPanel(
-      panelVm = PanelVm.Loaded(
-        videos = Videos(v(viewModel, viewModel, viewModel, viewModel))
-      )
-    ) { videos ->
-      VideosList(
-        orientation = 1,
-        listState = rememberLazyListState(),
-        videos = videos
-      )
-    }
-  }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun HomeDarkPreview() {
-  HomePreview()
 }

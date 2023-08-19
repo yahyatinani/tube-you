@@ -38,7 +38,8 @@ enum class common {
   is_route_active,
   prev_top_nav_route,
   top_app_bar_actions,
-  auto_scroll_up;
+  auto_scroll_up,
+  error;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

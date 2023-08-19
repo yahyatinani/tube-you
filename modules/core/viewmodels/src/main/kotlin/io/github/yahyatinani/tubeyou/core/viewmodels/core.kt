@@ -152,14 +152,14 @@ private fun highQuality(thumbnail: String) =
 fun formatVideo(
   video: Video,
   resources: Resources
-): VideoViewModel {
+): VideoVm {
   val isUpcoming = video.views == -1L && video.duration == -1L
   val authorId = video.uploaderUrl!!
   val isLiveStream = video.duration == -1L
   val uploaded = video.uploadedDate
   val uploaderName = video.uploaderName!!
 
-  val vm = VideoViewModel(
+  val vm = VideoVm(
     id = video.url,
     authorId = authorId,
     uploaderName = uploaderName,
@@ -218,7 +218,7 @@ fun formatVideo(
 fun formatVideos(
   videoDataList: List<Video>,
   resources: Resources
-): List<VideoViewModel> = videoDataList.fold(v()) { acc, video ->
+): List<VideoVm> = videoDataList.fold(v()) { acc, video ->
   acc.conj(formatVideo(video, resources))
 }
 

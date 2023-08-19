@@ -5,7 +5,6 @@ enum class common {
   init_app_db,
   navigate_to,
   is_backstack_available,
-  api_url,
   navigation_items,
   active_navigation_item,
   on_click_nav_item,
@@ -37,8 +36,7 @@ enum class common {
   collapse_player_sheet,
   comment_replies,
   is_route_active,
-  prev_top_nav_route,
-  top_level_back_handler_enabled;
+  prev_top_nav_route;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

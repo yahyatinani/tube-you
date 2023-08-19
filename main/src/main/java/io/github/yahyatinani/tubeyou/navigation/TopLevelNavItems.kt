@@ -33,3 +33,5 @@ enum class TopLevelNavItems(
     route = YOU_GRAPH_ROUTE
   )
 }
+
+val topLevelNavItems = TopLevelNavItems.values().asList()

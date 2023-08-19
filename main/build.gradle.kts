@@ -74,7 +74,7 @@ android {
   }
   packaging {
     resources {
-      excludes += "/META-INF/{AL2.0,LGPL2.1}"
+      excludes += "/META-INF/{AL2.0,LGPL2.1,INDEX.LIST}"
     }
   }
 }
@@ -83,7 +83,9 @@ dependencies {
   implementation(project(":modules:feature:home"))
   implementation(project(":modules:feature:subscriptions"))
   implementation(project(":modules:feature:you"))
+  implementation(project(":modules:core:common"))
   implementation(project(":modules:core:designsystem"))
+  implementation(project(":modules:core:network"))
 
   testImplementation(deps.junit)
   androidTestImplementation(deps.androidx.test.ext.junit)
@@ -99,4 +101,5 @@ dependencies {
   implementation(deps.compose.material3)
   implementation(deps.androidx.navigation.compose)
   implementation(deps.androidx.profileinstaller)
+  implementation(deps.recompose.httpfx)
 }

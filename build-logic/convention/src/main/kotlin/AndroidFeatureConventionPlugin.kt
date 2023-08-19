@@ -15,37 +15,14 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
           deps.findLibrary("androidx.navigation.compose").get()
         )
 
+        add("implementation", project(":modules:core:common"))
+        add("implementation", project(":modules:core:network"))
         add("implementation", project(":modules:core:designsystem"))
-        /*        add("implementation", project(":core:model"))
-                add("implementation", project(":core:ui"))
-                add("implementation", project(":core:designsystem"))
-                add("implementation", project(":core:data"))
-                add("implementation", project(":core:common"))
-                add("implementation", project(":core:domain"))
-                add("implementation", project(":core:analytics"))
-
-                add("testImplementation", kotlin("test"))
-                add("testImplementation", project(":core:testing"))
-                add("androidTestImplementation", kotlin("test"))
-                add("androidTestImplementation", project(":core:testing"))
-
-                add("implementation", deps.findLibrary("coil.kt").get())
-                add("implementation", deps.findLibrary("coil.kt.compose").get())
-
-
-                add(
-                  "implementation",
-                  deps.findLibrary("androidx.lifecycle.runtimeCompose").get()
-                )
-                add(
-                  "implementation",
-                  deps.findLibrary("androidx.lifecycle.viewModelCompose").get()
-                )
-
-                add(
-                  "implementation",
-                  deps.findLibrary("kotlinx.coroutines.android").get()
-                )*/
+        add("implementation", project(":modules:core:viewmodels"))
+        add("implementation", project(":modules:core:ui"))
+        add("implementation", deps.findLibrary("recompose-httpfx").get())
+        add("implementation", deps.findLibrary("recompose-fsm").get())
+        add("implementation", deps.findLibrary("recompose-pagingfx").get())
       }
     }
   }

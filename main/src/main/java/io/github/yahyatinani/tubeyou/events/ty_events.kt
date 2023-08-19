@@ -11,13 +11,12 @@ import io.github.yahyatinani.recompose.cofx.injectCofx
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.ids.recompose.db
 import io.github.yahyatinani.recompose.regEventFx
-import io.github.yahyatinani.tubeyou.db.TyAppState
+import io.github.yahyatinani.tubeyou.common.appDbBy
+import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.HOME_GRAPH_ROUTE
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
-
-fun appDbBy(cofx: Coeffects): TyAppState = get(cofx, db)!!
 
 fun regTyEvents() {
   regEventFx(
@@ -25,15 +24,14 @@ fun regTyEvents() {
     interceptors = v(injectCofx(start_destination))
   ) { cofx: Coeffects, (_, navItemRoute) ->
     val appDb = appDbBy(cofx)
-    if (appDb.activeTopLevelRoute === navItemRoute) {
+    if (appDb[ty_db.active_top_level_route] === navItemRoute) {
       // TODO: scroll up to top list.
       return@regEventFx m<Any, Any>()
     }
     m(
-      db to appDb.copy(
-        activeTopLevelRoute = navItemRoute as String,
-        topLevelBackHandlerEnabled = true
-      ),
+      db to appDb
+        .assoc(ty_db.active_top_level_route, navItemRoute)
+        .assoc(ty_db.top_level_back_handler_enabled, true),
       fx to v(
         v(
           common.navigate_to,
@@ -58,16 +56,15 @@ fun regTyEvents() {
       injectCofx(is_top_backstack_empty)
     )
   ) { cofx: Coeffects, _ ->
-    val prevDestinationRoute = cofx[prev_top_nav_route]
+    val prevDestinationRoute = cofx[prev_top_nav_route]!!
     val isTopLevelBackstackEmpty = get<Boolean>(cofx, is_top_backstack_empty)!!
     val disabled =
       prevDestinationRoute == HOME_GRAPH_ROUTE && isTopLevelBackstackEmpty
 
     m<Any, Any>(
-      db to appDbBy(cofx).copy(
-        activeTopLevelRoute = prevDestinationRoute as String,
-        topLevelBackHandlerEnabled = !disabled
-      ),
+      db to appDbBy(cofx)
+        .assoc(ty_db.active_top_level_route, prevDestinationRoute)
+        .assoc(ty_db.top_level_back_handler_enabled, !disabled),
       fx to v(v(back_press_top_nav, prevDestinationRoute))
     )
   }

@@ -4,18 +4,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import io.github.yahyatinani.recompose.regSub
-import io.github.yahyatinani.tubeyou.db.TyAppState
+import io.github.yahyatinani.tubeyou.common.AppDb
+import io.github.yahyatinani.tubeyou.common.ty_db
+import io.github.yahyatinani.y.core.get
 
 @Composable
 fun RegTySubs() {
   remember {
-    regSub<TyAppState>(common.is_route_active) { db, (_, navItem) ->
-      db.activeTopLevelRoute == navItem
+    regSub<AppDb>(common.is_route_active) { db, (_, navItem) ->
+      db[ty_db.active_top_level_route] == navItem
     }
 
-    regSub<TyAppState>(common.top_level_back_handler_enabled) { db, _ ->
-      db.topLevelBackHandlerEnabled
-    }
+    regSub(
+      queryId = ty_db.top_level_back_handler_enabled,
+      key = ty_db.top_level_back_handler_enabled
+    )
 
     true
   }

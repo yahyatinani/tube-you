@@ -51,12 +51,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import io.github.yahyatinani.tubeyou.modules.designsystem.R
-
-const val SMALL_BULLET = "·"
-const val MEDIUM_BULLET = "•"
 
 val roundedCornerShape = RoundedCornerShape(4.dp)
 
@@ -132,18 +128,6 @@ fun VideoDurationText(duration: String, modifier: Modifier = Modifier) {
     modifier = modifier.bgModifier(
       backgroundColor = Color.Black.copy(alpha = .8f)
     )
-  )
-}
-
-@Composable
-fun ThumbnailContent(viewModel: VideoViewModel) = when {
-  viewModel.isLiveStream -> LiveDurationText()
-  viewModel.isShort -> ShortDurationText()
-  else -> VideoDurationText(
-    duration = when {
-      viewModel.isUpcoming -> stringResource(R.string.upcoming)
-      else -> viewModel.length
-    }
   )
 }
 

@@ -18,6 +18,7 @@ android {
 
 dependencies {
   api(project(":modules:core:keywords"))
+
   api(deps.compose.foundation)
   api(deps.compose.foundation.layout)
   api(deps.compose.material.iconsExtended)
@@ -32,14 +33,4 @@ dependencies {
 
   implementation(deps.core.ktx)
   implementation(deps.coil.kt.compose)
-
-  /*  implementation project(':app:core:keywords')
-    implementation deps.bundles.compose
-    implementation deps.coil
-    implementation deps.y.core
-    implementation deps.kotlinx.datetime
-
-    testImplementation deps.kotlin.reflect
-    testImplementation deps.kotest.jvm.runner
-    testImplementation deps.kotest.assertions*/
 }

@@ -7,15 +7,6 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.HOME_GRAPH_ROUTE
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common.is_online
 import io.github.yahyatinani.recompose.cofx.regCofx
-import io.github.yahyatinani.y.core.m
-
-val defaultDb = m<Any, Any>(
-  common.is_backstack_available to false,
-  common.api_url to "https://api.piped.privacydev.net",
-  common.is_backstack_empty to true,
-  common.active_navigation_item to HOME_GRAPH_ROUTE,
-  common.active_stream to m("show_player_thumbnail" to true)
-)
 
 // -- Cofx ---------------------------------------------------------------------
 fun isDeviceOnline(context: Context): Boolean {

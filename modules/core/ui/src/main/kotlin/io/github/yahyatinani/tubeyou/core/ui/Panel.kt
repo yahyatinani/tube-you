@@ -1,4 +1,4 @@
-package com.github.yahyatinani.tubeyou.modules.designsystem.component
+package io.github.yahyatinani.tubeyou.core.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -12,17 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.github.yahyatinani.tubeyou.modules.designsystem.core.formatVideoInfo
-import com.github.yahyatinani.tubeyou.modules.designsystem.data.PanelVm
-import com.github.yahyatinani.tubeyou.modules.designsystem.data.VideoViewModel
-import com.github.yahyatinani.tubeyou.modules.designsystem.data.Videos
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
+import com.github.yahyatinani.tubeyou.modules.designsystem.component.rememberThumbnailHeightPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import io.github.yahyatinani.tubeyou.core.viewmodels.PanelVm
+import io.github.yahyatinani.tubeyou.core.viewmodels.VideoViewModel
+import io.github.yahyatinani.tubeyou.core.viewmodels.Videos
 import io.github.yahyatinani.y.core.v
 
 @Composable
@@ -96,13 +98,7 @@ fun HomePreview() {
     title = "Title",
     thumbnail = "",
     length = "2:23",
-    info = formatVideoInfo(
-      author = "Jon Deo",
-      authorId = "2342lk2sdf",
-      text1 = "32432",
-      publishedText = "2 hours ago",
-      text2 = "views"
-    )
+    info = AnnotatedString("Jon Deo")
   )
 
   TyTheme {

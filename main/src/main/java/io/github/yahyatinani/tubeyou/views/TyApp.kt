@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
-import com.github.yahyatinani.tubeyou.modules.core.keywords.common.top_level_back_handler_enabled
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TopAppBarActionItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBarItem
@@ -39,11 +38,12 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.R
-import io.github.yahyatinani.tubeyou.db.navItems
+import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
 import io.github.yahyatinani.tubeyou.navigation.RegNavFx
 import io.github.yahyatinani.tubeyou.navigation.TopLevelNavItems
 import io.github.yahyatinani.tubeyou.navigation.TyNavHost
+import io.github.yahyatinani.tubeyou.navigation.topLevelNavItems
 import io.github.yahyatinani.y.core.v
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -54,20 +54,20 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
     bottomBar = {
       TyBottomBar(
-        navItems = navItems,
+        navItems = topLevelNavItems,
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
       ) { navItemRoute ->
         dispatch(v(common.on_click_nav_item, navItemRoute))
       }
     }
-  ) { padding ->
+  ) { paddingBb ->
     Scaffold(
-      modifier = Modifier.padding(padding),
+      modifier = Modifier.padding(bottom = paddingBb.calculateBottomPadding()),
       topBar = {
+        // TODO: scrollable top bar.
         TyTopAppBar(
           title = "TubeYou",
           actions = v(
@@ -93,7 +93,7 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
         navController = navController,
         modifier = Modifier
           .fillMaxSize()
-          .padding(paddingTb)
+          .padding(top = paddingTb.calculateTopPadding())
           .consumeWindowInsets(paddingTb)
           .windowInsetsPadding(
             WindowInsets.safeDrawing.only(Horizontal + Vertical)
@@ -102,7 +102,7 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
 
       // Top-level navigation back handler.
       BackHandler(
-        enabled = watch(v(top_level_back_handler_enabled))
+        enabled = watch(v(ty_db.top_level_back_handler_enabled))
       ) {
         dispatch(v(common.back_press_top_nav))
       }

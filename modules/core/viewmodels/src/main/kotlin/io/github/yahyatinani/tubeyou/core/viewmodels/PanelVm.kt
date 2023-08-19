@@ -1,4 +1,4 @@
-package com.github.yahyatinani.tubeyou.modules.designsystem.data
+package io.github.yahyatinani.tubeyou.core.viewmodels
 
 sealed class PanelVm(
   open val videos: Videos = Videos(),

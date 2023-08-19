@@ -18,6 +18,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +39,11 @@ data class TopAppBarActionItem(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TyTopAppBar(title: String, actions: List<TopAppBarActionItem>) {
+fun TyTopAppBar(
+  title: String,
+  actions: List<TopAppBarActionItem>,
+  scrollBehavior: TopAppBarScrollBehavior
+) {
   val colorScheme = MaterialTheme.colorScheme
   TopAppBar(
     title = { Text(text = title, fontWeight = FontWeight.Bold) },
@@ -56,8 +61,8 @@ fun TyTopAppBar(title: String, actions: List<TopAppBarActionItem>) {
     },
     colors = TopAppBarDefaults.topAppBarColors(
       scrolledContainerColor = colorScheme.background
-    )
-//          scrollBehavior = scrollBehavior
+    ),
+    scrollBehavior = scrollBehavior
   )
 }
 

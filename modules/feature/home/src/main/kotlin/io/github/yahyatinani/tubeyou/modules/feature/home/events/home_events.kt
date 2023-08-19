@@ -49,10 +49,6 @@ fun RegHomeEvents() {
     )
   }
 
-  regEventFx(home.go_top_list) { _, _ ->
-    m(BuiltInFx.fx to v(v(home.go_top_list)))
-  }
-
   val homeStatePath = v(HOME_GRAPH_ROUTE, home.fsm_state)
 
   regEventFx(id = home.fsm) { cofx, e ->
@@ -68,7 +64,6 @@ fun RegHomeEvents() {
   DisposableEffect(Unit) {
     onDispose {
       clearEvent(home.load)
-      clearEvent(home.go_top_list)
       clearEvent(home.fsm)
     }
   }

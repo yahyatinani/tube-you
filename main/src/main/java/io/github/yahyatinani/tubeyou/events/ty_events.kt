@@ -25,8 +25,9 @@ fun regTyEvents() {
   ) { cofx: Coeffects, (_, navItemRoute) ->
     val appDb = appDbBy(cofx)
     if (appDb[ty_db.active_top_level_route] === navItemRoute) {
-      // TODO: scroll up to top list.
-      return@regEventFx m<Any, Any>()
+      return@regEventFx m<Any, Any>(
+        fx to v(v(common.auto_scroll_up))
+      )
     }
     m(
       db to appDb

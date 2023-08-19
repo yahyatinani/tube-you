@@ -13,18 +13,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.TopAppBarState
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -32,8 +39,12 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBarItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyTopAppBar
-import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
+import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
+import io.github.yahyatinani.recompose.RegFx
+import io.github.yahyatinani.recompose.clearEvent
 import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
+import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
@@ -41,14 +52,42 @@ import io.github.yahyatinani.tubeyou.navigation.RegNavFx
 import io.github.yahyatinani.tubeyou.navigation.TopLevelNavItems
 import io.github.yahyatinani.tubeyou.navigation.TyNavHost
 import io.github.yahyatinani.tubeyou.navigation.topLevelNavItems
+import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TyApp(navController: NavHostController = rememberNavController()) {
+@OptIn(ExperimentalMaterial3Api::class)
+fun topAppBarScrollBehavior(
+  isCompactDisplay: Boolean,
+  topAppBarState: TopAppBarState,
+): TopAppBarScrollBehavior = when {
+  isCompactDisplay -> {
+    RegFx(id = common.expand_top_app_bar) {
+      topAppBarState.heightOffset = 0f
+    }
+    DisposableEffect(Unit) {
+      regEventFx(common.expand_top_app_bar) { _, _ ->
+        m(fx to v(v(common.expand_top_app_bar)))
+      }
+      onDispose { clearEvent(common.expand_top_app_bar) }
+    }
+    TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+  }
+
+  else -> TopAppBarDefaults.pinnedScrollBehavior()
+}
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun TyApp(
+  navController: NavHostController = rememberNavController(),
+  windowSizeClass: WindowSizeClass
+) {
   RegNavFx(navController)
   RegNavCofx(navController)
 
+  val isCompactSize = isCompact(windowSizeClass)
+  val topBarState = rememberTopAppBarState()
   Scaffold(
     modifier = Modifier.fillMaxSize(),
     bottomBar = {
@@ -61,14 +100,25 @@ fun TyApp(navController: NavHostController = rememberNavController()) {
       }
     }
   ) { paddingBb ->
+    val topAppBarScrollBehavior = if (false) { // TODO: when search implemented
+      TopAppBarDefaults.pinnedScrollBehavior()
+    } else {
+      topAppBarScrollBehavior(
+        isCompactDisplay = isCompactSize,
+        topAppBarState = topBarState
+      )
+    }
+
     Scaffold(
-      modifier = Modifier.padding(bottom = paddingBb.calculateBottomPadding()),
+      modifier = Modifier
+        .padding(bottom = paddingBb.calculateBottomPadding())
+        .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
       topBar = {
-        // TODO: scrollable top bar.
-        val r: Resources = LocalContext.current.resources
+        val resources: Resources = LocalContext.current.resources
         TyTopAppBar(
           title = "TubeYou",
-          actions = watch(query = v(common.top_app_bar_actions, r))
+          actions = watch(query = v(common.top_app_bar_actions, resources)),
+          scrollBehavior = topAppBarScrollBehavior,
         )
       }
     ) { paddingTb ->
@@ -156,15 +206,5 @@ private fun TyBottomBar(
         onClick = { onClickNavItem(navItem.route) }
       )
     }
-  }
-}
-
-// -- Previews -----------------------------------------------------------------
-
-@Preview(showBackground = true)
-@Composable
-fun TyAppPreview() {
-  TyTheme {
-    TyApp()
   }
 }

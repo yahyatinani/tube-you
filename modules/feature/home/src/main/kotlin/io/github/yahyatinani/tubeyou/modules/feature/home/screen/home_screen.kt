@@ -30,6 +30,7 @@ import io.github.yahyatinani.tubeyou.core.viewmodels.VideoViewModel
 import io.github.yahyatinani.tubeyou.core.viewmodels.Videos
 import io.github.yahyatinani.tubeyou.modules.feature.home.cofx.RetRegHomeCofx
 import io.github.yahyatinani.tubeyou.modules.feature.home.events.RegHomeEvents
+import io.github.yahyatinani.tubeyou.modules.feature.home.fx.RegScrollUpFx
 import io.github.yahyatinani.tubeyou.modules.feature.home.subs.RegHomeSubs
 import io.github.yahyatinani.y.core.v
 
@@ -54,9 +55,9 @@ internal fun HomeScreen(
     onRefresh = { dispatch(v(home.fsm, home.refresh)) }
   ) { videos ->
     val listState = rememberLazyListState()
-    /*    RegScrollToTopListFx {
-          listState.animateScrollToItem(index = 0)
-        }*/
+    RegScrollUpFx {
+      listState.animateScrollToItem(index = 0)
+    }
 
     VideosList(
       orientation = orientation,

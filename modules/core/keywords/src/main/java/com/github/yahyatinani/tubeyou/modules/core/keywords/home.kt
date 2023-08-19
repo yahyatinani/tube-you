@@ -3,7 +3,6 @@ package com.github.yahyatinani.tubeyou.modules.core.keywords
 @Suppress("ClassName", "EnumEntryName")
 enum class home {
   view_model,
-  go_top_list,
   coroutine_scope,
   fsm_state,
   fsm,

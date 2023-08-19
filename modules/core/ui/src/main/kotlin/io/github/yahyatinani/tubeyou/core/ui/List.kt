@@ -10,22 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.LiveDurationText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ShortDurationText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoDurationText
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoViewModel
 import io.github.yahyatinani.tubeyou.core.viewmodels.Videos
-import io.github.yahyatinani.tubeyou.modules.designsystem.R
+import io.github.yahyatinani.tubeyou.modules.core.designsystem.R
 
 @Composable
 fun VideosList(
   orientation: Int = 1,
   listState: LazyListState,
   videos: Videos,
-  thumbnailHeight: Dp,
-  playVideo: (VideoViewModel) -> Unit = {}
+  onClickVideo: (VideoViewModel) -> Unit = {}
 ) {
   val isPortrait = orientation == ORIENTATION_PORTRAIT
   LazyColumn(
@@ -43,15 +41,16 @@ fun VideosList(
         isPortrait -> {
           VideoItemPortrait(
             viewModel = viewModel,
-            thumbnailHeight = thumbnailHeight,
-            play = { playVideo(viewModel) }
+            onClick = { onClickVideo(viewModel) }
           )
         }
 
-        else -> VideoItemLandscapeCompact(
-          viewModel = viewModel,
-          thumbnailHeight = thumbnailHeight
-        )
+        else -> {
+          VideoItemLandscapeCompact(
+            viewModel = viewModel,
+            onClick = { onClickVideo(viewModel) }
+          )
+        }
       }
     }
   }

@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
-import io.github.yahyatinani.tubeyou.modules.designsystem.R
+import io.github.yahyatinani.tubeyou.modules.core.designsystem.R
 
 val roundedCornerShape = RoundedCornerShape(4.dp)
 

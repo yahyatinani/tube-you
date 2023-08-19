@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,10 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -36,7 +35,6 @@ fun ListItemPortrait(
   thumbnail: String,
   info: AnnotatedString,
   videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
-  thumbnailHeight: Dp,
   thumbnailContent: @Composable (BoxScope.() -> Unit),
   channelAvatar: @Composable (RowScope.() -> Unit)? = null,
   onClick: () -> Unit = {}
@@ -46,7 +44,7 @@ fun ListItemPortrait(
       url = thumbnail,
       modifier = Modifier
         .fillMaxWidth()
-        .height(thumbnailHeight),
+        .aspectRatio(RATIO),
       content = thumbnailContent
     )
 
@@ -76,20 +74,16 @@ fun ListItemLandscape(
   modifier: Modifier = Modifier,
   thumbnail: String,
   info: AnnotatedString,
-  thumbnailHeight: Dp,
-  content: @Composable (BoxScope.() -> Unit),
-  channelAvatar: @Composable (ColumnScope.() -> Unit)? = null
+  channelAvatar: @Composable (ColumnScope.() -> Unit)? = null,
+  onClick: () -> Unit,
+  content: @Composable (BoxScope.() -> Unit)
 ) {
-  Row(
-    modifier = modifier
-      .testTag("video")
-      .clickable { /*todo:*/ }
-  ) {
+  Row(modifier = modifier.clickable(onClick = onClick)) {
     Thumbnail(
       url = thumbnail,
       modifier = Modifier
         .weight(.25f)
-        .height(thumbnailHeight)
+        .aspectRatio(RATIO)
         .clip(RoundedCornerShape(8.dp)),
       content = content
     )
@@ -138,3 +132,5 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
     )
   }
 }
+
+const val RATIO = 16 / 9f

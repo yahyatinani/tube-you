@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,7 +60,7 @@ import io.github.yahyatinani.y.core.v
 @OptIn(ExperimentalMaterial3Api::class)
 fun topAppBarScrollBehavior(
   isCompactDisplay: Boolean,
-  topAppBarState: TopAppBarState,
+  topAppBarState: TopAppBarState
 ): TopAppBarScrollBehavior = when {
   isCompactDisplay -> {
     RegFx(id = common.expand_top_app_bar) {
@@ -86,7 +87,7 @@ fun TyApp(
   RegNavFx(navController)
   RegNavCofx(navController)
 
-  val isCompactSize = isCompact(windowSizeClass)
+  val isCompact = isCompact(windowSizeClass)
   val topBarState = rememberTopAppBarState()
   Scaffold(
     modifier = Modifier.fillMaxSize(),
@@ -104,7 +105,7 @@ fun TyApp(
       TopAppBarDefaults.pinnedScrollBehavior()
     } else {
       topAppBarScrollBehavior(
-        isCompactDisplay = isCompactSize,
+        isCompactDisplay = isCompact,
         topAppBarState = topBarState
       )
     }
@@ -118,7 +119,7 @@ fun TyApp(
         TyTopAppBar(
           title = "TubeYou",
           actions = watch(query = v(common.top_app_bar_actions, resources)),
-          scrollBehavior = topAppBarScrollBehavior,
+          scrollBehavior = topAppBarScrollBehavior
         )
       }
     ) { paddingTb ->
@@ -130,7 +131,9 @@ fun TyApp(
           .consumeWindowInsets(paddingTb)
           .windowInsetsPadding(
             WindowInsets.safeDrawing.only(Horizontal + Vertical)
-          )
+          ),
+        isCompact = isCompact,
+        orientation = LocalConfiguration.current.orientation
       )
 
       // Top-level navigation back handler.

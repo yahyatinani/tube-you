@@ -16,7 +16,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
-import com.github.yahyatinani.tubeyou.modules.designsystem.component.rememberThumbnailHeightPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -110,8 +109,7 @@ fun HomePreview() {
       VideosList(
         orientation = 1,
         listState = rememberLazyListState(),
-        videos = videos,
-        thumbnailHeight = rememberThumbnailHeightPortrait()
+        videos = videos
       )
     }
   }

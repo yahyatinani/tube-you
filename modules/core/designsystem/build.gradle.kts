@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-  namespace = "${TyBuild.APP_ID}.modules.designsystem"
+  namespace = "${TyBuild.APP_ID}.modules.core.designsystem"
 
   defaultConfig {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

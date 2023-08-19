@@ -30,7 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.yahyatinani.tubeyou.modules.designsystem.R
+import io.github.yahyatinani.tubeyou.modules.core.designsystem.R
 
 @Composable
 fun MoreButton(modifier: Modifier = Modifier) {

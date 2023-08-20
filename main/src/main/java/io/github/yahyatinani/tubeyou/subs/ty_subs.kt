@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TopAppBarActionItem
+import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.tubeyou.R
@@ -38,7 +39,7 @@ fun RegTySubs() {
             R.string.top_app_bar_search_action_icon_description
           ),
           onActionClick = {
-            dispatchSync(v(search.panel_fsm, search.show_search_bar))
+            dispatch(v(search.panel_fsm, search.show_search_bar))
           }
         )
       ).let {

@@ -1,7 +1,10 @@
 package com.github.yahyatinani.tubeyou.modules.designsystem.theme
 
 import android.app.Activity
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
+import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +57,36 @@ fun isCompact(windowSizeClass: WindowSizeClass) = remember(windowSizeClass) {
 }
 
 @Composable
+private fun WindowSideEffects(
+  view: View,
+  background: Color,
+  isDarkTheme: Boolean
+) {
+  val bitmap = remember(background) {
+    Bitmap.createBitmap(24, 24, Bitmap.Config.ARGB_8888).apply {
+      eraseColor(background.toArgb())
+    }
+  }
+  val bgToArgb = background.toArgb()
+  val resources = LocalContext.current.resources
+  SideEffect {
+    val window = (view.context as Activity).window
+    window.statusBarColor = bgToArgb
+    window.navigationBarColor = bgToArgb
+    WindowCompat.getInsetsController(
+      window,
+      view
+    ).isAppearanceLightStatusBars = !isDarkTheme
+
+    // Set to true so the bottom bar doesn't get pushed up by the keyboard.
+    // But It causes the cutout area in landscape to be gray.
+    WindowCompat.setDecorFitsSystemWindows(window, true)
+    // Fix the cutout area color in landscape.
+    window.setBackgroundDrawable(BitmapDrawable(resources, bitmap))
+  }
+}
+
+@Composable
 fun TyTheme(
   isDarkTheme: Boolean = isSystemInDarkTheme(),
   // Dynamic color is available on Android 12+
@@ -74,18 +107,10 @@ fun TyTheme(
     isDarkTheme -> DarkColorScheme
     else -> LightColorScheme
   }
+
   val view = LocalView.current
   if (!view.isInEditMode) {
-    SideEffect {
-      val window = (view.context as Activity).window
-      window.statusBarColor = colorScheme.surface.toArgb()
-      window.navigationBarColor = colorScheme.surface.toArgb()
-
-      WindowCompat.getInsetsController(
-        window,
-        view
-      ).isAppearanceLightStatusBars = !isDarkTheme
-    }
+    WindowSideEffects(view, colorScheme.background, isDarkTheme)
   }
 
   MaterialTheme(

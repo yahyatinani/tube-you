@@ -84,9 +84,11 @@ dependencies {
   implementation(project(":modules:feature:subscriptions"))
   implementation(project(":modules:feature:you"))
   implementation(project(":modules:feature:search"))
+  implementation(project(":modules:feature:watch"))
   implementation(project(":modules:core:common"))
   implementation(project(":modules:core:designsystem"))
   implementation(project(":modules:core:network"))
+  implementation(project(":modules:core:viewmodels"))
 
   testImplementation(deps.junit)
   androidTestImplementation(deps.androidx.test.ext.junit)
@@ -103,4 +105,5 @@ dependencies {
   implementation(deps.androidx.navigation.compose)
   implementation(deps.androidx.profileinstaller)
   implementation(deps.recompose.httpfx)
+  implementation(deps.recompose.fsm)
 }

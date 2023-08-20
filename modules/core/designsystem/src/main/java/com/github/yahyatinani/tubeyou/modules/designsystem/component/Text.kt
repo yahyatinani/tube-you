@@ -219,7 +219,7 @@ fun ExpandableText(
         charRect.left > textLayoutResult.size.width - seeMoreSize.width
       )
       seeMoreOffsetState.value =
-        Offset(charRect.left, charRect.bottom - seeMoreSize.height + 8)
+        Offset(charRect.left, charRect.bottom - seeMoreSize.height)
       cutText = text.substring(startIndex = 0, endIndex = lastCharIndex)
     }
   }
@@ -241,38 +241,45 @@ fun ExpandableText(
         )
       }
     }
-    val uriHandler = LocalUriHandler.current
-
-    val urlAnnotations =
-      charSequence.getStringAnnotations("URL", 0, charSequence.length)
+    val urlAnnotations = charSequence.getStringAnnotations(
+      tag = "URL",
+      start = 0,
+      end = charSequence.length
+    )
+    val maxLines = remember(expanded) {
+      if (expanded) Int.MAX_VALUE else minimizedMaxLines
+    }
+    val onTextLayout: (TextLayoutResult) -> Unit = {
+      textLayoutResultState.value = it
+    }
 
     if (urlAnnotations.isEmpty()) {
       Text(
         text = charSequence,
-        maxLines = if (expanded) Int.MAX_VALUE else minimizedMaxLines,
+        maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        onTextLayout = { textLayoutResultState.value = it },
+        onTextLayout = onTextLayout,
         style = style
       )
     } else {
+      val uriHandler = LocalUriHandler.current
       ClickableText(
         text = charSequence,
         onClick = {
           charSequence
-            .getStringAnnotations("URL", it, it)
+            .getStringAnnotations(tag = "URL", start = it, end = it)
             .firstOrNull()?.let { stringAnnotation ->
               uriHandler.openUri(stringAnnotation.item)
             }
         },
-        maxLines = if (expanded) Int.MAX_VALUE else minimizedMaxLines,
+        maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        onTextLayout = { textLayoutResultState.value = it },
+        onTextLayout = onTextLayout,
         style = style
       )
     }
 
     if (!expanded) {
-      val density = LocalDensity.current
       val labelLarge = MaterialTheme.typography.bodyMedium
       val string = buildAnnotatedString {
         withStyle(labelLarge.toSpanStyle()) {
@@ -286,6 +293,7 @@ fun ExpandableText(
           append("Read more")
         }
       }
+      val density = LocalDensity.current
       Text(
         string,
         onTextLayout = { seeMoreSizeState.value = it.size },

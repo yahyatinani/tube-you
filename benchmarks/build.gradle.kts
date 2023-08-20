@@ -1,3 +1,4 @@
+import io.github.yahyatinani.tubeyou.TyBuild
 import io.github.yahyatinani.tubeyou.TyBuildType
 
 plugins {
@@ -5,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.google.samples.apps.nowinandroid.benchmarks"
+    namespace = "${TyBuild.APP_ID}.benchmarks"
 
     defaultConfig {
         minSdk = 28

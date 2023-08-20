@@ -89,7 +89,7 @@ fun TySearchBar(
   suggestions: List<String>,
   onSuggestionClick: (suggestion: String) -> Unit
 ) {
-  val focusRequester = FocusRequester()
+  val focusRequester = remember { FocusRequester() }
   SearchBar(
     query = searchQuery,
     modifier = Modifier

@@ -1,0 +1,103 @@
+package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen
+
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.Window
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+
+private fun Context.findWindow(): Window? {
+  var context = this
+  while (context is ContextWrapper) {
+    if (context is Activity) return context.window
+    context = context.baseContext
+  }
+  return null
+}
+
+@Composable
+fun DragHandle(modifier: Modifier = Modifier, onClick: () -> Unit = { }) {
+  Surface(
+    modifier = modifier
+      .wrapContentSize()
+      .padding(top = 8.dp, bottom = 2.dp)
+      .semantics { contentDescription = "dragHandleDescription" },
+    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .2f),
+    shape = MaterialTheme.shapes.extraLarge
+  ) {
+    Box(
+      Modifier
+        .clickable(onClick = onClick)
+        .size(width = 40.0.dp, height = 4.0.dp)
+    )
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SheetHeader(
+  modifier: Modifier = Modifier,
+  headerTitle: String = "",
+  header: (@Composable () -> Unit)? = null,
+  sheetState: SheetValue,
+  closeSheet: () -> Unit
+) {
+  Column {
+    Row(
+      modifier = modifier
+        .fillMaxWidth()
+        .padding(end = 4.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        when {
+          header != null -> header()
+          else -> {
+            Text(
+              text = headerTitle,
+              style = MaterialTheme.typography.titleMedium
+            )
+          }
+        }
+      }
+      IconButton(onClick = closeSheet) {
+        Icon(
+          modifier = Modifier.size(32.dp),
+          imageVector = Icons.Default.Close,
+          contentDescription = ""
+        )
+      }
+    }
+    Divider(modifier = Modifier.fillMaxWidth())
+  }
+
+  BackHandler(enabled = sheetState != SheetValue.Hidden) {
+    closeSheet()
+  }
+}

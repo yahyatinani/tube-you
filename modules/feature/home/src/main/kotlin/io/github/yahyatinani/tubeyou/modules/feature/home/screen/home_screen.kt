@@ -3,14 +3,16 @@ package io.github.yahyatinani.tubeyou.modules.feature.home.screen
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.core.ui.PullRefreshPanel
 import io.github.yahyatinani.tubeyou.core.ui.VideosGrid
-import io.github.yahyatinani.tubeyou.core.ui.VideosList
+import io.github.yahyatinani.tubeyou.core.ui.VideosListCompact
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.modules.feature.home.fx.RegScrollUpFx
@@ -32,15 +34,17 @@ internal fun HomeScreen(
     error = error,
     onRefresh = onRefresh
   ) {
+    val videosListTestTag = "home_videos_list"
     if (isCompact) {
       val listState = rememberLazyListState()
       RegScrollUpFx {
         listState.animateScrollToItem(index = 0)
       }
-      VideosList(
+      VideosListCompact(
+        modifier = Modifier.testTag(videosListTestTag),
+        videos = homeVideos,
         orientation = orientation,
         listState = listState,
-        videos = homeVideos,
         onClickVideo = onClickVideo
       )
     } else {
@@ -50,6 +54,7 @@ internal fun HomeScreen(
       }
 
       VideosGrid(
+        modifier = Modifier.testTag(videosListTestTag),
         orientation = orientation,
         gridState = gridState,
         videos = homeVideos,

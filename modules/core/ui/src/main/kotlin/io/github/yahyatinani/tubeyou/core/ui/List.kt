@@ -8,9 +8,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.LiveDurationText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ShortDurationText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.VideoDurationText
@@ -19,39 +20,31 @@ import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.modules.core.designsystem.R
 
 @Composable
-fun VideosList(
+fun VideosListCompact(
+  modifier: Modifier = Modifier,
+  videos: UIState,
   orientation: Int,
   listState: LazyListState,
-  videos: UIState,
-  onClickVideo: (VideoVm) -> Unit = {}
+  onClickVideo: (VideoVm) -> Unit
 ) {
-  val isPortrait = orientation == ORIENTATION_PORTRAIT
+  val isPortraitMode = orientation == ORIENTATION_PORTRAIT
   LazyColumn(
     state = listState,
-    modifier = Modifier
-      .testTag("popular_videos_list")
+    modifier = modifier
       .fillMaxSize()
-      .then(if (isPortrait) Modifier else Modifier.padding(horizontal = 16.dp))
+      .let { if (isPortraitMode) it else it.padding(horizontal = 16.dp) }
   ) {
+    val videoInfoTextStyle = TextStyle.Default.copy(fontSize = 12.sp)
     items(
       items = videos.data as List<VideoVm>,
       key = { it.id }
     ) { viewModel ->
-      when {
-        isPortrait -> {
-          VideoItemPortrait(
-            viewModel = viewModel,
-            onClick = { onClickVideo(viewModel) }
-          )
-        }
-
-        else -> {
-          VideoItemLandscapeCompact(
-            viewModel = viewModel,
-            onClick = { onClickVideo(viewModel) }
-          )
-        }
-      }
+      VideoItemCompact(
+        viewModel = viewModel,
+        videoInfoTextStyle = videoInfoTextStyle,
+        isPortraitMode = isPortraitMode,
+        onClickVideo = onClickVideo
+      )
     }
   }
 }

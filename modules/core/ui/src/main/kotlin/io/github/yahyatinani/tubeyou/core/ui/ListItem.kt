@@ -42,7 +42,7 @@ import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 @Composable
 fun VideoItemPortrait(
   modifier: Modifier = Modifier,
-  videoInfoTextStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
+  videoInfoTextStyle: TextStyle,
   viewModel: VideoVm,
   onClick: () -> Unit
 ) {
@@ -86,6 +86,25 @@ fun VideoItemLandscapeCompact(
   ) {
     ThumbnailContent(viewModel)
   }
+}
+
+@Composable
+fun VideoItemCompact(
+  viewModel: VideoVm,
+  videoInfoTextStyle: TextStyle,
+  isPortraitMode: Boolean,
+  onClickVideo: (VideoVm) -> Unit
+) = when {
+  isPortraitMode -> VideoItemPortrait(
+    videoInfoTextStyle = videoInfoTextStyle,
+    viewModel = viewModel,
+    onClick = { onClickVideo(viewModel) }
+  )
+
+  else -> VideoItemLandscapeCompact(
+    viewModel = viewModel,
+    onClick = { onClickVideo(viewModel) }
+  )
 }
 
 @Composable

@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -99,12 +100,21 @@ fun LandscapeListItem(vm: Any) {
 
 @Composable
 internal fun SearchScreen(
-  state: States,
-  searchResults: UIState,
-  error: Int?,
+  uiState: UIState,
   orientation: Int
 ) {
-  Panel(state = state, error = error) { appendLoader ->
+  val data = uiState.data
+  val state: States = get<States>(data, common.state)!!
+
+  Panel(state = state) { appendLoader ->
+    if (state == States.FAILED) {
+      val error: Int? = get<Int>(data, common.error)
+      Text(text = "Request failed! Error: $error")
+
+      return@Panel
+    }
+
+    val searchResults: UIState = get<UIState>(data, searchBar.results)!!
     val isPortraitMode = orientation == Configuration.ORIENTATION_PORTRAIT
     LazyColumn(
       modifier = Modifier
@@ -145,14 +155,8 @@ fun SearchRoute(
   ),
   orientation: Int
 ) {
-  val data = uiState.data
-  val state: States = get<States>(data, common.state)!!
-  val searchResults: UIState = get<UIState>(data, searchBar.results)!!
-  val error: Int? = get<Int>(data, common.error)
   SearchScreen(
-    state = state,
-    searchResults = searchResults,
-    error = error,
+    uiState = uiState,
     orientation = orientation
   )
 }

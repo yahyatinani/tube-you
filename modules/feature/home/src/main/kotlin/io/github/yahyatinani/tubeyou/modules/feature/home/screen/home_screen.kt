@@ -2,6 +2,7 @@ package io.github.yahyatinani.tubeyou.modules.feature.home.screen
 
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,19 +22,24 @@ import io.github.yahyatinani.y.core.v
 
 @Composable
 internal fun HomeScreen(
-  state: States,
-  homeVideos: UIState,
-  error: Int?,
+  uiState: UIState,
   orientation: Int,
   isCompact: Boolean,
   onRefresh: () -> Unit,
   onClickVideo: (VideoVm) -> Unit
 ) {
+  val data = uiState.data
+  val state: States = get<States>(data, common.state)!!
   PullRefreshPanel(
     state = state,
-    error = error,
     onRefresh = onRefresh
   ) {
+    if (state == States.FAILED) {
+      val error: Int? = get<Int>(data, common.error)
+      Text(text = "Request failed! Error: $error")
+    }
+
+    val homeVideos: UIState = get<UIState>(data, home.content)!!
     val videosListTestTag = "home_videos_list"
     if (isCompact) {
       val listState = rememberLazyListState()
@@ -72,14 +78,8 @@ fun HomeRoute(
   onPullRefresh: () -> Unit,
   onClickVideo: (VideoVm) -> Unit
 ) {
-  val data = uiState.data
-  val state: States = get<States>(data, common.state)!!
-  val homeVideos: UIState = get<UIState>(data, home.content)!!
-  val error: Int? = get<Int>(data, common.error)
   HomeScreen(
-    state = state,
-    homeVideos = homeVideos,
-    error = error,
+    uiState = uiState,
     orientation = orientation,
     isCompact = isCompact,
     onRefresh = onPullRefresh,

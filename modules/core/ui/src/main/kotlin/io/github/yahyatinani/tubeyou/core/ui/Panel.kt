@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,7 +12,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States.APPENDING
-import com.github.yahyatinani.tubeyou.modules.core.keywords.States.FAILED
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States.LOADING
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States.REFRESHING
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLoader
@@ -26,7 +24,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 fun Panel(
   modifier: Modifier = Modifier,
   state: States,
-  error: Int?,
   content: @Composable (appendLoader: @Composable () -> Unit) -> Unit
 ) {
   Box(modifier = modifier.fillMaxSize()) {
@@ -43,11 +40,6 @@ fun Panel(
         color = Blue300
       )
     }
-
-    if (state == FAILED) {
-      // TODO: Implement proper UI for errors. Also, make it an argument.
-      Text(text = "Request failed! Error: $error")
-    }
   }
 }
 
@@ -55,11 +47,10 @@ fun Panel(
 fun PullRefreshPanel(
   modifier: Modifier = Modifier,
   state: States,
-  error: Int?,
   onRefresh: () -> Unit = {},
   content: @Composable () -> Unit
 ) {
-  Panel(modifier = modifier, state = state, error = error) {
+  Panel(modifier = modifier, state = state) {
     SwipeRefresh(
       modifier = Modifier.testTag("swipe_refresh"),
       swipeEnabled = state != LOADING,

@@ -29,7 +29,8 @@ internal fun InitHome() {
 
 fun NavGraphBuilder.homeGraph(
   isCompact: Boolean,
-  orientation: Int
+  orientation: Int,
+  nestedGraphs: NavGraphBuilder.(rootGraphRoute: String) -> Unit
 ) {
   navigation(
     route = HOME_GRAPH_ROUTE,
@@ -46,5 +47,6 @@ fun NavGraphBuilder.homeGraph(
         }
       )
     }
+    nestedGraphs(HOME_GRAPH_ROUTE)
   }
 }

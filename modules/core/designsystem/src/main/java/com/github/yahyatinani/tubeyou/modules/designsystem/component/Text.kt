@@ -144,17 +144,20 @@ fun VideoItemTitle(modifier: Modifier = Modifier, title: String) {
 }
 
 @Composable
-fun VideoItemInfo(
+fun VideoInfoText(
   modifier: Modifier = Modifier,
   info: AnnotatedString,
   textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp)
 ) {
   val context = LocalContext.current
-  val color = MaterialTheme.colorScheme.onSurface.copy(alpha = .6f)
   ClickableText(
     text = info,
     modifier = modifier,
-    style = textStyle.copy(color = color),
+    style = textStyle.copy(
+      color = MaterialTheme.colorScheme.onSurface.copy(
+        alpha = .6f
+      )
+    ),
     onClick = {
       info
         .getStringAnnotations("author", it, it)
@@ -340,6 +343,6 @@ fun ShortVideoTextPreview() {
 @Composable
 fun VideoItemInfoPreview() {
   TyTheme {
-    VideoItemInfo(info = AnnotatedString("author سلاام . 2K"))
+    VideoInfoText(info = AnnotatedString("author سلاام . 2K"))
   }
 }

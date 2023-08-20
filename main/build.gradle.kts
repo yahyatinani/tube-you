@@ -83,6 +83,7 @@ dependencies {
   implementation(project(":modules:feature:home"))
   implementation(project(":modules:feature:subscriptions"))
   implementation(project(":modules:feature:you"))
+  implementation(project(":modules:feature:search"))
   implementation(project(":modules:core:common"))
   implementation(project(":modules:core:designsystem"))
   implementation(project(":modules:core:network"))

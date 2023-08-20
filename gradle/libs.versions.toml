@@ -31,7 +31,7 @@ kotlinxSerializationJson = "1.5.1"
 
 ylib = "0.5.0"
 #FIXME: release the new recompose version.
-recompose = "0.4.0.92-SNAPSHOT"
+recompose = "0.4.0.94-SNAPSHOT"
 
 uiTextAndroid = "1.5.0"
 

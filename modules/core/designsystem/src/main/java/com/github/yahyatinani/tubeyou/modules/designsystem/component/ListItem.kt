@@ -58,7 +58,7 @@ fun ListItemPortrait(
       Column(modifier = Modifier.weight(1f)) {
         VideoItemTitle(title = title)
         Spacer(modifier = Modifier.height(4.dp))
-        VideoItemInfo(info = info, textStyle = videoInfoTextStyle)
+        VideoInfoText(info = info, textStyle = videoInfoTextStyle)
       }
 
       Spacer(modifier = Modifier.width(24.dp))
@@ -95,7 +95,7 @@ fun ListItemLandscape(
 
       Spacer(modifier = Modifier.height(2.dp))
 
-      VideoItemInfo(info = info)
+      VideoInfoText(info = info)
 
       channelAvatar?.let { it() }
     }

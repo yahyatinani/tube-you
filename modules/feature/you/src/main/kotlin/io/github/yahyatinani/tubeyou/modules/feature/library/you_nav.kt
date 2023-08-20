@@ -8,7 +8,9 @@ import androidx.navigation.navigation
 const val YOU_GRAPH_ROUTE = "you_graph"
 const val YOU_ROUTE = "you_route"
 
-fun NavGraphBuilder.youGraph() {
+fun NavGraphBuilder.youGraph(
+  nestedGraphs: NavGraphBuilder.(rootGraphRoute: String) -> Unit
+) {
   navigation(
     route = YOU_GRAPH_ROUTE,
     startDestination = YOU_ROUTE
@@ -16,5 +18,6 @@ fun NavGraphBuilder.youGraph() {
     composable(route = YOU_ROUTE) {
       Text(text = "todo: you not implement, yet.")
     }
+    nestedGraphs(YOU_GRAPH_ROUTE)
   }
 }

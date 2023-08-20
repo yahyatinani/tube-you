@@ -7,7 +7,9 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
+import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TopAppBarActionItem
+import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.tubeyou.R
 import io.github.yahyatinani.tubeyou.common.AppDb
@@ -35,7 +37,9 @@ fun RegTySubs() {
           iconContentDescription = (resources as Resources).getString(
             R.string.top_app_bar_search_action_icon_description
           ),
-          onActionClick = { /* TODO: search */ }
+          onActionClick = {
+            dispatchSync(v(search.panel_fsm, search.show_search_bar))
+          }
         )
       ).let {
         if (db[ty_db.active_top_level_route] != YOU_GRAPH_ROUTE) {

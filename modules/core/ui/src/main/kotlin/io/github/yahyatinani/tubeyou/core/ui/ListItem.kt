@@ -185,13 +185,15 @@ fun BoxScope.PlaylistThumbnailContent(viewModel: PlaylistVm) {
 @Composable
 fun PlayListPortrait(
   modifier: Modifier = Modifier,
-  viewModel: PlaylistVm
+  viewModel: PlaylistVm,
+  videoInfoTextStyle: TextStyle
 ) {
   ListItemPortrait(
     title = viewModel.title,
+    modifier = modifier.padding(top = 12.dp),
     thumbnail = viewModel.thumbnailUrl,
     info = AnnotatedString(viewModel.author),
-    modifier = modifier.padding(top = 12.dp),
+    videoInfoTextStyle = videoInfoTextStyle,
     thumbnailContent = { PlaylistThumbnailContent(viewModel) }
   )
 }

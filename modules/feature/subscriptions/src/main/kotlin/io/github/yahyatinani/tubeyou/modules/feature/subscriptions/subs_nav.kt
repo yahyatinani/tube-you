@@ -8,7 +8,9 @@ import androidx.navigation.navigation
 const val SUBSCRIPTIONS_GRAPH_ROUTE = "subscriptions_graph"
 const val SUBSCRIPTIONS_ROUTE = "subscriptions_route"
 
-fun NavGraphBuilder.subscriptionsGraph() {
+fun NavGraphBuilder.subscriptionsGraph(
+  nestedGraphs: NavGraphBuilder.(rootGraphRoute: String) -> Unit
+) {
   navigation(
     route = SUBSCRIPTIONS_GRAPH_ROUTE,
     startDestination = SUBSCRIPTIONS_ROUTE
@@ -16,5 +18,6 @@ fun NavGraphBuilder.subscriptionsGraph() {
     composable(route = SUBSCRIPTIONS_ROUTE) {
       Text(text = "todo: subscriptions not implement, yet.")
     }
+    nestedGraphs(SUBSCRIPTIONS_GRAPH_ROUTE)
   }
 }

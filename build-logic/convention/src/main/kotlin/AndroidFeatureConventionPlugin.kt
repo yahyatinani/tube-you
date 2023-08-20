@@ -22,7 +22,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         add("implementation", project(":modules:core:ui"))
         add("implementation", deps.findLibrary("recompose-httpfx").get())
         add("implementation", deps.findLibrary("recompose-fsm").get())
-        add("implementation", deps.findLibrary("recompose-pagingfx").get())
+        add("api", deps.findLibrary("recompose-pagingfx").get())
       }
     }
   }

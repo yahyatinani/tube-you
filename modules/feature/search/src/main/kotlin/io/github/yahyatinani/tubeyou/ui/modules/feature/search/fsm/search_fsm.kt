@@ -14,6 +14,7 @@ import io.github.yahyatinani.recompose.fsm.AppDb
 import io.github.yahyatinani.recompose.fsm.State
 import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.fx.BuiltInFx
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
 import io.github.yahyatinani.recompose.httpfx.bounce
 import io.github.yahyatinani.tubeyou.common.activeTopLevelRoute
@@ -52,7 +53,7 @@ fun isQueryBlankOrEmpty(appDb: AppDb, state: State?, event: Event): Boolean {
 fun navigateToSearchPanel(appDb: AppDb, state: State?, event: Event): Effects {
   val activeTab = activeTopLevelRoute(appDb)
   return m(
-    BuiltInFx.fx to v(
+    fx to v(
       v(
         common.navigate_to,
         m(common.destination to "$activeTab/$SEARCH_ROUTE")
@@ -199,12 +200,12 @@ fun getSearchSuggestions(appDb: AppDb, state: State?, event: Event): Effects {
   }
 
   return m(
-    BuiltInFx.fx to v(
+    fx to v(
       v(
         bounce.fx,
         m(
           bounce.id to search.get_search_suggestions,
-          bounce.event to v(search.get_search_suggestions, b = searchQuery),
+          bounce.event to v(search.get_search_suggestions, searchQuery),
           bounce.delay to 500
         )
       )
@@ -239,7 +240,7 @@ fun backUpSearchBar(appDb: AppDb, state: State?, event: Event): Effects {
 }
 
 fun navigateBack(appDb: AppDb, state: State?, event: Event): Effects =
-  m(BuiltInFx.fx to v(v(common.pop_back_stack)))
+  m(fx to v(v(common.pop_back_stack)))
 
 fun trimSearchQuery(appDb: AppDb, state: State?, event: Event): Effects {
   val sb = state!![search.search_bar] as SearchBar
@@ -253,7 +254,7 @@ fun trimSearchQuery(appDb: AppDb, state: State?, event: Event): Effects {
 
 fun submitSearchRequest(appDb: AppDb, state: State?, event: Event): Effects =
   m(
-    BuiltInFx.fx to v(
+    fx to v(
       v(
         BuiltInFx.dispatch,
         v(search.get_search_results, state)

@@ -68,7 +68,10 @@ fun RegSearchSubs() {
 
   regSub(queryId = search.panel_fsm, ::searchPanelState)
 
-  val initState = m<Any, Any>(common.state to LOADING)
+  val initState = m<Any, Any>(
+    common.state to LOADING,
+    searchBar.results to UIState(l<Any>())
+  )
   regSub<Any?, UIState>(
     queryId = search.view_model,
     initialValue = UIState(initState),
@@ -84,7 +87,10 @@ fun RegSearchSubs() {
           val sb = get<SearchStack>(searchPanelState, search.stack)!!.peek()
           val error = sb!![searchBar.search_error]
           when {
-            error != null -> ret.assoc(common.error, error as Int)
+            error != null -> {
+              ret.assoc(common.error, error as Int)
+                .assoc(common.state, States.FAILED)
+            }
 
             else -> {
               val items = get<List<Searchable>>(sb, searchBar.results)!!

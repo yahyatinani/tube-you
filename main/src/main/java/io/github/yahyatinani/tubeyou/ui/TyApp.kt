@@ -45,12 +45,19 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigatio
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyTopAppBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
+import io.github.yahyatinani.recompose.RegCofx
 import io.github.yahyatinani.recompose.RegFx
 import io.github.yahyatinani.recompose.clearEvent
-import io.github.yahyatinani.recompose.cofx.regCofx
+import io.github.yahyatinani.recompose.clearFx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
+import io.github.yahyatinani.recompose.httpfx.bounce
+import io.github.yahyatinani.recompose.httpfx.ktor
+import io.github.yahyatinani.recompose.httpfx.regBounceFx
+import io.github.yahyatinani.recompose.httpfx.regHttpKtor
+import io.github.yahyatinani.recompose.pagingfx.paging
+import io.github.yahyatinani.recompose.pagingfx.regPagingFx
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.common.ty_db
@@ -128,9 +135,21 @@ fun TyApp(
       topBar = {
         RegSearchEvents()
 
+        DisposableEffect(Unit) {
+          regBounceFx()
+          regHttpKtor()
+          regPagingFx()
+
+          onDispose {
+            clearFx(bounce.fx)
+            clearFx(ktor.http_fx)
+            clearFx(paging.fx)
+          }
+        }
+
         if (sb != null) {
           val topBarScope = rememberCoroutineScope()
-          regCofx(search.coroutine_scope) { cofx ->
+          RegCofx(search.coroutine_scope) { cofx ->
             cofx.assoc(search.coroutine_scope, topBarScope)
           }
           TySearchBar(
@@ -151,17 +170,18 @@ fun TyApp(
             onLeadingClick = {
               dispatch(v(search.panel_fsm, search.back_press_search))
             },
-            suggestions = sb[searchBar.suggestions] as List<String>
-          ) { selectedSuggestion ->
-            // FIXME: Move cursor to the end of text.
-            dispatchSync(
-              v(
-                search.panel_fsm,
-                search.update_search_input,
-                selectedSuggestion
+            suggestions = sb[searchBar.suggestions] as List<String>,
+            onSuggestionClick = { selectedSuggestion ->
+              // FIXME: Move cursor to the end of text.
+              dispatchSync(
+                v(
+                  search.panel_fsm,
+                  search.update_search_input,
+                  selectedSuggestion
+                )
               )
-            )
-          }
+            }
+          )
         } else {
           val resources: Resources = LocalContext.current.resources
           TyTopAppBar(
@@ -186,10 +206,12 @@ fun TyApp(
       )
 
       // Top-level navigation back handler.
-      BackHandler(
-        enabled = watch(v(ty_db.top_level_back_handler_enabled))
-      ) {
+      BackHandler(enabled = watch(v(ty_db.top_level_back_handler_enabled))) {
         dispatch(v(common.back_press_top_nav))
+      }
+
+      BackHandler(enabled = sb != null) {
+        dispatch(v(search.panel_fsm, search.back_press_search))
       }
     }
   }

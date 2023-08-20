@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
+import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.core.ui.ChannelItem
@@ -34,7 +35,6 @@ import io.github.yahyatinani.tubeyou.core.viewmodels.PlaylistVm
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.y.core.get
-import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.v
 
 @Composable
@@ -113,7 +113,7 @@ internal fun SearchScreen(
       state = rememberLazyListState()
     ) {
       val videoInfoTextStyle = TextStyle.Default.copy(fontSize = 12.sp)
-      val items = searchResults.data as List<Any>? ?: l()
+      val items = searchResults.data as List<Any>
       itemsIndexed(
         items = items
       ) { index: Int, vm: Any ->
@@ -147,7 +147,7 @@ fun SearchRoute(
 ) {
   val data = uiState.data
   val state: States = get<States>(data, common.state)!!
-  val searchResults: UIState = get<UIState>(data, "search.results")!!
+  val searchResults: UIState = get<UIState>(data, searchBar.results)!!
   val error: Int? = get<Int>(data, common.error)
   SearchScreen(
     state = state,

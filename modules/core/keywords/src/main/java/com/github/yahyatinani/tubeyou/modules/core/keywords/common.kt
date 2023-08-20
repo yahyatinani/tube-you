@@ -42,4 +42,8 @@ enum class common {
   error;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
+
+  init {
+
+  }
 }

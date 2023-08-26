@@ -1,6 +1,7 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen
 
 import android.content.res.Configuration
+import android.graphics.Color.TRANSPARENT
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.annotation.OptIn
@@ -135,6 +136,7 @@ fun VideoPlayer(
         PlayerView(factoryContext).apply {
           setControllerVisibilityListener(controllerVisibilityListener)
           player = TyPlayer.getInstance()
+          setShutterBackgroundColor(TRANSPARENT)
           resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
           if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // FIXME:

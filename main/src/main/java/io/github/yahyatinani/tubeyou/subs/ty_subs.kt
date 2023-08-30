@@ -22,6 +22,10 @@ import io.github.yahyatinani.y.core.v
 @Composable
 fun RegTySubs() {
   remember {
+    regSub<AppDb>(":active_route") { db, _ ->
+      db[ty_db.active_top_level_route]
+    }
+
     regSub<AppDb>(common.is_route_active) { db, (_, navItem) ->
       db[ty_db.active_top_level_route] == navItem
     }

@@ -388,7 +388,6 @@ fun NowPlayingSheet(
       },
       sheetContent = {
         CommentsSheet(
-          commentsSheetState = commentsSheetState,
           sheetPeekHeight = height,
           uiState = commentsPanelState
         )
@@ -618,6 +617,7 @@ fun NowPlayingSheet(
           val commentsStateData =
             get<UIState>(commentsPanelState.data, "comments")!!.data
               as IPersistentMap<Any?, Any?>
+
           item {
             if (
               get<ListState>(

@@ -56,8 +56,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,7 +64,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -81,9 +78,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.ComposeNavigator
-import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -94,6 +88,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableT
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
+import com.github.yahyatinani.tubeyou.modules.designsystem.utils.recomposeHighlighter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -528,188 +523,6 @@ fun CommentReplies(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun CommentsSheet(
-  commentsSheetState: SheetState,
-  sheetPeekHeight: Dp,
-  uiState: UIState
-) {
-  val data = uiState.data
-  val route = get<String>(data, "current_route")!!
-  Scaffold(
-    modifier = Modifier
-      .then(
-        if (commentsSheetState.currentValue == SheetValue.PartiallyExpanded) {
-          Modifier.height(sheetPeekHeight)
-        } else {
-          Modifier
-        }
-      ),
-    topBar = {
-      val isComments = route == COMMENTS_ROUTE
-      SheetHeader(
-        header = {
-          Box {
-            AnimatedVisibility(
-              modifier = Modifier
-                .padding(start = 16.dp)
-                .align(Alignment.CenterStart),
-              visible = isComments,
-              enter = fadeIn(),
-              exit = fadeOut()
-            ) {
-              Text(
-                text = stringResource(R.string.comments_bottom_sheet_title),
-                style = MaterialTheme.typography.titleMedium
-              )
-            }
-
-            val enter =
-              slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn()
-            val exit =
-              slideOutHorizontally(targetOffsetX = { it / 8 }) + fadeOut()
-            AnimatedVisibility(
-              visible = !isComments,
-              enter = enter,
-              exit = exit
-            ) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                  onClick = { dispatch(v("nav_back_to_comments")) }
-                ) {
-                  Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = ""
-                  )
-                }
-                Spacer(modifier = Modifier.width(32.dp))
-                Text(
-                  text = stringResource(R.string.replies_bottom_sheet_title),
-                  style = MaterialTheme.typography.titleMedium
-                )
-              }
-            }
-          }
-        },
-        sheetState = commentsSheetState.currentValue
-      ) {
-        dispatch(v("stream_panel_fsm", "close_comments_sheet"))
-      }
-    }
-  ) { padding: PaddingValues ->
-    val context = LocalContext.current
-    val commentsNavController = rememberNavController()
-    rememberSaveable(
-      saver = Saver(
-        save = { it.saveState() },
-        restore = {
-          NavHostController(context).apply {
-            navigatorProvider.addNavigator(ComposeNavigator())
-            navigatorProvider.addNavigator(DialogNavigator())
-          }.apply { restoreState(it) }
-        }
-      )
-    ) {
-      NavHostController(context).apply {
-        navigatorProvider.addNavigator(ComposeNavigator())
-        navigatorProvider.addNavigator(DialogNavigator())
-      }
-    }
-
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-      regEventFx("nav_back_to_comments") { _, _ ->
-        m(BuiltInFx.fx to v(v("nav_back_to_comments")))
-      }
-    }
-
-    RegFx(id = "nav_comment_replies") {
-      scope.launch {
-        commentsNavController.navigate(REPLIES_ROUTE)
-      }
-    }
-
-    RegFx(id = "nav_back_to_comments") {
-      scope.launch {
-        commentsNavController.popBackStack(COMMENTS_ROUTE, inclusive = false)
-        dispatch(v("stream_panel_fsm", "nav_back_to_comments"))
-      }
-    }
-
-    val commentTextStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(
-      color = MaterialTheme.colorScheme.onSurface
-    )
-    NavHost(
-      modifier = Modifier
-        .padding(padding)
-        .fillMaxWidth(),
-      navController = commentsNavController,
-      startDestination = COMMENTS_ROUTE
-    ) {
-      commentsList(
-        uiState = get<UIState>(data, "comments")!!,
-        commentTextStyle = commentTextStyle
-      )
-
-      repliesList(
-        get<UIState>(data, "replies")!!,
-        commentTextStyle = commentTextStyle
-      )
-    }
-  }
-}
-
-private fun NavGraphBuilder.repliesList(
-  repliesState: UIState,
-  commentTextStyle: TextStyle
-) {
-  composable(
-    route = REPLIES_ROUTE,
-    enterTransition = {
-      slideInHorizontally(
-        tween(500),
-        initialOffsetX = { it }
-      )
-    },
-    exitTransition = {
-      slideOutHorizontally(
-        tween(500),
-        targetOffsetX = { it }
-      )
-    }
-  ) {
-    val listState = get<ListState>(repliesState.data, common.state)
-    SwipeRefresh(
-      modifier = Modifier
-        .fillMaxSize()
-        .nestedScroll(BlockScrolling),
-      state = rememberSwipeRefreshState(
-        isRefreshing = listState == ListState.REFRESHING
-      ),
-      onRefresh = {
-        dispatch(v("stream_panel_fsm", "refresh_comment_replies"))
-      },
-      indicator = { swipeRefreshState, refreshTrigger ->
-        val colorScheme = MaterialTheme.colorScheme
-        SwipeRefreshIndicator(
-          state = swipeRefreshState,
-          refreshTriggerDistance = refreshTrigger,
-          backgroundColor = colorScheme.primaryContainer,
-          contentColor = colorScheme.onBackground,
-          elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
-        )
-      }
-    ) {
-      CommentReplies(
-        repliesState = repliesState,
-        commentTextStyle = commentTextStyle
-      )
-    }
-  }
-}
-
 private fun NavGraphBuilder.commentsList(
   uiState: UIState,
   commentTextStyle: TextStyle
@@ -782,6 +595,190 @@ private fun NavGraphBuilder.commentsList(
           }
         }
       }
+    }
+  }
+}
+
+private fun NavGraphBuilder.repliesList(
+  repliesState: UIState?,
+  commentTextStyle: TextStyle
+) {
+  composable(
+    route = REPLIES_ROUTE,
+    enterTransition = {
+      slideInHorizontally(
+        tween(500),
+        initialOffsetX = { it }
+      )
+    },
+    exitTransition = {
+      slideOutHorizontally(
+        tween(500),
+        targetOffsetX = { it }
+      )
+    }
+  ) {
+    if (repliesState == null) return@composable
+
+    val listState = get<ListState>(repliesState.data, common.state)
+    SwipeRefresh(
+      modifier = Modifier
+        .fillMaxSize()
+        .nestedScroll(BlockScrolling),
+      state = rememberSwipeRefreshState(
+        isRefreshing = listState == ListState.REFRESHING
+      ),
+      onRefresh = {
+        dispatch(v("stream_panel_fsm", "refresh_comment_replies"))
+      },
+      indicator = { swipeRefreshState, refreshTrigger ->
+        val colorScheme = MaterialTheme.colorScheme
+        SwipeRefreshIndicator(
+          state = swipeRefreshState,
+          refreshTriggerDistance = refreshTrigger,
+          backgroundColor = colorScheme.primaryContainer,
+          contentColor = colorScheme.onBackground,
+          elevation = if (isSystemInDarkTheme()) 0.dp else 4.dp
+        )
+      }
+    ) {
+      CommentReplies(
+        repliesState = repliesState,
+        commentTextStyle = commentTextStyle
+      )
+    }
+  }
+}
+
+@Composable
+private fun Header(
+  isCommentsRoute: Boolean,
+  onClick: () -> Unit
+) {
+  Box {
+    AnimatedVisibility(
+      modifier = Modifier
+        .padding(start = 16.dp)
+        .align(Alignment.CenterStart),
+      visible = isCommentsRoute,
+      enter = fadeIn(),
+      exit = fadeOut()
+    ) {
+      Text(
+        text = stringResource(R.string.comments_bottom_sheet_title),
+        style = MaterialTheme.typography.titleMedium
+      )
+    }
+
+    val enter =
+      slideInHorizontally(initialOffsetX = { it / 4 }) + fadeIn()
+    val exit =
+      slideOutHorizontally(targetOffsetX = { it / 8 }) + fadeOut()
+    AnimatedVisibility(
+      visible = !isCommentsRoute,
+      enter = enter,
+      exit = exit
+    ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(
+          onClick = onClick
+        ) {
+          Icon(
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = ""
+          )
+        }
+        Spacer(modifier = Modifier.width(32.dp))
+        Text(
+          text = stringResource(R.string.replies_bottom_sheet_title),
+          style = MaterialTheme.typography.titleMedium
+        )
+      }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun CommentsSheet(
+  sheetPeekHeight: Dp,
+  uiState: UIState,
+) {
+  val data = uiState.data
+  // {
+  // current_route comments_route,
+  // comments UIState(data={:common/state LOADING}),
+  // replies UIState(data={:common/state LOADING})
+  // }
+
+  val commentsState = get<UIState>(data, "comments") ?: return
+
+  val sheetValue =
+    get<SheetValue>(commentsState.data, ":comments_sheet") ?: SheetValue.Hidden
+  val repliesState = get<UIState>(data, "replies")
+  Scaffold(
+    modifier = Modifier
+      .let {
+        if (sheetValue == SheetValue.PartiallyExpanded) {
+          it.height(sheetPeekHeight)
+        } else {
+          it
+        }
+      },
+    topBar = {
+      SheetHeader(
+        header = {
+          Header(
+            isCommentsRoute = repliesState == null,
+            onClick = { dispatch(v("nav_back_to_comments")) }
+          )
+        },
+        sheetState = sheetValue
+      ) {
+        dispatch(v("stream_panel_fsm", "close_comments_sheet"))
+      }
+    }
+  ) { padding: PaddingValues ->
+    LaunchedEffect(Unit) {
+      regEventFx(id = "nav_back_to_comments") { _, _ ->
+        m(BuiltInFx.fx to v(v("nav_back_to_comments")))
+      }
+    }
+    val scope = rememberCoroutineScope()
+    val commentsNavController = rememberNavController()
+    RegFx(id = "nav_comment_replies", commentsNavController) {
+      scope.launch {
+        commentsNavController.navigate(REPLIES_ROUTE)
+      }
+    }
+
+    RegFx(id = "nav_back_to_comments", commentsNavController) {
+      scope.launch {
+        commentsNavController.popBackStack(COMMENTS_ROUTE, inclusive = false)
+        dispatch(v("stream_panel_fsm", "nav_back_to_comments"))
+      }
+    }
+
+    val commentTextStyle = MaterialTheme.typography.bodyMedium.copy(
+      color = MaterialTheme.colorScheme.onSurface
+    )
+    NavHost(
+      modifier = Modifier
+        //.recomposeHighlighter()
+        .padding(padding)
+        .fillMaxWidth(),
+      navController = commentsNavController,
+      startDestination = COMMENTS_ROUTE
+    ) {
+      commentsList(
+        uiState = commentsState,
+        commentTextStyle = commentTextStyle
+      )
+
+      repliesList(
+        repliesState = repliesState,
+        commentTextStyle = commentTextStyle
+      )
     }
   }
 }

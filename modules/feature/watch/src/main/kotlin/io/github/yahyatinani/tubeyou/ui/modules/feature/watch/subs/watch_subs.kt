@@ -325,6 +325,8 @@ fun RegWatchSubs() {
     val fsmStates = get<Any>(panelFsm, fsm._state)
     val commentsListState =
       get(fsmStates, ":comments_list") ?: ListState.LOADING
+
+    val commentsSheet = get(fsmStates, ":comments_sheet") ?: SheetValue.Hidden
     val commentsState: IPersistentMap<Any?, Any?> = when (commentsListState) {
       ListState.LOADING -> m()
       ListState.REFRESHING, ListState.APPENDING -> {
@@ -340,7 +342,8 @@ fun RegWatchSubs() {
 
         m(
           "comments_list" to comments,
-          "comments_section" to highlightComment(sc)
+          "comments_section" to highlightComment(sc),
+          ":comments_sheet" to commentsSheet
         )
       }
     }
@@ -348,17 +351,17 @@ fun RegWatchSubs() {
     UIState(data = commentsState.assoc(common.state, commentsListState))
   }
 
-  regSub<IPersistentMap<Any, Any>, UIState>(
+  regSub<IPersistentMap<Any, Any>, UIState?>(
     queryId = common.comment_replies,
-    initialValue = loadingState,
+    initialValue = null,
     inputSignal = v("stream_panel_fsm")
   ) { panelFsm: IPersistentMap<Any, Any>?, prev, _ ->
     val fsmStates = get<Any>(panelFsm, fsm._state)
-    val commentRepliesState =
-      get(fsmStates, ":comment_replies") ?: ListState.LOADING
+    val commentRepliesState = get<ListState>(fsmStates, ":comment_replies")
+      ?: return@regSub null
 
     val ret: IPersistentMap<Any?, Any?> = when (commentRepliesState) {
-      ListState.LOADING -> m<Any?, Any?>()
+      ListState.LOADING -> m()
 
       ListState.READY -> {
         val replies = get<List<StreamComment>>(panelFsm, "comment_replies")
@@ -377,7 +380,7 @@ fun RegWatchSubs() {
       }
 
       ListState.REFRESHING, ListState.APPENDING -> {
-        prev.data as IPersistentMap<Any?, Any?>
+        prev!!.data as IPersistentMap<Any?, Any?>
       }
     }
     UIState(ret.assoc(common.state, commentRepliesState))
@@ -390,18 +393,15 @@ fun RegWatchSubs() {
   regSub(
     queryId = "comments_panel",
     initialValue = UIState(
-      m(
-        "current_route" to COMMENTS_ROUTE,
-        "comments" to loadingState,
-        "replies" to loadingState
-      )
+      m("comments" to loadingState,)
     ),
     v(Stream.comments),
     v(common.comment_replies),
-    v("active_comments_route")
-  ) { (comments, replies, route), _, _ ->
+  ) { (comments, replies), _, _ ->
     UIState(
-      m("current_route" to route, "comments" to comments, "replies" to replies)
+      m("comments" to comments).let {
+        if (replies != null) it.assoc("replies", replies) else it
+      }
     )
   }
 }

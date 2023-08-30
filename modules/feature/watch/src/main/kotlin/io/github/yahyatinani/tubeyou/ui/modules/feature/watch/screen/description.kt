@@ -1,6 +1,5 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -59,10 +58,9 @@ internal fun DescriptionSheet(
         modifier = Modifier
           .padding(start = 16.dp),
         headerTitle = "Description",
-        sheetState = descSheetState.currentValue
-      ) {
-        dispatch(v("stream_panel_fsm", "close_desc_sheet"))
-      }
+        sheetState = descSheetState.currentValue,
+        closeSheet = { dispatch(v("stream_panel_fsm", "close_desc_sheet")) }
+      )
     }
   ) { padding ->
     val sheetData = uiState.data
@@ -190,10 +188,6 @@ internal fun DescriptionSheet(
 
       item { Spacer(modifier = Modifier.height(16.dp)) }
     }
-  }
-
-  BackHandler(enabled = descSheetState.currentValue != SheetValue.Hidden) {
-    dispatch(v("stream_panel_fsm", "close_desc_sheet"))
   }
 }
 

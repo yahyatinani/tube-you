@@ -470,6 +470,10 @@ fun TyApp(
         BackHandler(enabled = sb != null) {
           dispatch(v(search.panel_fsm, search.back_press_search))
         }
+
+        BackHandler(enabled = playerSheetValue == SheetValue.Expanded) {
+          dispatch(v("stream_panel_fsm", common.minimize_player))
+        }
       }
     }
   }

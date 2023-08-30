@@ -14,7 +14,7 @@ compose-bom = "2023.08.00"
 compose-bom-alpha = "2023.09.00-alpha02"
 
 androidxComposeCompiler = "1.5.0"
-accompanist = "0.28.0"
+accompanist = "0.32.0"
 androidxNavigation = "2.7.1"
 androidxCoreSplashscreen = "1.0.1"
 

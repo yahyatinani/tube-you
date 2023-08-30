@@ -48,7 +48,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.PlainTooltipState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -88,7 +87,6 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableT
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
-import com.github.yahyatinani.tubeyou.modules.designsystem.utils.recomposeHighlighter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -702,7 +700,7 @@ private fun Header(
 @Composable
 internal fun CommentsSheet(
   sheetPeekHeight: Dp,
-  uiState: UIState,
+  uiState: UIState
 ) {
   val data = uiState.data
   // {
@@ -764,7 +762,7 @@ internal fun CommentsSheet(
     )
     NavHost(
       modifier = Modifier
-        //.recomposeHighlighter()
+        // .recomposeHighlighter()
         .padding(padding)
         .fillMaxWidth(),
       navController = commentsNavController,

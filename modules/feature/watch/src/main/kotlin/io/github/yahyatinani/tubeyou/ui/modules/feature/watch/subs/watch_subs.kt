@@ -393,10 +393,10 @@ fun RegWatchSubs() {
   regSub(
     queryId = "comments_panel",
     initialValue = UIState(
-      m("comments" to loadingState,)
+      m("comments" to loadingState)
     ),
     v(Stream.comments),
-    v(common.comment_replies),
+    v(common.comment_replies)
   ) { (comments, replies), _, _ ->
     UIState(
       m("comments" to comments).let {

@@ -13,7 +13,6 @@ import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamData
-import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs.ratio
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m

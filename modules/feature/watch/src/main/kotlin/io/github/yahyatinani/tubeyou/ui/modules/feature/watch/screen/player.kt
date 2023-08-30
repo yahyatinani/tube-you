@@ -57,7 +57,6 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import io.github.yahyatinani.recompose.dispatch
-import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.events.RegPlaybackEvents
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.StreamState

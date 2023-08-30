@@ -10,7 +10,6 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TopAppBarActionItem
 import io.github.yahyatinani.recompose.dispatch
-import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.tubeyou.R
 import io.github.yahyatinani.tubeyou.common.AppDb

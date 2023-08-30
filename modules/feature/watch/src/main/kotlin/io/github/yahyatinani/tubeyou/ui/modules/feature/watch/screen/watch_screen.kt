@@ -65,7 +65,6 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TextLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
 import io.github.yahyatinani.recompose.RegFx
 import io.github.yahyatinani.recompose.dispatch
-import io.github.yahyatinani.recompose.dispatchSync
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.core.ui.ChannelItem
 import io.github.yahyatinani.tubeyou.core.ui.PlayListPortrait

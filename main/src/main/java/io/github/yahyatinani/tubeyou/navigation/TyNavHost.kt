@@ -6,11 +6,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.HOME_GRAPH_ROUTE
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.homeGraph
 import io.github.yahyatinani.tubeyou.modules.feature.library.youGraph
@@ -50,11 +51,21 @@ fun TyNavHost(
   }
 }
 
-internal object NavStateSaver : Saver<Bundle, Bundle> {
-  override fun restore(value: Bundle): Bundle? = value
-
-  override fun SaverScope.save(value: Bundle): Bundle? = when {
-    value.isEmpty -> null
-    else -> value
+@Composable
+fun rememberSaveableNavController(activeRoute: String): NavHostController {
+  val navController = rememberNavController()
+  rememberSaveable(
+    activeRoute,
+    saver = Saver(
+      save = { if (it.isEmpty) null else it },
+      restore = {
+        navController.restoreState(it)
+        it
+      }
+    )
+  ) {
+    navController.saveState() ?: Bundle()
   }
+
+  return navController
 }

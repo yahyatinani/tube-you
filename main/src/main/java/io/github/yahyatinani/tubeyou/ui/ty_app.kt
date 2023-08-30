@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Resources
-import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -39,7 +38,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,7 +55,6 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
@@ -86,11 +83,11 @@ import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
-import io.github.yahyatinani.tubeyou.navigation.NavStateSaver
 import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
 import io.github.yahyatinani.tubeyou.navigation.RegNavFx
 import io.github.yahyatinani.tubeyou.navigation.TopLevelNavItems
 import io.github.yahyatinani.tubeyou.navigation.TyNavHost
+import io.github.yahyatinani.tubeyou.navigation.rememberSaveableNavController
 import io.github.yahyatinani.tubeyou.navigation.topLevelNavItems
 import io.github.yahyatinani.tubeyou.ui.modules.feature.search.db.SearchBar
 import io.github.yahyatinani.tubeyou.ui.modules.feature.search.evnts.RegSearchEvents
@@ -286,7 +283,9 @@ private fun screenDimensions(density: Density): Pair<Float, Float> {
 )
 @Composable
 fun TyApp(
-  navController: NavHostController = rememberNavController(),
+  navController: NavHostController = rememberSaveableNavController(
+    activeRoute = watch(v(":active_route"))
+  ),
   windowSizeClass: WindowSizeClass,
   appContext: Context
 ) {
@@ -450,15 +449,6 @@ fun TyApp(
           TyTopBar(sb, topBarScrollBehavior)
         }
       ) { paddingTb ->
-        val bundle = navController.saveState() ?: Bundle()
-        val saveState = rememberSaveable(bundle, saver = NavStateSaver) {
-          bundle
-        }
-
-        if (!saveState.isEmpty) {
-          navController.restoreState(saveState)
-        }
-
         TyNavHost(
           navController = navController,
           modifier = Modifier

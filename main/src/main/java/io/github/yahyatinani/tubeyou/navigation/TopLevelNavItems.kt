@@ -34,4 +34,4 @@ enum class TopLevelNavItems(
   )
 }
 
-val topLevelNavItems = TopLevelNavItems.values().asList()
+val topLevelNavItems = TopLevelNavItems.entries

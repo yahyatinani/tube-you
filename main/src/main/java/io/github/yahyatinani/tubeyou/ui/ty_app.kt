@@ -103,6 +103,7 @@ import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
+import kotlin.enums.EnumEntries
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -201,7 +202,7 @@ private fun TyTopBar(
 
 @Composable
 private fun TyBottomBar(
-  navItems: List<TopLevelNavItems>,
+  navItems: EnumEntries<TopLevelNavItems>,
   modifier: Modifier = Modifier,
   onClickNavItem: (navItemRoute: String) -> Unit
 ) {

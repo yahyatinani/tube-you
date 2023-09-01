@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Resources
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Vertical
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -36,6 +39,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -363,13 +367,20 @@ fun TyApp(
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeDrawing.only(Vertical)),
     bottomBar = {
-      if (playbackTargetValue == SheetValue.Expanded) {
-        return@Scaffold
-      }
+      val animateDpAsState by animateDpAsState(
+        targetValue = if (playbackTargetValue == SheetValue.Expanded) {
+          0.dp
+        } else {
+          BOTTOM_BAR_HEIGHT
+        },
+        animationSpec = tween(400),
+        label = "bottom_nav_bar_hide_anim"
+      )
 
       TyBottomBar(
         navItems = topLevelNavItems,
         modifier = Modifier
+          .height(animateDpAsState)
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
       ) { navItemRoute ->
         dispatch(v(common.on_click_nav_item, navItemRoute))

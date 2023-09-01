@@ -48,12 +48,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.ControllerVisibilityListener
-import androidx.media3.ui.R
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
@@ -147,8 +145,6 @@ fun VideoPlayer(
         // Release the player instance since it outlives this view and prevent
         // MainActivity from being GCed (Leak on rotation).
         it.player = null
-      },
-      onReset = {
       },
       update = {
         if (it.videoSurfaceView != null) {

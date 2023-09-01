@@ -413,21 +413,21 @@ fun NowPlayingSheet(
           Row(modifier = Modifier.weight(.8f)) {
             VideoPlayer(
               modifier = Modifier
-                .background(color = Color.Black)
-                .then(
+                .let {
                   if (isCollapsed) {
-                    Modifier
+                    it
                       .height(110.dp - 54.dp)
                       .width(136.dp)
 //                      .aspectRatio(ratio)
                   } else {
-                    Modifier
+                    it
                       .fillMaxWidth()
                       .aspectRatio(
                         get(streamData, Stream.aspect_ratio, ratio)!!
                       )
                   }
-                ),
+                }
+                .background(color = Color.Black),
               streamState = activeStream,
               useController = !isCollapsed,
               showThumbnail = showThumbnail,

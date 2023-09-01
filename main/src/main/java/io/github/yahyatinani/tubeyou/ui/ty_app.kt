@@ -305,14 +305,13 @@ fun TyApp(
   val playbackFsm = watch<IPersistentMap<Any, Any>>(v("stream_panel_fsm"))
   val playbackMachine = get<Any>(playbackFsm, fsm._state)
 
-  val playerSheetRegion =
-    get<PlayerSheetState>(playbackMachine, ":player_sheet")
+  val playerState = get<PlayerSheetState>(playbackMachine, ":player_sheet")
 
   val view = LocalView.current
   val background = MaterialTheme.colorScheme.background
-  LaunchedEffect(isSystemInDarkTheme(), playerSheetRegion) {
+  LaunchedEffect(isSystemInDarkTheme(), playerState) {
     val window = (view.context as Activity).window
-    if (playerSheetRegion == PlayerSheetState.EXPANDED) {
+    if (playerState == PlayerSheetState.EXPANDED) {
       window.statusBarColor = Color.Black.toArgb()
     } else {
       window.statusBarColor = background.toArgb()
@@ -334,15 +333,12 @@ fun TyApp(
     )
   )
 
-  val isMediaPlaying =
-    playerSheetRegion != PlayerSheetState.HIDDEN && playerSheetRegion != null
-
   val playerScope = rememberCoroutineScope()
   RegCofx("player_scope", playerScope) { cofx ->
     cofx.assoc("player_scope", playerScope)
   }
 
-  if (orientation == ORIENTATION_LANDSCAPE && isMediaPlaying) {
+  if (orientation == ORIENTATION_LANDSCAPE && playerState != null) {
     VideoPlayer(
       modifier = Modifier.padding(start = 24.dp),
       streamState = activeStream,
@@ -414,7 +410,7 @@ fun TyApp(
     }
     RegPlayerSheetEffects(playerSheetState)
     val bottomNavBarPadding = paddingBb.calculateBottomPadding()
-    val isPlayerSheetCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED
+    val isPlayerSheetCollapsed = playerState == PlayerSheetState.COLLAPSED
     BottomSheetScaffold(
       sheetContent = {
         if (orientation == ORIENTATION_LANDSCAPE) {

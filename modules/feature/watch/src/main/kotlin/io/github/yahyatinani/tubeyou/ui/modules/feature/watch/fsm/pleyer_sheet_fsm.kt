@@ -12,7 +12,7 @@ import io.github.yahyatinani.tubeyou.common.AppDb
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 
-enum class PlayerSheetState { HIDDEN, COLLAPSED, EXPANDED }
+enum class PlayerSheetState { COLLAPSED, EXPANDED }
 
 fun expandPlayerSheet(
   appDb: AppDb,
@@ -35,7 +35,7 @@ val bottomSheetMachine = m(
       fsm.actions to ::collapsePlayerSheet
     ),
     SheetValue.Hidden to m(
-      fsm.target to PlayerSheetState.HIDDEN,
+      fsm.target to null,
       fsm.actions to ::hidePlayerSheet
     )
   ),
@@ -45,7 +45,7 @@ val bottomSheetMachine = m(
       fsm.actions to ::expandPlayerSheet
     ),
     SheetValue.Hidden to m(
-      fsm.target to PlayerSheetState.HIDDEN,
+      fsm.target to null,
       fsm.actions to ::hidePlayerSheet
     )
   ),
@@ -55,7 +55,7 @@ val bottomSheetMachine = m(
       fsm.actions to ::expandPlayerSheet
     ),
     common.close_player to m(
-      fsm.target to PlayerSheetState.HIDDEN,
+      fsm.target to null,
       fsm.actions to ::hidePlayerSheet
     )
   )

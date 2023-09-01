@@ -319,7 +319,6 @@ fun TyApp(
     }
   }
 
-  val isPlayerSheetCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED
   val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
 
   val screenDim = screenDimensions(density)
@@ -347,7 +346,6 @@ fun TyApp(
     VideoPlayer(
       modifier = Modifier.padding(start = 24.dp),
       streamState = activeStream,
-      useController = !isPlayerSheetCollapsed,
       showThumbnail = showThumbnail,
       thumbnail = activeStreamCache.thumbnail
     )
@@ -416,7 +414,7 @@ fun TyApp(
     }
     RegPlayerSheetEffects(playerSheetState)
     val bottomNavBarPadding = paddingBb.calculateBottomPadding()
-
+    val isPlayerSheetCollapsed = playerSheetRegion == PlayerSheetState.COLLAPSED
     BottomSheetScaffold(
       sheetContent = {
         if (orientation == ORIENTATION_LANDSCAPE) {

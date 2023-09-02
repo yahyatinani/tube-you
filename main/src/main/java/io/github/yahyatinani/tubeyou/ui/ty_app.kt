@@ -410,7 +410,6 @@ fun TyApp(
     }
     RegPlayerSheetEffects(playerSheetState)
     val bottomNavBarPadding = paddingBb.calculateBottomPadding()
-    val isPlayerSheetCollapsed = playerState == PlayerSheetState.COLLAPSED
     BottomSheetScaffold(
       sheetContent = {
         if (orientation == ORIENTATION_LANDSCAPE) {
@@ -424,7 +423,7 @@ fun TyApp(
         val paddingValues = PaddingValues(bottom = bottomNavBarPadding)
         NowPlayingSheet(
           modifier = Modifier.padding(paddingValues),
-          isCollapsed = isPlayerSheetCollapsed,
+          isCollapsed = playbackTargetValue == SheetValue.PartiallyExpanded,
           onCollapsedClick = {
             dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
           },

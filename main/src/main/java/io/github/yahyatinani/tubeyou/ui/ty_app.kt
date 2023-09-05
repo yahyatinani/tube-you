@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Resources
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,7 +13,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Vertical
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -40,8 +38,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
@@ -102,12 +104,14 @@ import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fx.RegPlayerSheetE
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.MINI_PLAYER_HEIGHT
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.NowPlayingSheet
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.VideoPlayer
+import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.lerp
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs.RegWatchSubs
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 import kotlin.enums.EnumEntries
+import kotlin.math.roundToInt
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -356,25 +360,52 @@ fun TyApp(
     dispatch(v("stream_panel_fsm", common.close_player))
   }
 
+  var bottomSheetOffset by remember { mutableFloatStateOf(0f) }
+
+  LaunchedEffect(Unit) {
+    snapshotFlow { playerSheetState.requireOffset() }.collect {
+      bottomSheetOffset = it
+    }
+  }
+
   Scaffold(
     modifier = Modifier
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeDrawing.only(Vertical)),
     bottomBar = {
-      val animateDpAsState by animateDpAsState(
-        targetValue = if (playbackTargetValue == SheetValue.Expanded) {
-          0.dp
-        } else {
-          BOTTOM_BAR_HEIGHT
-        },
-        animationSpec = tween(400),
-        label = "bottom_nav_bar_hide_anim"
-      )
+      val offsetY = if (playerState == null) {
+        0f
+      } else {
+        val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+        val bottomBarHeightPx = remember(density) {
+          with(density) { BOTTOM_BAR_HEIGHT.toPx() }
+        }
+        val screenHeightPx = remember(density) {
+          with(density) { screenHeightDp.toPx() }
+        }
+        val bottomHeight = remember(density) {
+          with(density) { bottomBarHeightPx + 56.dp.toPx() }
+        }
+
+        remember(
+          playerState,
+          screenHeightPx,
+          screenHeightDp,
+          bottomSheetOffset
+        ) {
+          lerp(
+            sheetYOffset = bottomSheetOffset,
+            traverse = screenHeightPx - bottomHeight,
+            start = -bottomBarHeightPx,
+            end = 0f
+          )
+        }
+      }
 
       TyBottomBar(
         navItems = topLevelNavItems,
         modifier = Modifier
-          .height(animateDpAsState)
+          .offset { IntOffset(0, -offsetY.roundToInt()) }
           .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
       ) { navItemRoute ->
         dispatch(v(common.on_click_nav_item, navItemRoute))
@@ -409,7 +440,10 @@ fun TyApp(
       }
     }
     RegPlayerSheetEffects(playerSheetState)
-    val bottomNavBarPadding = paddingBb.calculateBottomPadding()
+    val bottomNavBarPadding = when (playerState) {
+      null -> paddingBb.calculateBottomPadding()
+      else -> 0.dp
+    }
     BottomSheetScaffold(
       sheetContent = {
         if (orientation == ORIENTATION_LANDSCAPE) {
@@ -420,10 +454,12 @@ fun TyApp(
           get<Float>(activeStream.data, ":desc_sheet_height")?.toDp()
             ?: 0.toDp()
         }
-        val paddingValues = PaddingValues(bottom = bottomNavBarPadding)
+
         NowPlayingSheet(
-          modifier = Modifier.padding(paddingValues),
-          isCollapsed = playbackTargetValue == SheetValue.PartiallyExpanded,
+          modifier = Modifier.padding(
+            PaddingValues(bottom = bottomNavBarPadding)
+          ),
+          isCollapsing = playbackTargetValue == SheetValue.PartiallyExpanded,
           onCollapsedClick = {
             dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
           },
@@ -431,6 +467,7 @@ fun TyApp(
           activeStreamCache = activeStreamCache,
           showThumbnail = showThumbnail,
           sheetPeekHeight = sheetPeekHeight,
+          sheetOffset = { bottomSheetOffset },
           onClickClosePlayer = onClickClosePlayer
         )
       },

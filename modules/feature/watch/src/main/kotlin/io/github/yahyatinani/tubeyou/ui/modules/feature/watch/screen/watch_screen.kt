@@ -6,18 +6,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -42,12 +44,17 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +88,7 @@ import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @Composable
 fun NowPlayingTitle(streamTitle: String, maxLines: Int = 2) {
@@ -253,16 +261,27 @@ fun LikeSection(
   }
 }
 
+fun lerp(
+  sheetYOffset: Float,
+  traverse: Float,
+  start: Float = 0f,
+  end: Float = 1f
+): Float {
+  val d = (1f - abs(sheetYOffset / traverse)) * (start - end) + end
+  return d.coerceIn(minOf(start, end), maxOf(start, end))
+}
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun NowPlayingSheet(
   modifier: Modifier = Modifier,
-  isCollapsed: Boolean,
+  isCollapsing: Boolean,
   onCollapsedClick: () -> Unit,
   activeStream: UIState,
   activeStreamCache: VideoVm,
   showThumbnail: Boolean?,
   sheetPeekHeight: Dp,
+  sheetOffset: () -> Float,
   onClickClosePlayer: () -> Unit = { }
 ) {
   val descSheetState = rememberStandardBottomSheetState(
@@ -392,51 +411,100 @@ fun NowPlayingSheet(
         )
       }
     ) {
+      val density = LocalDensity.current
+      val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+      val screenHeightPx = remember(density, screenHeightDp) {
+        with(density) { screenHeightDp.toPx() }
+      }
       val colorScheme = MaterialTheme.colorScheme
       val containerColor: Color = colorScheme.primaryContainer
-
       Column {
         val typography = MaterialTheme.typography
         val bodySmall = typography.bodySmall
+
+        val screenWidthDp = LocalConfiguration.current.screenWidthDp.dp
+        val ratio = remember { 16 / 9f }
+        val miniPlayerHeightPx = remember(density) {
+          with(density) { 56.dp.toPx() }
+        }
+        val r = get(streamData, Stream.aspect_ratio, ratio)!!
+        val fullVidHeight = remember(screenWidthDp) { screenWidthDp / r }
+        val sheetOffsetPx by remember { derivedStateOf { sheetOffset() } }
+
+        val bottomBar = remember(density) {
+          with(density) { 48.dp.toPx() + miniPlayerHeightPx }
+        }
+        val fullVideoHeightPx = remember(density) {
+          with(density) { fullVidHeight.toPx() }
+        }
+        val h = remember(density, sheetOffsetPx) {
+          with(density) {
+            lerp(
+              sheetYOffset = sheetOffsetPx,
+              traverse = screenHeightPx - bottomBar,
+              start = fullVideoHeightPx,
+              end = miniPlayerHeightPx
+            ).toDp()
+          }
+        }
+
+        val widthShrinkingY = remember(screenHeightPx) { screenHeightPx / 4 }
+        val minVideoWidthPx = remember {
+          with(density) { MINI_PLAYER_WIDTH.toPx() }
+        }
+        val breakingPoint =
+          remember(widthShrinkingY) { screenHeightPx - widthShrinkingY }
+
+        val w =
+          remember(density, sheetOffsetPx, screenWidthDp, widthShrinkingY) {
+            with(density) {
+              if (sheetOffsetPx < breakingPoint) {
+                screenWidthDp
+              } else {
+                lerp(
+                  sheetYOffset = sheetOffsetPx - breakingPoint,
+                  traverse = widthShrinkingY - bottomBar,
+                  start = screenWidthDp.toPx(),
+                  end = minVideoWidthPx
+                ).toDp()
+              }
+            }
+          }
         Row(
           modifier = Modifier
-            .fillMaxWidth()
+            .widthIn(min = MINI_PLAYER_WIDTH)
+            .heightIn(min = MINI_PLAYER_HEIGHT, max = fullVidHeight)
+            .height(h)
             .clickable(
-              enabled = isCollapsed,
+              enabled = isCollapsing,
               indication = null,
               interactionSource = remember { MutableInteractionSource() },
               onClick = onCollapsedClick
             ),
-          horizontalArrangement = Arrangement.SpaceBetween
+          horizontalArrangement = Arrangement.SpaceAround
         ) {
-          val ratio = remember { 16 / 9f }
-          Row(modifier = Modifier.weight(.8f)) {
-            VideoPlayer(
-              modifier = Modifier
-                .let {
-                  if (isCollapsed) {
-                    it
-                      .height(110.dp - 54.dp)
-                      .width(136.dp)
-//                      .aspectRatio(ratio)
-                  } else {
-                    it
-                      .fillMaxWidth()
-                      .aspectRatio(
-                        get(streamData, Stream.aspect_ratio, ratio)!!
-                      )
-                  }
-                }
-                .background(color = Color.Black),
-              streamState = activeStream,
-              useController = !isCollapsed,
-              showThumbnail = showThumbnail,
-              thumbnail = activeStreamCache.thumbnail
-            )
-
-            if (isCollapsed) {
+          VideoPlayer(
+            modifier = Modifier
+              .width(w)
+              .background(color = Color.Black),
+            streamState = activeStream,
+            useController = !isCollapsing,
+            showThumbnail = showThumbnail,
+            thumbnail = activeStreamCache.thumbnail
+          )
+          Box {
+            val delta =
+              remember(density) { with(density) { 100.dp.toPx() } }
+            val traverse = remember(screenHeightPx, breakingPoint) {
+              screenHeightPx - breakingPoint - delta
+            }
+            Row {
               if (!isLoading) {
-                Column(Modifier.padding(8.dp)) {
+                Column(
+                  Modifier
+                    .padding(8.dp)
+                    .weight(.7f)
+                ) {
                   Text(
                     text = get<String>(streamData, Stream.title)!!,
                     maxLines = 1,
@@ -453,17 +521,45 @@ fun NowPlayingSheet(
                   )
                 }
               }
-            }
-          }
-          if (isCollapsed) {
-            val playerState = get<StreamState>(activeStream.data, common.state)
-            MiniPlayerControls(
-              modifier = Modifier.weight(.2f),
-              isPlaying = playerState == StreamState.PLAYING,
-              onClickClose = onClickClosePlayer,
-              playPausePlayer = {
-                dispatch(v("stream_panel_fsm", "toggle_play_pause"))
+
+              if (sheetOffsetPx >= breakingPoint) {
+                val weight = remember(sheetOffsetPx, traverse) {
+                  lerp(
+                    sheetYOffset = sheetOffsetPx - breakingPoint,
+                    traverse = traverse,
+                    start = .0001f,
+                    end = .3f
+                  )
+                }
+
+                val playerState =
+                  get<StreamState>(activeStream.data, common.state)
+
+                MiniPlayerControls(
+                  modifier = Modifier.weight(weight),
+                  isPlaying = playerState == StreamState.PLAYING,
+                  onClickClose = onClickClosePlayer,
+                  playPausePlayer = {
+                    dispatch(v("stream_panel_fsm", "toggle_play_pause"))
+                  }
+                )
               }
+            }
+
+            val alpha = remember(sheetOffsetPx) {
+              lerp(
+                sheetYOffset = sheetOffsetPx - breakingPoint,
+                traverse = traverse,
+                start = 1f,
+                end = 0f
+              )
+            }
+            Box(
+              modifier = Modifier
+                .fillMaxSize()
+                .drawBehind {
+                  drawRect(Color.Black.copy(alpha = alpha))
+                }
             )
           }
         }
@@ -473,248 +569,264 @@ fun NowPlayingSheet(
           lazyListState.scrollToItem(0)
         }
 
-        LazyColumn(
-          modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(BlockScrolling),
-          state = lazyListState
-        ) {
-          item {
-            if (isLoading) {
-              Column(modifier = Modifier.fillMaxSize()) {
-                Surface(
-                  modifier = Modifier
-                    .padding(horizontal = 6.dp, vertical = 8.dp)
-                    .fillMaxWidth(),
-                  shape = RoundedCornerShape(12.dp),
-                  color = containerColor
-                ) {
-                  Column(
-                    modifier = Modifier.padding(
-                      horizontal = 6.dp,
-                      vertical = 4.dp
-                    )
+        Box {
+          LazyColumn(
+            modifier = Modifier
+              .fillMaxSize()
+              .nestedScroll(BlockScrolling),
+            state = lazyListState
+          ) {
+            item {
+              if (isLoading) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                  Surface(
+                    modifier = Modifier
+                      .padding(horizontal = 6.dp, vertical = 8.dp)
+                      .fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = containerColor
                   ) {
-                    NowPlayingTitle(streamTitle = activeStreamCache.title)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                      text = activeStreamCache.viewCount,
-                      style = bodySmall.copy(
-                        colorScheme.onSurface.copy(alpha = .6f)
+                    Column(
+                      modifier = Modifier.padding(
+                        horizontal = 6.dp,
+                        vertical = 4.dp
                       )
-                    )
-                  }
-                }
-
-                val roundedCornerShape = RoundedCornerShape(20.dp)
-                Row(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                    AvatarLoader(
-                      modifier = Modifier.size(size = 32.dp),
-                      containerColor = containerColor
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    TextLoader(
-                      modifier = Modifier.width(128.dp),
-                      containerColor = containerColor
-                    )
+                    ) {
+                      NowPlayingTitle(streamTitle = activeStreamCache.title)
+                      Spacer(modifier = Modifier.height(4.dp))
+                      Text(
+                        text = activeStreamCache.viewCount,
+                        style = bodySmall.copy(
+                          colorScheme.onSurface.copy(alpha = .6f)
+                        )
+                      )
+                    }
                   }
 
-                  Surface(
+                  val roundedCornerShape = RoundedCornerShape(20.dp)
+                  Row(
                     modifier = Modifier
-                      .width(72.dp)
-                      .height(32.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    color = containerColor,
-                    content = {}
-                  )
-                }
+                      .fillMaxWidth()
+                      .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                  ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                      AvatarLoader(
+                        modifier = Modifier.size(size = 32.dp),
+                        containerColor = containerColor
+                      )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                      Spacer(modifier = Modifier.width(12.dp))
 
-                Row(
-                  modifier = Modifier
-                    .horizontalScroll(rememberScrollState(), enabled = false)
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
-                ) {
-                  Surface(
-                    modifier = Modifier
-                      .width(128.dp)
-                      .height(30.dp),
-                    shape = roundedCornerShape,
-                    color = containerColor,
-                    content = {}
-                  )
+                      TextLoader(
+                        modifier = Modifier.width(128.dp),
+                        containerColor = containerColor
+                      )
+                    }
 
-                  repeat(3) {
-                    Spacer(modifier = Modifier.width(16.dp))
                     Surface(
                       modifier = Modifier
-                        .width(80.dp)
+                        .width(72.dp)
+                        .height(32.dp),
+                      shape = RoundedCornerShape(20.dp),
+                      color = containerColor,
+                      content = {}
+                    )
+                  }
+
+                  Spacer(modifier = Modifier.height(16.dp))
+
+                  Row(
+                    modifier = Modifier
+                      .horizontalScroll(rememberScrollState(), enabled = false)
+                      .fillMaxWidth()
+                      .padding(horizontal = 12.dp)
+                  ) {
+                    Surface(
+                      modifier = Modifier
+                        .width(128.dp)
                         .height(30.dp),
                       shape = roundedCornerShape,
                       color = containerColor,
                       content = {}
                     )
+
+                    repeat(3) {
+                      Spacer(modifier = Modifier.width(16.dp))
+                      Surface(
+                        modifier = Modifier
+                          .width(80.dp)
+                          .height(30.dp),
+                        shape = roundedCornerShape,
+                        color = containerColor,
+                        content = {}
+                      )
+                    }
                   }
+                }
+
+                return@item
+              }
+
+              Surface {
+                Column {
+                  DescriptionSection(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .clickable {
+                        dispatch(
+                          v(
+                            "stream_panel_fsm",
+                            "half_expand_desc_sheet"
+                          )
+                        )
+                      }
+                      .padding(horizontal = 12.dp),
+                    streamTitle = get<String>(streamData, Stream.title)!!,
+                    views = get<String>(streamData, Stream.views)!!,
+                    date = get(streamData, Stream.date)!!
+                  )
+
+                  ChannelSection(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .clickable { }
+                      .padding(horizontal = 12.dp),
+                    channelName = get(streamData, Stream.channel_name)!!,
+                    channelAvatar = get(streamData, Stream.avatar)!!,
+                    subscribersCount = get(streamData, Stream.sub_count)!!
+                  )
+
+                  Spacer(modifier = Modifier.height(8.dp))
+
+                  LikeSection(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 12.dp),
+                    likesCount = get<String>(streamData, Stream.likes_count)!!,
+                    buttonsColor = containerColor
+                  )
+                }
+              }
+            }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
+            val commentsStateData =
+              get<UIState>(commentsPanelState.data, "comments")!!.data
+                as IPersistentMap<Any?, Any?>
+
+            item {
+              if (
+                get<ListState>(
+                  commentsStateData,
+                  common.state
+                ) == ListState.LOADING
+              ) {
+                Surface(
+                  modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .fillMaxWidth()
+                    .height(88.dp),
+                  color = containerColor,
+                  shape = RoundedCornerShape(12.dp),
+                  content = { }
+                )
+
+                return@item
+              }
+
+              val commentsSection = get<IPersistentMap<Any, Any>>(
+                commentsStateData,
+                "comments_section"
+              )
+              val highlightedComment =
+                get<Spanned>(commentsSection, Stream.highlight_comment)
+              val commentAvatar =
+                get<String>(commentsSection, Stream.highlight_comment_avatar)
+              val commentsCount = (
+                get<String>(commentsSection, Stream.comments_count)
+                  ?: ""
+                )
+              val commentsDisabled =
+                get<Boolean>(commentsSection, Stream.comments_disabled) ?: false
+
+              CommentsSection(
+                modifier = Modifier
+                  .padding(horizontal = 12.dp)
+                  .fillMaxWidth(),
+                highlightedComment = highlightedComment,
+                containerColor = containerColor,
+                commentsCount = commentsCount,
+                commentAvatar = commentAvatar,
+                commentsDisabled = commentsDisabled,
+                onClick = {
+                  dispatch(v("stream_panel_fsm", "half_expand_comments_sheet"))
+                }
+              )
+            }
+
+            item { Spacer(modifier = Modifier.height(24.dp)) }
+
+            if (isLoading) {
+              repeat(2) {
+                item {
+                  StreamLoaderPortrait(containerColor)
                 }
               }
 
-              return@item
+              return@LazyColumn
             }
 
-            Column {
-              DescriptionSection(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .clickable {
-                    dispatch(
-                      v(
-                        "stream_panel_fsm",
-                        "half_expand_desc_sheet"
+            val videoInfoTextStyle = TextStyle.Default.copy(fontSize = 14.sp)
+            items(
+              get<List<Any>>(streamData, Stream.related_streams)!!
+            ) { viewModel ->
+              when (viewModel) {
+                is VideoVm -> {
+                  VideoItemPortrait(
+                    viewModel = viewModel,
+                    videoInfoTextStyle = videoInfoTextStyle,
+                    onClick = {
+                      dispatch(
+                        v("stream_panel_fsm", common.play_video, viewModel)
                       )
-                    )
-                  }
-                  .padding(horizontal = 12.dp),
-                streamTitle = get<String>(streamData, Stream.title)!!,
-                views = get<String>(streamData, Stream.views)!!,
-                date = get(streamData, Stream.date)!!
-              )
+                    }
+                  )
+                }
 
-              ChannelSection(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .clickable { }
-                  .padding(horizontal = 12.dp),
-                channelName = get(streamData, Stream.channel_name)!!,
-                channelAvatar = get(streamData, Stream.avatar)!!,
-                subscribersCount = get(streamData, Stream.sub_count)!!
-              )
+                is ChannelVm -> {
+                  ChannelItem(
+                    modifier = Modifier
+                      .clickable { /*TODO*/ }
+                      .fillMaxWidth(),
+                    vm = viewModel
+                  )
+                }
+
+                else -> PlayListPortrait(
+                  modifier = Modifier.padding(start = 12.dp),
+                  viewModel = viewModel as PlaylistVm,
+                  videoInfoTextStyle = videoInfoTextStyle
+                )
+              }
 
               Spacer(modifier = Modifier.height(8.dp))
-
-              LikeSection(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 12.dp),
-                likesCount = get<String>(streamData, Stream.likes_count)!!,
-                buttonsColor = containerColor
-              )
             }
           }
 
-          item { Spacer(modifier = Modifier.height(16.dp)) }
-
-          val commentsStateData =
-            get<UIState>(commentsPanelState.data, "comments")!!.data
-              as IPersistentMap<Any?, Any?>
-
-          item {
-            if (
-              get<ListState>(
-                commentsStateData,
-                common.state
-              ) == ListState.LOADING
-            ) {
-              Surface(
-                modifier = Modifier
-                  .padding(horizontal = 12.dp)
-                  .fillMaxWidth()
-                  .height(88.dp),
-                color = containerColor,
-                shape = RoundedCornerShape(12.dp),
-                content = { }
-              )
-
-              return@item
-            }
-
-            val commentsSection = get<IPersistentMap<Any, Any>>(
-              commentsStateData,
-              "comments_section"
-            )
-            val highlightedComment =
-              get<Spanned>(commentsSection, Stream.highlight_comment)
-            val commentAvatar =
-              get<String>(commentsSection, Stream.highlight_comment_avatar)
-            val commentsCount = (
-              get<String>(commentsSection, Stream.comments_count)
-                ?: ""
-              )
-            val commentsDisabled =
-              get<Boolean>(commentsSection, Stream.comments_disabled) ?: false
-
-            CommentsSection(
-              modifier = Modifier
-                .padding(horizontal = 12.dp)
-                .fillMaxWidth(),
-              highlightedComment = highlightedComment,
-              containerColor = containerColor,
-              commentsCount = commentsCount,
-              commentAvatar = commentAvatar,
-              commentsDisabled = commentsDisabled,
-              onClick = {
-                dispatch(v("stream_panel_fsm", "half_expand_comments_sheet"))
-              }
-            )
+          val traverse = remember(screenHeightPx, density) {
+            with(density) { screenHeightPx - 160.dp.toPx() }
           }
-
-          item { Spacer(modifier = Modifier.height(24.dp)) }
-
-          if (isLoading) {
-            repeat(2) {
-              item {
-                StreamLoaderPortrait(containerColor)
+          val alpha = remember(sheetOffsetPx) { lerp(sheetOffsetPx, traverse) }
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .drawBehind {
+                drawRect(Color.Black.copy(alpha = alpha))
               }
-            }
-
-            return@LazyColumn
-          }
-
-          val videoInfoTextStyle = TextStyle.Default.copy(fontSize = 14.sp)
-          items(
-            get<List<Any>>(streamData, Stream.related_streams)!!
-          ) { viewModel ->
-            when (viewModel) {
-              is VideoVm -> {
-                VideoItemPortrait(
-                  viewModel = viewModel,
-                  videoInfoTextStyle = videoInfoTextStyle,
-                  onClick = {
-                    dispatch(
-                      v("stream_panel_fsm", common.play_video, viewModel)
-                    )
-                  }
-                )
-              }
-
-              is ChannelVm -> {
-                ChannelItem(
-                  modifier = Modifier
-                    .clickable { /*TODO*/ }
-                    .fillMaxWidth(),
-                  vm = viewModel
-                )
-              }
-
-              else -> PlayListPortrait(
-                modifier = Modifier.padding(start = 12.dp),
-                viewModel = viewModel as PlaylistVm,
-                videoInfoTextStyle = videoInfoTextStyle
-              )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-          }
+          )
         }
       }
     }

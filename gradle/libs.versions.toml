@@ -33,8 +33,9 @@ kotlinxSerializationJson = "1.5.1"
 datetime = "0.4.0"
 
 ylib = "0.5.0"
+
 #FIXME: release the new recompose version.
-recompose = "0.4.0.96-SNAPSHOT"
+recompose = "0.4.0-LOCAL"
 
 material3 = "1.1.1"
 cronetOkhttp = "0.1.0"

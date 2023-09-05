@@ -127,15 +127,15 @@ fun VideoPlayer(
 
     RegPlaybackEvents()
     AndroidView(
-      modifier = Modifier
-        .fillMaxWidth()
-        .align(Alignment.Center),
+      modifier = Modifier,
+//        .fillMaxWidth()
+//        .align(Alignment.Center)
       factory = { factoryContext ->
         PlayerView(factoryContext).apply {
           setControllerVisibilityListener(controllerVisibilityListener)
           player = TyPlayer.getInstance()
           setShutterBackgroundColor(TRANSPARENT)
-          resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+          resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
           if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setBackgroundColor(Color.Black.toArgb())
           }
@@ -274,3 +274,4 @@ fun MiniPlayerControls(
 }
 
 val MINI_PLAYER_HEIGHT = 56.dp
+val MINI_PLAYER_WIDTH = 136.dp

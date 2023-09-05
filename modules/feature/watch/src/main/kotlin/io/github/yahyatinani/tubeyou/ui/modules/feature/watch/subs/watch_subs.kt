@@ -261,6 +261,12 @@ fun RegWatchSubs() {
       Stream.quality_list to qualityList,
       Stream.current_quality to cq,
       Stream.aspect_ratio to ratio,
+      "height" to (
+        stream.videoStreams.firstOrNull {
+          val codec: String? = it.codec
+          codec != null && codec.contains("avc1")
+        }?.height ?: 0
+        ),
       Stream.views to views,
       Stream.date to shortenTime(viewModel.uploaded),
       Stream.channel_name to viewModel.uploaderName,

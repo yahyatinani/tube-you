@@ -127,16 +127,18 @@ fun VideoPlayer(
 
     RegPlaybackEvents()
     AndroidView(
-      modifier = Modifier,
-//        .fillMaxWidth()
-//        .align(Alignment.Center)
+      modifier = Modifier
+        .fillMaxWidth()
+        .align(Alignment.Center),
       factory = { factoryContext ->
         PlayerView(factoryContext).apply {
           setControllerVisibilityListener(controllerVisibilityListener)
           player = TyPlayer.getInstance()
           setShutterBackgroundColor(TRANSPARENT)
-          resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
+          resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+          
           if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             setBackgroundColor(Color.Black.toArgb())
           }
         }

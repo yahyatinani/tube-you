@@ -5,9 +5,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -52,7 +59,8 @@ fun TyNavHost(
 }
 
 @Composable
-fun rememberSaveableNavController(activeRoute: String): NavHostController {
+fun rememberSaveableNavController(): NavHostController {
+  var activeRoute by remember { mutableStateOf<String?>(null) }
   val navController = rememberNavController()
   rememberSaveable(
     activeRoute,
@@ -65,6 +73,16 @@ fun rememberSaveableNavController(activeRoute: String): NavHostController {
     )
   ) {
     navController.saveState() ?: Bundle()
+  }
+
+  DisposableEffect(Unit) {
+    val l = { _: NavController, destination: NavDestination, _: Bundle? ->
+      activeRoute = destination.route
+    }
+    navController.addOnDestinationChangedListener(l)
+    onDispose {
+      navController.removeOnDestinationChangedListener(l)
+    }
   }
 
   return navController

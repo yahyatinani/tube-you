@@ -292,9 +292,7 @@ private fun screenDimensions(density: Density): Pair<Float, Float> {
 )
 @Composable
 fun TyApp(
-  navController: NavHostController = rememberSaveableNavController(
-    activeRoute = watch(v(":active_route"))
-  ),
+  navController: NavHostController = rememberSaveableNavController(),
   windowSizeClass: WindowSizeClass,
   appContext: Context
 ) {

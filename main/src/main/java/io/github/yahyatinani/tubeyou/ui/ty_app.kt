@@ -6,6 +6,7 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Resources
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -45,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -86,7 +88,7 @@ import io.github.yahyatinani.recompose.pagingfx.paging
 import io.github.yahyatinani.recompose.pagingfx.regPagingFx
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.watch
-import io.github.yahyatinani.tubeyou.common.ty_db
+import io.github.yahyatinani.tubeyou.common.ty_db.top_level_back_handler_enabled
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
@@ -281,6 +283,34 @@ private fun screenDimensions(density: Density): Pair<Float, Float> {
     with(density) {
       configuration.screenWidthDp.dp.toPx() to
         configuration.screenHeightDp.dp.toPx()
+    }
+  }
+}
+
+@Composable
+private fun screenMask(
+  screenHeightPx: Float,
+  density: Density,
+  bottomSheetOffset: Float,
+  playerState: PlayerSheetState?
+): Float {
+  val third = remember(screenHeightPx) { screenHeightPx / 3f }
+  val traverse = remember(third, density) {
+    third - with(density) { (56 + 48).dp.toPx() }
+  }
+  val threshold = remember(screenHeightPx) { screenHeightPx - third }
+  return remember(bottomSheetOffset, screenHeightPx, threshold) {
+    when {
+      playerState == null -> 0f
+      bottomSheetOffset < threshold -> .5f
+      else -> {
+        lerp(
+          sheetYOffset = bottomSheetOffset - threshold,
+          traverse = traverse,
+          start = .5f,
+          end = 0f
+        )
+      }
     }
   }
 }
@@ -482,38 +512,54 @@ fun TyApp(
       sheetDragHandle = null,
       sheetShape = RoundedCornerShape(0.dp)
     ) {
-      Scaffold(
-        modifier = Modifier
-          .nestedScroll(topBarScrollBehavior.nestedScrollConnection),
-        topBar = {
-          TyTopBar(sb, topBarScrollBehavior)
+      Box {
+        Scaffold(
+          modifier = Modifier
+            .nestedScroll(topBarScrollBehavior.nestedScrollConnection),
+          topBar = {
+            TyTopBar(sb, topBarScrollBehavior)
+          }
+        ) { paddingTb ->
+          TyNavHost(
+            navController = navController,
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(top = paddingTb.calculateTopPadding())
+              .consumeWindowInsets(paddingTb)
+              .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(Horizontal + Vertical)
+              ),
+            isCompact = isCompact,
+            orientation = LocalConfiguration.current.orientation
+          )
+
+          // Top-level navigation back handler.
+          BackHandler(enabled = watch(v(top_level_back_handler_enabled))) {
+            dispatch(v(common.back_press_top_nav))
+          }
+
+          BackHandler(enabled = sb != null) {
+            dispatch(v(search.panel_fsm, search.back_press_search))
+          }
+
+          BackHandler(enabled = playerSheetValue == SheetValue.Expanded) {
+            dispatch(v("stream_panel_fsm", common.minimize_player))
+          }
         }
-      ) { paddingTb ->
-        TyNavHost(
-          navController = navController,
+
+        val alpha = screenMask(
+          screenHeightPx = screenDim.second,
+          density = density,
+          bottomSheetOffset = bottomSheetOffset,
+          playerState = playerState
+        )
+        Box(
           modifier = Modifier
             .fillMaxSize()
-            .padding(top = paddingTb.calculateTopPadding())
-            .consumeWindowInsets(paddingTb)
-            .windowInsetsPadding(
-              WindowInsets.safeDrawing.only(Horizontal + Vertical)
-            ),
-          isCompact = isCompact,
-          orientation = LocalConfiguration.current.orientation
+            .drawBehind {
+              drawRect(Color.Black.copy(alpha = alpha))
+            }
         )
-
-        // Top-level navigation back handler.
-        BackHandler(enabled = watch(v(ty_db.top_level_back_handler_enabled))) {
-          dispatch(v(common.back_press_top_nav))
-        }
-
-        BackHandler(enabled = sb != null) {
-          dispatch(v(search.panel_fsm, search.back_press_search))
-        }
-
-        BackHandler(enabled = playerSheetValue == SheetValue.Expanded) {
-          dispatch(v("stream_panel_fsm", common.minimize_player))
-        }
       }
     }
   }

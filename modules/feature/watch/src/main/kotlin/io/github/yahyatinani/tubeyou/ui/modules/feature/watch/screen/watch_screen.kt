@@ -423,26 +423,29 @@ fun NowPlayingSheet(
         val bodySmall = typography.bodySmall
 
         val screenWidthDp = LocalConfiguration.current.screenWidthDp.dp
-        val ratio = remember { 16 / 9f }
+        val defaultRatio = remember { 16 / 9f }
         val miniPlayerHeightPx = remember(density) {
           with(density) { 56.dp.toPx() }
         }
-        val r = get(streamData, Stream.aspect_ratio, ratio)!!
-        val fullVidHeight = remember(screenWidthDp) { screenWidthDp / r }
+        val ratio = get(streamData, Stream.aspect_ratio, defaultRatio)!!
+        println("dasjfkljsdfj$ratio")
+        val fullVidHeight = with(density) {
+          remember(screenWidthDp, ratio) { screenWidthDp.toPx() / ratio }
+        }
         val sheetOffsetPx by remember { derivedStateOf { sheetOffset() } }
 
         val bottomBar = remember(density) {
           with(density) { 48.dp.toPx() + miniPlayerHeightPx }
         }
-        val fullVideoHeightPx = remember(density) {
-          with(density) { fullVidHeight.toPx() }
+        val fullVideoHeightDp = remember(fullVidHeight) {
+          with(density) { fullVidHeight.toDp() }
         }
-        val h = remember(density, sheetOffsetPx) {
+        val h = remember(density, sheetOffsetPx, fullVidHeight) {
           with(density) {
             lerp(
               sheetYOffset = sheetOffsetPx,
               traverse = screenHeightPx - bottomBar,
-              start = fullVideoHeightPx,
+              start = fullVidHeight,
               end = miniPlayerHeightPx
             ).toDp()
           }
@@ -473,7 +476,7 @@ fun NowPlayingSheet(
         Row(
           modifier = Modifier
             .widthIn(min = MINI_PLAYER_WIDTH)
-            .heightIn(min = MINI_PLAYER_HEIGHT, max = fullVidHeight)
+            .heightIn(min = MINI_PLAYER_HEIGHT, max = fullVideoHeightDp)
             .height(h)
             .clickable(
               enabled = isCollapsing,

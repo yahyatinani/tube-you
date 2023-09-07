@@ -136,7 +136,7 @@ fun VideoPlayer(
           player = TyPlayer.getInstance()
           setShutterBackgroundColor(TRANSPARENT)
           resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-          
+
           if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             setBackgroundColor(Color.Black.toArgb())

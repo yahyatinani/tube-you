@@ -15,6 +15,7 @@ dependencies {
   implementation(deps.androidx.media3.exoplayer.dash)
   implementation(deps.androidx.media3.datasource.cronet)
   implementation(deps.androidx.media3.ui)
+  implementation(deps.androidx.media3.session)
   implementation(deps.cronet.okhttp)
   implementation(deps.kotlinx.datetime)
 }

@@ -16,6 +16,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSession.ControllerInfo
+import androidx.media3.session.MediaSessionService
 import com.google.net.cronet.okhttptransport.CronetCallFactory
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs.Stream
@@ -195,5 +198,30 @@ object TyPlayer {
     exoPlayer = null
     trackSelector = null
     CronetHelper.cronetEngine = null
+  }
+}
+
+class PlaybackService : MediaSessionService() {
+  private var mediaSession: MediaSession? = null
+
+  // If desired, validate the controller before returning the media session
+  override fun onGetSession(controllerInfo: ControllerInfo) = mediaSession
+
+  @OptIn(UnstableApi::class)
+  override fun onCreate() {
+    super.onCreate()
+
+    val player = TyPlayer.getInstance()
+    mediaSession = MediaSession.Builder(this, player).build()
+  }
+
+  // Remember to release the player and media session in onDestroy
+  override fun onDestroy() {
+    mediaSession?.run {
+      player.release()
+      release()
+      mediaSession = null
+    }
+    super.onDestroy()
   }
 }

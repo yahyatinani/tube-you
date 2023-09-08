@@ -106,4 +106,6 @@ dependencies {
   implementation(deps.androidx.profileinstaller)
   implementation(deps.recompose.httpfx)
   implementation(deps.recompose.fsm)
+  implementation(deps.androidx.media3.ui)
+  implementation(deps.androidx.media3.session)
 }

@@ -62,6 +62,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
@@ -341,12 +342,17 @@ fun TyApp(
 
   val view = LocalView.current
   val background = MaterialTheme.colorScheme.background
-  LaunchedEffect(isSystemInDarkTheme(), playerState) {
+  val isDarkTheme = isSystemInDarkTheme()
+  LaunchedEffect(isDarkTheme, playerState) {
     val window = (view.context as Activity).window
-    if (playerState == PlayerSheetState.EXPANDED) {
-      window.statusBarColor = Color.Black.toArgb()
-    } else {
-      window.statusBarColor = background.toArgb()
+    val (statusBarColor, foregroundColorStatusBar) = when (playerState) {
+      PlayerSheetState.EXPANDED -> Pair(Color.Black.toArgb(), false)
+
+      else -> Pair(background.toArgb(), !isDarkTheme)
+    }
+    window.statusBarColor = statusBarColor
+    WindowCompat.getInsetsController(window, view).apply {
+      isAppearanceLightStatusBars = foregroundColorStatusBar
     }
   }
 

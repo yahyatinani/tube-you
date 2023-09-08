@@ -367,6 +367,7 @@ fun TyApp(
   val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
     bottomSheetState = rememberStandardBottomSheetState(
       initialValue = SheetValue.Hidden,
+//      confirmValueChange = { it != SheetValue.Hidden },
       skipHiddenState = false
     )
   )
@@ -389,10 +390,6 @@ fun TyApp(
 
   val playerSheetState = bottomSheetScaffoldState.bottomSheetState
   val playbackTargetValue = playerSheetState.targetValue
-
-  val onClickClosePlayer: () -> Unit = {
-    dispatch(v("stream_panel_fsm", common.close_player))
-  }
 
   var bottomSheetOffset by remember { mutableFloatStateOf(0f) }
 
@@ -460,13 +457,8 @@ fun TyApp(
     LaunchedEffect(playerSheetValue) {
       dispatch(v("stream_panel_fsm", playerSheetValue))
     }
-    LaunchedEffect(playbackTargetValue) {
+    LaunchedEffect(playbackTargetValue, playerSheetValue) {
       when {
-        playbackTargetValue == SheetValue.Hidden &&
-          playerSheetValue != SheetValue.Hidden -> {
-          onClickClosePlayer()
-        }
-
         playbackTargetValue == SheetValue.Expanded &&
           playerSheetValue == SheetValue.PartiallyExpanded -> {
           dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
@@ -502,7 +494,9 @@ fun TyApp(
           showThumbnail = showThumbnail,
           sheetPeekHeight = sheetPeekHeight,
           sheetOffset = { bottomSheetOffset },
-          onClickClosePlayer = onClickClosePlayer
+          onClickClosePlayer = {
+            dispatch(v("stream_panel_fsm", common.close_player))
+          }
         )
       },
       modifier = Modifier

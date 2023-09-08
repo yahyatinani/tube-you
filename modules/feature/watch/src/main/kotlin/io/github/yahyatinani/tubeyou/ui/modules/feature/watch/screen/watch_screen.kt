@@ -571,7 +571,7 @@ fun NowPlayingSheet(
           lazyListState.scrollToItem(0)
         }
 
-        Box {
+        Box(modifier = Modifier.background(colorScheme.background)) {
           LazyColumn(
             modifier = Modifier
               .fillMaxSize()
@@ -671,45 +671,43 @@ fun NowPlayingSheet(
                 return@item
               }
 
-              Surface {
-                Column {
-                  DescriptionSection(
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .clickable {
-                        dispatch(
-                          v(
-                            "stream_panel_fsm",
-                            "half_expand_desc_sheet"
-                          )
+              Column {
+                DescriptionSection(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                      dispatch(
+                        v(
+                          "stream_panel_fsm",
+                          "half_expand_desc_sheet"
                         )
-                      }
-                      .padding(horizontal = 12.dp),
-                    streamTitle = get<String>(streamData, Stream.title)!!,
-                    views = get<String>(streamData, Stream.views)!!,
-                    date = get(streamData, Stream.date)!!
-                  )
+                      )
+                    }
+                    .padding(horizontal = 12.dp),
+                  streamTitle = get<String>(streamData, Stream.title)!!,
+                  views = get<String>(streamData, Stream.views)!!,
+                  date = get(streamData, Stream.date)!!
+                )
 
-                  ChannelSection(
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .clickable { }
-                      .padding(horizontal = 12.dp),
-                    channelName = get(streamData, Stream.channel_name)!!,
-                    channelAvatar = get(streamData, Stream.avatar)!!,
-                    subscribersCount = get(streamData, Stream.sub_count)!!
-                  )
+                ChannelSection(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { }
+                    .padding(horizontal = 12.dp),
+                  channelName = get(streamData, Stream.channel_name)!!,
+                  channelAvatar = get(streamData, Stream.avatar)!!,
+                  subscribersCount = get(streamData, Stream.sub_count)!!
+                )
 
-                  Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                  LikeSection(
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .padding(horizontal = 12.dp),
-                    likesCount = get<String>(streamData, Stream.likes_count)!!,
-                    buttonsColor = containerColor
-                  )
-                }
+                LikeSection(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                  likesCount = get<String>(streamData, Stream.likes_count)!!,
+                  buttonsColor = containerColor
+                )
               }
             }
 

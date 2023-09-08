@@ -275,7 +275,7 @@ fun lerp(
 @OptIn(ExperimentalMaterial3Api::class)
 fun NowPlayingSheet(
   modifier: Modifier = Modifier,
-  isCollapsing: Boolean,
+  isCollapsed: Boolean,
   onCollapsedClick: () -> Unit,
   activeStream: UIState,
   activeStreamCache: VideoVm,
@@ -478,7 +478,7 @@ fun NowPlayingSheet(
             .heightIn(min = MINI_PLAYER_HEIGHT, max = fullVideoHeightDp)
             .height(h)
             .clickable(
-              enabled = isCollapsing,
+              enabled = isCollapsed,
               indication = null,
               interactionSource = remember { MutableInteractionSource() },
               onClick = onCollapsedClick
@@ -490,7 +490,7 @@ fun NowPlayingSheet(
               .width(w)
               .background(color = Color.Black),
             streamState = activeStream,
-            useController = !isCollapsing,
+            useController = !isCollapsed,
             showThumbnail = showThumbnail,
             thumbnail = activeStreamCache.thumbnail
           )
@@ -501,12 +501,12 @@ fun NowPlayingSheet(
               screenHeightPx - breakingPoint - delta
             }
             Row {
-              if (!isLoading) {
-                Column(
-                  Modifier
-                    .padding(8.dp)
-                    .weight(.7f)
-                ) {
+              Column(
+                Modifier
+                  .padding(8.dp)
+                  .weight(.7f)
+              ) {
+                if (!isLoading) {
                   Text(
                     text = get<String>(streamData, Stream.title)!!,
                     maxLines = 1,

@@ -493,7 +493,7 @@ fun TyApp(
           modifier = Modifier.padding(
             PaddingValues(bottom = bottomNavBarPadding)
           ),
-          isCollapsing = playbackTargetValue == SheetValue.PartiallyExpanded,
+          isCollapsed = playerSheetValue == SheetValue.PartiallyExpanded,
           onCollapsedClick = {
             dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
           },

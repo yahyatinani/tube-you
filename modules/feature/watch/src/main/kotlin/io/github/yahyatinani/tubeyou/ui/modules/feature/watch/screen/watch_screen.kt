@@ -428,7 +428,6 @@ fun NowPlayingSheet(
           with(density) { 56.dp.toPx() }
         }
         val ratio = get(streamData, Stream.aspect_ratio, defaultRatio)!!
-        println("dasjfkljsdfj$ratio")
         val fullVidHeight = with(density) {
           remember(screenWidthDp, ratio) { screenWidthDp.toPx() / ratio }
         }
@@ -497,7 +496,7 @@ fun NowPlayingSheet(
           )
           Box {
             val delta =
-              remember(density) { with(density) { 100.dp.toPx() } }
+              remember(density) { with(density) { (56 + 48).dp.toPx() } }
             val traverse = remember(screenHeightPx, breakingPoint) {
               screenHeightPx - breakingPoint - delta
             }

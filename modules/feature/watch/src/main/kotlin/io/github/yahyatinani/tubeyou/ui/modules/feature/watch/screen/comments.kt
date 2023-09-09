@@ -32,13 +32,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.outlined.ThumbDown
-import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -85,6 +80,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.AppendingLo
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.AuthorAvatar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ExpandableText
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.IconBorder
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue400
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -204,9 +200,9 @@ fun CommentsSection(
           }
           Spacer(modifier = Modifier.padding(start = 12.dp))
           Icon(
-            imageVector = Icons.Default.KeyboardArrowDown,
+            imageVector = TyIcons.ExpandArrow,
             contentDescription = "",
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(18.dp)
           )
         }
       }
@@ -317,8 +313,8 @@ fun Comment(
         val uploader: String = get(comment, "uploader")!!
         Row(verticalAlignment = Alignment.CenterVertically) {
           Icon(
-            modifier = Modifier.size(12.dp),
-            imageVector = Icons.Default.PushPin,
+            modifier = Modifier.size(16.dp),
+            imageVector = TyIcons.PushPin,
             contentDescription = "",
             tint = tint
           )
@@ -395,7 +391,7 @@ fun Comment(
         val size = 16.dp
         Icon(
           modifier = Modifier.size(size),
-          imageVector = Icons.Outlined.ThumbUp,
+          imageVector = TyIcons.ThumbUpOutlined400,
           contentDescription = ""
         )
 
@@ -409,7 +405,7 @@ fun Comment(
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
           modifier = Modifier.size(size),
-          imageVector = Icons.Outlined.ThumbDown,
+          imageVector = TyIcons.ThumbDownOutlined400,
           contentDescription = ""
         )
 
@@ -682,7 +678,8 @@ private fun Header(
           onClick = onClick
         ) {
           Icon(
-            imageVector = Icons.Default.ArrowBack,
+            imageVector = TyIcons.ArrowBack,
+            modifier = Modifier.width(28.dp),
             contentDescription = ""
           )
         }

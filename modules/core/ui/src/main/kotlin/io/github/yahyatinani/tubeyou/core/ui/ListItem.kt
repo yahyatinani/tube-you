@@ -10,11 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
@@ -35,6 +32,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.LARGE_AVATA
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ListItemLandscape
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.ListItemPortrait
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 import io.github.yahyatinani.tubeyou.core.viewmodels.ChannelVm
 import io.github.yahyatinani.tubeyou.core.viewmodels.PlaylistVm
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
@@ -146,7 +144,7 @@ fun BoxScope.PlaylistThumbnailContent(viewModel: PlaylistVm) {
   Row(
     modifier = Modifier
       .align(alignment = Alignment.BottomCenter)
-      .background(color = Color.Black.copy(alpha = .4f))
+      .background(color = Color.DarkGray.copy(alpha = .8f))
       .fillMaxWidth()
       .wrapContentHeight()
       .padding(vertical = 2.dp, horizontal = 4.dp),
@@ -155,9 +153,9 @@ fun BoxScope.PlaylistThumbnailContent(viewModel: PlaylistVm) {
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       Icon(
-        imageVector = Icons.Default.PlaylistPlay,
+        imageVector = TyIcons.PlayListPlay,
         contentDescription = "",
-        modifier = Modifier.size(18.dp),
+        modifier = Modifier.width(24.dp),
         tint = Color.White
       )
       Text(

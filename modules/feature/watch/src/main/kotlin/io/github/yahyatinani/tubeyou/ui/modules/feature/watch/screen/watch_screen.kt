@@ -25,12 +25,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.LibraryAdd
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.ThumbDown
-import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -70,6 +64,7 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.StreamLoade
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.SubscribeButton
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TextLoader
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyIconRoundedButton
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 import io.github.yahyatinani.recompose.RegFx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.watch
@@ -179,7 +174,7 @@ fun LikeSection(
         ) {
           Icon(
             modifier = Modifier.size(size),
-            imageVector = Icons.Outlined.ThumbUp,
+            imageVector = TyIcons.ThumbUpOutlined,
             contentDescription = ""
           )
         }
@@ -201,7 +196,7 @@ fun LikeSection(
         ) {
           Icon(
             modifier = Modifier.size(size),
-            imageVector = Icons.Outlined.ThumbDown,
+            imageVector = TyIcons.ThumbDownOutlined,
             contentDescription = ""
           )
         }
@@ -220,7 +215,7 @@ fun LikeSection(
     ) {
       Icon(
         modifier = Modifier.size(size),
-        imageVector = Icons.Outlined.Share,
+        imageVector = TyIcons.Share,
         contentDescription = ""
       )
     }
@@ -236,8 +231,8 @@ fun LikeSection(
       vertical = vertical
     ) {
       Icon(
-        modifier = Modifier.size(size),
-        imageVector = Icons.Outlined.Download,
+        modifier = Modifier.size(18.dp),
+        imageVector = TyIcons.Download,
         contentDescription = ""
       )
     }
@@ -254,7 +249,7 @@ fun LikeSection(
     ) {
       Icon(
         modifier = Modifier.size(size),
-        imageVector = Icons.Outlined.LibraryAdd,
+        imageVector = TyIcons.LibraryAdd,
         contentDescription = ""
       )
     }
@@ -502,7 +497,7 @@ fun NowPlayingSheet(
             }
             Row {
               Column(
-                Modifier
+                modifier = Modifier
                   .padding(8.dp)
                   .weight(.7f)
               ) {

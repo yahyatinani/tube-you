@@ -18,11 +18,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,6 +49,7 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.ControllerVisibilityListener
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
@@ -198,8 +194,9 @@ fun VideoPlayer(
         onClick = { dispatch(v(":toggle_orientation")) }
       ) {
         Image(
-          imageVector = Icons.Default.Fullscreen,
+          imageVector = TyIcons.Fullscreen,
           contentDescription = "",
+          modifier = Modifier.size(32.dp),
           colorFilter = ColorFilter.tint(
             MaterialTheme.colorScheme.onBackground
           )
@@ -248,17 +245,16 @@ fun MiniPlayerControls(
     modifier = modifier.height(110.dp - 48.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    val size = 32.dp
     val colorFilter = ColorFilter.tint(
       color = MaterialTheme.colorScheme.onBackground
     )
     IconButton(onClick = playPausePlayer) {
       Image(
         imageVector = when (isPlaying) {
-          true -> Icons.Default.Pause
-          else -> Icons.Default.PlayArrow
+          true -> TyIcons.Pause
+          else -> TyIcons.PlayArrow
         },
-        modifier = Modifier.size(size),
+        modifier = Modifier.size(34.dp),
         contentDescription = "play/pause",
         colorFilter = colorFilter
       )
@@ -266,8 +262,8 @@ fun MiniPlayerControls(
 
     IconButton(onClick = onClickClose) {
       Image(
-        imageVector = Icons.Default.Close,
-        modifier = Modifier.size(size),
+        imageVector = TyIcons.Close,
+        modifier = Modifier.size(34.dp),
         contentDescription = "close video",
         colorFilter = colorFilter
       )

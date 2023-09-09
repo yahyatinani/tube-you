@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -27,6 +27,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 
 @Composable
 fun ListItemPortrait(
@@ -114,9 +115,11 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
     verticalAlignment = Alignment.CenterVertically
   ) {
     Icon(
-      imageVector = Icons.Default.Search,
+      imageVector = TyIcons.Search,
       contentDescription = "Suggestion icon",
-      modifier = Modifier.weight(weight = .1f)
+      modifier = Modifier
+        .size(28.dp)
+        .weight(weight = .1f)
     )
     Spacer(modifier = Modifier.width(16.dp))
     Text(
@@ -126,9 +129,11 @@ fun SearchSuggestionItem(text: String, onClick: () -> Unit) {
     )
     Spacer(modifier = Modifier.width(16.dp))
     Icon(
-      imageVector = Icons.Default.ArrowOutward,
+      imageVector = TyIcons.ArrowOutward,
       contentDescription = "Suggestion icon",
-      modifier = Modifier.weight(weight = .1f)
+      modifier = Modifier
+        .size(28.dp)
+        .weight(weight = .1f)
     )
   }
 }

@@ -55,7 +55,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -229,39 +228,21 @@ private fun TyBottomBar(
       TyNavigationBarItem(
         selected = selected,
         icon = {
-          if (navItem.unselectedIcon is Int) {
-            Icon(
-              painter = painterResource(navItem.unselectedIcon),
-              contentDescription = null,
-              tint = tint,
-              modifier = Modifier
-            )
-          } else {
-            Icon(
-              imageVector = navItem.unselectedIcon as ImageVector,
-              contentDescription = null,
-              tint = tint,
-              modifier = Modifier
-            )
-          }
+          Icon(
+            imageVector = navItem.unselectedIcon as ImageVector,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(26.dp)
+          )
         },
         modifier = itemsModifier,
         selectedIcon = {
-          if (navItem.selectedIcon is Int) {
-            Icon(
-              painter = painterResource(navItem.selectedIcon),
-              contentDescription = null,
-              tint = tint,
-              modifier = Modifier.size(32.dp)
-            )
-          } else {
-            Icon(
-              imageVector = navItem.selectedIcon as ImageVector,
-              contentDescription = null,
-              tint = tint,
-              modifier = Modifier.size(32.dp)
-            )
-          }
+          Icon(
+            imageVector = navItem.selectedIcon as ImageVector,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(32.dp)
+          )
         },
         label = {
           val type = MaterialTheme.typography
@@ -367,7 +348,7 @@ fun TyApp(
   val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
     bottomSheetState = rememberStandardBottomSheetState(
       initialValue = SheetValue.Hidden,
-//      confirmValueChange = { it != SheetValue.Hidden },
+//      confirmValueChange = { true },
       skipHiddenState = false
     )
   )

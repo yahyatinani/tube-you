@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 import io.github.yahyatinani.tubeyou.modules.core.designsystem.R
 
 @Composable
@@ -39,7 +38,7 @@ fun MoreButton(modifier: Modifier = Modifier) {
     onClick = { /*TODO*/ }
   ) {
     Icon(
-      imageVector = Icons.Filled.MoreVert,
+      imageVector = TyIcons.MoreVert,
       contentDescription = "more"
     )
   }

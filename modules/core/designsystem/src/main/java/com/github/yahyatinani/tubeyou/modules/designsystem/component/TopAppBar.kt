@@ -2,10 +2,10 @@ package com.github.yahyatinani.tubeyou.modules.designsystem.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 
 @Immutable
 data class TopAppBarActionItem(
@@ -54,6 +55,7 @@ fun TyTopAppBar(
           Icon(
             imageVector = action.icon,
             contentDescription = action.iconContentDescription,
+            modifier = Modifier.size(30.dp),
             tint = colorScheme.onSurface
           )
         }
@@ -103,8 +105,8 @@ fun TySearchBar(
     leadingIcon = {
       IconButton(onClick = onLeadingClick) {
         Icon(
-          imageVector = Icons.Default.ArrowBack,
-          modifier = Modifier,
+          imageVector = TyIcons.ArrowBack,
+          modifier = Modifier.size(28.dp),
           contentDescription = "Navigate back"
         )
       }
@@ -112,8 +114,8 @@ fun TySearchBar(
     trailingIcon = {
       IconButton(onClick = onTrailingClick) {
         Icon(
-          imageVector = Icons.Default.Close,
-          modifier = Modifier,
+          imageVector = TyIcons.Close,
+          modifier = Modifier.size(24.dp),
           contentDescription = "Clear search query"
         )
       }
@@ -122,7 +124,7 @@ fun TySearchBar(
     onActiveChange = onActiveChange,
     onSearch = onSearchClick
   ) {
-    LazyColumn(modifier = Modifier.padding(top = 8.dp)) {
+    LazyColumn(modifier = Modifier.padding(8.dp)) {
       itemsIndexed(
         key = { i, _ -> i },
         items = suggestions

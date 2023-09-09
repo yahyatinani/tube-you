@@ -33,4 +33,5 @@ dependencies {
 
   implementation(deps.core.ktx)
   implementation(deps.coil.kt.compose)
+  implementation(deps.activity.compose)
 }

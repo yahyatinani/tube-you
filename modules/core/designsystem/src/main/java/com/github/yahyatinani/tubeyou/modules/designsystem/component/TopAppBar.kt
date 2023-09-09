@@ -1,13 +1,12 @@
 package com.github.yahyatinani.tubeyou.modules.designsystem.component
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -138,5 +137,9 @@ fun TySearchBar(
 
   LaunchedEffect(isSearchBarActive) {
     if (isSearchBarActive) focusRequester.requestFocus()
+  }
+
+  BackHandler {
+    onLeadingClick()
   }
 }

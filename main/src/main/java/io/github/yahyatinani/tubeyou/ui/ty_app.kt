@@ -426,10 +426,9 @@ fun TyApp(
   ) { paddingBb ->
     RegSearchSubs()
     val sb = watch<SearchBar?>(v(search.search_bar))
-    val topBarState = rememberTopAppBarState()
     val isCompact = isCompact(windowSizeClass)
     val topBarScrollBehavior = topAppBarScrollBehavior(
-      topAppBarState = topBarState,
+      topAppBarState = rememberTopAppBarState(),
       isSearchScreen = sb != null,
       isCompactDisplay = isCompact
     )

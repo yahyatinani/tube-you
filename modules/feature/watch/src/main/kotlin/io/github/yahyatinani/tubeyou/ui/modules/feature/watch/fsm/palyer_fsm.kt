@@ -16,9 +16,7 @@ import io.github.yahyatinani.recompose.fx.Effects
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamData
 import io.github.yahyatinani.y.core.get
-import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
-import io.github.yahyatinani.y.core.selectKeys
 import io.github.yahyatinani.y.core.v
 
 enum class StreamState { LOADING, BUFFERING, PLAYING, PAUSED }
@@ -70,10 +68,8 @@ fun isSameVideoAlreadyPlaying(
 fun toggle(appDb: AppDb, state: State?, event: Event): Effects =
   m(fx to v(v(common.toggle_player)))
 
-fun closePlayer(appDb: AppDb, state: State?, event: Event): Effects = m(
-  fsm.state_map to selectKeys(state, l(fsm._state)),
-  fx to v(v(common.close_player))
-)
+fun closePlayer(appDb: AppDb, state: State?, event: Event): Effects =
+  m(fx to v(v(common.close_player)))
 
 fun stopPlayer(appDb: AppDb, state: State?, event: Event): Effects = m(
   fx to v(v(common.close_player))
@@ -145,8 +141,8 @@ val playerMachine = m<Any?, Any?>(
         actions to v(::fetchStream, ::stopPlayer)
       )
     ),
-    common.close_player to m(target to null),
-    SheetValue.Hidden to m(target to null),
+    common.close_player to m(target to null, actions to ::closePlayer),
+    SheetValue.Hidden to m(target to null, actions to ::closePlayer),
     "generate_quality_list" to m(
       target to fsm.ALL,
       actions to ::generateQualityList

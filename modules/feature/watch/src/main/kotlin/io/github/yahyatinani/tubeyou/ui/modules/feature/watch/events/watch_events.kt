@@ -7,7 +7,7 @@ import io.github.yahyatinani.recompose.clearEvent
 import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
 import io.github.yahyatinani.recompose.fsm.trigger
-import io.github.yahyatinani.recompose.fx.BuiltInFx
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.ids.recompose
 import io.github.yahyatinani.recompose.pagingfx.paging
@@ -44,7 +44,7 @@ fun RegWatchEvents() {
       val appDb = appDbBy.dissoc("current_video_stream")
       val id = (videoId as String).replace("/watch?v=", "")
       m(
-        BuiltInFx.fx to v(
+        fx to v(
           v(
             ktor.http_fx,
             m(
@@ -69,7 +69,7 @@ fun RegWatchEvents() {
       val api = appDbBy(cofx)[ty_db.api_url]
       val commentsEvent = v("stream_panel_fsm", "set_stream_comments")
       m(
-        BuiltInFx.fx to v(
+        fx to v(
           v(
             paging.fx,
             m(
@@ -104,7 +104,7 @@ fun RegWatchEvents() {
       val commentsEndpoint =
         "$api/nextpage/comments/$videoId?nextpage=$repliesPage"
       m(
-        BuiltInFx.fx to v(
+        fx to v(
           v(
             paging.fx,
             m(
@@ -144,27 +144,27 @@ fun RegWatchEvents() {
 fun RegPlaybackEvents() {
   DisposableEffect(Unit) {
     regEventFx(common.close_player) { _, _ ->
-      m(BuiltInFx.fx to v(v(common.close_player)))
+      m(fx to v(v(common.hide_player_sheet), v(common.close_player)))
     }
 
     regEventFx(common.toggle_player) { _, _ ->
-      m(BuiltInFx.fx to v(v(common.toggle_player)))
+      m(fx to v(v(common.toggle_player)))
     }
 
     regEventFx("set_player_resolution") { _, (_, resolution) ->
-      m(BuiltInFx.fx to v(v("set_player_resolution", resolution)))
+      m(fx to v(v("set_player_resolution", resolution)))
     }
 
     regEventFx(":player_fullscreen_landscape") { _, _ ->
-      m(BuiltInFx.fx to v(v(":player_fullscreen_landscape")))
+      m(fx to v(v(":player_fullscreen_landscape")))
     }
 
     regEventFx(":player_portrait") { _, _ ->
-      m(BuiltInFx.fx to v(v(":player_portrait")))
+      m(fx to v(v(":player_portrait")))
     }
 
     regEventFx(":toggle_orientation") { _, _ ->
-      m(BuiltInFx.fx to v(v(":toggle_orientation")))
+      m(fx to v(v(":toggle_orientation")))
     }
 
     onDispose {

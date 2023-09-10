@@ -471,7 +471,7 @@ fun TyApp(
           sheetPeekHeight = sheetPeekHeight,
           sheetOffset = { bottomSheetOffset },
           onClickClosePlayer = {
-            dispatch(v("stream_panel_fsm", common.close_player))
+            dispatch(v(common.close_player))
           }
         )
       },
@@ -485,8 +485,11 @@ fun TyApp(
         },
       scaffoldState = bottomSheetScaffoldState,
       sheetPeekHeight = remember(playerState) {
-        if (playerState == null) 0.dp
-        else MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT
+        if (playerState == null) {
+          0.dp
+        } else {
+          MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT
+        }
       },
       sheetDragHandle = null,
       sheetShape = RoundedCornerShape(0.dp)

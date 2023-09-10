@@ -107,8 +107,6 @@ fun RegPlayerSheetEffects(playerSheetState: SheetState) {
   }
 
   RegFx(common.hide_player_sheet) {
-    playerSheetScope.launch { TyPlayer.setVolume() }
     playerSheetScope.launch { playerSheetState.hide() }
-    playerSheetScope.launch { TyPlayer.close() }
   }
 }

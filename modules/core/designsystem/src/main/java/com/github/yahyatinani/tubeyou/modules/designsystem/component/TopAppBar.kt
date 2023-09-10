@@ -21,6 +21,8 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -91,6 +93,16 @@ fun TySearchBar(
   onSuggestionClick: (suggestion: String) -> Unit
 ) {
   val focusRequester = remember { FocusRequester() }
+  val trailing: @Composable () -> Unit = {
+    IconButton(onClick = onTrailingClick) {
+      Icon(
+        imageVector = TyIcons.Close,
+        modifier = Modifier.size(24.dp),
+        contentDescription = "Clear search query"
+      )
+    }
+  }
+  val isQueryEmpty = searchQuery.isEmpty()
   SearchBar(
     query = searchQuery,
     modifier = Modifier
@@ -100,7 +112,12 @@ fun TySearchBar(
     tonalElevation = 0.dp,
     shape = RoundedCornerShape(30.dp),
     colors = colors,
-    placeholder = { Text(text = "Search YouTube") },
+    placeholder = {
+      Text(
+        text = "Search YouTube",
+        style = MaterialTheme.typography.bodyLarge
+      )
+    },
     leadingIcon = {
       IconButton(onClick = onLeadingClick) {
         Icon(
@@ -110,14 +127,8 @@ fun TySearchBar(
         )
       }
     },
-    trailingIcon = {
-      IconButton(onClick = onTrailingClick) {
-        Icon(
-          imageVector = TyIcons.Close,
-          modifier = Modifier.size(24.dp),
-          contentDescription = "Clear search query"
-        )
-      }
+    trailingIcon = remember(isQueryEmpty) {
+      if (isQueryEmpty) null else trailing
     },
     onQueryChange = onQueryChange,
     onActiveChange = onActiveChange,

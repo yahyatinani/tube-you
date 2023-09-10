@@ -1199,7 +1199,7 @@ object TyIcons {
     }
   }.build()
 
-  val MoreVert =       ImageVector.Builder(
+  val MoreVert = ImageVector.Builder(
     name = "more_vert",
     defaultWidth = 40.0.dp,
     defaultHeight = 40.0.dp,

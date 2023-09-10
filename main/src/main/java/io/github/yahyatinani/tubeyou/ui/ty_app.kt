@@ -112,6 +112,7 @@ import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
+import kotlinx.coroutines.launch
 import kotlin.enums.EnumEntries
 import kotlin.math.roundToInt
 
@@ -160,9 +161,9 @@ private fun TyTopBar(
   }
 
   if (sb != null) {
-    val topBarScope = rememberCoroutineScope()
+    val searchBarScope = rememberCoroutineScope()
     RegCofx(search.coroutine_scope) { cofx ->
-      cofx.assoc(search.coroutine_scope, topBarScope)
+      cofx.assoc(search.coroutine_scope, searchBarScope)
     }
     TySearchBar(
       searchQuery = sb[searchBar.query] as String,
@@ -297,6 +298,25 @@ private fun screenMask(
   }
 }
 
+@Composable
+fun StatusBarEffect(playerState: PlayerSheetState?) {
+  val view = LocalView.current
+  val background = MaterialTheme.colorScheme.background
+  val isDarkTheme = isSystemInDarkTheme()
+  LaunchedEffect(isDarkTheme, playerState) {
+    val window = (view.context as Activity).window
+    val (statusBarColor, foregroundColorStatusBar) = when (playerState) {
+      PlayerSheetState.EXPANDED -> Pair(Color.Black.toArgb(), false)
+
+      else -> Pair(background.toArgb(), !isDarkTheme)
+    }
+    window.statusBarColor = statusBarColor
+    WindowCompat.getInsetsController(window, view).apply {
+      isAppearanceLightStatusBars = foregroundColorStatusBar
+    }
+  }
+}
+
 @OptIn(
   ExperimentalLayoutApi::class,
   ExperimentalMaterial3Api::class,
@@ -315,32 +335,16 @@ fun TyApp(
   RegWatchSubs()
 
   val density = LocalDensity.current
-  val activeStreamCache = watch<VideoVm>(v("active_stream_vm"))
   val playbackFsm = watch<IPersistentMap<Any, Any>>(v("stream_panel_fsm"))
   val playbackMachine = get<Any>(playbackFsm, fsm._state)
-
   val playerState = get<PlayerSheetState>(playbackMachine, ":player_sheet")
 
-  val view = LocalView.current
-  val background = MaterialTheme.colorScheme.background
-  val isDarkTheme = isSystemInDarkTheme()
-  LaunchedEffect(isDarkTheme, playerState) {
-    val window = (view.context as Activity).window
-    val (statusBarColor, foregroundColorStatusBar) = when (playerState) {
-      PlayerSheetState.EXPANDED -> Pair(Color.Black.toArgb(), false)
-
-      else -> Pair(background.toArgb(), !isDarkTheme)
-    }
-    window.statusBarColor = statusBarColor
-    WindowCompat.getInsetsController(window, view).apply {
-      isAppearanceLightStatusBars = foregroundColorStatusBar
-    }
-  }
-
-  val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
+  StatusBarEffect(playerState)
 
   val screenDim = screenDimensions(density)
   val activeStream = watch<UIState>(v("active_stream", appContext, screenDim))
+  val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
+  val activeStreamCache = watch<VideoVm>(v("active_stream_vm"))
 
   val orientation = LocalConfiguration.current.orientation
 
@@ -348,7 +352,6 @@ fun TyApp(
   val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
     bottomSheetState = rememberStandardBottomSheetState(
       initialValue = SheetValue.Hidden,
-//      confirmValueChange = { true },
       skipHiddenState = false
     )
   )
@@ -370,13 +373,20 @@ fun TyApp(
   }
 
   val playerSheetState = bottomSheetScaffoldState.bottomSheetState
-  val playbackTargetValue = playerSheetState.targetValue
 
   var bottomSheetOffset by remember { mutableFloatStateOf(0f) }
 
-  LaunchedEffect(Unit) {
-    snapshotFlow { playerSheetState.requireOffset() }.collect {
-      bottomSheetOffset = it
+  LaunchedEffect(playerSheetState) {
+    playerScope.launch {
+      snapshotFlow { playerSheetState.requireOffset() }.collect {
+        bottomSheetOffset = it
+      }
+    }
+
+    playerScope.launch {
+      snapshotFlow { playerSheetState.currentValue }.collect {
+        dispatch(v("stream_panel_fsm", it))
+      }
     }
   }
 
@@ -433,18 +443,6 @@ fun TyApp(
       isCompactDisplay = isCompact
     )
 
-    val playerSheetValue = playerSheetState.currentValue
-    LaunchedEffect(playerSheetValue) {
-      dispatch(v("stream_panel_fsm", playerSheetValue))
-    }
-    LaunchedEffect(playbackTargetValue, playerSheetValue) {
-      when {
-        playbackTargetValue == SheetValue.Expanded &&
-          playerSheetValue == SheetValue.PartiallyExpanded -> {
-          dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
-        }
-      }
-    }
     RegPlayerSheetEffects(playerSheetState)
     val bottomNavBarPadding = when (playerState) {
       null -> paddingBb.calculateBottomPadding()
@@ -465,7 +463,7 @@ fun TyApp(
           modifier = Modifier.padding(
             PaddingValues(bottom = bottomNavBarPadding)
           ),
-          isCollapsed = playerSheetValue == SheetValue.PartiallyExpanded,
+          isCollapsed = playerState == PlayerSheetState.COLLAPSED,
           onCollapsedClick = {
             dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
           },
@@ -522,7 +520,7 @@ fun TyApp(
             dispatch(v(search.panel_fsm, search.back_press_search))
           }
 
-          BackHandler(enabled = playerSheetValue == SheetValue.Expanded) {
+          BackHandler(enabled = playerState == PlayerSheetState.EXPANDED) {
             dispatch(v("stream_panel_fsm", common.minimize_player))
           }
         }

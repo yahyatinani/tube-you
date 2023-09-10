@@ -1,5 +1,7 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.media3.common.Player
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import io.github.yahyatinani.recompose.events.Event
@@ -100,6 +102,7 @@ fun setStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
   return m(fsm.state_map to state.assoc("stream_comments", comments))
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 val playerMachine = m<Any?, Any?>(
   null to m(
     common.play_video to m(
@@ -143,6 +146,7 @@ val playerMachine = m<Any?, Any?>(
       )
     ),
     common.close_player to m(target to null),
+    SheetValue.Hidden to m(target to null),
     "generate_quality_list" to m(
       target to fsm.ALL,
       actions to ::generateQualityList

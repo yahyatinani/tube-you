@@ -29,10 +29,10 @@ fun RegWatchEvents() {
     regEventFx(id = "stream_panel_fsm") { cofx, e ->
       val appDb = appDbBy(cofx)
       trigger(
-        streamPanelMachine,
-        m(recompose.db to appDb),
-        v("stream_panel_fsm"),
-        e.subvec(1, e.count)
+        machine = streamPanelMachine,
+        fxs = m(recompose.db to appDb),
+        statePath = v("stream_panel_fsm"),
+        event = e.subvec(1, e.count)
       )
     }
 

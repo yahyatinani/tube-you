@@ -361,7 +361,9 @@ fun TyApp(
     cofx.assoc("player_scope", playerScope)
   }
 
-  if (orientation == ORIENTATION_LANDSCAPE && playerState != null) {
+  if (orientation == ORIENTATION_LANDSCAPE &&
+    playerState == PlayerSheetState.EXPANDED
+  ) {
     VideoPlayer(
       modifier = Modifier.padding(start = 24.dp),
       streamState = activeStream,
@@ -450,10 +452,6 @@ fun TyApp(
     }
     BottomSheetScaffold(
       sheetContent = {
-        if (orientation == ORIENTATION_LANDSCAPE) {
-          return@BottomSheetScaffold
-        }
-
         val sheetPeekHeight = with(density) {
           get<Float>(activeStream.data, ":desc_sheet_height")?.toDp()
             ?: 0.toDp()
@@ -486,7 +484,10 @@ fun TyApp(
           testTagsAsResourceId = true
         },
       scaffoldState = bottomSheetScaffoldState,
-      sheetPeekHeight = remember { MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT },
+      sheetPeekHeight = remember(playerState) {
+        if (playerState == null) 0.dp
+        else MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT
+      },
       sheetDragHandle = null,
       sheetShape = RoundedCornerShape(0.dp)
     ) {

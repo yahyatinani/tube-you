@@ -320,6 +320,13 @@ fun NowPlayingSheet(
   }
   val height = remember(sheetPeekHeight) { sheetPeekHeight - 18.dp }
   BottomSheetScaffold(
+    sheetContent = {
+      DescriptionSheet(
+        descSheetState = descSheetState,
+        sheetPeekHeight = height,
+        uiState = activeStream
+      )
+    },
     modifier = modifier,
     scaffoldState = descScaffoldState,
     sheetPeekHeight = descSheetPeekHeight,
@@ -333,13 +340,6 @@ fun NowPlayingSheet(
           }
         }
       }
-    },
-    sheetContent = {
-      DescriptionSheet(
-        descSheetState = descSheetState,
-        sheetPeekHeight = height,
-        uiState = activeStream
-      )
     }
   ) {
     val commentsSheetState = rememberStandardBottomSheetState(
@@ -386,23 +386,26 @@ fun NowPlayingSheet(
 
     val commentsPanelState = watch<UIState>(query = v("comments_panel"))
     BottomSheetScaffold(
+      sheetContent = {
+        CommentsSheet(
+          sheetState = commentsSheetState,
+          sheetPeekHeight = height,
+          uiState = commentsPanelState
+        )
+      },
       scaffoldState = commentsScaffoldState,
       sheetPeekHeight = commentsSheetPeekHeight,
       sheetDragHandle = {
-        DragHandle {
-          playbackScope.launch {
-            if (commentsSheetState.currentValue == PartiallyExpanded) {
-              commentsSheetState.expand()
-            } else if (commentsSheetState.currentValue == SheetValue.Expanded) {
-              commentsSheetState.partialExpand()
+        DragHandle(
+          onClick = {
+            playbackScope.launch {
+              if (commentsSheetState.currentValue == PartiallyExpanded) {
+                commentsSheetState.expand()
+              } else if (commentsSheetState.currentValue == SheetValue.Expanded) {
+                commentsSheetState.partialExpand()
+              }
             }
           }
-        }
-      },
-      sheetContent = {
-        CommentsSheet(
-          sheetPeekHeight = height,
-          uiState = commentsPanelState
         )
       }
     ) {

@@ -43,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.PlainTooltipState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -696,21 +697,15 @@ private fun Header(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CommentsSheet(
+  sheetState: SheetState,
   sheetPeekHeight: Dp,
   uiState: UIState
 ) {
+  val sheetValue = sheetState.currentValue
   val data = uiState.data
-  // {
-  // current_route comments_route,
-  // comments UIState(data={:common/state LOADING}),
-  // replies UIState(data={:common/state LOADING})
-  // }
-
   val commentsState = get<UIState>(data, "comments") ?: return
-
-  val sheetValue =
-    get<SheetValue>(commentsState.data, ":comments_sheet") ?: SheetValue.Hidden
   val repliesState = get<UIState>(data, "replies")
+
   Scaffold(
     modifier = Modifier
       .let {
@@ -728,10 +723,11 @@ internal fun CommentsSheet(
             onClick = { dispatch(v("nav_back_to_comments")) }
           )
         },
-        sheetState = sheetValue
-      ) {
-        dispatch(v("stream_panel_fsm", "close_comments_sheet"))
-      }
+        sheetState = sheetValue,
+        closeSheet = {
+          dispatch(v("stream_panel_fsm", "close_comments_sheet"))
+        }
+      )
     }
   ) { padding: PaddingValues ->
     LaunchedEffect(Unit) {

@@ -44,10 +44,11 @@ internal fun DescriptionSheet(
   sheetPeekHeight: Dp,
   uiState: UIState
 ) {
+  val sheetState = descSheetState.currentValue
   Scaffold(
     modifier = Modifier
       .then(
-        if (descSheetState.currentValue == SheetValue.PartiallyExpanded) {
+        if (sheetState == SheetValue.PartiallyExpanded) {
           Modifier.height(sheetPeekHeight)
         } else {
           Modifier
@@ -58,7 +59,7 @@ internal fun DescriptionSheet(
         modifier = Modifier
           .padding(start = 16.dp),
         headerTitle = "Description",
-        sheetState = descSheetState.currentValue,
+        sheetState = sheetState,
         closeSheet = { dispatch(v("stream_panel_fsm", "close_desc_sheet")) }
       )
     }

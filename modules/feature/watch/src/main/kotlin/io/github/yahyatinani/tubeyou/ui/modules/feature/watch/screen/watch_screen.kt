@@ -319,27 +319,29 @@ fun NowPlayingSheet(
     streamState == null || streamState == StreamState.LOADING
   }
   val height = remember(sheetPeekHeight) { sheetPeekHeight - 18.dp }
+  val toggleDescExpansion: () -> Unit = {
+    playbackScope.launch {
+      if (descSheetState.currentValue == PartiallyExpanded) {
+        descSheetState.expand()
+      } else if (descSheetState.currentValue == SheetValue.Expanded) {
+        descSheetState.partialExpand()
+      }
+    }
+  }
   BottomSheetScaffold(
     sheetContent = {
       DescriptionSheet(
         descSheetState = descSheetState,
         sheetPeekHeight = height,
-        uiState = activeStream
+        uiState = activeStream,
+        toggleExpansion = toggleDescExpansion
       )
     },
     modifier = modifier,
     scaffoldState = descScaffoldState,
     sheetPeekHeight = descSheetPeekHeight,
     sheetDragHandle = {
-      DragHandle {
-        playbackScope.launch {
-          if (descSheetValue == PartiallyExpanded) {
-            descSheetState.expand()
-          } else if (descSheetValue == SheetValue.Expanded) {
-            descSheetState.partialExpand()
-          }
-        }
-      }
+      DragHandle(onClick = toggleDescExpansion)
     }
   ) {
     val commentsSheetState = rememberStandardBottomSheetState(
@@ -384,29 +386,29 @@ fun NowPlayingSheet(
       }
     }
 
+    val toggleCommentsExpansion: () -> Unit = {
+      playbackScope.launch {
+        if (commentsSheetState.currentValue == PartiallyExpanded) {
+          commentsSheetState.expand()
+        } else if (commentsSheetState.currentValue == SheetValue.Expanded) {
+          commentsSheetState.partialExpand()
+        }
+      }
+    }
     val commentsPanelState = watch<UIState>(query = v("comments_panel"))
     BottomSheetScaffold(
       sheetContent = {
         CommentsSheet(
           sheetState = commentsSheetState,
           sheetPeekHeight = height,
-          uiState = commentsPanelState
+          uiState = commentsPanelState,
+          toggleExpansion = toggleCommentsExpansion
         )
       },
       scaffoldState = commentsScaffoldState,
       sheetPeekHeight = commentsSheetPeekHeight,
       sheetDragHandle = {
-        DragHandle(
-          onClick = {
-            playbackScope.launch {
-              if (commentsSheetState.currentValue == PartiallyExpanded) {
-                commentsSheetState.expand()
-              } else if (commentsSheetState.currentValue == SheetValue.Expanded) {
-                commentsSheetState.partialExpand()
-              }
-            }
-          }
-        )
+        DragHandle(onClick = toggleCommentsExpansion)
       }
     ) {
       val density = LocalDensity.current

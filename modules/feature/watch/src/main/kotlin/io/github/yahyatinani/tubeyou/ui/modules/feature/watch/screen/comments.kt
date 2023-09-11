@@ -699,7 +699,8 @@ private fun Header(
 internal fun CommentsSheet(
   sheetState: SheetState,
   sheetPeekHeight: Dp,
-  uiState: UIState
+  uiState: UIState,
+  toggleExpansion: () -> Unit
 ) {
   val sheetValue = sheetState.currentValue
   val data = uiState.data
@@ -726,7 +727,8 @@ internal fun CommentsSheet(
         sheetState = sheetValue,
         closeSheet = {
           dispatch(v("stream_panel_fsm", "close_comments_sheet"))
-        }
+        },
+        toggleExpansion = toggleExpansion
       )
     }
   ) { padding: PaddingValues ->

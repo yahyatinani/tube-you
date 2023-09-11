@@ -42,7 +42,8 @@ import io.github.yahyatinani.y.core.v
 internal fun DescriptionSheet(
   descSheetState: SheetState,
   sheetPeekHeight: Dp,
-  uiState: UIState
+  uiState: UIState,
+  toggleExpansion: () -> Unit
 ) {
   val sheetState = descSheetState.currentValue
   Scaffold(
@@ -60,7 +61,8 @@ internal fun DescriptionSheet(
           .padding(start = 16.dp),
         headerTitle = "Description",
         sheetState = sheetState,
-        closeSheet = { dispatch(v("stream_panel_fsm", "close_desc_sheet")) }
+        closeSheet = { dispatch(v("stream_panel_fsm", "close_desc_sheet")) },
+        toggleExpansion = toggleExpansion
       )
     }
   ) { padding ->

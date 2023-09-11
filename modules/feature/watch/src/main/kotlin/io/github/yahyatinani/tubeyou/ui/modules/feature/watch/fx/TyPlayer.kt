@@ -181,8 +181,11 @@ object TyPlayer {
     )
   }
 
-  fun setVolume() {
-    exoPlayer!!.volume = .4f
+  /**
+   * @param volume 0, to = 1.0
+   */
+  fun setVolume(volume: Float) {
+    exoPlayer!!.volume = volume
   }
 
   fun close() {

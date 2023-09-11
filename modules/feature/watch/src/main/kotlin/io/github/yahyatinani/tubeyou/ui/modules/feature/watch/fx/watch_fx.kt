@@ -28,6 +28,10 @@ import kotlinx.coroutines.launch
 fun RegWatchFx(context: Activity, orientation: Int) {
   val scope = rememberCoroutineScope()
 
+  RegFx("set_volume") { vol ->
+    scope.launch { TyPlayer.setVolume(vol as Float) }
+  }
+
   RegFx(common.close_player) {
     scope.launch { TyPlayer.close() }
   }

@@ -450,6 +450,16 @@ fun NowPlayingSheet(
           }
         }
 
+        dispatch(
+          v(
+            "set_volume",
+            sheetOffsetPx,
+            screenHeightPx,
+            bottomBar,
+            miniPlayerHeightPx
+          )
+        )
+
         val widthShrinkingY = remember(screenHeightPx) { screenHeightPx / 4 }
         val minVideoWidthPx = remember {
           with(density) { MINI_PLAYER_WIDTH.toPx() }

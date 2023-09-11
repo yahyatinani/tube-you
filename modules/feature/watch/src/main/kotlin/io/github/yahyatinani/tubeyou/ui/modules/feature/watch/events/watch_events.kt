@@ -17,6 +17,7 @@ import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamComments
 import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamData
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.streamPanelMachine
+import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.lerp
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
@@ -165,6 +166,29 @@ fun RegPlaybackEvents() {
 
     regEventFx(":toggle_orientation") { _, _ ->
       m(fx to v(v(":toggle_orientation")))
+    }
+
+    regEventFx("set_volume") { _,
+      (
+        _,
+        sheetOffsetPx,
+        screenHeightPx,
+        bottomBar,
+        miniPlayerHeightPx
+      ) ->
+      val sheetYOffset = (
+        (sheetOffsetPx as Float) -
+          ((screenHeightPx as Float) - (bottomBar as Float))
+        ).coerceAtLeast(
+        0f
+      )
+      val vol = lerp(
+        sheetYOffset = sheetYOffset,
+        traverse = miniPlayerHeightPx as Float,
+        start = 1f,
+        end = .1f
+      )
+      m(fx to v(v("set_volume", vol)))
     }
 
     onDispose {

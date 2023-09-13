@@ -161,7 +161,7 @@ private fun mapComment(
     else -> comment.verified
   }
   return m(
-    "author" to comment.author,
+    "author" to (comment.author ?: ""),
     "commentedTime" to " $MEDIUM_BULLET ${shortenTime(comment.commentedTime)}",
     "author_avatar" to comment.thumbnail,
     "comment_text" to HtmlCompat.fromHtml(

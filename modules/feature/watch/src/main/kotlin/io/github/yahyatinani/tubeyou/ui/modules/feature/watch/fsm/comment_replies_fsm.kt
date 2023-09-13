@@ -1,7 +1,5 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm
 
-import androidx.paging.LoadState
-import androidx.paging.LoadState.NotLoading
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.AppDb
@@ -99,6 +97,7 @@ fun anyReplies(
   val (index) = comment as Pair<Int, UIState>
   val repliesPage =
     get<StreamComments>(state, "stream_comments")!!.comments[index].repliesPage
+
   return repliesPage != null
 }
 
@@ -128,33 +127,28 @@ val commentRepliesListMachine = m(
     )
   ),
   ListState.READY to m(
-    v("append_replies", LoadState.Loading) to m(
-      target to ListState.APPENDING
-    ),
+    v("append_replies", "loading") to m(target to ListState.APPENDING),
     "refresh_comment_replies" to m(
       target to ListState.REFRESHING,
       actions to v(::fetchCommentReplies)
     )
   ),
   ListState.REFRESHING to m(
-    "append_replies_page" to m(
+    v("append_replies", "done_loading") to m(
       target to ListState.READY,
       actions to ::appendCommentReplies
     )
   ),
   ListState.LOADING to m(
-    "append_replies_page" to m(
+    v("append_replies", "done_loading") to m(
       target to ListState.READY,
       actions to ::appendCommentReplies
     )
   ),
   ListState.APPENDING to m(
-    "append_replies_page" to m(
+    v("append_replies", "done_loading") to m(
       target to ListState.READY,
       actions to ::appendCommentReplies
-    ),
-    v("append_replies", NotLoading(endOfPaginationReached = true)) to m(
-      target to ListState.READY
     )
   ),
   fsm.ALL to m(

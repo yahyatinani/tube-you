@@ -1,8 +1,6 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.search.fsm
 
 import androidx.paging.ItemSnapshotList
-import androidx.paging.LoadState
-import androidx.paging.LoadState.NotLoading
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States.APPENDING
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States.LOADED
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States.LOADING
@@ -13,6 +11,9 @@ import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.AppDb
 import io.github.yahyatinani.recompose.fsm.State
 import io.github.yahyatinani.recompose.fsm.fsm
+import io.github.yahyatinani.recompose.fsm.fsm.actions
+import io.github.yahyatinani.recompose.fsm.fsm.guard
+import io.github.yahyatinani.recompose.fsm.fsm.target
 import io.github.yahyatinani.recompose.fx.BuiltInFx
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
@@ -77,8 +78,8 @@ fun updateSearchBarToMatchTopOfStack(
 }
 
 fun setResults(appDb: AppDb, state: State?, event: Event): Effects {
-  val sb = event[1] as State
-  val results = event[2]
+  val results = event[1]
+  val sb = event[2] as State
   val searchStack = (state?.get(search.stack) as SearchStack? ?: v())
   val topSb: SearchBar? = searchStack.peek()
 
@@ -122,53 +123,54 @@ fun isSearching(appDb: AppDb, state: State?, event: Event): Boolean =
 val searchListMachine = m<Any?, Any?>(
   null to m(
     search.submit to v(
-      m(fsm.target to null, fsm.guard to ::isQueryBlankOrEmpty),
-      m(fsm.target to LOADING, fsm.actions to ::navigateToSearchPanel)
+      m(target to null, guard to ::isQueryBlankOrEmpty),
+      m(target to LOADING, actions to ::navigateToSearchPanel)
     )
   ),
   LOADING to m(
     search.back_press_search to v(
-      m(fsm.target to null, fsm.guard to ::isSearchStackEmpty),
-      m(fsm.target to LOADED)
+      m(target to null, guard to ::isSearchStackEmpty),
+      m(target to LOADED)
     ),
-    search.set_search_results to m(
-      fsm.target to LOADED,
-      fsm.actions to ::setResults
+    v("append_search_results", "done_loading") to m(
+      target to LOADED,
+      actions to ::setResults
+    ),
+    v("append_search_results", "error") to m(
+      target to LOADED,
+      actions to ::setResults
     ),
     search.clear_search_input to v(
-      m(fsm.target to null, fsm.guard to ::isSearchStackEmpty),
-      m(fsm.target to LOADED)
+      m(target to null, guard to ::isSearchStackEmpty),
+      m(target to LOADED)
     )
   ),
   LOADED to m(
     search.back_press_search to v(
       m(
-        fsm.target to null,
-        fsm.guard to v(::isLastSearchBar, ::isSearchBarInactive)
+        target to null,
+        guard to v(::isLastSearchBar, ::isSearchBarInactive)
       ),
-      m(fsm.target to LOADED)
+      m(target to LOADED)
     ),
     search.submit to v(
-      m(fsm.target to LOADED, fsm.guard to ::isQueryBlankOrEmpty),
-      m(fsm.target to LOADING)
+      m(target to LOADED, guard to ::isQueryBlankOrEmpty),
+      m(target to LOADING)
     ),
-    v("append_search_results", LoadState.Loading) to m(fsm.target to APPENDING)
+    v("append_search_results", "loading") to m(target to APPENDING)
   ),
   APPENDING to m(
-    search.set_search_results to m(
-      fsm.target to LOADED,
-      fsm.actions to ::setResults
-    ),
-    v("append_search_results", LoadState.Loading) to m(fsm.target to APPENDING),
-    v("append_search_results", NotLoading(endOfPaginationReached = true)) to m(
-      fsm.target to LOADED
+    v("append_search_results", "loading") to m(target to APPENDING),
+    v("append_search_results", "done_loading") to m(
+      target to LOADED,
+      actions to ::setResults
     ),
     search.back_press_search to v(
       m(
-        fsm.target to null,
-        fsm.guard to v(::isLastSearchBar, ::isSearchBarInactive)
+        target to null,
+        guard to v(::isLastSearchBar, ::isSearchBarInactive)
       ),
-      m(fsm.target to LOADED)
+      m(target to LOADED)
     )
   )
 )
@@ -265,53 +267,53 @@ fun submitSearchRequest(appDb: AppDb, state: State?, event: Event): Effects =
 val searchBarMachine = m<Any?, Any?>(
   null to m(
     search.show_search_bar to m(
-      fsm.target to ACTIVE,
-      fsm.actions to ::initSearchBar
+      target to ACTIVE,
+      actions to ::initSearchBar
     ),
-    search.set_suggestions to m(fsm.target to null)
+    search.set_suggestions to m(target to null)
   ),
   ACTIVE to m(
     search.update_search_input to m(
-      fsm.target to ACTIVE,
-      fsm.actions to v(::newSbInput, ::getSearchSuggestions)
+      target to ACTIVE,
+      actions to v(::newSbInput, ::getSearchSuggestions)
     ),
     search.back_press_search to v(
-      m(fsm.target to null, fsm.guard to ::isSearchStackEmpty),
+      m(target to null, guard to ::isSearchStackEmpty),
       m(
-        fsm.target to INACTIVE,
-        fsm.actions to ::updateSearchBarToMatchTopOfStack
+        target to INACTIVE,
+        actions to ::updateSearchBarToMatchTopOfStack
       )
     ),
     search.submit to v(
-      m(fsm.target to ACTIVE, fsm.guard to ::isQueryBlankOrEmpty),
+      m(target to ACTIVE, guard to ::isQueryBlankOrEmpty),
       m(
-        fsm.target to INACTIVE,
-        fsm.actions to v(::trimSearchQuery, ::submitSearchRequest)
+        target to INACTIVE,
+        actions to v(::trimSearchQuery, ::submitSearchRequest)
       )
     )
   ),
   INACTIVE to m(
     search.back_press_search to v(
       m(
-        fsm.target to null,
-        fsm.guard to ::isSearchStackEmpty,
-        fsm.actions to ::navigateBack
+        target to null,
+        guard to ::isSearchStackEmpty,
+        actions to ::navigateBack
       ),
       v(
         m(
-          fsm.target to INACTIVE,
-          fsm.guard to ::isSearching,
-          fsm.actions to ::updateSearchBarToMatchTopOfStack
+          target to INACTIVE,
+          guard to ::isSearching,
+          actions to ::updateSearchBarToMatchTopOfStack
         ),
         v(
           m(
-            fsm.target to null,
-            fsm.guard to ::isLastSearchBar,
-            fsm.actions to ::navigateBack
+            target to null,
+            guard to ::isLastSearchBar,
+            actions to ::navigateBack
           ),
           m(
-            fsm.target to INACTIVE,
-            fsm.actions to v(
+            target to INACTIVE,
+            actions to v(
               ::popSearchStack,
               ::updateSearchBarToMatchTopOfStack
             )
@@ -320,18 +322,18 @@ val searchBarMachine = m<Any?, Any?>(
       )
     ),
     search.activate_searchBar to m(
-      fsm.target to ACTIVE,
-      fsm.actions to ::backUpSearchBar
+      target to ACTIVE,
+      actions to ::backUpSearchBar
     )
   ),
   fsm.ALL to m(
     search.set_suggestions to m(
-      fsm.target to fsm.ALL,
-      fsm.actions to ::setSuggestions
+      target to fsm.ALL,
+      actions to ::setSuggestions
     ),
     search.clear_search_input to m(
-      fsm.target to ACTIVE,
-      fsm.actions to ::initSearchBar
+      target to ACTIVE,
+      actions to ::initSearchBar
     )
   )
 )

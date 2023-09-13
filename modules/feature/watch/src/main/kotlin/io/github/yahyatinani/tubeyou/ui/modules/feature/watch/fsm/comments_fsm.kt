@@ -1,7 +1,5 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm
 
-import androidx.paging.LoadState
-import androidx.paging.LoadState.NotLoading
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.State
@@ -18,6 +16,11 @@ import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamComments
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
+
+fun setStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
+  val (_, comments) = event
+  return m(fsm.state_map to state!!.assoc("stream_comments", comments))
+}
 
 fun appendStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
   if (!state!!.containsKey("stream_comments")) return m()
@@ -53,14 +56,41 @@ fun fetchStreamComments(
   )
 }
 
+fun appendCommentsError(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects {
+  val (_, error) = event
+  println("dsjfkjsdjfjsd $error")
+  return m()
+}
+
+fun loadingCommentsError(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects {
+  val (_, error) = event
+  println("sdsgsdagf $error")
+  return m()
+}
+
 enum class ListState { LOADING, REFRESHING, READY, APPENDING }
 
 val commentsListMachine = m(
   ListState.LOADING to m(
-    "set_stream_comments" to m(target to ListState.READY)
+    "set_stream_comments" to m(
+      target to ListState.READY,
+      actions to ::setStreamComments
+    ),
+    v("append_comments", "error") to m(
+      target to ListState.LOADING,
+      actions to ::loadingCommentsError
+    )
   ),
   ListState.READY to m(
-    v("append_comments", LoadState.Loading) to m(
+    v("append_comments", "loading") to m(
       target to ListState.APPENDING
     ),
     "refresh_comments" to m(
@@ -70,16 +100,22 @@ val commentsListMachine = m(
   ),
   ListState.REFRESHING to m(
     "set_stream_comments" to m(
-      target to ListState.READY
+      target to ListState.READY,
+      actions to ::setStreamComments
+    ),
+    v("append_comments", "error") to m(
+      target to ListState.REFRESHING,
+      actions to ::loadingCommentsError
     )
   ),
-  ListState.APPENDING to m(
-    "append_comments_page" to m(
+  ListState.APPENDING to m<Any, Any>(
+    v("append_comments", "done_loading") to m(
       target to ListState.READY,
       actions to ::appendStreamComments
     ),
-    v("append_comments", NotLoading(endOfPaginationReached = true)) to m(
-      target to ListState.READY
+    v("append_comments", "error") to m(
+      target to ListState.READY,
+      actions to ::appendCommentsError
     )
   ),
   fsm.ALL to m(

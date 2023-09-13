@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.testTag
 import com.github.yahyatinani.tubeyou.modules.core.keywords.States
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
+import io.github.yahyatinani.recompose.httpfx.HttpError
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.core.ui.PullRefreshPanel
 import io.github.yahyatinani.tubeyou.core.ui.VideosGrid
@@ -35,8 +36,8 @@ internal fun HomeScreen(
     onRefresh = onRefresh
   ) {
     if (state == States.FAILED) {
-      val error: Int? = get<Int>(data, common.error)
-      Text(text = "Request failed! Error: $error")
+      val error: HttpError? = get<HttpError>(data, common.error)
+      Text(text = "Request failed! status code: ${error?.status}")
     }
 
     val homeVideos: UIState = get<UIState>(data, home.content)!!

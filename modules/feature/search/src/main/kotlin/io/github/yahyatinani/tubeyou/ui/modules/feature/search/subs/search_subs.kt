@@ -13,6 +13,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.search.search_list
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import io.github.yahyatinani.recompose.fsm.State
 import io.github.yahyatinani.recompose.fsm.fsm
+import io.github.yahyatinani.recompose.httpfx.HttpError
 import io.github.yahyatinani.recompose.regSub
 import io.github.yahyatinani.tubeyou.common.AppDb
 import io.github.yahyatinani.tubeyou.common.activeTopLevelRoute
@@ -88,7 +89,7 @@ fun RegSearchSubs() {
           val error = sb!![searchBar.search_error]
           when {
             error != null -> {
-              ret.assoc(common.error, error as Int)
+              ret.assoc(common.error, error as HttpError)
                 .assoc(common.state, States.FAILED)
             }
 

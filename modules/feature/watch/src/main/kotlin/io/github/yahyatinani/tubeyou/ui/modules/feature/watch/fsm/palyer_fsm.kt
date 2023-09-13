@@ -91,13 +91,6 @@ fun setQualityList(appDb: AppDb, state: State?, event: Event): Effects = m(
     .assoc("current_quality", event[2])
 )
 
-fun setStreamComments(appDb: AppDb, state: State?, event: Event): Effects {
-  if (state!!.containsKey("stream_comments")) return m()
-
-  val (_, comments) = event
-  return m(fsm.state_map to state.assoc("stream_comments", comments))
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 val playerMachine = m<Any?, Any?>(
   null to m(
@@ -150,10 +143,6 @@ val playerMachine = m<Any?, Any?>(
     "set_quality_list" to m(
       target to fsm.ALL,
       actions to ::setQualityList
-    ),
-    "set_stream_comments" to m(
-      target to fsm.ALL,
-      actions to ::setStreamComments
     )
   )
 )

@@ -24,6 +24,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.recompose.httpfx.HttpError
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.core.ui.ChannelItem
 import io.github.yahyatinani.tubeyou.core.ui.Panel
@@ -108,8 +109,8 @@ internal fun SearchScreen(
 
   Panel(state = state) { appendLoader ->
     if (state == States.FAILED) {
-      val error: Int? = get<Int>(data, common.error)
-      Text(text = "Request failed! Error: $error")
+      val error = get<HttpError>(data, common.error)
+      Text(text = "Request failed! Status code: ${error?.status}")
 
       return@Panel
     }

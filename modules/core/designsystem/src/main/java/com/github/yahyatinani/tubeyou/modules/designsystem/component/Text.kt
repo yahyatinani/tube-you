@@ -211,12 +211,14 @@ fun ExpandableText(
     ) {
       var lastCharIndex =
         textLayoutResult.getLineEnd(lastLineIndex, visibleEnd = true) + 1
+
       var charRect: Rect
       do {
         lastCharIndex -= 1
         charRect = textLayoutResult.getCursorRect(lastCharIndex)
       } while (
-        charRect.left > textLayoutResult.size.width - seeMoreSize.width
+        charRect.left > textLayoutResult.size.width - seeMoreSize.width &&
+        lastCharIndex > 0
       )
       seeMoreOffsetState.value =
         Offset(charRect.left, charRect.bottom - seeMoreSize.height)

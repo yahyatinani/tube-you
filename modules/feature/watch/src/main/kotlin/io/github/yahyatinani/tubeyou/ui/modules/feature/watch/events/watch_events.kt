@@ -68,7 +68,6 @@ fun RegWatchEvents() {
     ) { cofx: Coeffects, (_, videoId) ->
       val id = (videoId as String).replace("/watch?v=", "")
       val api = appDbBy(cofx)[ty_db.api_url]
-      val commentsEvent = v("stream_panel_fsm", "set_stream_comments")
       m(
         fx to v(
           v(
@@ -77,19 +76,13 @@ fun RegWatchEvents() {
               ktor.method to HttpMethod.Get,
               ktor.url to "$api/comments/$id",
               ktor.timeout to 8000,
-              "pageName" to "nextpage",
-              "nextUrl" to "$api/nextpage/comments/$id",
-              "eventId" to "load_stream_comments",
-              paging.append_id to "append_comments",
               ktor.coroutine_scope to cofx["player_scope"],
               ktor.response_type_info to typeInfo<StreamComments>(),
-              ktor.on_success to commentsEvent,
-              paging.on_page_success to v(
-                "stream_panel_fsm",
-                "append_comments_page"
-              ),
-              "on_appending" to v("stream_panel_fsm"),
-              ktor.on_failure to v(""),
+              ktor.on_success to v("stream_panel_fsm", "set_stream_comments"),
+              paging.pageName to "nextpage",
+              paging.nextUrl to "$api/nextpage/comments/$id",
+              paging.trigger_append_id to "append_comments",
+              paging.on_append to v("stream_panel_fsm"),
               paging.page_size to 5
             )
           )
@@ -112,19 +105,12 @@ fun RegWatchEvents() {
               ktor.method to HttpMethod.Get,
               ktor.url to commentsEndpoint,
               ktor.timeout to 8000,
-              "pageName" to "nextpage",
-              "nextUrl" to "$api/nextpage/comments/$videoId",
-              "eventId" to "load_comment_replies",
               ktor.coroutine_scope to cofx["player_scope"],
               ktor.response_type_info to typeInfo<StreamComments>(),
-              ktor.on_success to v("ignore"),
-              ktor.on_failure to v(""),
-              paging.on_page_success to v(
-                "stream_panel_fsm",
-                "append_replies_page"
-              ),
-              paging.append_id to "append_replies",
-              "on_appending" to v("stream_panel_fsm"),
+              paging.pageName to "nextpage",
+              paging.nextUrl to "$api/nextpage/comments/$videoId",
+              paging.trigger_append_id to "append_replies",
+              paging.on_append to v("stream_panel_fsm"),
               paging.page_size to 5
             )
           )

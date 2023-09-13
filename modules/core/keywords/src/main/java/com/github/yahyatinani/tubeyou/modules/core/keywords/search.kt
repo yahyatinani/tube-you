@@ -9,7 +9,6 @@ enum class search {
   submit,
   activate_searchBar,
   set_suggestions,
-  set_search_results,
   back_press_search,
 
   route,

@@ -5,7 +5,6 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.get_search_results
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.get_search_suggestions
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.search_bar
-import com.github.yahyatinani.tubeyou.modules.core.keywords.search.set_search_results
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search.set_suggestions
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
 import io.github.yahyatinani.recompose.cofx.injectCofx
@@ -61,9 +60,8 @@ fun RegSearchEvents() {
     id = get_search_results,
     interceptors = v(injectCofx(search.coroutine_scope))
   ) { cofx, (_, searchQuery) ->
-    val sb = get<SearchBar>(searchQuery, search_bar)
-    val sq = sb?.get(searchBar.query) as String?
-    val handleResultsEvent = v(search.panel_fsm, set_search_results, sb)
+    val sb = get<SearchBar>(searchQuery, search_bar)!!
+    val sq = sb[searchBar.query] as String?
     val api = appDbBy(cofx)[api_url]
     m<Any, Any>(
       fx to v(
@@ -73,16 +71,13 @@ fun RegSearchEvents() {
             ktor.method to HttpMethod.Get,
             ktor.url to "$api/search?q=$sq&filter=all",
             ktor.timeout to 8000,
-            "pageName" to "nextpage",
-            "nextUrl" to "$api/nextpage/search?q=$sq&filter=all",
-            "eventId" to get_search_results,
-            paging.append_id to "append_search_results",
             ktor.coroutine_scope to cofx[search.coroutine_scope],
             ktor.response_type_info to typeInfo<SearchResponse>(),
-            ktor.on_success to v("todo: ignore this"),
-            paging.on_page_success to handleResultsEvent,
-            "on_appending" to v(search.panel_fsm),
-            ktor.on_failure to handleResultsEvent
+            paging.trigger_append_id to "append_search_results",
+            paging.pageName to "nextpage",
+            paging.nextUrl to "$api/nextpage/search?q=$sq&filter=all",
+            paging.on_append to v(search.panel_fsm),
+            paging.on_append_args to v(sb)
           )
         )
       )

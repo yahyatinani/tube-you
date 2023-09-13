@@ -45,6 +45,9 @@ internal fun Project.configureAndroidCompose(
   commonExtension: CommonExtension<*, *, *, *, *>
 ) {
   commonExtension.apply {
+    lint {
+      disable += setOf("UnsafeOptInUsageError", "UnsafeOptInUsageWarning")
+    }
     buildFeatures {
       compose = true
     }

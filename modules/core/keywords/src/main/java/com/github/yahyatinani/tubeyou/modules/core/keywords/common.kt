@@ -2,10 +2,9 @@ package com.github.yahyatinani.tubeyou.modules.core.keywords
 
 @Suppress("ClassName", "EnumEntryName")
 enum class common {
-  initialize,
+  init_app_db,
   navigate_to,
   is_backstack_available,
-  api_url,
   navigation_items,
   active_navigation_item,
   on_click_nav_item,
@@ -19,13 +18,31 @@ enum class common {
   destination,
   navOptions,
   is_online,
-  dispatch_debounce,
 
-//  is_search_bar_active,
-  bottom_bar_back_press,
+  //  is_search_bar_active,
+  back_press_top_nav,
   pop_back_stack,
-  is_backstack_empty,
-  start_destination;
+  is_top_backstack_empty,
+  start_destination,
+  play_video,
+  expand_player_sheet,
+  coroutine_scope,
+  toggle_player,
+  active_stream,
+  close_player,
+  hide_player_sheet,
+  state,
+  minimize_player,
+  collapse_player_sheet,
+  comment_replies,
+  is_route_active,
+  prev_top_nav_route,
+  top_app_bar_actions,
+  auto_scroll_up,
+  error;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
+
+  init {
+  }
 }

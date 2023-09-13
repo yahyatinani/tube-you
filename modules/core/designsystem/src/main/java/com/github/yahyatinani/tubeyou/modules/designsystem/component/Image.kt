@@ -1,7 +1,5 @@
 package com.github.yahyatinani.tubeyou.modules.designsystem.component
 
-import android.content.res.Configuration
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -14,58 +12,19 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.github.yahyatinani.tubeyou.modules.designsystem.R
-
-const val THUMBNAIL_HEIGHT = 720f
-const val THUMBNAIL_WIDTH = 1280f
-
-@Composable
-fun screenWidthPx(
-  density: Density = LocalDensity.current,
-  configuration: Configuration = LocalConfiguration.current
-): Float = remember(configuration, density) {
-  with(density) { configuration.screenWidthDp.dp.toPx() }
-}
-
-@Composable
-fun rememberThumbnailHeightPortrait(
-  screenWidthPx: Float = screenWidthPx(),
-  density: Density = LocalDensity.current
-): Dp = remember(key1 = screenWidthPx, key2 = density) {
-  with(density) { (screenWidthPx * THUMBNAIL_HEIGHT / THUMBNAIL_WIDTH).toDp() }
-}
-
-@Composable
-fun rememberThumbnailHeightLandscape(
-  screenWidthPx: Float = screenWidthPx(),
-  density: Density = LocalDensity.current
-): Dp = remember(key1 = screenWidthPx, key2 = density) {
-  with(density) {
-    ((screenWidthPx / 4.6f) * THUMBNAIL_HEIGHT / THUMBNAIL_WIDTH).toDp()
-  }
-}
-
-@Composable
-fun thumbnailHeight(orientation: Int) = when (orientation) {
-  ORIENTATION_PORTRAIT -> rememberThumbnailHeightPortrait()
-  else -> rememberThumbnailHeightLandscape()
-}
+import io.github.yahyatinani.tubeyou.modules.core.designsystem.R
 
 @Composable
 fun Thumbnail(
@@ -91,7 +50,7 @@ val MINI_AVATAR = 40.dp
 val MINI_AVATAR_LIVE = 44.dp
 
 @Composable
-fun ChannelAvatar(
+fun AuthorAvatar(
   url: String?,
   modifier: Modifier = Modifier,
   size: Dp = MINI_AVATAR
@@ -150,7 +109,7 @@ fun ChannelAvatarLive(
 @Preview(showBackground = true)
 @Composable
 fun ChannelAvatarDarkPreview() {
-  ChannelAvatar(url = "")
+  AuthorAvatar(url = "")
 }
 
 @Preview(showBackground = true)

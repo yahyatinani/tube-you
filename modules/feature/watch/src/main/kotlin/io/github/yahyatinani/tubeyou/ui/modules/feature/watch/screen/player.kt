@@ -52,6 +52,7 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.Thumbnail
 import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Grey300
+import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.events.RegPlaybackEvents
@@ -209,7 +210,6 @@ fun VideoPlayer(
   if (showQualitiesSheet) {
     val sheetState =
       rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val containerColor = Color(0xFF212121)
     ModalBottomSheet(
       modifier = Modifier
 //          .offset(y = (-24).dp)
@@ -218,7 +218,7 @@ fun VideoPlayer(
         .wrapContentHeight(),
       dragHandle = null,
       shape = RoundedCornerShape(10.dp),
-      containerColor = containerColor,
+      containerColor = TyTheme.colors.popupContainer,
       onDismissRequest = { showQualitiesSheet = false },
       sheetState = sheetState
     ) {
@@ -226,7 +226,7 @@ fun VideoPlayer(
         get<List<Pair<String, Int>>>(streamData, Stream.quality_list)!!
       QualityList(
         resolutions = resolutions,
-        containerColor = containerColor
+        containerColor = TyTheme.colors.popupContainer
       )
     }
   }

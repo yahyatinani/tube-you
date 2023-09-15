@@ -10,7 +10,9 @@ import io.github.yahyatinani.recompose.cofx.Coeffects
 import io.github.yahyatinani.recompose.cofx.injectCofx
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.ids.recompose.db
+import io.github.yahyatinani.recompose.regEventDb
 import io.github.yahyatinani.recompose.regEventFx
+import io.github.yahyatinani.tubeyou.common.AppDb
 import io.github.yahyatinani.tubeyou.common.appDbBy
 import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.HOME_GRAPH_ROUTE
@@ -68,5 +70,13 @@ fun regTyEvents() {
         .assoc(ty_db.top_level_back_handler_enabled, !disabled),
       fx to v(v(back_press_top_nav, prevDestinationRoute))
     )
+  }
+
+  regEventDb(common.show_top_settings_popup) { db: AppDb, _ ->
+    db.assoc(ty_db.top_settings_popup, true)
+  }
+
+  regEventDb(common.hide_top_settings_popup) { db: AppDb, _ ->
+    db.assoc(ty_db.top_settings_popup, false)
   }
 }

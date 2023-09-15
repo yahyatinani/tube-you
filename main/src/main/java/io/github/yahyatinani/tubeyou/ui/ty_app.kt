@@ -3,8 +3,8 @@ package io.github.yahyatinani.tubeyou.ui
 import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.content.res.Resources
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -22,8 +22,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
@@ -52,9 +56,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -71,6 +75,8 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigatio
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigationBarItem
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyTopAppBar
+import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
+import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
 import io.github.yahyatinani.recompose.RegCofx
 import io.github.yahyatinani.recompose.RegFx
@@ -88,6 +94,8 @@ import io.github.yahyatinani.recompose.pagingfx.paging
 import io.github.yahyatinani.recompose.pagingfx.regPagingFx
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.watch
+import io.github.yahyatinani.tubeyou.R
+import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.common.ty_db.top_level_back_handler_enabled
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
@@ -202,13 +210,98 @@ private fun TyTopBar(
       }
     )
   } else {
-    val resources: Resources = LocalContext.current.resources
-    TyTopAppBar(
-      title = "TubeYou",
-      actions = watch(query = v(common.top_app_bar_actions, resources)),
-      scrollBehavior = topAppBarScrollBehavior
-    )
+    TyTopBar(topAppBarScrollBehavior)
   }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TyTopBar(
+  topAppBarScrollBehavior: TopAppBarScrollBehavior
+) {
+  TyTopAppBar(
+    title = "TubeYou",
+    actions = {
+      val colorScheme = MaterialTheme.colorScheme
+      val contentDescription = stringResource(
+        R.string.top_app_bar_search_action_icon_description
+      )
+
+      IconButton(
+        modifier = Modifier.testTag(contentDescription),
+        onClick = { dispatch(v(search.panel_fsm, search.show_search_bar)) }
+      ) {
+        Icon(
+          imageVector = TyIcons.Search,
+          contentDescription = contentDescription,
+          modifier = Modifier.size(30.dp),
+          tint = colorScheme.onSurface
+        )
+      }
+
+      Box {
+        val iconDesc = stringResource(
+          R.string.top_app_bar_account_action_icon_description
+        )
+        IconButton(
+          modifier = Modifier.testTag(iconDesc),
+          onClick = { dispatch(v(common.show_top_settings_popup)) }
+        ) {
+          Icon(
+            imageVector = TyIcons.NoAccounts,
+            contentDescription = iconDesc,
+            modifier = Modifier.size(30.dp),
+            tint = colorScheme.onSurface
+          )
+        }
+
+        DropdownMenu(
+          expanded = watch(query = v(ty_db.top_settings_popup)),
+          onDismissRequest = {
+            dispatch(v(common.hide_top_settings_popup))
+          },
+          modifier = Modifier.background(TyTheme.colors.popupContainer)
+        ) {
+          val dropDownItemIconSize = 28.dp
+          DropdownMenuItem(
+            text = { Text("Login/Register") },
+            onClick = { /*TODO:*/ },
+            leadingIcon = {
+              Icon(
+                TyIcons.Login,
+                contentDescription = null,
+                modifier = Modifier.size(dropDownItemIconSize)
+              )
+            }
+          )
+          DropdownMenuItem(
+            text = { Text("Settings") },
+            onClick = { /*TODO:*/ },
+            leadingIcon = {
+              Icon(
+                TyIcons.Settings,
+                contentDescription = null,
+                modifier = Modifier.size(dropDownItemIconSize)
+              )
+            }
+          )
+          Divider()
+          DropdownMenuItem(
+            text = { Text("About") },
+            onClick = { /*TODO:*/ },
+            leadingIcon = {
+              Icon(
+                TyIcons.Info,
+                contentDescription = null,
+                modifier = Modifier.size(dropDownItemIconSize)
+              )
+            }
+          )
+        }
+      }
+    },
+    scrollBehavior = topAppBarScrollBehavior
+  )
 }
 
 @Composable
@@ -217,7 +310,7 @@ private fun TyBottomBar(
   modifier: Modifier = Modifier,
   onClickNavItem: (navItemRoute: String) -> Unit
 ) {
-  val borderColor: Color = MaterialTheme.colorScheme.onSurface.copy(.12f)
+  val borderColor: Color = MaterialTheme.colorScheme.outlineVariant
   val tint = MaterialTheme.colorScheme.onBackground
   TyNavigationBar(
     modifier = modifier,

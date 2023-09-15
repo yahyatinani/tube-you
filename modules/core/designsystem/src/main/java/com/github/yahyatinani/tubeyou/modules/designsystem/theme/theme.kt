@@ -17,8 +17,10 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +38,8 @@ val DarkColorScheme = darkColorScheme(
   background = Gray900,
   surfaceVariant = Color.Cyan,
   onBackground = Color.White,
-  surfaceTint = Gray900
+  surfaceTint = Gray900,
+  outlineVariant = Color.White.copy(.12f)
 )
 
 val LightColorScheme = lightColorScheme(
@@ -47,8 +50,20 @@ val LightColorScheme = lightColorScheme(
   surface = Color.White,
   background = Color.White,
   onBackground = Color.Black,
-  surfaceTint = Color.White
+  surfaceTint = Color.White,
+  outlineVariant = Color.Black.copy(.12f)
 )
+
+@Immutable
+data class ExtendedColors(
+  val popupContainer: Color
+)
+
+val LocalExtendedColors = staticCompositionLocalOf {
+  ExtendedColors(
+    popupContainer = Color.Unspecified
+  )
+}
 
 @Composable
 fun isCompact(windowSizeClass: WindowSizeClass) = remember(windowSizeClass) {
@@ -113,14 +128,25 @@ fun TyTheme(
     WindowSideEffects(view, colorScheme.background, isDarkTheme)
   }
 
-  MaterialTheme(
-    colorScheme = colorScheme,
-    typography = if (isCompact) TypographyCompact else TypographyExpanded,
-    shapes = Shapes
+  val extendedColors = ExtendedColors(
+    popupContainer = if (isDarkTheme) Color(0xFF212121) else Color.White
+  )
+
+  CompositionLocalProvider(
+    LocalRippleTheme provides TyThemeRippleTheme,
+    LocalExtendedColors provides extendedColors
   ) {
-    CompositionLocalProvider(
-      LocalRippleTheme provides TyThemeRippleTheme,
+    MaterialTheme(
+      colorScheme = colorScheme,
+      typography = if (isCompact) TypographyCompact else TypographyExpanded,
+      shapes = Shapes,
       content = content
     )
   }
+}
+
+object TyTheme {
+  val colors: ExtendedColors
+    @Composable
+    get() = LocalExtendedColors.current
 }

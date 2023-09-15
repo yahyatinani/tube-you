@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">TubeYou</string>
-    <string name="nav_item_label_home">Home</string>
-    <string name="nav_item_label_trend">Trending</string>
-    <string name="nav_item_label_subs">Subscriptions</string>
-    <string name="nav_item_label_you">You</string>
-    <string name="top_app_bar_search_action_icon_description">Top-bar search icon</string>
-    <string name="top_app_bar_settings_action_icon_description">Settings</string>
+  <string name="app_name">TubeYou</string>
+  <string name="nav_item_label_home">Home</string>
+  <string name="nav_item_label_trend">Trending</string>
+  <string name="nav_item_label_subs">Subscriptions</string>
+  <string name="nav_item_label_library">Library</string>
+  <string name="top_app_bar_search_action_icon_description">Top-bar search icon</string>
+  <string name="top_app_bar_account_action_icon_description">Account</string>
 </resources>

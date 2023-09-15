@@ -25,7 +25,7 @@ enum class TopLevelNavItems(
     route = SUBSCRIPTIONS_GRAPH_ROUTE
   ),
   You(
-    label = R.string.nav_item_label_you,
+    label = R.string.nav_item_label_library,
     selectedIcon = TyIcons.LibraryFilled,
     unselectedIcon = TyIcons.LibraryOutlined,
     route = YOU_GRAPH_ROUTE

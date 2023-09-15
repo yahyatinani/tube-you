@@ -16,5 +16,6 @@ fun activeTopLevelRoute(appDb: AppDb): Any =
 enum class ty_db {
   active_top_level_route,
   top_level_back_handler_enabled,
-  api_url
+  api_url,
+  top_settings_popup
 }

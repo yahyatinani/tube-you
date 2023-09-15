@@ -1,6 +1,7 @@
 package com.github.yahyatinani.tubeyou.modules.designsystem.component
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,51 +20,28 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 
-@Immutable
-data class TopAppBarActionItem(
-  val icon: ImageVector,
-  val iconContentDescription: String? = null,
-  val onActionClick: () -> Unit = {}
-)
-
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TyTopAppBar(
   title: String,
-  actions: List<TopAppBarActionItem>,
+  actions: @Composable (RowScope.() -> Unit),
   scrollBehavior: TopAppBarScrollBehavior
 ) {
   val colorScheme = MaterialTheme.colorScheme
   TopAppBar(
     title = { Text(text = title, fontWeight = FontWeight.Bold) },
     modifier = Modifier.fillMaxWidth(),
-    actions = {
-      actions.forEach { action ->
-        IconButton(
-          modifier = Modifier.testTag(action.iconContentDescription!!),
-          onClick = action.onActionClick
-        ) {
-          Icon(
-            imageVector = action.icon,
-            contentDescription = action.iconContentDescription,
-            modifier = Modifier.size(30.dp),
-            tint = colorScheme.onSurface
-          )
-        }
-      }
-    },
+    actions = actions,
     colors = TopAppBarDefaults.topAppBarColors(
       scrolledContainerColor = colorScheme.background
     ),

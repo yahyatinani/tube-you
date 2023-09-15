@@ -2,7 +2,6 @@ package io.github.yahyatinani.tubeyou.modules.feature.home.events
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalConfiguration
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import io.github.yahyatinani.recompose.clearEvent
 import io.github.yahyatinani.recompose.cofx.injectCofx
@@ -25,15 +24,15 @@ import io.ktor.util.reflect.typeInfo
 
 @Composable
 fun RegHomeEvents() {
-  val configuration = LocalConfiguration.current
   regEventFx(
     id = home.load,
-    interceptors = v(injectCofx(home.coroutine_scope))
+    interceptors = v(
+      injectCofx(home.coroutine_scope),
+      injectCofx(":locale_region")
+    )
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    val systemRegion = configuration.locale.country
-    val popularVideosEndpoint =
-      "${appDb[ty_db.api_url]}/trending?region=$systemRegion"
+    val region = get<String>(cofx, ":locale_region")
     m<Any, Any>(
       recompose.db to appDb,
       BuiltInFx.fx to v(
@@ -41,7 +40,7 @@ fun RegHomeEvents() {
           ktor.http_fx,
           m(
             ktor.method to HttpMethod.Get,
-            ktor.url to popularVideosEndpoint,
+            ktor.url to "${appDb[ty_db.api_url]}/trending?region=$region",
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<Video>>(),

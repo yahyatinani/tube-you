@@ -73,10 +73,10 @@ fun regTyEvents() {
   }
 
   regEventDb(common.show_top_settings_popup) { db: AppDb, _ ->
-    db.assoc(ty_db.top_settings_popup, true)
+    db.assoc(ty_db.is_top_settings_popup_visible, true)
   }
 
   regEventDb(common.hide_top_settings_popup) { db: AppDb, _ ->
-    db.assoc(ty_db.top_settings_popup, false)
+    db.assoc(ty_db.is_top_settings_popup_visible, false)
   }
 }

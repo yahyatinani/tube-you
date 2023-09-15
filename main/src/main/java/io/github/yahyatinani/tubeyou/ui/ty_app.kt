@@ -4,7 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -22,9 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import com.github.yahyatinani.tubeyou.modules.core.keywords.search
 import com.github.yahyatinani.tubeyou.modules.core.keywords.searchBar
@@ -76,7 +77,6 @@ import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyNavigatio
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TySearchBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.component.TyTopAppBar
 import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
-import com.github.yahyatinani.tubeyou.modules.designsystem.theme.TyTheme
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.isCompact
 import io.github.yahyatinani.recompose.RegCofx
 import io.github.yahyatinani.recompose.RegFx
@@ -90,19 +90,27 @@ import io.github.yahyatinani.recompose.httpfx.bounce
 import io.github.yahyatinani.recompose.httpfx.ktor
 import io.github.yahyatinani.recompose.httpfx.regBounceFx
 import io.github.yahyatinani.recompose.httpfx.regHttpKtor
+import io.github.yahyatinani.recompose.ids.recompose.db
 import io.github.yahyatinani.recompose.pagingfx.paging
 import io.github.yahyatinani.recompose.pagingfx.regPagingFx
 import io.github.yahyatinani.recompose.regEventFx
 import io.github.yahyatinani.recompose.watch
 import io.github.yahyatinani.tubeyou.R
+import io.github.yahyatinani.tubeyou.common.appDbBy
 import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.common.ty_db.top_level_back_handler_enabled
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
+import io.github.yahyatinani.tubeyou.modules.feature.settings.navigation.ABOUT_ROUTE
+import io.github.yahyatinani.tubeyou.modules.feature.settings.navigation.aboutScreen
+import io.github.yahyatinani.tubeyou.modules.feature.settings.navigation.settingsScreen
+import io.github.yahyatinani.tubeyou.modules.feature.settings.screen.SettingsDropdownButton
+import io.github.yahyatinani.tubeyou.navigation.MAIN_ROUTE
 import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
 import io.github.yahyatinani.tubeyou.navigation.RegNavFx
 import io.github.yahyatinani.tubeyou.navigation.TopLevelNavItems
 import io.github.yahyatinani.tubeyou.navigation.TyNavHost
+import io.github.yahyatinani.tubeyou.navigation.mainScreen
 import io.github.yahyatinani.tubeyou.navigation.rememberSaveableNavController
 import io.github.yahyatinani.tubeyou.navigation.topLevelNavItems
 import io.github.yahyatinani.tubeyou.ui.modules.feature.search.db.SearchBar
@@ -226,6 +234,7 @@ private fun TyTopBar(
       val contentDescription = stringResource(
         R.string.top_app_bar_search_action_icon_description
       )
+      val tint = colorScheme.onSurface
 
       IconButton(
         modifier = Modifier.testTag(contentDescription),
@@ -235,70 +244,11 @@ private fun TyTopBar(
           imageVector = TyIcons.Search,
           contentDescription = contentDescription,
           modifier = Modifier.size(30.dp),
-          tint = colorScheme.onSurface
+          tint = tint
         )
       }
 
-      Box {
-        val iconDesc = stringResource(
-          R.string.top_app_bar_account_action_icon_description
-        )
-        IconButton(
-          modifier = Modifier.testTag(iconDesc),
-          onClick = { dispatch(v(common.show_top_settings_popup)) }
-        ) {
-          Icon(
-            imageVector = TyIcons.NoAccounts,
-            contentDescription = iconDesc,
-            modifier = Modifier.size(30.dp),
-            tint = colorScheme.onSurface
-          )
-        }
-
-        DropdownMenu(
-          expanded = watch(query = v(ty_db.top_settings_popup)),
-          onDismissRequest = {
-            dispatch(v(common.hide_top_settings_popup))
-          },
-          modifier = Modifier.background(TyTheme.colors.popupContainer)
-        ) {
-          val dropDownItemIconSize = 28.dp
-          DropdownMenuItem(
-            text = { Text("Login/Register") },
-            onClick = { /*TODO:*/ },
-            leadingIcon = {
-              Icon(
-                TyIcons.Login,
-                contentDescription = null,
-                modifier = Modifier.size(dropDownItemIconSize)
-              )
-            }
-          )
-          DropdownMenuItem(
-            text = { Text("Settings") },
-            onClick = { /*TODO:*/ },
-            leadingIcon = {
-              Icon(
-                TyIcons.Settings,
-                contentDescription = null,
-                modifier = Modifier.size(dropDownItemIconSize)
-              )
-            }
-          )
-          Divider()
-          DropdownMenuItem(
-            text = { Text("About") },
-            onClick = { /*TODO:*/ },
-            leadingIcon = {
-              Icon(
-                TyIcons.Info,
-                contentDescription = null,
-                modifier = Modifier.size(dropDownItemIconSize)
-              )
-            }
-          )
-        }
-      }
+      SettingsDropdownButton(tint = tint)
     },
     scrollBehavior = topAppBarScrollBehavior
   )
@@ -410,16 +360,16 @@ fun StatusBarEffect(playerState: PlayerSheetState?) {
   }
 }
 
+@Composable
 @OptIn(
   ExperimentalLayoutApi::class,
   ExperimentalMaterial3Api::class,
   ExperimentalComposeUiApi::class
 )
-@Composable
-fun TyApp(
-  navController: NavHostController = rememberSaveableNavController(),
-  windowSizeClass: WindowSizeClass,
-  appContext: Context
+fun TyMain(
+  navController: NavHostController,
+  appContext: Context,
+  windowSizeClass: WindowSizeClass
 ) {
   RegNavFx(navController)
   RegNavCofx(navController)
@@ -637,5 +587,44 @@ fun TyApp(
         )
       }
     }
+  }
+}
+
+@Composable
+fun TyApp(
+  topLevelNavCtrl: NavHostController = rememberSaveableNavController(),
+  mainNavController: NavHostController = rememberSaveableNavController(),
+  windowSizeClass: WindowSizeClass,
+  appContext: Context
+) {
+  val s = rememberCoroutineScope()
+  RegFx("nav_to_about") {
+    s.launch { topLevelNavCtrl.navigate(ABOUT_ROUTE) }
+  }
+  RegFx(":about/nav_back") {
+    s.launch { topLevelNavCtrl.popBackStack() }
+  }
+
+  regEventFx("on_dropdown_item_about_click") { cofx, _ ->
+    m(
+      db to appDbBy(cofx).assoc(ty_db.is_top_settings_popup_visible, false),
+      fx to v(v("nav_to_about"))
+    )
+  }
+  regEventFx("on_about_nav_ic_click") { _, _ ->
+    m(fx to v(v(":about/nav_back")))
+  }
+  NavHost(
+    navController = topLevelNavCtrl,
+    startDestination = MAIN_ROUTE,
+    modifier = Modifier,
+    enterTransition = { slideInVertically { it / 10 } + fadeIn() },
+    exitTransition = { slideOutVertically { it / 10 } + fadeOut() }
+  ) {
+    mainScreen(mainNavController, appContext, windowSizeClass)
+
+    settingsScreen()
+
+    aboutScreen()
   }
 }

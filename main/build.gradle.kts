@@ -9,10 +9,13 @@ plugins {
 android {
   namespace = TyBuild.APP_ID
 
+  buildFeatures {
+    buildConfig = true
+  }
   defaultConfig {
     applicationId = TyBuild.APP_ID
     versionCode = 1
-    versionName = "0.0.1" // X.Y.Z; X = Major, Y = minor, Z = Patch level
+    versionName = "0.1.0-alpha01" // X.Y.Z; X = Major, Y = minor, Z = Patch level
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables {
@@ -85,6 +88,7 @@ dependencies {
   implementation(project(":modules:feature:you"))
   implementation(project(":modules:feature:search"))
   implementation(project(":modules:feature:watch"))
+  implementation(project(":modules:feature:settings"))
   implementation(project(":modules:core:common"))
   implementation(project(":modules:core:designsystem"))
   implementation(project(":modules:core:network"))

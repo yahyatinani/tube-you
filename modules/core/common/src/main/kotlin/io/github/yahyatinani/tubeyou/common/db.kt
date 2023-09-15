@@ -17,5 +17,6 @@ enum class ty_db {
   active_top_level_route,
   top_level_back_handler_enabled,
   api_url,
-  top_settings_popup
+  is_top_settings_popup_visible,
+  app_version
 }

@@ -2,6 +2,7 @@ package io.github.yahyatinani.tubeyou.modules.feature.home.events
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalConfiguration
 import com.github.yahyatinani.tubeyou.modules.core.keywords.home
 import io.github.yahyatinani.recompose.clearEvent
 import io.github.yahyatinani.recompose.cofx.injectCofx
@@ -24,12 +25,15 @@ import io.ktor.util.reflect.typeInfo
 
 @Composable
 fun RegHomeEvents() {
+  val configuration = LocalConfiguration.current
   regEventFx(
     id = home.load,
     interceptors = v(injectCofx(home.coroutine_scope))
   ) { cofx, _ ->
     val appDb = appDbBy(cofx)
-    val popularVideosEndpoint = "${appDb[ty_db.api_url]}/trending?region=US"
+    val systemRegion = configuration.locale.country
+    val popularVideosEndpoint =
+      "${appDb[ty_db.api_url]}/trending?region=$systemRegion"
     m<Any, Any>(
       recompose.db to appDb,
       BuiltInFx.fx to v(

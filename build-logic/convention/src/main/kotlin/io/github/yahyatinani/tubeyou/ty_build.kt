@@ -12,10 +12,6 @@ object TyBuild {
   const val APP_ID = "io.github.yahyatinani.tubeyou"
   const val APP_NAME = "TubeYou"
 
-  const val versionMajor = 0
-  const val versionMinor = 0
-  const val versionPatch = 1
-
   object Versions {
     const val KOTLIN = "1.8"
     const val JVM = "11"

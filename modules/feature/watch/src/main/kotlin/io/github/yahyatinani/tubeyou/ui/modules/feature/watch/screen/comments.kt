@@ -60,6 +60,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -293,7 +294,7 @@ fun Comment(
       .wrapContentHeight()
       .clickable(onClick = onClick)
       .padding(12.dp)
-      .then(modifier)
+      .then(modifier.testTag("watch:comment"))
   ) {
     AuthorAvatar(url = authorAvatar, size = 24.dp)
 
@@ -527,6 +528,7 @@ private fun NavGraphBuilder.commentsList(
     val state = get<ListState>(uiData, common.state)
     SwipeRefresh(
       modifier = Modifier
+        .testTag("watch:comments_list")
         .fillMaxSize()
         .nestedScroll(BlockScrolling),
       state = rememberSwipeRefreshState(
@@ -577,7 +579,8 @@ private fun NavGraphBuilder.commentsList(
                     )
                   }
                 )
-                .padding(12.dp),
+                .padding(12.dp)
+                .testTag("watch:replies_count"),
               text = "$repliesCount replies",
               style = textStyle
             )
@@ -618,6 +621,7 @@ private fun NavGraphBuilder.repliesList(
     val listState = get<ListState>(repliesState.data, common.state)
     SwipeRefresh(
       modifier = Modifier
+        .testTag("watch:replies_list")
         .fillMaxSize()
         .nestedScroll(BlockScrolling),
       state = rememberSwipeRefreshState(

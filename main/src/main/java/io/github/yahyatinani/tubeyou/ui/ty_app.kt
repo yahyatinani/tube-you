@@ -395,7 +395,11 @@ fun TyApp(
   Scaffold(
     modifier = Modifier
       .fillMaxSize()
-      .windowInsetsPadding(WindowInsets.safeDrawing.only(Vertical)),
+      .windowInsetsPadding(WindowInsets.safeDrawing.only(Vertical))
+      .semantics {
+        // Allows to use testTag() for UiAutomator resource-id.
+        testTagsAsResourceId = true
+      },
     bottomBar = {
       val offsetY = if (playerState == null) {
         0f
@@ -430,10 +434,11 @@ fun TyApp(
         navItems = topLevelNavItems,
         modifier = Modifier
           .offset { IntOffset(0, -offsetY.roundToInt()) }
-          .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
-      ) { navItemRoute ->
-        dispatch(v(common.on_click_nav_item, navItemRoute))
-      }
+          .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal)),
+        onClickNavItem = { navItemRoute ->
+          dispatch(v(common.on_click_nav_item, navItemRoute))
+        }
+      )
     }
   ) { paddingBb ->
     RegSearchSubs()
@@ -458,9 +463,8 @@ fun TyApp(
         }
 
         NowPlayingSheet(
-          modifier = Modifier.padding(
-            PaddingValues(bottom = bottomNavBarPadding)
-          ),
+          modifier = Modifier
+            .padding(PaddingValues(bottom = bottomNavBarPadding)),
           isCollapsed = playerState == PlayerSheetState.COLLAPSED,
           onCollapsedClick = {
             dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
@@ -478,11 +482,7 @@ fun TyApp(
       modifier = Modifier
         .padding(bottom = bottomNavBarPadding)
         .fillMaxSize()
-        .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-        .semantics {
-          // Allows to use testTag() for UiAutomator resource-id.
-          testTagsAsResourceId = true
-        },
+        .nestedScroll(topBarScrollBehavior.nestedScrollConnection),
       scaffoldState = bottomSheetScaffoldState,
       sheetPeekHeight = remember(playerState) {
         if (playerState == null) {

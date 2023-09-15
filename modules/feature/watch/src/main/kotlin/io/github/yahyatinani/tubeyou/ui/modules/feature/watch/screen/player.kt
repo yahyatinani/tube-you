@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.util.UnstableApi
@@ -260,10 +261,14 @@ fun MiniPlayerControls(
       )
     }
 
-    IconButton(onClick = onClickClose) {
+    IconButton(
+      modifier = Modifier.testTag("watch:close_mini_player_btn"),
+      onClick = onClickClose
+    ) {
       Image(
         imageVector = TyIcons.Close,
-        modifier = Modifier.size(34.dp),
+        modifier = Modifier
+          .size(34.dp),
         contentDescription = "close video",
         colorFilter = colorFilter
       )

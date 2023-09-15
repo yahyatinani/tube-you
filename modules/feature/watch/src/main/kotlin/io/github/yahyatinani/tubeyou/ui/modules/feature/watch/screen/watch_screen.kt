@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -510,7 +511,10 @@ fun NowPlayingSheet(
             val traverse = remember(screenHeightPx, breakingPoint) {
               screenHeightPx - breakingPoint - delta
             }
-            Row {
+            Row(
+              modifier = Modifier
+                .testTag("watch:mini_player")
+            ) {
               Column(
                 modifier = Modifier
                   .padding(8.dp)
@@ -548,7 +552,9 @@ fun NowPlayingSheet(
                   get<StreamState>(activeStream.data, common.state)
 
                 MiniPlayerControls(
-                  modifier = Modifier.weight(weight),
+                  modifier = Modifier
+                    .weight(weight)
+                    .testTag("watch:mini_player_controls"),
                   isPlaying = playerState == StreamState.PLAYING,
                   onClickClose = onClickClosePlayer,
                   playPausePlayer = {
@@ -585,7 +591,8 @@ fun NowPlayingSheet(
           LazyColumn(
             modifier = Modifier
               .fillMaxSize()
-              .nestedScroll(BlockScrolling),
+              .nestedScroll(BlockScrolling)
+              .testTag("watch:related_streams"),
             state = lazyListState
           ) {
             item {
@@ -593,6 +600,7 @@ fun NowPlayingSheet(
                 Column(modifier = Modifier.fillMaxSize()) {
                   Surface(
                     modifier = Modifier
+                      .testTag("watch:content_loader")
                       .padding(horizontal = 6.dp, vertical = 8.dp)
                       .fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -693,7 +701,8 @@ fun NowPlayingSheet(
                         )
                       )
                     }
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 12.dp)
+                    .testTag("watch:description_section"),
                   streamTitle = get<String>(streamData, Stream.title)!!,
                   views = get<String>(streamData, Stream.views)!!,
                   date = get(streamData, Stream.date)!!
@@ -736,6 +745,7 @@ fun NowPlayingSheet(
               ) {
                 Surface(
                   modifier = Modifier
+                    .testTag("watch:comments_section_loader")
                     .padding(horizontal = 12.dp)
                     .fillMaxWidth()
                     .height(88.dp),
@@ -764,6 +774,7 @@ fun NowPlayingSheet(
 
               CommentsSection(
                 modifier = Modifier
+                  .testTag("watch:comments_section")
                   .padding(horizontal = 12.dp)
                   .fillMaxWidth(),
                 highlightedComment = highlightedComment,

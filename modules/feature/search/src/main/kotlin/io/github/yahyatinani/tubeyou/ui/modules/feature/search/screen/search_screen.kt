@@ -119,7 +119,7 @@ internal fun SearchScreen(
     val isPortraitMode = orientation == Configuration.ORIENTATION_PORTRAIT
     LazyColumn(
       modifier = Modifier
-        .testTag("search_results_list")
+        .testTag("search:results_list")
         .fillMaxSize(),
       state = rememberLazyListState()
     ) {

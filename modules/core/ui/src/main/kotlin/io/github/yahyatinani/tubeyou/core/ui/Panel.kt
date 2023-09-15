@@ -36,7 +36,9 @@ fun Panel(
     if (state == LOADING) {
       // TODO: if online use placeholder UI loader.
       CircularProgressIndicator(
-        modifier = Modifier.align(Alignment.Center),
+        modifier = Modifier
+          .align(Alignment.Center)
+          .testTag("loadingIndicator"),
         color = Blue300
       )
     }

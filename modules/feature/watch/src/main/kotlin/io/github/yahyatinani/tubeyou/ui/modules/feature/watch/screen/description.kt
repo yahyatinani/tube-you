@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -81,6 +82,7 @@ internal fun DescriptionSheet(
         .padding(padding)
         .fillMaxSize()
         .nestedScroll(BottomSheetNestedScrollConnection())
+        .testTag("watch:description_list")
     ) {
       item {
         Surface(

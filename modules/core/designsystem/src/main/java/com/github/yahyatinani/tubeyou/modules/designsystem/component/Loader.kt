@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.yahyatinani.tubeyou.modules.designsystem.theme.Blue300
 
@@ -27,6 +28,7 @@ fun AppendingLoader() {
     modifier = Modifier
       .fillMaxWidth()
       .padding(vertical = 4.dp)
+      .testTag("appendingIndicator")
   ) {
     CircularProgressIndicator(
       modifier = Modifier.align(Alignment.Center),

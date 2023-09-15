@@ -21,12 +21,12 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
@@ -51,7 +51,10 @@ fun TyTopAppBar(
     modifier = Modifier.fillMaxWidth(),
     actions = {
       actions.forEach { action ->
-        IconButton(onClick = action.onActionClick) {
+        IconButton(
+          modifier = Modifier.testTag(action.iconContentDescription!!),
+          onClick = action.onActionClick
+        ) {
           Icon(
             imageVector = action.icon,
             contentDescription = action.iconContentDescription,
@@ -93,7 +96,10 @@ fun TySearchBar(
 ) {
   val focusRequester = remember { FocusRequester() }
   val trailing: @Composable () -> Unit = {
-    IconButton(onClick = onTrailingClick) {
+    IconButton(
+      modifier = Modifier.testTag("clear_search_input"),
+      onClick = onTrailingClick
+    ) {
       Icon(
         imageVector = TyIcons.Close,
         modifier = Modifier.size(24.dp),
@@ -105,6 +111,7 @@ fun TySearchBar(
   SearchBar(
     query = searchQuery,
     modifier = Modifier
+      .testTag("search:search_bar")
       .fillMaxWidth()
       .focusRequester(focusRequester),
     active = isSearchBarActive,
@@ -133,7 +140,11 @@ fun TySearchBar(
     onActiveChange = onActiveChange,
     onSearch = onSearchClick
   ) {
-    LazyColumn(modifier = Modifier.padding(8.dp)) {
+    LazyColumn(
+      modifier = Modifier
+        .padding(8.dp)
+        .testTag("search:suggestions_list")
+    ) {
       itemsIndexed(
         key = { i, _ -> i },
         items = suggestions

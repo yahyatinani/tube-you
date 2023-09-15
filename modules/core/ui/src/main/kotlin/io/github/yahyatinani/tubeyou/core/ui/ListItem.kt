@@ -48,7 +48,8 @@ fun VideoItemPortrait(
     title = viewModel.title,
     thumbnail = viewModel.thumbnail,
     info = viewModel.info,
-    modifier = modifier.padding(top = 12.dp),
+    modifier = modifier
+      .padding(top = 12.dp),
     videoInfoTextStyle = videoInfoTextStyle,
     thumbnailContent = { ThumbnailContent(viewModel) },
     channelAvatar = {

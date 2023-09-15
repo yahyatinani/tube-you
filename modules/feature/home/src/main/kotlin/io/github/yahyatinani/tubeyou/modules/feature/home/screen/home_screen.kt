@@ -41,7 +41,7 @@ internal fun HomeScreen(
     }
 
     val homeVideos: UIState = get<UIState>(data, home.content)!!
-    val videosListTestTag = "home_videos_list"
+    val videosListTestTag = "home:videos_list"
     if (isCompact) {
       val listState = rememberLazyListState()
       RegScrollUpFx {

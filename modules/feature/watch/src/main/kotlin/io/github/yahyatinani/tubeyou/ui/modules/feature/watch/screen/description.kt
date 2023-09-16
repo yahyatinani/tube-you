@@ -59,7 +59,8 @@ internal fun DescriptionSheet(
     topBar = {
       SheetHeader(
         modifier = Modifier
-          .padding(start = 16.dp),
+          .padding(start = 16.dp)
+          .testTag("watch:description_top_bar"),
         headerTitle = "Description",
         sheetState = sheetState,
         closeSheet = { dispatch(v("stream_panel_fsm", "close_desc_sheet")) },

@@ -498,6 +498,7 @@ fun NowPlayingSheet(
         ) {
           VideoPlayer(
             modifier = Modifier
+              .testTag("watch:video_player")
               .width(w)
               .background(color = Color.Black),
             streamState = activeStream,

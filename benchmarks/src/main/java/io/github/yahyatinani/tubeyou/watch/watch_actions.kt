@@ -1,5 +1,6 @@
 package io.github.yahyatinani.tubeyou.watch
 
+import android.graphics.Point
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -8,7 +9,7 @@ import io.github.yahyatinani.tubeyou.flingElementDownUp
 import io.github.yahyatinani.tubeyou.waitAndFindObject
 
 fun MacrobenchmarkScope.playVideo() {
-  device.click(device.displayWidth / 2, (device.displayHeight / 2) - 700)
+  device.click(device.displayWidth / 2, device.displayHeight / 2)
   device.wait(Until.gone(By.res("watch:content_loader")), 5_000)
   device.wait(Until.gone(By.res("watch:comments_section_loader")), 5_000)
 
@@ -43,16 +44,21 @@ fun MacrobenchmarkScope.playVideo() {
   device.flingElementDownUp(desc)
   device.waitForIdle()
 
-  device.pressBack()
-  device.wait(Until.gone(By.res("watch:description_list")), 5_000)
+//  device.pressBack()
+  device.waitAndFindObject(By.res("watch:description_top_bar"), 10_000)
+    .drag(Point(0, device.displayWidth))
+//  device.wait(Until.gone(By.res("watch:description_list")), 5_000)
 
-  device.pressBack()
+//  device.pressBack()
   device.waitForIdle()
 
 //  device.waitAndFindObject(By.res("watch:mini_player"), 10_000).click()
 //  device.wait(Until.gone(By.res("watch:mini_player_controls")), 5_000)
 //  device.pressBack()
 //  device.waitAndFindObject(By.res("watch:mini_player_controls"), 10_000)
+
+  device.waitAndFindObject(By.res("watch:video_player"), 10_000)
+    .drag(Point(0, device.displayWidth))
 
   device.waitAndFindObject(By.res("watch:close_mini_player_btn"), 10_000)
     .click()

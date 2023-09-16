@@ -421,7 +421,7 @@ fun TyMain(
 
   var bottomSheetOffset by remember { mutableFloatStateOf(0f) }
 
-  LaunchedEffect(playerSheetState) {
+  LaunchedEffect(Unit) {
     playerScope.launch {
       snapshotFlow { playerSheetState.requireOffset() }.collect {
         bottomSheetOffset = it
@@ -563,12 +563,14 @@ fun TyMain(
             dispatch(v(common.back_press_top_nav))
           }
 
-          BackHandler(enabled = sb != null) {
-            dispatch(v(search.panel_fsm, search.back_press_search))
-          }
-
-          BackHandler(enabled = playerState == PlayerSheetState.EXPANDED) {
-            dispatch(v("stream_panel_fsm", common.minimize_player))
+          if (playerState == PlayerSheetState.EXPANDED) {
+            BackHandler {
+              dispatch(v("stream_panel_fsm", common.minimize_player))
+            }
+          } else if (sb != null) {
+            BackHandler {
+              dispatch(v(search.panel_fsm, search.back_press_search))
+            }
           }
         }
 
@@ -614,6 +616,7 @@ fun TyApp(
   regEventFx("on_about_nav_ic_click") { _, _ ->
     m(fx to v(v(":about/nav_back")))
   }
+
   NavHost(
     navController = topLevelNavCtrl,
     startDestination = MAIN_ROUTE,

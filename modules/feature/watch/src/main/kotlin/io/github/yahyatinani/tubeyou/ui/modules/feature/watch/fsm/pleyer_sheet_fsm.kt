@@ -39,7 +39,8 @@ val bottomSheetMachine = m(
     common.expand_player_sheet to m(
       fsm.target to PlayerSheetState.EXPANDED,
       fsm.actions to ::expandPlayerSheet
-    )
+    ),
+    SheetValue.Expanded to m(fsm.target to PlayerSheetState.EXPANDED)
   ),
   fsm.ALL to m(
     common.play_video to m(

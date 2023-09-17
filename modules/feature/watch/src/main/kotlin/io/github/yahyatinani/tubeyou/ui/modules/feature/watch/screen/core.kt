@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -112,7 +113,9 @@ fun SheetHeader(
       }
       IconButton(onClick = closeSheet) {
         Icon(
-          modifier = Modifier.size(32.dp),
+          modifier = Modifier
+            .size(32.dp)
+            .testTag("watch:close_comments_desc_sheet"),
           imageVector = TyIcons.Close,
           contentDescription = ""
         )

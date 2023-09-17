@@ -1,7 +1,14 @@
 package io.github.yahyatinani.tubeyou.baselineprofile
 
 import androidx.benchmark.macro.junit4.BaselineProfileRule
+import io.github.yahyatinani.tubeyou.home.homeScrollDownUp
 import io.github.yahyatinani.tubeyou.home.homeWaitForContent
+import io.github.yahyatinani.tubeyou.library.navigateToLibraryScreen
+import io.github.yahyatinani.tubeyou.search.searchClear
+import io.github.yahyatinani.tubeyou.search.searchOpenSearchBar
+import io.github.yahyatinani.tubeyou.search.searchPerformSearch
+import io.github.yahyatinani.tubeyou.search.searchScrollDownUp
+import io.github.yahyatinani.tubeyou.subscriptions.navigateToSubscriptionsScreen
 import io.github.yahyatinani.tubeyou.watch.playVideo
 import org.junit.Rule
 import org.junit.Test
@@ -21,7 +28,6 @@ class BaselineProfileGenerator {
     startActivityAndWait()
 
     homeWaitForContent()
-/*    homeScrollDownUp()
 
     navigateToLibraryScreen()
 
@@ -45,8 +51,10 @@ class BaselineProfileGenerator {
     repeat(2) {
       device.pressBack()
       device.waitForIdle()
-    }*/
+    }
 
     playVideo()
+
+    homeScrollDownUp()
   }
 }

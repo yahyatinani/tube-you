@@ -30,9 +30,11 @@ fun MacrobenchmarkScope.searchPerformSearch(x: Int, y: Int) {
 
 fun MacrobenchmarkScope.searchScrollDownUp() {
   val searchResults = device.findObject(By.res("search:results_list"))
-  repeat(15) { searchResults.scroll(Direction.DOWN, 1f, 100000) }
+  searchResults.fling(Direction.DOWN)
   device.wait(Until.gone(By.res("appendingIndicator")), 5_000)
-  repeat(15) { searchResults.scroll(Direction.UP, 1f, 100000) }
+  device.waitForIdle()
+  searchResults.fling(Direction.UP)
+  device.waitForIdle()
 }
 
 fun MacrobenchmarkScope.searchClear() {

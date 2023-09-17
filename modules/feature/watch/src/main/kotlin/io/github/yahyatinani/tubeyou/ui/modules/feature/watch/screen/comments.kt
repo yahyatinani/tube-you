@@ -722,6 +722,7 @@ internal fun CommentsSheet(
       },
     topBar = {
       SheetHeader(
+        modifier = Modifier.testTag("watch:comments_top_bar"),
         header = {
           Header(
             isCommentsRoute = repliesState == null,

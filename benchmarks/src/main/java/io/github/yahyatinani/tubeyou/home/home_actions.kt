@@ -18,6 +18,8 @@ fun MacrobenchmarkScope.homeScrollDownUp() {
   val margin = 10 * homeList.visibleBounds.width() / 100
   homeList.setGestureMargins(margin, margin, margin, margin)
 
-  repeat(5) { homeList.scroll(Direction.DOWN, 1f, 100000) }
-  repeat(5) { homeList.scroll(Direction.UP, 1f, 100000) }
+  homeList.fling(Direction.DOWN)
+  device.waitForIdle()
+  homeList.fling(Direction.UP)
+  device.waitForIdle()
 }

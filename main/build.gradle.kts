@@ -72,7 +72,13 @@ android {
       // Only use benchmark proguard rules
       proguardFiles("benchmark-rules.pro")
       isMinifyEnabled = true
+
       applicationIdSuffix = TyBuildType.BENCHMARK.applicationIdSuffix
+      resValue(
+        type = "string",
+        name = "app_name",
+        value = TyBuildType.BENCHMARK.applicationName
+      )
     }
   }
   packaging {

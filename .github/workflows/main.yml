@@ -58,10 +58,10 @@ jobs:
           path: build-reports.zip
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: apks
-          path: app/build/outputs
+          path: main/build/outputs
 
 env:
   SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}

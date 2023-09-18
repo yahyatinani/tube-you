@@ -14,10 +14,10 @@
     <item name="android:windowLightNavigationBar" tools:targetApi="27">
       true
     </item>
+    <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_dark</item>
   </style>
 
   <style name="Theme.Ty.Splash" parent="NightAdjusted.Theme.Splash">
-    <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
     <item name="postSplashScreenTheme">@style/Theme.Ty</item>
   </style>
 

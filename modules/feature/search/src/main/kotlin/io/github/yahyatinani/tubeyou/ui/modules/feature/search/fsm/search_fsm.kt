@@ -284,6 +284,13 @@ val searchBarMachine = m<Any?, Any?>(
         actions to ::updateSearchBarToMatchTopOfStack
       )
     ),
+    v(search.activate_searchBar, false) to v(
+      m(target to null, guard to ::isSearchStackEmpty),
+      m(
+        target to INACTIVE,
+        actions to ::updateSearchBarToMatchTopOfStack
+      )
+    ),
     search.submit to v(
       m(target to ACTIVE, guard to ::isQueryBlankOrEmpty),
       m(
@@ -321,7 +328,7 @@ val searchBarMachine = m<Any?, Any?>(
         )
       )
     ),
-    search.activate_searchBar to m(
+    v(search.activate_searchBar, true) to m(
       target to ACTIVE,
       actions to ::backUpSearchBar
     )

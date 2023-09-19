@@ -124,7 +124,5 @@ fun SheetHeader(
     Divider(modifier = Modifier.fillMaxWidth())
   }
 
-  BackHandler(enabled = sheetState != SheetValue.Hidden) {
-    closeSheet()
-  }
+  BackHandler(enabled = sheetState != SheetValue.Hidden, onBack = closeSheet)
 }

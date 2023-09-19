@@ -369,18 +369,10 @@ fun NowPlayingSheet(
         }
       }
 
-    RegFx(
-      id = "half_expand_comments_sheet",
-      playbackScope,
-      commentsSheetState
-    ) {
+    RegFx("half_expand_comments_sheet", playbackScope, commentsSheetState) {
       playbackScope.launch { commentsSheetState.partialExpand() }
     }
-    RegFx(
-      id = "close_comments_sheet",
-      playbackScope,
-      commentsSheetState
-    ) {
+    RegFx(id = "close_comments_sheet", playbackScope, commentsSheetState) {
       playbackScope.launch {
         commentsSheetState.hide()
         dispatch(v("nav_back_to_comments"))

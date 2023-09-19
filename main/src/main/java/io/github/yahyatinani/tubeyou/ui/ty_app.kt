@@ -184,20 +184,14 @@ private fun TyTopBar(
     TySearchBar(
       searchQuery = sb[searchBar.query] as String,
       onQueryChange = {
-        dispatchSync(
-          v(
-            search.panel_fsm,
-            search.update_search_input,
-            it
-          )
-        )
+        dispatchSync(v(search.panel_fsm, search.update_search_input, it))
       },
       onSearchClick = {
         dispatch(v(search.panel_fsm, search.submit, it))
       },
       isSearchBarActive = sb[common.state] as Boolean,
       onActiveChange = {
-        dispatch(v(search.panel_fsm, search.activate_searchBar))
+        dispatch(v(search.panel_fsm, v(search.activate_searchBar, it)))
       },
       onTrailingClick = {
         dispatch(v(search.panel_fsm, search.clear_search_input))
@@ -404,9 +398,8 @@ fun TyMain(
     cofx.assoc("player_scope", playerScope)
   }
 
-  if (orientation == ORIENTATION_LANDSCAPE &&
-    playerState == PlayerSheetState.EXPANDED
-  ) {
+  val playerBottomSheetExpanded = playerState == PlayerSheetState.EXPANDED
+  if (orientation == ORIENTATION_LANDSCAPE && playerBottomSheetExpanded) {
     VideoPlayer(
       modifier = Modifier.padding(start = 24.dp),
       streamState = activeStream,
@@ -563,14 +556,12 @@ fun TyMain(
             dispatch(v(common.back_press_top_nav))
           }
 
-          if (playerState == PlayerSheetState.EXPANDED) {
-            BackHandler {
-              dispatch(v("stream_panel_fsm", common.minimize_player))
-            }
-          } else if (sb != null) {
-            BackHandler {
-              dispatch(v(search.panel_fsm, search.back_press_search))
-            }
+          BackHandler(enabled = sb != null) {
+            dispatch(v(search.panel_fsm, search.back_press_search))
+          }
+
+          BackHandler(enabled = playerBottomSheetExpanded) {
+            dispatch(v("stream_panel_fsm", common.minimize_player))
           }
         }
 

@@ -6,6 +6,8 @@ import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.State
 import io.github.yahyatinani.recompose.fsm.fsm
+import io.github.yahyatinani.recompose.fsm.fsm.actions
+import io.github.yahyatinani.recompose.fsm.fsm.target
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
 import io.github.yahyatinani.tubeyou.common.AppDb
@@ -28,20 +30,20 @@ fun closeCommentsSheet(
 val commentsSheetMachine = m(
   fsm.ALL to m(
     "half_expand_comments_sheet" to m(
-      fsm.target to SheetValue.PartiallyExpanded,
-      fsm.actions to ::expandCommentsSheet
+      target to SheetValue.PartiallyExpanded,
+      actions to ::expandCommentsSheet
     ),
     "close_comments_sheet" to m(
-      fsm.target to SheetValue.Hidden,
-      fsm.actions to ::closeCommentsSheet
+      target to SheetValue.Hidden,
+      actions to ::closeCommentsSheet
     ),
     common.close_player to m(
-      fsm.target to SheetValue.Hidden,
-      fsm.actions to ::closeCommentsSheet
+      target to SheetValue.Hidden,
+      actions to ::closeCommentsSheet
     ),
     common.play_video to m(
-      fsm.target to SheetValue.Hidden,
-      fsm.actions to ::closeCommentsSheet
+      target to SheetValue.Hidden,
+      actions to ::closeCommentsSheet
     )
   )
 )

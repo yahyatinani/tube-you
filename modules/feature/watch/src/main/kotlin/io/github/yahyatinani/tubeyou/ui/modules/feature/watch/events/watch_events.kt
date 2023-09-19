@@ -28,6 +28,7 @@ import io.ktor.util.reflect.typeInfo
 fun RegWatchEvents() {
   DisposableEffect(Unit) {
     regEventFx(id = "stream_panel_fsm") { cofx, e ->
+      println("stream_panel_fsm $e")
       val appDb = appDbBy(cofx)
       trigger(
         machine = streamPanelMachine,

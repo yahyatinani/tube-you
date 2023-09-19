@@ -1,6 +1,5 @@
 package com.github.yahyatinani.tubeyou.modules.designsystem.component
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -136,9 +135,5 @@ fun TySearchBar(
 
   LaunchedEffect(isSearchBarActive) {
     if (isSearchBarActive) focusRequester.requestFocus()
-  }
-
-  BackHandler {
-    onLeadingClick()
   }
 }

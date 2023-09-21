@@ -1,5 +1,6 @@
 package io.github.yahyatinani.tubeyou.navigation
 
+import androidx.compose.runtime.Stable
 import com.github.yahyatinani.tubeyou.modules.designsystem.icon.TyIcons
 import io.github.yahyatinani.tubeyou.R
 import io.github.yahyatinani.tubeyou.modules.feature.home.navigation.HOME_GRAPH_ROUTE
@@ -32,4 +33,5 @@ enum class TopLevelNavItems(
   )
 }
 
+@Stable
 val topLevelNavItems = TopLevelNavItems.entries

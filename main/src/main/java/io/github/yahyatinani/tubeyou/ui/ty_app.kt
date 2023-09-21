@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Vertical
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -42,6 +41,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +52,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -63,7 +64,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
@@ -108,7 +108,6 @@ import io.github.yahyatinani.tubeyou.modules.feature.settings.screen.SettingsDro
 import io.github.yahyatinani.tubeyou.navigation.MAIN_ROUTE
 import io.github.yahyatinani.tubeyou.navigation.RegNavCofx
 import io.github.yahyatinani.tubeyou.navigation.RegNavFx
-import io.github.yahyatinani.tubeyou.navigation.TopLevelNavItems
 import io.github.yahyatinani.tubeyou.navigation.TyNavHost
 import io.github.yahyatinani.tubeyou.navigation.mainScreen
 import io.github.yahyatinani.tubeyou.navigation.rememberSaveableNavController
@@ -129,8 +128,6 @@ import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.launch
-import kotlin.enums.EnumEntries
-import kotlin.math.roundToInt
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -250,18 +247,18 @@ private fun TyTopBar(
 
 @Composable
 private fun TyBottomBar(
-  navItems: EnumEntries<TopLevelNavItems>,
   modifier: Modifier = Modifier,
   onClickNavItem: (navItemRoute: String) -> Unit
 ) {
-  val borderColor: Color = MaterialTheme.colorScheme.outlineVariant
-  val tint = MaterialTheme.colorScheme.onBackground
+  val colorScheme = MaterialTheme.colorScheme
+  val borderColor: Color = colorScheme.outlineVariant
   TyNavigationBar(
     modifier = modifier,
     isCompact = true,
     borderColor = borderColor
   ) { itemsModifier ->
-    navItems.forEach { navItem ->
+    val tint = colorScheme.onBackground
+    topLevelNavItems.forEach { navItem ->
       val selected = watch<Boolean>(v(common.is_route_active, navItem.route))
       TyNavigationBarItem(
         selected = selected,
@@ -437,40 +434,28 @@ fun TyMain(
         testTagsAsResourceId = true
       },
     bottomBar = {
-      val offsetY = if (playerState == null) {
-        0f
-      } else {
-        val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
-        val bottomBarHeightPx = remember(density) {
-          with(density) { BOTTOM_BAR_HEIGHT.toPx() }
-        }
-        val screenHeightPx = remember(density) {
-          with(density) { screenHeightDp.toPx() }
-        }
-        val bottomHeight = remember(density) {
-          with(density) { bottomBarHeightPx + 56.dp.toPx() }
-        }
-
-        remember(
-          playerState,
-          screenHeightPx,
-          screenHeightDp,
-          bottomSheetOffset
-        ) {
-          lerp(
-            sheetYOffset = bottomSheetOffset,
-            traverse = screenHeightPx - bottomHeight,
-            start = -bottomBarHeightPx,
-            end = 0f
-          )
-        }
+      val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+      val bottomBarHeightPx = remember(density) {
+        with(density) { BOTTOM_BAR_HEIGHT.toPx() }
+      }
+      val screenHeightPx = remember(density, screenHeightDp) {
+        with(density) { screenHeightDp.toPx() }
+      }
+      val bottomHeight = remember(density) {
+        with(density) { bottomBarHeightPx + 56.dp.toPx() }
       }
 
       TyBottomBar(
-        navItems = topLevelNavItems,
         modifier = Modifier
-          .offset { IntOffset(0, -offsetY.roundToInt()) }
-          .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal)),
+          .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
+          .graphicsLayer {
+            translationY = -lerp(
+              sheetYOffset = bottomSheetOffset,
+              traverse = screenHeightPx - bottomHeight,
+              start = -bottomBarHeightPx,
+              end = 0f
+            )
+          },
         onClickNavItem = { navItemRoute ->
           dispatch(v(common.on_click_nav_item, navItemRoute))
         }

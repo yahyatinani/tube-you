@@ -211,7 +211,7 @@ fun TyNavigationBar(
           .drawBehind {
             drawRect(borderColor)
           },
-        thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS,
+        thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS
       )
       if (isCompact) {
         TyNavigationBarCompact(content = content)

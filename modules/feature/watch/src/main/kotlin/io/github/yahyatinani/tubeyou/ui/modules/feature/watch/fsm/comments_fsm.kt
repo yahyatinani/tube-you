@@ -62,7 +62,6 @@ fun appendCommentsError(
   event: Event
 ): Effects {
   val (_, error) = event
-  println("dsjfkjsdjfjsd $error")
   return m()
 }
 
@@ -72,7 +71,6 @@ fun loadingCommentsError(
   event: Event
 ): Effects {
   val (_, error) = event
-  println("sdsgsdagf $error")
   return m()
 }
 
@@ -90,9 +88,7 @@ val commentsListMachine = m(
     )
   ),
   ListState.READY to m(
-    v("append_comments", "loading") to m(
-      target to ListState.APPENDING
-    ),
+    v("append_comments", "loading") to m(target to ListState.APPENDING),
     "refresh_comments" to m(
       target to ListState.REFRESHING,
       actions to ::fetchStreamComments
@@ -122,7 +118,7 @@ val commentsListMachine = m(
     common.play_video to m(
       target to ListState.LOADING,
       actions to ::fetchStreamComments
-    ),
-    common.close_player to m(target to null)
+    )
+//    common.close_player to m(target to null)
   )
 )

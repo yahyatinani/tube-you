@@ -16,11 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,13 +62,12 @@ fun DragHandle(modifier: Modifier = Modifier, onClick: () -> Unit = { }) {
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SheetHeader(
   modifier: Modifier = Modifier,
   headerTitle: String = "",
   header: (@Composable () -> Unit)? = null,
-  sheetState: SheetValue,
+  isSheetOpen: Boolean,
   closeSheet: () -> Unit,
   toggleExpansion: () -> Unit
 ) {
@@ -124,5 +121,5 @@ fun SheetHeader(
     Divider(modifier = Modifier.fillMaxWidth())
   }
 
-  BackHandler(enabled = sheetState != SheetValue.Hidden, onBack = closeSheet)
+  BackHandler(enabled = isSheetOpen, onBack = closeSheet)
 }

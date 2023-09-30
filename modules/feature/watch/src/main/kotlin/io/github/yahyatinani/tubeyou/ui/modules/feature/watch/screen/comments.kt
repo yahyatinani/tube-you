@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,14 +45,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.PlainTooltipState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -100,6 +104,7 @@ import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.REPLIES_ROUTE
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 @Composable
@@ -525,14 +530,13 @@ private fun NavGraphBuilder.commentsList(
 ) {
   composable(COMMENTS_ROUTE) {
     val uiData = uiState.data
-    val state = get<ListState>(uiData, common.state)
     SwipeRefresh(
       modifier = Modifier
         .testTag("watch:comments_list")
         .fillMaxSize()
         .nestedScroll(BlockScrolling),
       state = rememberSwipeRefreshState(
-        isRefreshing = state == ListState.REFRESHING
+        isRefreshing = get(uiData, "is_refreshing", false)!!
       ),
       onRefresh = { dispatch(v("stream_panel_fsm", "refresh_comments")) },
       indicator = { refreshState, refreshTrigger ->
@@ -547,13 +551,22 @@ private fun NavGraphBuilder.commentsList(
       }
     ) {
       val textStyle = MaterialTheme.typography.labelLarge.copy(color = Blue400)
+
+      if (get(uiData, "is_loading", false)!!) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          CircularProgressIndicator(
+            modifier = Modifier.align(Alignment.Center),
+            color = Blue300
+          )
+        }
+        return@SwipeRefresh
+      }
+
       LazyColumn(
         modifier = Modifier
           .fillMaxSize()
           .nestedScroll(BottomSheetNestedScrollConnection())
       ) {
-        if (state == ListState.LOADING) return@LazyColumn
-
         itemsIndexed(
           items = get<List<UIState>>(uiData, "comments_list")!!
         ) { index: Int, comment: UIState ->
@@ -588,7 +601,7 @@ private fun NavGraphBuilder.commentsList(
         }
 
         item {
-          if (state == ListState.APPENDING) {
+          if (get(uiData, "is_appending", false)!!) {
             AppendingLoader()
           }
         }
@@ -698,28 +711,17 @@ private fun Header(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CommentsSheet(
-  sheetState: SheetState,
-  sheetPeekHeight: Dp,
   uiState: UIState,
+  contentHeight: Dp,
+  isSheetOpen: Boolean,
   toggleExpansion: () -> Unit
 ) {
-  val sheetValue = sheetState.currentValue
-  val data = uiState.data
-  val commentsState = get<UIState>(data, "comments") ?: return
-  val repliesState = get<UIState>(data, "replies")
+  val repliesState = get<UIState>(uiState.data, "replies")
 
   Scaffold(
-    modifier = Modifier
-      .let {
-        if (sheetValue == SheetValue.PartiallyExpanded) {
-          it.height(sheetPeekHeight)
-        } else {
-          it
-        }
-      },
+    modifier = Modifier.heightIn(max = contentHeight),
     topBar = {
       SheetHeader(
         modifier = Modifier.testTag("watch:comments_top_bar"),
@@ -729,7 +731,7 @@ internal fun CommentsSheet(
             onClick = { dispatch(v("nav_back_to_comments")) }
           )
         },
-        sheetState = sheetValue,
+        isSheetOpen = isSheetOpen,
         closeSheet = {
           dispatch(v("stream_panel_fsm", "close_comments_sheet"))
         },
@@ -762,14 +764,13 @@ internal fun CommentsSheet(
     )
     NavHost(
       modifier = Modifier
-        // .recomposeHighlighter()
         .padding(padding)
         .fillMaxWidth(),
       navController = commentsNavController,
       startDestination = COMMENTS_ROUTE
     ) {
       commentsList(
-        uiState = commentsState,
+        uiState = uiState,
         commentTextStyle = commentTextStyle
       )
 
@@ -779,4 +780,61 @@ internal fun CommentsSheet(
       )
     }
   }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun CommentsBottomSheetScaffold(
+  commentsListState: UIState?,
+  sheetUiState: UIState,
+  onClickSheetHeader: () -> Unit,
+  content: @Composable (PaddingValues) -> Unit
+) {
+  val commentsSheetState = rememberStandardBottomSheetState(
+    initialValue = SheetValue.Hidden,
+    skipHiddenState = false
+  )
+  val commentsScaffoldState = rememberBottomSheetScaffoldState(
+    bottomSheetState = commentsSheetState
+  )
+  LaunchedEffect(Unit) {
+    snapshotFlow { commentsSheetState.currentValue }
+      .distinctUntilChanged()
+      .collect {
+        dispatch(v("stream_panel_fsm", v("comments_sheet", it)))
+      }
+  }
+  val coroutineScope = rememberCoroutineScope()
+  val sheetData = sheetUiState.data
+  BottomSheetScaffold(
+    sheetContent = {
+      RegFx("half_expand_comments_sheet", coroutineScope, sheetUiState) {
+        coroutineScope.launch { commentsSheetState.partialExpand() }
+      }
+      RegFx("expand_comments_sheet", coroutineScope, sheetUiState) {
+        coroutineScope.launch { commentsSheetState.expand() }
+      }
+      RegFx("close_comments_sheet", coroutineScope, sheetUiState) {
+        coroutineScope.launch {
+          commentsSheetState.hide()
+          dispatch(v("nav_back_to_comments"))
+        }
+      }
+
+      if (commentsListState == null) return@BottomSheetScaffold
+
+      CommentsSheet(
+        uiState = commentsListState,
+        contentHeight = get<Dp>(sheetData, ":sheet_content_height")!!,
+        isSheetOpen = get(sheetData, ":is_sheet_open", false)!!,
+        toggleExpansion = onClickSheetHeader
+      )
+    },
+    scaffoldState = commentsScaffoldState,
+    sheetPeekHeight = get<Dp>(sheetData, ":sheet_peak_height")!!,
+    sheetDragHandle = {
+      DragHandle(onClick = onClickSheetHeader)
+    },
+    content = content
+  )
 }

@@ -2,7 +2,6 @@ package io.github.yahyatinani.tubeyou.ui
 
 import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,7 +10,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Vertical
@@ -22,8 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,7 +37,6 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +58,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
@@ -84,7 +78,6 @@ import io.github.yahyatinani.recompose.clearEvent
 import io.github.yahyatinani.recompose.clearFx
 import io.github.yahyatinani.recompose.dispatch
 import io.github.yahyatinani.recompose.dispatchSync
-import io.github.yahyatinani.recompose.fsm.fsm
 import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.httpfx.bounce
 import io.github.yahyatinani.recompose.httpfx.ktor
@@ -100,7 +93,6 @@ import io.github.yahyatinani.tubeyou.common.appDbBy
 import io.github.yahyatinani.tubeyou.common.ty_db
 import io.github.yahyatinani.tubeyou.common.ty_db.top_level_back_handler_enabled
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
-import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.modules.feature.settings.navigation.ABOUT_ROUTE
 import io.github.yahyatinani.tubeyou.modules.feature.settings.navigation.aboutScreen
 import io.github.yahyatinani.tubeyou.modules.feature.settings.navigation.settingsScreen
@@ -116,14 +108,10 @@ import io.github.yahyatinani.tubeyou.ui.modules.feature.search.db.SearchBar
 import io.github.yahyatinani.tubeyou.ui.modules.feature.search.evnts.RegSearchEvents
 import io.github.yahyatinani.tubeyou.ui.modules.feature.search.subs.RegSearchSubs
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.events.RegWatchEvents
-import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.PlayerSheetState
-import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fx.RegPlayerSheetEffects
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.MINI_PLAYER_HEIGHT
-import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.NowPlayingSheet
-import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.VideoPlayer
+import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.NowPlayingScaffold
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen.lerp
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs.RegWatchSubs
-import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
@@ -151,66 +139,6 @@ fun topAppBarScrollBehavior(
   }
 
   return TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TyTopBar(
-  sb: SearchBar?,
-  topAppBarScrollBehavior: TopAppBarScrollBehavior
-) {
-  RegSearchEvents()
-
-  DisposableEffect(Unit) {
-    regBounceFx()
-    regHttpKtor()
-    regPagingFx()
-
-    onDispose {
-      clearFx(bounce.fx)
-      clearFx(ktor.http_fx)
-      clearFx(paging.fx)
-    }
-  }
-
-  if (sb != null) {
-    val searchBarScope = rememberCoroutineScope()
-    RegCofx(search.coroutine_scope) { cofx ->
-      cofx.assoc(search.coroutine_scope, searchBarScope)
-    }
-    TySearchBar(
-      searchQuery = sb[searchBar.query] as String,
-      onQueryChange = {
-        dispatchSync(v(search.panel_fsm, search.update_search_input, it))
-      },
-      onSearchClick = {
-        dispatch(v(search.panel_fsm, search.submit, it))
-      },
-      isSearchBarActive = sb[common.state] as Boolean,
-      onActiveChange = {
-        dispatch(v(search.panel_fsm, v(search.activate_searchBar, it)))
-      },
-      onTrailingClick = {
-        dispatch(v(search.panel_fsm, search.clear_search_input))
-      },
-      onLeadingClick = {
-        dispatch(v(search.panel_fsm, search.back_press_search))
-      },
-      suggestions = sb[searchBar.suggestions] as List<String>,
-      onSuggestionClick = { selectedSuggestion ->
-        // FIXME: Move cursor to the end of text.
-        dispatch(
-          v(
-            search.panel_fsm,
-            search.update_search_input,
-            selectedSuggestion
-          )
-        )
-      }
-    )
-  } else {
-    TyTopBar(topAppBarScrollBehavior)
-  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -245,15 +173,95 @@ private fun TyTopBar(
   )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TyTopBar(
+  topSearchBar: SearchBar?,
+  topAppBarScrollBehavior: TopAppBarScrollBehavior
+) {
+  RegSearchEvents()
+
+  DisposableEffect(Unit) {
+    regBounceFx()
+    regHttpKtor()
+    regPagingFx()
+
+    onDispose {
+      clearFx(bounce.fx)
+      clearFx(ktor.http_fx)
+      clearFx(paging.fx)
+    }
+  }
+
+  if (topSearchBar != null) {
+    val searchBarScope = rememberCoroutineScope()
+    RegCofx(search.coroutine_scope) { cofx ->
+      cofx.assoc(search.coroutine_scope, searchBarScope)
+    }
+    TySearchBar(
+      searchQuery = topSearchBar[searchBar.query] as String,
+      onQueryChange = {
+        dispatchSync(v(search.panel_fsm, search.update_search_input, it))
+      },
+      onSearchClick = {
+        dispatch(v(search.panel_fsm, search.submit, it))
+      },
+      isSearchBarActive = topSearchBar[common.state] as Boolean,
+      onActiveChange = {
+        dispatch(v(search.panel_fsm, v(search.activate_searchBar, it)))
+      },
+      onTrailingClick = {
+        dispatch(v(search.panel_fsm, search.clear_search_input))
+      },
+      onLeadingClick = {
+        dispatch(v(search.panel_fsm, search.back_press_search))
+      },
+      suggestions = topSearchBar[searchBar.suggestions] as List<String>,
+      onSuggestionClick = { selectedSuggestion ->
+        // FIXME: Move cursor to the end of text.
+        dispatch(
+          v(
+            search.panel_fsm,
+            search.update_search_input,
+            selectedSuggestion
+          )
+        )
+      }
+    )
+  } else {
+    TyTopBar(topAppBarScrollBehavior)
+  }
+}
+
 @Composable
 private fun TyBottomBar(
   modifier: Modifier = Modifier,
-  onClickNavItem: (navItemRoute: String) -> Unit
+  onClickNavItem: (navItemRoute: String) -> Unit,
+  sheetOffset: () -> Float
 ) {
+  val density = LocalDensity.current
+  val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+  val bottomBarHeightPx = remember(density) {
+    with(density) { BOTTOM_BAR_HEIGHT.toPx() }
+  }
+  val screenHeightPx = remember(density, screenHeightDp) {
+    with(density) { screenHeightDp.toPx() }
+  }
+  val bottomHeight = remember(density) {
+    with(density) { bottomBarHeightPx + 56.dp.toPx() }
+  }
   val colorScheme = MaterialTheme.colorScheme
   val borderColor: Color = colorScheme.outlineVariant
   TyNavigationBar(
-    modifier = modifier,
+    modifier = modifier
+      .graphicsLayer {
+        translationY = -lerp(
+          sheetYOffset = sheetOffset(),
+          traverse = screenHeightPx - bottomHeight,
+          start = -bottomBarHeightPx,
+          end = 0f
+        )
+      },
     isCompact = true,
     borderColor = borderColor
   ) { itemsModifier ->
@@ -294,7 +302,8 @@ private fun TyBottomBar(
 }
 
 @Composable
-private fun screenDimensions(density: Density): Pair<Float, Float> {
+private fun screenDimensions(): Pair<Float, Float> {
+  val density = LocalDensity.current
   val configuration = LocalConfiguration.current
   return remember(configuration, density) {
     with(density) {
@@ -304,51 +313,70 @@ private fun screenDimensions(density: Density): Pair<Float, Float> {
   }
 }
 
+fun lerpRGB(from: Color, to: Color, t: Float): Color = Color(
+  red = from.red + (to.red - from.red) * t,
+  green = from.green + (to.green - from.green) * t,
+  blue = from.blue + (to.blue - from.blue) * t,
+  alpha = from.alpha + (to.alpha - from.alpha) * t
+)
+
 @Composable
-private fun screenMask(
-  screenHeightPx: Float,
-  density: Density,
-  bottomSheetOffset: Float,
-  playerState: PlayerSheetState?
-): Float {
-  val third = remember(screenHeightPx) { screenHeightPx / 3f }
-  val traverse = remember(third, density) {
-    third - with(density) { (56 + 48).dp.toPx() }
+fun StatusBarColorEffect(screenHeightPx: Float, sheetOffset: () -> Float) {
+  val view = LocalView.current
+  val colorScheme = MaterialTheme.colorScheme
+  val background = colorScheme.background
+  val isDarkTheme = isSystemInDarkTheme()
+
+  val density = LocalDensity.current
+  val minValue = remember {
+    with(density) {
+      (MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT).toPx()
+    }
   }
-  val threshold = remember(screenHeightPx) { screenHeightPx - third }
-  return remember(bottomSheetOffset, screenHeightPx, threshold) {
-    when {
-      playerState == null -> 0f
-      bottomSheetOffset < threshold -> .5f
-      else -> {
-        lerp(
-          sheetYOffset = bottomSheetOffset - threshold,
-          traverse = traverse,
-          start = .5f,
-          end = 0f
-        )
-      }
+  val maxValue = remember(screenHeightPx) { screenHeightPx - minValue }
+  val n = (sheetOffset() - minValue) / (maxValue - minValue)
+  LaunchedEffect(isDarkTheme, n) {
+    val color = lerpRGB(Color.Black, background, n.coerceIn(0f, 1f))
+    val window = (view.context as Activity).window
+    window.statusBarColor = color.toArgb()
+    WindowCompat.getInsetsController(window, view).apply {
+      isAppearanceLightStatusBars =
+        if (color == Color.Black) false else !isDarkTheme
     }
   }
 }
 
 @Composable
-fun StatusBarEffect(playerState: PlayerSheetState?) {
-  val view = LocalView.current
-  val background = MaterialTheme.colorScheme.background
-  val isDarkTheme = isSystemInDarkTheme()
-  LaunchedEffect(isDarkTheme, playerState) {
-    val window = (view.context as Activity).window
-    val (statusBarColor, foregroundColorStatusBar) = when (playerState) {
-      PlayerSheetState.EXPANDED -> Pair(Color.Black.toArgb(), false)
-
-      else -> Pair(background.toArgb(), !isDarkTheme)
-    }
-    window.statusBarColor = statusBarColor
-    WindowCompat.getInsetsController(window, view).apply {
-      isAppearanceLightStatusBars = foregroundColorStatusBar
+fun SheetBackgroundMask(
+  screenHeightPx: Float,
+  sheetOffset: () -> Float
+) {
+  val density = LocalDensity.current
+  val third = remember(screenHeightPx) { screenHeightPx / 3f }
+  val threshold = remember(third) { screenHeightPx - third }
+  val traverse = remember(third, density) {
+    third - with(density) {
+      (MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT).toPx()
     }
   }
+  Box(
+    modifier = Modifier
+      .fillMaxSize()
+      .drawBehind {
+        val offset = sheetOffset()
+        val alpha = when {
+          offset < threshold -> .5f
+          else -> lerp(
+            sheetYOffset = offset - threshold,
+            traverse = traverse,
+            start = .5f,
+            end = 0f
+          )
+        }
+
+        drawRect(Color.Black.copy(alpha = alpha))
+      }
+  )
 }
 
 @Composable
@@ -362,68 +390,61 @@ fun TyMain(
   appContext: Context,
   windowSizeClass: WindowSizeClass
 ) {
-  RegNavFx(navController)
-  RegNavCofx(navController)
-
   RegWatchEvents()
   RegWatchSubs()
 
+  val screenDim = screenDimensions()
   val density = LocalDensity.current
-  val playbackFsm = watch<IPersistentMap<Any, Any>>(v("stream_panel_fsm"))
-  val playbackMachine = get<Any>(playbackFsm, fsm._state)
-  val playerState = get<PlayerSheetState>(playbackMachine, ":player_sheet")
-
-  StatusBarEffect(playerState)
-
-  val screenDim = screenDimensions(density)
-  val activeStream = watch<UIState>(v("active_stream", appContext, screenDim))
-  val showThumbnail = get<Boolean>(playbackFsm, "show_player_thumbnail")
-  val activeStreamCache = watch<VideoVm>(v("active_stream_vm"))
-
-  val orientation = LocalConfiguration.current.orientation
+  val nowPlayingStream =
+    watch<UIState?>(v(":now_playing_stream", appContext, screenDim, density))
 
   // WARNING: this must be called before landscape video player
+  val bottomSheetState = rememberStandardBottomSheetState(
+    initialValue = SheetValue.Hidden,
+    skipHiddenState = false
+  )
   val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-    bottomSheetState = rememberStandardBottomSheetState(
-      initialValue = SheetValue.Hidden,
-      skipHiddenState = false
-    )
+    bottomSheetState = bottomSheetState
   )
 
+  /*
+    val orientation = LocalConfiguration.current.orientation
+    if (orientation == ORIENTATION_LANDSCAPE &&
+      playerState == PlayerSheetState.EXPANDED
+    ) {
+      VideoPlayer(
+        modifier = Modifier.padding(start = 24.dp),
+        streamState = activeStream,
+        showThumbnail = showThumbnail,
+        thumbnail = activeStreamCache.thumbnail
+      )
+
+      return
+    }*/
+
+  var bottomSheetOffset by remember { mutableFloatStateOf(screenDim.second) }
+
   val playerScope = rememberCoroutineScope()
-  RegCofx("player_scope", playerScope) { cofx ->
+  RegCofx(id = "player_scope", key1 = playerScope) { cofx ->
     cofx.assoc("player_scope", playerScope)
   }
 
-  val playerBottomSheetExpanded = playerState == PlayerSheetState.EXPANDED
-  if (orientation == ORIENTATION_LANDSCAPE && playerBottomSheetExpanded) {
-    VideoPlayer(
-      modifier = Modifier.padding(start = 24.dp),
-      streamState = activeStream,
-      showThumbnail = showThumbnail,
-      thumbnail = activeStreamCache.thumbnail
-    )
-
-    return
+  LaunchedEffect(Unit) {
+    snapshotFlow { bottomSheetState.requireOffset() }.collect {
+      bottomSheetOffset = it
+    }
   }
-
-  val playerSheetState = bottomSheetScaffoldState.bottomSheetState
-
-  var bottomSheetOffset by remember { mutableFloatStateOf(0f) }
 
   LaunchedEffect(Unit) {
-    playerScope.launch {
-      snapshotFlow { playerSheetState.requireOffset() }.collect {
-        bottomSheetOffset = it
-      }
-    }
-
-    playerScope.launch {
-      snapshotFlow { playerSheetState.currentValue }.collect {
-        dispatch(v("stream_panel_fsm", it))
-      }
+    snapshotFlow { bottomSheetState.currentValue }.collect {
+      dispatch(v("stream_panel_fsm", v("now_playing_sheet", it)))
     }
   }
+
+  StatusBarColorEffect(
+    screenHeightPx = screenDim.second,
+    sheetOffset = { bottomSheetOffset }
+  )
 
   Scaffold(
     modifier = Modifier
@@ -434,34 +455,16 @@ fun TyMain(
         testTagsAsResourceId = true
       },
     bottomBar = {
-      val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
-      val bottomBarHeightPx = remember(density) {
-        with(density) { BOTTOM_BAR_HEIGHT.toPx() }
-      }
-      val screenHeightPx = remember(density, screenHeightDp) {
-        with(density) { screenHeightDp.toPx() }
-      }
-      val bottomHeight = remember(density) {
-        with(density) { bottomBarHeightPx + 56.dp.toPx() }
-      }
-
       TyBottomBar(
         modifier = Modifier
-          .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal))
-          .graphicsLayer {
-            translationY = -lerp(
-              sheetYOffset = bottomSheetOffset,
-              traverse = screenHeightPx - bottomHeight,
-              start = -bottomBarHeightPx,
-              end = 0f
-            )
-          },
+          .windowInsetsPadding(WindowInsets.safeDrawing.only(Horizontal)),
         onClickNavItem = { navItemRoute ->
           dispatch(v(common.on_click_nav_item, navItemRoute))
-        }
+        },
+        sheetOffset = { bottomSheetOffset }
       )
     }
-  ) { paddingBb ->
+  ) { padding ->
     RegSearchSubs()
     val sb = watch<SearchBar?>(v(search.search_bar))
     val isCompact = isCompact(windowSizeClass)
@@ -470,64 +473,33 @@ fun TyMain(
       isSearchScreen = sb != null,
       isCompactDisplay = isCompact
     )
-
-    RegPlayerSheetEffects(playerSheetState)
-    val bottomNavBarPadding = when (playerState) {
-      null -> paddingBb.calculateBottomPadding()
-      else -> 0.dp
-    }
-    BottomSheetScaffold(
-      sheetContent = {
-        val sheetPeekHeight = with(density) {
-          get<Float>(activeStream.data, ":desc_sheet_height")?.toDp()
-            ?: 0.toDp()
-        }
-
-        NowPlayingSheet(
-          modifier = Modifier
-            .padding(PaddingValues(bottom = bottomNavBarPadding)),
-          isCollapsed = playerState == PlayerSheetState.COLLAPSED,
-          onCollapsedClick = {
-            dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
-          },
-          activeStream = activeStream,
-          activeStreamCache = activeStreamCache,
-          showThumbnail = showThumbnail,
-          sheetPeekHeight = sheetPeekHeight,
-          sheetOffset = { bottomSheetOffset },
-          onClickClosePlayer = {
-            dispatch(v(common.close_player))
-          }
-        )
-      },
+    NowPlayingScaffold(
       modifier = Modifier
-        .padding(bottom = bottomNavBarPadding)
         .fillMaxSize()
         .nestedScroll(topBarScrollBehavior.nestedScrollConnection),
+      nowPlayingStream = nowPlayingStream,
       scaffoldState = bottomSheetScaffoldState,
-      sheetPeekHeight = remember(playerState) {
-        if (playerState == null) {
-          0.dp
-        } else {
-          MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT
-        }
-      },
-      sheetDragHandle = null,
-      sheetShape = RoundedCornerShape(0.dp)
+      bottomSheetOffset = { bottomSheetOffset }
     ) {
       Box {
         Scaffold(
-          modifier = Modifier
-            .nestedScroll(topBarScrollBehavior.nestedScrollConnection),
           topBar = {
-            TyTopBar(sb, topBarScrollBehavior)
+            TyTopBar(
+              topSearchBar = sb,
+              topAppBarScrollBehavior = topBarScrollBehavior
+            )
           }
         ) { paddingTb ->
+          RegNavFx(navController)
+          RegNavCofx(navController)
           TyNavHost(
             navController = navController,
             modifier = Modifier
               .fillMaxSize()
-              .padding(top = paddingTb.calculateTopPadding())
+              .padding(
+                top = paddingTb.calculateTopPadding(),
+                bottom = padding.calculateBottomPadding()
+              )
               .consumeWindowInsets(paddingTb)
               .windowInsetsPadding(
                 WindowInsets.safeDrawing.only(Horizontal + Vertical)
@@ -545,23 +517,16 @@ fun TyMain(
             dispatch(v(search.panel_fsm, search.back_press_search))
           }
 
-          BackHandler(enabled = playerBottomSheetExpanded) {
-            dispatch(v("stream_panel_fsm", common.minimize_player))
+          BackHandler(
+            enabled = bottomSheetState.currentValue == SheetValue.Expanded
+          ) {
+            dispatch(v<Any>("stream_panel_fsm", common.minimize_player))
           }
         }
 
-        val alpha = screenMask(
+        SheetBackgroundMask(
           screenHeightPx = screenDim.second,
-          density = density,
-          bottomSheetOffset = bottomSheetOffset,
-          playerState = playerState
-        )
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .drawBehind {
-              drawRect(Color.Black.copy(alpha = alpha))
-            }
+          sheetOffset = { bottomSheetOffset }
         )
       }
     }

@@ -12,8 +12,6 @@ import io.github.yahyatinani.tubeyou.common.AppDb
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 
-enum class PlayerSheetState { COLLAPSED, EXPANDED }
-
 fun expandPlayerSheet(
   appDb: AppDb,
   state: State?,
@@ -28,30 +26,34 @@ fun collapsePlayerSheet(appDb: AppDb, state: State?, event: Event): Effects =
 
 @OptIn(ExperimentalMaterial3Api::class)
 val bottomSheetMachine = m(
-  PlayerSheetState.EXPANDED to m(
-    SheetValue.PartiallyExpanded to m(fsm.target to PlayerSheetState.COLLAPSED),
+  SheetValue.Expanded to m(
+    v("now_playing_sheet", SheetValue.PartiallyExpanded) to m(
+      fsm.target to SheetValue.PartiallyExpanded
+    ),
     common.minimize_player to m(
-      fsm.target to PlayerSheetState.COLLAPSED,
+      fsm.target to SheetValue.PartiallyExpanded,
       fsm.actions to ::collapsePlayerSheet
     )
   ),
-  PlayerSheetState.COLLAPSED to m(
+  SheetValue.PartiallyExpanded to m(
     common.expand_player_sheet to m(
-      fsm.target to PlayerSheetState.EXPANDED,
+      fsm.target to SheetValue.Expanded,
       fsm.actions to ::expandPlayerSheet
     ),
-    SheetValue.Expanded to m(fsm.target to PlayerSheetState.EXPANDED)
+    v("now_playing_sheet", SheetValue.Expanded) to m(
+      fsm.target to SheetValue.Expanded
+    )
   ),
   fsm.ALL to m(
     common.play_video to m(
-      fsm.target to PlayerSheetState.EXPANDED,
+      fsm.target to SheetValue.Expanded,
       fsm.actions to ::expandPlayerSheet
     ),
     common.close_player to m(
       fsm.target to null,
       fsm.actions to ::hidePlayerSheet
     ),
-    SheetValue.Hidden to m(
+    v("now_playing_sheet", SheetValue.Hidden) to m(
       fsm.target to null,
       fsm.actions to ::hidePlayerSheet
     )

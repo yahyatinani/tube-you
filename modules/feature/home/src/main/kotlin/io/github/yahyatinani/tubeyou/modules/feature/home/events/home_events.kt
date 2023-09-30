@@ -40,7 +40,7 @@ fun RegHomeEvents() {
           ktor.http_fx,
           m(
             ktor.method to HttpMethod.Get,
-            ktor.url to "${appDb[ty_db.api_url]}/trending?region=$region",
+            ktor.url to "${appDb[ty_db.api_url]}/trending?region=US", // fixme:
             ktor.timeout to 8000,
             ktor.coroutine_scope to cofx[home.coroutine_scope],
             ktor.response_type_info to typeInfo<PersistentVector<Video>>(),

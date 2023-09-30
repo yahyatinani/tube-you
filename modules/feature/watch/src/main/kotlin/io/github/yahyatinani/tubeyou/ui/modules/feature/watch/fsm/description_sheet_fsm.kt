@@ -5,45 +5,64 @@ import androidx.compose.material3.SheetValue
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
 import io.github.yahyatinani.recompose.events.Event
 import io.github.yahyatinani.recompose.fsm.State
-import io.github.yahyatinani.recompose.fsm.fsm
-import io.github.yahyatinani.recompose.fx.BuiltInFx
+import io.github.yahyatinani.recompose.fsm.fsm.ALL
+import io.github.yahyatinani.recompose.fsm.fsm.actions
+import io.github.yahyatinani.recompose.fsm.fsm.target
+import io.github.yahyatinani.recompose.fx.BuiltInFx.fx
 import io.github.yahyatinani.recompose.fx.Effects
 import io.github.yahyatinani.tubeyou.common.AppDb
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 
-fun expandDescriptionSheet(
+fun partExpandDescriptionSheet(
   appDb: AppDb,
   state: State?,
   event: Event
-): Effects = m(BuiltInFx.fx to v(v("half_expand_desc_sheet")))
+): Effects = m(fx to v(v("half_expand_desc_sheet")))
+
+fun fullExpandDescriptionSheet(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects = m(fx to v(v("expand_desc_sheet")))
 
 fun closeDescriptionSheet(
   appDb: AppDb,
   state: State?,
   event: Event
-): Effects = m(BuiltInFx.fx to v(v("close_desc_sheet")))
+): Effects = m(fx to v(v("close_desc_sheet")))
 
 @OptIn(ExperimentalMaterial3Api::class)
 val descriptionSheetMachine = m(
   null to m(),
-  SheetValue.Hidden to m(),
-  fsm.ALL to m(
+  SheetValue.PartiallyExpanded to m(
+    "toggle_desc_expansion" to m(
+      target to SheetValue.Expanded,
+      actions to ::fullExpandDescriptionSheet
+    )
+  ),
+  SheetValue.Expanded to m(
+    "toggle_desc_expansion" to m(
+      target to SheetValue.PartiallyExpanded,
+      actions to ::partExpandDescriptionSheet
+    )
+  ),
+  ALL to m(
     "half_expand_desc_sheet" to m(
-      fsm.target to SheetValue.PartiallyExpanded,
-      fsm.actions to ::expandDescriptionSheet
+      target to SheetValue.PartiallyExpanded,
+      actions to ::partExpandDescriptionSheet
     ),
     "close_desc_sheet" to m(
-      fsm.target to SheetValue.Hidden,
-      fsm.actions to ::closeDescriptionSheet
+      target to SheetValue.Hidden,
+      actions to ::closeDescriptionSheet
     ),
     common.close_player to m(
-      fsm.target to SheetValue.Hidden,
-      fsm.actions to ::closeDescriptionSheet
+      target to SheetValue.Hidden,
+      actions to ::closeDescriptionSheet
     ),
     common.play_video to m(
-      fsm.target to SheetValue.Hidden,
-      fsm.actions to ::closeDescriptionSheet
+      target to SheetValue.Hidden,
+      actions to ::closeDescriptionSheet
     )
   )
 )

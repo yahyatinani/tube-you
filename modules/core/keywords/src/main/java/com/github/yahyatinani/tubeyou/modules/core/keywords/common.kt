@@ -30,7 +30,8 @@ enum class common {
   auto_scroll_up,
   error,
   show_top_settings_popup,
-  hide_top_settings_popup;
+  hide_top_settings_popup,
+  is_loading;
 
   override fun toString(): String = ":${javaClass.simpleName}/$name"
 }

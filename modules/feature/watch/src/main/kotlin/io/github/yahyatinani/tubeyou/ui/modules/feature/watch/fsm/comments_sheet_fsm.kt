@@ -14,7 +14,13 @@ import io.github.yahyatinani.tubeyou.common.AppDb
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 
-fun expandCommentsSheet(
+fun fullExpandCommentsSheet(
+  appDb: AppDb,
+  state: State?,
+  event: Event
+): Effects = m(fx to v(v("expand_comments_sheet")))
+
+fun partExpandCommentsSheet(
   appDb: AppDb,
   state: State?,
   event: Event
@@ -28,12 +34,43 @@ fun closeCommentsSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 val commentsSheetMachine = m(
-  fsm.ALL to m(
+  null to m(
+    "half_expand_comments_sheet" to m(
+      target to "Expanding",
+      actions to ::partExpandCommentsSheet
+    ),
+    v("comments_sheet", SheetValue.PartiallyExpanded) to m(
+      target to SheetValue.PartiallyExpanded,
+      actions to ::fullExpandCommentsSheet
+    )
+  ),
+  SheetValue.Hidden to m(
     "half_expand_comments_sheet" to m(
       target to SheetValue.PartiallyExpanded,
-      actions to ::expandCommentsSheet
+      actions to ::partExpandCommentsSheet
+    )
+  ),
+  SheetValue.PartiallyExpanded to m(
+    "toggle_comments_expansion" to m(
+      target to SheetValue.Expanded,
+      actions to ::fullExpandCommentsSheet
+    )
+  ),
+  SheetValue.Expanded to m(
+    "toggle_comments_expansion" to m(
+      target to SheetValue.PartiallyExpanded,
+      actions to ::partExpandCommentsSheet
+    )
+  ),
+  fsm.ALL to m(
+    v("comments_sheet", SheetValue.PartiallyExpanded) to m(
+      target to SheetValue.PartiallyExpanded
     ),
     "close_comments_sheet" to m(
+      target to SheetValue.Hidden,
+      actions to ::closeCommentsSheet
+    ),
+    v("comments_sheet", SheetValue.Hidden) to m(
       target to SheetValue.Hidden,
       actions to ::closeCommentsSheet
     ),
@@ -41,9 +78,6 @@ val commentsSheetMachine = m(
       target to SheetValue.Hidden,
       actions to ::closeCommentsSheet
     ),
-    common.play_video to m(
-      target to SheetValue.Hidden,
-      actions to ::closeCommentsSheet
-    )
+    common.play_video to m(target to null, actions to ::closeCommentsSheet)
   )
 )

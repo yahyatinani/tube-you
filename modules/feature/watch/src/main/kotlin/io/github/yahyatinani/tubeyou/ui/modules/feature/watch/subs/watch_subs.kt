@@ -1,12 +1,23 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs
 
 import android.content.Context
+import android.content.res.Configuration
+import android.text.Spanned
 import android.text.SpannedString
 import android.text.TextPaint
 import android.text.style.URLSpan
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.media3.common.MimeTypes
@@ -33,12 +44,15 @@ import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.dash.createDashSou
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.COMMENTS_ROUTE
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.ListState
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.StreamState
+import io.github.yahyatinani.y.core.assoc
+import io.github.yahyatinani.y.core.collections.Associative
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.collections.PersistentArrayMap
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.getIn
 import io.github.yahyatinani.y.core.l
 import io.github.yahyatinani.y.core.m
+import io.github.yahyatinani.y.core.selectKeys
 import io.github.yahyatinani.y.core.v
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -199,47 +213,96 @@ private class URLSpanNoUnderline(url: String?) : URLSpan(url) {
   }
 }
 
+fun height(stream: StreamData) = stream.videoStreams.firstOrNull {
+  val codec: String? = it.codec
+  codec != null && codec.contains("avc1")
+}?.height ?: 0
+
+private val Delta = 18.dp
+
+/**
+ * e.g.: 2023-10-03
+ */
+val DateRegex = "\\d{2,4}-\\d{1,2}-\\d{1,2}".toRegex()
+
+private fun year(uploadDate: String) = DateRegex.find(uploadDate)
+  ?.groupValues
+  ?.first()
+  ?.toLocalDate()
+  ?.year.toString()
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun RegWatchSubs() {
-  regSub(queryId = "stream_panel_fsm") { db: AppDb, _: Query ->
+  regSub("stream_panel_fsm") { db: AppDb, _: Query ->
     db["stream_panel_fsm"]
   }
 
-  regSub(queryId = "active_stream_vm") { db: AppDb, _: Query ->
+  regSub("active_stream_vm") { db: AppDb, _: Query ->
     get<VideoVm>(db["stream_panel_fsm"], "active_stream")
       ?: VideoVm()
   }
 
-  regSub<IPersistentMap<Any, Any>, UIState>(
-    queryId = "active_stream",
-    initialValue = UIState(m(common.state to StreamState.LOADING)),
-    inputSignal = v("stream_panel_fsm")
-  ) { streamPanelFsm: IPersistentMap<Any, Any>?, _, (_, context, screenDim) ->
-    val machineState = get<Any>(streamPanelFsm, fsm._state)
-    val playerRegion = get<Any>(machineState, ":player")
-      ?: return@regSub UIState(m<Any, Any>())
+  regSub(":stream_fsm") { db: AppDb, _: Query ->
+    val streamPanelFsm = db["stream_panel_fsm"]
+    selectKeys(
+      streamPanelFsm,
+      l(
+        "stream_data",
+        "current_quality",
+        "quality_list",
+        "active_stream",
+        "show_player_thumbnail"
+      )
+    ).assoc(
+      ":player_state",
+      get<StreamState>(get<Any>(streamPanelFsm, fsm._state), ":player")
+    )
+  }
 
-    if (playerRegion == StreamState.LOADING) {
-      return@regSub UIState(m(common.state to StreamState.LOADING))
+  regSub("is_player_sheet_minimized") { db: AppDb, _: Query ->
+    get<SheetValue>(
+      get<Any>(db["stream_panel_fsm"], fsm._state),
+      ":player_sheet"
+    ) == PartiallyExpanded
+  }
+
+  regSub<UIState?>(
+    queryId = ":now_playing_stream",
+    initialValue = null,
+    v(":stream_fsm")
+  ) { signals, _, (_, context) ->
+    val streamFsm = get<IPersistentMap<Any, Any>>(signals, 0)
+    val playerRegionState = get<StreamState>(streamFsm, ":player_state")
+      ?: return@regSub null
+
+    val activeStream = get<VideoVm>(streamFsm, "active_stream")!!
+
+    if (playerRegionState == StreamState.LOADING) {
+      return@regSub UIState(
+        m(
+          common.is_loading to true,
+          Stream.thumbnail to activeStream.thumbnail,
+          Stream.title to activeStream.title,
+          Stream.views to activeStream.viewCount,
+          "show_player_thumbnail" to true
+        )
+      )
     }
 
-    val stream = get<StreamData>(streamPanelFsm, "stream_data")!!
+    val stream = get<StreamData>(streamFsm, "stream_data")!!
     val ratio = ratio(stream)
-    val (w, h) = (screenDim as Pair<Float, Float>)
-    val currentQuality = streamPanelFsm!!["current_quality"]
-    val ql = get<List<Pair<String, Int>>>(streamPanelFsm, "quality_list") ?: l()
+    val currentQuality = streamFsm!!["current_quality"]
+    val ql = get<List<Pair<String, Int>>>(streamFsm, "quality_list") ?: l()
     val qualityList = ql.map {
-      val a = if (currentQuality == it.second) "${it.first} ✓" else it.first
-      a to it.second
+      when (currentQuality) {
+        it.second -> "${it.first} ✓"
+        else -> it.first
+      } to it.second
     }
-
-    val cq = if (currentQuality == null) "" else "${currentQuality}p"
-
-    val viewModel = get<VideoVm>(streamPanelFsm, "active_stream")!!
 
     val views = formatViews(stream.views).let {
-      if (viewModel.isLiveStream) {
+      if (activeStream.isLiveStream) {
         it + " watching" + " Started ${timeAgoFormat(stream.uploadDate)}"
       } else {
         "$it views"
@@ -253,35 +316,36 @@ fun RegWatchSubs() {
         is Playlist -> formatPlayList(item)
       }
     }
+    val showThumbnail =
+      get<Boolean>(streamFsm, "show_player_thumbnail") ?: false
     val m = m(
-      common.state to playerRegion,
+      common.state to playerRegionState,
       Stream.title to stream.title,
       Stream.uploader to stream.uploader,
-      Stream.thumbnail to stream.thumbnailUrl,
+      Stream.thumbnail to activeStream.thumbnail,
       Stream.quality_list to qualityList,
-      Stream.current_quality to cq,
+      Stream.current_quality to when (currentQuality) {
+        null -> ""
+        else -> "${currentQuality}p"
+      },
       Stream.aspect_ratio to ratio,
-      "height" to (
-        stream.videoStreams.firstOrNull {
-          val codec: String? = it.codec
-          codec != null && codec.contains("avc1")
-        }?.height ?: 0
-        ),
       Stream.views to views,
-      Stream.date to shortenTime(viewModel.uploaded),
-      Stream.channel_name to viewModel.uploaderName,
+      Stream.date to shortenTime(activeStream.uploaded),
+      Stream.channel_name to activeStream.uploaderName,
       Stream.avatar to (stream.uploaderAvatar ?: ""),
       Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
       Stream.likes_count to formatViews(stream.likes),
       Stream.views_full to formatFullViews(stream.views),
-      Stream.year to stream.uploadDate.toLocalDate().year.toString(),
+      Stream.year to year(uploadDate = stream.uploadDate),
       Stream.month_day to formatToMonthDay(stream.uploadDate),
+      Stream.related_streams to relatedStreams,
       Stream.description to HtmlCompat.fromHtml(
         stream.description,
         HtmlCompat.FROM_HTML_MODE_LEGACY
       ),
-      Stream.related_streams to relatedStreams,
-      ":desc_sheet_height" to h - (w / ratio)
+      common.is_loading to false,
+      "show_player_thumbnail" to showThumbnail,
+      "height" to height(stream)
     )
 
     UIState(
@@ -305,56 +369,188 @@ fun RegWatchSubs() {
     )
   }
 
-  regSub("description_sheet") { db: AppDb, _: Query ->
-    val playbackFsm = db["stream_panel_fsm"]
-    val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val commentsSheet =
-      get<SheetValue>(playbackMachine, ":description_sheet")
-    commentsSheet ?: SheetValue.Hidden
+  // description sheet:
+
+  val context = LocalContext.current
+  regSub<UIState?, Any?>(
+    queryId = "description_state",
+    initialValue = null,
+    inputSignal = v(":now_playing_stream", context)
+  ) { input, _, _ ->
+    if (input == null) return@regSub null
+
+    val data = input.data
+    val isLoading = get(data, common.is_loading, false)!!
+
+    if (isLoading) {
+      return@regSub UIState(
+        m(
+          Stream.title to "",
+          Stream.likes_count to "",
+          Stream.views_full to "",
+          Stream.month_day to "",
+          Stream.year to "",
+          Stream.description to "",
+          Stream.avatar to "",
+          Stream.sub_count to "",
+          Stream.channel_name to ""
+        )
+      )
+    }
+
+    UIState(
+      data = selectKeys(
+        data,
+        l(
+          Stream.title,
+          Stream.likes_count,
+          Stream.views_full,
+          Stream.month_day,
+          Stream.year,
+          Stream.description,
+          Stream.avatar,
+          Stream.sub_count,
+          Stream.channel_name
+        )
+      )
+    )
   }
 
-  regSub("comments_sheet") { db: AppDb, _: Query ->
-    val playbackFsm = db["stream_panel_fsm"]
-    val playbackMachine = get<Any>(playbackFsm, fsm._state)
-    val commentsSheet =
-      get<SheetValue>(playbackMachine, ":comments_sheet")
-    commentsSheet ?: SheetValue.Hidden
+  regSub(queryId = "description_sheet_fsm_state") { db: AppDb, _: Query ->
+    get(
+      get<Any>(db["stream_panel_fsm"], fsm._state),
+      ":description_sheet",
+      SheetValue.Hidden
+    )!!
   }
 
-  val loadingState = UIState(m(common.state to ListState.LOADING))
+  val defaultSheetPeekHeight = defaultSheetPeekHeight()
+  val initSheetState = UIState(
+    m(
+      ":sheet_peak_height" to defaultSheetPeekHeight,
+      ":sheet_content_height" to 0.dp
+    )
+  )
 
-  regSub<IPersistentMap<Any, Any>, UIState>(
-    queryId = Stream.comments,
-    initialValue = loadingState,
-    inputSignal = v("stream_panel_fsm")
-  ) { panelFsm: IPersistentMap<Any, Any>?, prev, _ ->
-    val fsmStates = get<Any>(panelFsm, fsm._state)
+  regSub(
+    queryId = "description_sheet_state",
+    initialValue = initSheetState,
+    v("description_sheet_fsm_state"),
+    v(":stream_fsm")
+  ) { (descSheetState, streamFsm), _, (_, cfg, density) ->
+    val (w, h) = with(density as Density) {
+      (cfg as Configuration).screenWidthDp.dp.toPx() to
+        cfg.screenHeightDp.dp.toPx()
+    }
+    if (descSheetState == SheetValue.Hidden) {
+      return@regSub initSheetState
+    }
+
+    val stream = get<StreamData>(streamFsm, "stream_data")!!
+    val sheetPeekHeight = with(density) { (h - (w / ratio(stream))).toDp() }
+    UIState(
+      m(
+        ":desc_sheet_value" to descSheetState,
+        ":is_desc_sheet_open" to (descSheetState != SheetValue.Hidden),
+        ":sheet_peak_height" to sheetPeekHeight,
+        ":sheet_content_height" to when (descSheetState) {
+          PartiallyExpanded -> sheetPeekHeight - Delta
+          else -> Dp.Unspecified
+        }
+      )
+    )
+  }
+
+  // comments sheet:
+
+  regSub(queryId = ":comments_stream_data") { db: AppDb, _: Query ->
+    val streamPanelFsm = db["stream_panel_fsm"]
+    val listState = get(
+      get<Any>(streamPanelFsm, fsm._state),
+      ":comments_list",
+      ListState.LOADING
+    )!!
+    selectKeys(
+      streamPanelFsm,
+      l("stream_data", "stream_comments")
+    ).assoc(":comments_list_fsm_state", listState)
+  }
+
+  regSub<Any>(
+    queryId = ":comments_section",
+    initialValue = ListState.LOADING,
+    v(":comments_stream_data")
+  ) { (streamData), currentValue, _ ->
     val commentsListState =
-      get(fsmStates, ":comments_list") ?: ListState.LOADING
-
-    val commentsSheet = get(fsmStates, ":comments_sheet") ?: SheetValue.Hidden
-    val commentsState: IPersistentMap<Any?, Any?> = when (commentsListState) {
-      ListState.LOADING -> m()
-      ListState.REFRESHING, ListState.APPENDING -> {
-        prev.data as IPersistentMap<Any?, Any?>
-      }
+      get<ListState>(streamData, ":comments_list_fsm_state")
+    when (commentsListState as ListState) {
+      ListState.LOADING -> ListState.LOADING
+      ListState.REFRESHING, ListState.APPENDING -> currentValue
 
       ListState.READY -> {
-        val sc = get<StreamComments>(panelFsm, "stream_comments")!!
-        val stream = get<StreamData>(panelFsm, "stream_data")
-        val comments = sc.comments.map { comment ->
-          UIState(mapComment(comment, stream))
-        }
+        highlightComment(get<StreamComments>(streamData, "stream_comments")!!)
+      }
+    }
+  }
 
+  regSub("comments_sheet_fsm_state") { db: AppDb, _: Query ->
+    get(get<Any>(db["stream_panel_fsm"], fsm._state), ":comments_sheet")
+  }
+
+  regSub(
+    queryId = "comments_sheet_state",
+    initialValue = initSheetState,
+    v("comments_sheet_fsm_state"),
+    v(":stream_fsm")
+  ) { (sheetState, streamFsm), _, (_, cfg, density) ->
+    if (sheetState == null) return@regSub initSheetState
+    if (sheetState == SheetValue.Hidden) return@regSub initSheetState
+
+    val sheetPeekHeight = with(density as Density) {
+      val w = (cfg as Configuration).screenWidthDp.dp.toPx()
+      val h = cfg.screenHeightDp.dp.toPx()
+      (h - (w / ratio(get<StreamData>(streamFsm, "stream_data")!!))).toDp()
+    }
+    val isSheetOpen = sheetState == SheetValue.Expanded ||
+      sheetState == PartiallyExpanded
+    val contentHeight = when (sheetState) {
+      "Expanding", PartiallyExpanded -> sheetPeekHeight - Delta
+      else -> Dp.Unspecified
+    }
+    UIState(
+      m(
+        ":sheet_value" to sheetState,
+        ":is_sheet_open" to isSheetOpen,
+        ":sheet_peak_height" to sheetPeekHeight,
+        ":sheet_content_height" to contentHeight
+      )
+    )
+  }
+
+  regSub<IPersistentMap<Any, Any>?>(
+    queryId = Stream.comments,
+    initialValue = null,
+    v(":comments_stream_data"),
+    v("comments_sheet_fsm_state")
+  ) { (stream, sheetValue), prev, _ ->
+    val initCommentsList = m("is_loading" to true)
+
+    if (sheetValue == "Expanding") return@regSub initCommentsList
+
+    when (get<ListState>(stream, ":comments_list_fsm_state")!!) {
+      ListState.LOADING -> initCommentsList
+      ListState.REFRESHING -> prev!!.assoc("is_refreshing", true)
+      ListState.APPENDING -> prev!!.assoc("is_appending", true)
+
+      ListState.READY -> {
+        val streamData = get<StreamData>(stream, "stream_data")
         m(
-          "comments_list" to comments,
-          "comments_section" to highlightComment(sc),
-          ":comments_sheet" to commentsSheet
+          "comments_list" to get<StreamComments>(stream, "stream_comments")!!
+            .comments
+            .map { comment -> UIState(mapComment(comment, streamData)) }
         )
       }
     }
-
-    UIState(data = commentsState.assoc(common.state, commentsListState))
   }
 
   regSub<IPersistentMap<Any, Any>, UIState?>(
@@ -392,22 +588,50 @@ fun RegWatchSubs() {
     UIState(ret.assoc(common.state, commentRepliesState))
   }
 
-  regSub(queryId = "active_comments_route") { db: AppDb, _: Query ->
-    getIn(db, l("stream_panel_fsm", "comments_panel_route")) ?: COMMENTS_ROUTE
-  }
-
-  regSub(
+  regSub<UIState?>(
     queryId = "comments_panel",
-    initialValue = UIState(
-      m("comments" to loadingState)
-    ),
+    initialValue = null,
     v(Stream.comments),
     v(common.comment_replies)
   ) { (comments, replies), _, _ ->
-    UIState(
-      m("comments" to comments).let {
-        if (replies != null) it.assoc("replies", replies) else it
-      }
-    )
+    if (replies != null) {
+      return@regSub UIState(
+        assoc(comments as Associative<Any, Any>?, "replies" to replies)
+      )
+    }
+
+    if (comments == null) return@regSub null
+
+    UIState(comments)
+  }
+
+  regSub(queryId = "active_comments_route") { db: AppDb, _: Query ->
+    getIn(db, l("stream_panel_fsm", "comments_panel_route")) ?: COMMENTS_ROUTE
   }
 }
+
+@Composable
+private fun defaultSheetPeekHeight(): Dp {
+  val density = LocalDensity.current
+  val configuration = LocalConfiguration.current
+  return remember(density, configuration) {
+    with(density) {
+      val h = configuration.screenHeightDp.dp.toPx()
+      val w = configuration.screenWidthDp.dp.toPx()
+      (h - (w / (16 / 9f))).toDp()
+    }
+  }
+}
+
+@Immutable
+data class Description(
+  val title: String,
+  val likesCount: String,
+  val views_full: String,
+  val month_day: String,
+  val year: String,
+  val description: Spanned,
+  val avatar: String,
+  val sub_count: String,
+  val channel_name: String
+)

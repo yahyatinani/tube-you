@@ -91,14 +91,12 @@ fun VideoPlayer(
   modifier: Modifier = Modifier,
   streamState: UIState,
   useController: Boolean = true,
-  showThumbnail: Boolean?,
-  thumbnail: String?,
   orientation: Int = LocalConfiguration.current.orientation
 ) {
   var showQualityControl: Boolean by remember { mutableStateOf(false) }
   var showQualitiesSheet: Boolean by remember { mutableStateOf(false) }
 
-  val controllerVisibilityListener = remember {
+  val controllerVisibilityListener = remember(useController) {
     ControllerVisibilityListener { visibility: Int ->
       if (useController) {
         showQualityControl = visibility == View.VISIBLE
@@ -107,6 +105,9 @@ fun VideoPlayer(
   }
 
   val streamData = streamState.data as IPersistentMap<Any, Any>
+  val showThumbnail = get<Boolean>(streamData, "show_player_thumbnail") ?: false
+  val thumbnail = get<String>(streamData, Stream.thumbnail)
+
   Box(modifier = modifier) {
     val playerState = streamData[common.state]
     LaunchedEffect(streamData) {
@@ -130,7 +131,6 @@ fun VideoPlayer(
         .align(Alignment.Center),
       factory = { factoryContext ->
         PlayerView(factoryContext).apply {
-          setControllerVisibilityListener(controllerVisibilityListener)
           player = TyPlayer.getInstance()
           setShutterBackgroundColor(TRANSPARENT)
           resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
@@ -147,6 +147,8 @@ fun VideoPlayer(
         it.player = null
       },
       update = {
+        it.setControllerVisibilityListener(controllerVisibilityListener)
+
         if (it.videoSurfaceView != null) {
           it.videoSurfaceView!!.layoutParams.height = MATCH_PARENT
         }
@@ -155,7 +157,7 @@ fun VideoPlayer(
       }
     )
 
-    if (showThumbnail == true) {
+    if (showThumbnail) {
       Thumbnail(
         modifier = Modifier.wrapContentSize(),
         url = thumbnail

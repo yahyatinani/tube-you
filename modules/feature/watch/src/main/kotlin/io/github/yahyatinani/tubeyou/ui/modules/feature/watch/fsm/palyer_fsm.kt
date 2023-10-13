@@ -135,6 +135,10 @@ val playerMachine = m<Any?, Any?>(
       )
     ),
     common.close_player to m(target to null, actions to ::closePlayer),
+    v("now_playing_sheet", SheetValue.Hidden) to m(
+      target to null,
+      actions to ::closePlayer
+    ),
     SheetValue.Hidden to m(target to null, actions to ::closePlayer),
     "generate_quality_list" to m(
       target to fsm.ALL,

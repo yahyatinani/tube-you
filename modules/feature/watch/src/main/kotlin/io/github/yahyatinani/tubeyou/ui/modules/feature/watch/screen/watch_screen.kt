@@ -284,12 +284,10 @@ fun SheetHiddenStateSyncEffect(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NowPlayingBottomSheet(
   modifier: Modifier = Modifier,
   nowPlayingStream: UIState,
-//  commentsUiState: Any,
   isPlayerSheetMinimized: Boolean,
   sheetOffset: () -> Float,
   onClickCloseSheet: () -> Unit,
@@ -785,7 +783,10 @@ fun NowPlayingScaffold(
         nowPlayingStream = nowPlayingStream,
         isPlayerSheetMinimized = watch(query = v("is_player_sheet_minimized")),
         sheetOffset = bottomSheetOffset,
-        onClickCloseSheet = { dispatch(v(common.close_player)) },
+        onClickCloseSheet = {
+//          dispatch(v("stream_panel_fsm", common.close_player))
+          dispatch(v(common.close_player))
+        },
         onClickMiniPlayer = {
           dispatch(v<Any>("stream_panel_fsm", common.expand_player_sheet))
         }

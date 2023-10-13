@@ -418,6 +418,7 @@ fun NowPlayingBottomSheet(
             Row(
               modifier = Modifier
                 .testTag("watch:mini_player")
+                .fillMaxHeight()
                 .drawWithContent {
                   drawContent()
                   drawRect(

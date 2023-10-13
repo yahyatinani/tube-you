@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides.Companion.Horizontal
@@ -45,7 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
@@ -347,39 +346,6 @@ fun StatusBarColorEffect(screenHeightPx: Float, sheetOffset: () -> Float) {
 }
 
 @Composable
-fun SheetBackgroundMask(
-  screenHeightPx: Float,
-  sheetOffset: () -> Float
-) {
-  val density = LocalDensity.current
-  val third = remember(screenHeightPx) { screenHeightPx / 3f }
-  val threshold = remember(third) { screenHeightPx - third }
-  val traverse = remember(third, density) {
-    third - with(density) {
-      (MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT).toPx()
-    }
-  }
-  Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .drawBehind {
-        val offset = sheetOffset()
-        val alpha = when {
-          offset < threshold -> .5f
-          else -> lerp(
-            sheetYOffset = offset - threshold,
-            traverse = traverse,
-            start = .5f,
-            end = 0f
-          )
-        }
-
-        drawRect(Color.Black.copy(alpha = alpha))
-      }
-  )
-}
-
-@Composable
 @OptIn(
   ExperimentalLayoutApi::class,
   ExperimentalMaterial3Api::class,
@@ -473,61 +439,79 @@ fun TyMain(
       isSearchScreen = sb != null,
       isCompactDisplay = isCompact
     )
+
+    val third = remember(key1 = screenDim.second) { screenDim.second / 3f }
+    val threshold = remember(third) { screenDim.second - third }
+    val traverse = remember(third, density) {
+      third - with(density) {
+        (MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT).toPx()
+      }
+    }
+
     NowPlayingScaffold(
       modifier = Modifier
+        .drawWithContent {
+          drawContent()
+          val offset = bottomSheetOffset
+          drawRect(
+            color = Color.Black,
+            alpha = when {
+              offset < threshold -> .5f
+              else -> lerp(
+                sheetYOffset = offset - threshold,
+                traverse = traverse,
+                start = .5f,
+                end = 0f
+              )
+            }
+          )
+        }
         .fillMaxSize()
         .nestedScroll(topBarScrollBehavior.nestedScrollConnection),
       nowPlayingStream = nowPlayingStream,
       scaffoldState = bottomSheetScaffoldState,
       bottomSheetOffset = { bottomSheetOffset }
     ) {
-      Box {
-        Scaffold(
-          topBar = {
-            TyTopBar(
-              topSearchBar = sb,
-              topAppBarScrollBehavior = topBarScrollBehavior
-            )
-          }
-        ) { paddingTb ->
-          RegNavFx(navController)
-          RegNavCofx(navController)
-          TyNavHost(
-            navController = navController,
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(
-                top = paddingTb.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding()
-              )
-              .consumeWindowInsets(paddingTb)
-              .windowInsetsPadding(
-                WindowInsets.safeDrawing.only(Horizontal + Vertical)
-              ),
-            isCompact = isCompact,
-            orientation = LocalConfiguration.current.orientation
+      Scaffold(
+        topBar = {
+          TyTopBar(
+            topSearchBar = sb,
+            topAppBarScrollBehavior = topBarScrollBehavior
           )
+        }
+      ) { paddingTb ->
+        RegNavFx(navController)
+        RegNavCofx(navController)
+        TyNavHost(
+          navController = navController,
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(
+              top = paddingTb.calculateTopPadding(),
+              bottom = padding.calculateBottomPadding()
+            )
+            .consumeWindowInsets(paddingTb)
+            .windowInsetsPadding(
+              WindowInsets.safeDrawing.only(Horizontal + Vertical)
+            ),
+          isCompact = isCompact,
+          orientation = LocalConfiguration.current.orientation
+        )
 
-          // Top-level navigation back handler.
-          BackHandler(enabled = watch(v(top_level_back_handler_enabled))) {
-            dispatch(v(common.back_press_top_nav))
-          }
-
-          BackHandler(enabled = sb != null) {
-            dispatch(v(search.panel_fsm, search.back_press_search))
-          }
-
-          BackHandler(
-            enabled = bottomSheetState.currentValue == SheetValue.Expanded
-          ) {
-            dispatch(v<Any>("stream_panel_fsm", common.minimize_player))
-          }
+        // Top-level navigation back handler.
+        BackHandler(enabled = watch(v(top_level_back_handler_enabled))) {
+          dispatch(v(common.back_press_top_nav))
         }
 
-        SheetBackgroundMask(
-          screenHeightPx = screenDim.second,
-          sheetOffset = { bottomSheetOffset }
-        )
+        BackHandler(enabled = sb != null) {
+          dispatch(v(search.panel_fsm, search.back_press_search))
+        }
+
+        BackHandler(
+          enabled = bottomSheetState.currentValue == SheetValue.Expanded
+        ) {
+          dispatch(v<Any>("stream_panel_fsm", common.minimize_player))
+        }
       }
     }
   }

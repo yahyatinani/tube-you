@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
@@ -207,10 +206,8 @@ fun TyNavigationBar(
     Box(contentAlignment = Alignment.TopCenter) {
       Divider(
         modifier = Modifier
-          .fillMaxWidth()
-          .drawBehind {
-            drawRect(borderColor)
-          },
+          .fillMaxWidth(),
+        color = borderColor,
         thickness = BOTTOM_BAR_TOP_BORDER_THICKNESS
       )
       if (isCompact) {

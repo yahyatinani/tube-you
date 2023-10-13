@@ -26,6 +26,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -108,103 +109,105 @@ fun VideoPlayer(
   val showThumbnail = get<Boolean>(streamData, "show_player_thumbnail") ?: false
   val thumbnail = get<String>(streamData, Stream.thumbnail)
 
-  Box(modifier = modifier) {
-    val playerState = streamData[common.state]
-    LaunchedEffect(streamData) {
-      if (playerState != null && playerState != StreamState.LOADING) {
-        TyPlayer.playNewVideo(streamData)
+  Surface(modifier = modifier) {
+    Box {
+      val playerState = streamData[common.state]
+      LaunchedEffect(streamData) {
+        if (playerState != null && playerState != StreamState.LOADING) {
+          TyPlayer.playNewVideo(streamData)
+        }
       }
-    }
 
-    LaunchedEffect(orientation) {
-      if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        dispatch(v(":player_fullscreen_landscape"))
-      } else {
-        dispatch(v(":player_portrait"))
+      LaunchedEffect(orientation) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+          dispatch(v(":player_fullscreen_landscape"))
+        } else {
+          dispatch(v(":player_portrait"))
+        }
       }
-    }
 
-    RegPlaybackEvents()
-    AndroidView(
-      modifier = Modifier
-        .fillMaxWidth()
-        .align(Alignment.Center),
-      factory = { factoryContext ->
-        PlayerView(factoryContext).apply {
-          player = TyPlayer.getInstance()
-          setShutterBackgroundColor(TRANSPARENT)
-          resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+      RegPlaybackEvents()
+      AndroidView(
+        modifier = Modifier
+          .fillMaxWidth()
+          .align(Alignment.Center),
+        factory = { factoryContext ->
+          PlayerView(factoryContext).apply {
+            player = TyPlayer.getInstance()
+            setShutterBackgroundColor(TRANSPARENT)
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
 
-          if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-            setBackgroundColor(Color.Black.toArgb())
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+              resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+              setBackgroundColor(Color.Black.toArgb())
+            }
           }
+        },
+        onRelease = {
+          // Release the player instance since it outlives this view and prevent
+          // MainActivity from being GCed (Leak on rotation).
+          it.player = null
+        },
+        update = {
+          it.setControllerVisibilityListener(controllerVisibilityListener)
+
+          if (it.videoSurfaceView != null) {
+            it.videoSurfaceView!!.layoutParams.height = MATCH_PARENT
+          }
+
+          it.useController = useController && showThumbnail != true
         }
-      },
-      onRelease = {
-        // Release the player instance since it outlives this view and prevent
-        // MainActivity from being GCed (Leak on rotation).
-        it.player = null
-      },
-      update = {
-        it.setControllerVisibilityListener(controllerVisibilityListener)
-
-        if (it.videoSurfaceView != null) {
-          it.videoSurfaceView!!.layoutParams.height = MATCH_PARENT
-        }
-
-        it.useController = useController && showThumbnail != true
-      }
-    )
-
-    if (showThumbnail) {
-      Thumbnail(
-        modifier = Modifier.wrapContentSize(),
-        url = thumbnail
       )
-    }
 
-    if (
-      playerState == StreamState.LOADING ||
-      playerState == StreamState.BUFFERING
-    ) {
-      CircularProgressIndicator(
-        modifier = Modifier
-          .align(Alignment.Center)
-          .size(64.dp),
-        color = Grey300.copy(alpha = .4f)
-      )
-    }
-
-    if (showQualityControl &&
-      playerState != StreamState.LOADING &&
-      playerState != null
-    ) {
-      TextButton(
-        modifier = Modifier.align(Alignment.TopEnd),
-        colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-        onClick = {
-          dispatch(v("stream_panel_fsm", "generate_quality_list"))
-          showQualitiesSheet = true
-        }
-      ) {
-        Text(text = get<String>(streamData, Stream.current_quality)!!)
-      }
-
-      IconButton(
-        modifier = Modifier
-          .align(Alignment.BottomEnd)
-          .padding(end = 40.dp, bottom = 6.dp),
-        onClick = { dispatch(v(":toggle_orientation")) }
-      ) {
-        Image(
-          imageVector = TyIcons.Fullscreen,
-          contentDescription = "",
-          modifier = Modifier.size(32.dp),
-          colorFilter = ColorFilter.tint(
-            MaterialTheme.colorScheme.onBackground
-          )
+      if (showThumbnail) {
+        Thumbnail(
+          modifier = Modifier.wrapContentSize(),
+          url = thumbnail
         )
+      }
+
+      if (
+        playerState == StreamState.LOADING ||
+        playerState == StreamState.BUFFERING
+      ) {
+        CircularProgressIndicator(
+          modifier = Modifier
+            .align(Alignment.Center)
+            .size(64.dp),
+          color = Grey300.copy(alpha = .4f)
+        )
+      }
+
+      if (showQualityControl &&
+        playerState != StreamState.LOADING &&
+        playerState != null
+      ) {
+        TextButton(
+          modifier = Modifier.align(Alignment.TopEnd),
+          colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+          onClick = {
+            dispatch(v("stream_panel_fsm", "generate_quality_list"))
+            showQualitiesSheet = true
+          }
+        ) {
+          Text(text = get<String>(streamData, Stream.current_quality)!!)
+        }
+
+        IconButton(
+          modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(end = 40.dp, bottom = 6.dp),
+          onClick = { dispatch(v(":toggle_orientation")) }
+        ) {
+          Image(
+            imageVector = TyIcons.Fullscreen,
+            contentDescription = "",
+            modifier = Modifier.size(32.dp),
+            colorFilter = ColorFilter.tint(
+              MaterialTheme.colorScheme.onBackground
+            )
+          )
+        }
       }
     }
   }

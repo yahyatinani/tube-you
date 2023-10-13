@@ -410,10 +410,10 @@ fun NowPlayingBottomSheet(
               streamState = nowPlayingStream,
               useController = !isPlayerSheetMinimized
             )
-            val delta =
-              remember(density) { with(density) { (56 + 48).dp.toPx() } }
+
             val traverse = remember(screenHeightPx, breakingPoint) {
-              screenHeightPx - breakingPoint - delta
+              val navBarMinPlayerHeight = with(density) { (56 + 48).dp.toPx() }
+              screenHeightPx - breakingPoint - navBarMinPlayerHeight
             }
             Row(
               modifier = Modifier
@@ -464,15 +464,15 @@ fun NowPlayingBottomSheet(
                     end = .3f
                   )
                 }
-
-                val playerState =
-                  get<StreamState>(nowPlayingStream, ":player_state")
-
+                
                 MiniPlayerControls(
                   modifier = Modifier
                     .weight(weight)
                     .testTag("watch:mini_player_controls"),
-                  isPlaying = playerState == StreamState.PLAYING,
+                  isPlaying = get<StreamState>(
+                    nowPlayingStream,
+                    ":player_state"
+                  ) == StreamState.PLAYING,
                   onClickClose = onClickCloseSheet,
                   playPausePlayer = {
                     dispatch(v("stream_panel_fsm", "toggle_play_pause"))

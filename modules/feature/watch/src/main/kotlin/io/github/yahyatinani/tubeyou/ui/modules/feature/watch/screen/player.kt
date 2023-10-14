@@ -109,7 +109,7 @@ fun VideoPlayer(
   val showThumbnail = get<Boolean>(streamData, "show_player_thumbnail") ?: false
   val thumbnail = get<String>(streamData, Stream.thumbnail)
 
-  Surface(modifier = modifier) {
+  Surface(modifier = modifier, color = Color.Black) {
     Box {
       val playerState = streamData[common.state]
       LaunchedEffect(streamData) {
@@ -135,7 +135,7 @@ fun VideoPlayer(
           PlayerView(factoryContext).apply {
             player = TyPlayer.getInstance()
             setShutterBackgroundColor(TRANSPARENT)
-            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
               resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT

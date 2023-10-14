@@ -242,7 +242,7 @@ fun MiniPlayerControls(
   modifier: Modifier = Modifier,
   isPlaying: Boolean,
   onClickClose: () -> Unit = { },
-  playPausePlayer: () -> Unit = { }
+  onClickPlay: () -> Unit = { }
 ) {
   /*  with(LocalContext.current.findWindow()) {
       this?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
@@ -254,7 +254,7 @@ fun MiniPlayerControls(
     val colorFilter = ColorFilter.tint(
       color = MaterialTheme.colorScheme.onBackground
     )
-    IconButton(onClick = playPausePlayer) {
+    IconButton(onClick = onClickPlay) {
       Image(
         imageVector = when (isPlaying) {
           true -> TyIcons.Pause

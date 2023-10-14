@@ -416,11 +416,11 @@ fun NowPlayingBottomSheet(
               MiniPlayerControls(
                 modifier = Modifier.testTag("watch:mini_player_controls"),
                 isPlaying = get<StreamState>(
-                  nowPlayingStream,
-                  ":player_state"
+                  streamData,
+                  common.state
                 ) == StreamState.PLAYING,
                 onClickClose = onClickCloseSheet,
-                playPausePlayer = {
+                onClickPlay = {
                   dispatch(v("stream_panel_fsm", "toggle_play_pause"))
                 }
               )

@@ -349,7 +349,7 @@ fun RegWatchSubs() {
       ),
       common.is_loading to false,
       "show_player_thumbnail" to showThumbnail,
-      "stream_height" to streamHeight,
+      "stream_height" to streamHeight
     )
 
     UIState(

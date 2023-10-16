@@ -1,6 +1,7 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.screen
 
 import android.text.Spanned
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -374,7 +375,9 @@ fun NowPlayingBottomSheet(
               ),
             content = {
               VideoPlayer(
-                modifier = Modifier.testTag("watch:video_player"),
+                modifier = Modifier
+                  .testTag("watch:video_player")
+                  .background(color = Color.Black),
                 streamState = nowPlayingStream,
                 useController = !isPlayerSheetMinimized
               )
@@ -450,19 +453,20 @@ fun NowPlayingBottomSheet(
             val streamMaxHeightPx = streamMaxHeightDp.toPx()
             val videoHeight = (videoWidth * streamMaxHeightPx) / screenWidthPx
 
-            val videoPlaceable = measurables[0].measure(
-              constraints.copy(
-                maxWidth = videoWidthInt,
-                maxHeight = videoHeight.roundToInt()
-              )
-            )
-
             val height = lerp(
               sheetYOffset = sheetOffsetPx,
               traverse = screenHeightPx - bottomBar,
               start = streamMaxHeightPx,
               end = miniPlayerHeightPx
             ).roundToInt()
+
+            val videoPlaceable = measurables[0].measure(
+              constraints.copy(
+                maxWidth = videoWidthInt,
+                minHeight = height,
+                maxHeight = videoHeight.roundToInt()
+              )
+            )
 
             layout(width = screenWidthPx.roundToInt(), height = height) {
               val y = (height - videoPlaceable.height) / 2

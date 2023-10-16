@@ -53,6 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.yahyatinani.tubeyou.modules.core.keywords.common
@@ -331,21 +332,14 @@ fun NowPlayingBottomSheet(
           val screenWidthPx = remember(density, screenWidthDp) {
             with(density) { screenWidthDp.toPx() }
           }
-          val defaultRatio = remember { 16 / 9f }
           val miniPlayerHeightPx = remember(density) {
             with(density) { 56.dp.toPx() }
           }
-          val ratio = get(streamData, Stream.aspect_ratio, defaultRatio)!!
-          val fullVideoHeightPx = with(density) {
-            remember(screenWidthDp, ratio) { screenWidthDp.toPx() / ratio }
-          }
+          val streamMaxHeightDp = get<Dp>(streamData, "stream_height")!!
           val sheetOffsetPx by remember { derivedStateOf { sheetOffset() } }
 
           val bottomBar = remember(density) {
             with(density) { 48.dp.toPx() + miniPlayerHeightPx }
-          }
-          val fullVideoHeightDp = remember(fullVideoHeightPx) {
-            with(density) { fullVideoHeightPx.toDp() }
           }
 
           dispatch(
@@ -376,7 +370,7 @@ fun NowPlayingBottomSheet(
             modifier = modifier
               .heightIn(
                 min = MINI_PLAYER_HEIGHT,
-                max = fullVideoHeightDp
+                max = streamMaxHeightDp
               ),
             content = {
               VideoPlayer(
@@ -452,28 +446,32 @@ fun NowPlayingBottomSheet(
                 end = minVideoWidthPx
               )
             }
-            val vidWidthInt = videoWidth.roundToInt()
+            val videoWidthInt = videoWidth.roundToInt()
+            val streamMaxHeightPx = streamMaxHeightDp.toPx()
+            val videoHeight = (videoWidth * streamMaxHeightPx) / screenWidthPx
 
-            val video = measurables[0].measure(
+            val videoPlaceable = measurables[0].measure(
               constraints.copy(
-                maxWidth = vidWidthInt,
-                maxHeight = fullVideoHeightPx.roundToInt()
+                maxWidth = videoWidthInt,
+                maxHeight = videoHeight.roundToInt()
               )
             )
+
             val height = lerp(
               sheetYOffset = sheetOffsetPx,
               traverse = screenHeightPx - bottomBar,
-              start = fullVideoHeightPx,
+              start = streamMaxHeightPx,
               end = miniPlayerHeightPx
             ).roundToInt()
 
             layout(width = screenWidthPx.roundToInt(), height = height) {
-              val y = (abs(height - video.height) / 2)
-              video.placeRelative(x = 0, y = -y)
+              val y = (height - videoPlaceable.height) / 2
 
-              if (videoWidth == screenWidthPx) return@layout
+              videoPlaceable.placeRelative(x = 0, y = y)
 
-              val mask = measurables[3].measure(constraints)
+              if (videoWidth == screenWidthPx) {
+                return@layout
+              }
 
               val ctrlButtons = measurables[2].measure(
                 constraints.copy(
@@ -483,8 +481,7 @@ fun NowPlayingBottomSheet(
 
               val ctrlButtonsFinalX =
                 (screenWidthPx - ctrlButtons.width).roundToInt()
-              val ctrlButtonsX =
-                vidWidthInt.coerceAtLeast(ctrlButtonsFinalX)
+              val ctrlButtonsX = videoWidthInt.coerceAtLeast(ctrlButtonsFinalX)
               ctrlButtons.placeRelative(x = ctrlButtonsX, y = 0)
 
               val title = measurables[1].measure(
@@ -492,9 +489,10 @@ fun NowPlayingBottomSheet(
                   maxWidth = (ctrlButtonsX - videoWidth).roundToInt()
                 )
               )
-              title.placeRelative(x = vidWidthInt, y = 0)
+              title.placeRelative(x = videoWidthInt, y = 0)
 
-              mask.placeRelative(x = vidWidthInt, y = 0)
+              val mask = measurables[3].measure(constraints)
+              mask.placeRelative(x = videoWidthInt, y = 0)
             }
           }
 

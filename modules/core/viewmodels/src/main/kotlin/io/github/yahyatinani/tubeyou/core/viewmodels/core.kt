@@ -149,10 +149,7 @@ inline fun <T> T.letIf(b: Boolean, block: (T) -> T): T {
 private fun highQuality(thumbnail: String) =
   thumbnail.replace("hqdefault.jpg", "sddefault.jpg")
 
-fun formatVideo(
-  video: Video,
-  resources: Resources
-): VideoVm {
+fun formatVideo(video: Video, resources: Resources): VideoVm {
   val isUpcoming = video.views == -1L && video.duration == -1L
   val authorId = video.uploaderUrl!!
   val isLiveStream = video.duration == -1L

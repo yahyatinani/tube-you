@@ -361,8 +361,9 @@ fun TyMain(
 
   val screenDim = screenDimensions()
   val density = LocalDensity.current
+  val cfg = LocalConfiguration.current
   val nowPlayingStream =
-    watch<UIState?>(v(":now_playing_stream", appContext, screenDim, density))
+    watch<UIState?>(v(":now_playing_stream", appContext, cfg, density))
 
   // WARNING: this must be called before landscape video player
   val bottomSheetState = rememberStandardBottomSheetState(
@@ -495,7 +496,7 @@ fun TyMain(
               WindowInsets.safeDrawing.only(Horizontal + Vertical)
             ),
           isCompact = isCompact,
-          orientation = LocalConfiguration.current.orientation
+          orientation = cfg.orientation
         )
 
         // Top-level navigation back handler.

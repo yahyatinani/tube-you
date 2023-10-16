@@ -2,7 +2,6 @@ package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs
 
 import android.content.Context
 import android.content.res.Configuration
-import android.text.Spanned
 import android.text.SpannedString
 import android.text.TextPaint
 import android.text.style.URLSpan
@@ -10,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -91,8 +89,9 @@ enum class Stream {
   related_streams
 }
 
-fun ratio(streamData: StreamData): Float {
+fun ratio(streamData: StreamData?): Float {
   val default = 16 / 9f
+  if (streamData == null) return default
   if (streamData.livestream) return default
 
   val stream = streamData.videoStreams.firstOrNull {
@@ -267,32 +266,36 @@ fun RegWatchSubs() {
     ) == PartiallyExpanded
   }
 
-  regSub<UIState?>(
+  regSub<IPersistentMap<Any, Any>, UIState?>(
     queryId = ":now_playing_stream",
     initialValue = null,
     v(":stream_fsm")
-  ) { signals, _, (_, context) ->
-    val streamFsm = get<IPersistentMap<Any, Any>>(signals, 0)
+  ) { streamFsm, _, (_, context, configuration, density) -> // (_, context, cfg, density)
     val playerRegionState = get<StreamState>(streamFsm, ":player_state")
       ?: return@regSub null
 
-    val activeStream = get<VideoVm>(streamFsm, "active_stream")!!
+    val preLoadedStreamData = get<VideoVm>(streamFsm, "active_stream")!!
+    val stream = get<StreamData>(streamFsm, "stream_data")
+    val ratio = ratio(stream)
+
+    val streamHeight = with(density as Density) {
+      ((configuration as Configuration).screenWidthDp.dp.toPx() / ratio).toDp()
+    }
 
     if (playerRegionState == StreamState.LOADING) {
       return@regSub UIState(
         m(
           common.is_loading to true,
-          Stream.thumbnail to activeStream.thumbnail,
-          Stream.title to activeStream.title,
-          Stream.views to activeStream.viewCount,
-          "show_player_thumbnail" to true
+          Stream.thumbnail to preLoadedStreamData.thumbnail,
+          Stream.title to preLoadedStreamData.title,
+          Stream.views to preLoadedStreamData.viewCount,
+          "show_player_thumbnail" to true,
+          "stream_height" to streamHeight
         )
       )
     }
 
-    val stream = get<StreamData>(streamFsm, "stream_data")!!
-    val ratio = ratio(stream)
-    val currentQuality = streamFsm!!["current_quality"]
+    val currentQuality = streamFsm["current_quality"]
     val ql = get<List<Pair<String, Int>>>(streamFsm, "quality_list") ?: l()
     val qualityList = ql.map {
       when (currentQuality) {
@@ -301,8 +304,8 @@ fun RegWatchSubs() {
       } to it.second
     }
 
-    val views = formatViews(stream.views).let {
-      if (activeStream.isLiveStream) {
+    val views = formatViews(stream!!.views).let {
+      if (preLoadedStreamData.isLiveStream) {
         it + " watching" + " Started ${timeAgoFormat(stream.uploadDate)}"
       } else {
         "$it views"
@@ -318,11 +321,12 @@ fun RegWatchSubs() {
     }
     val showThumbnail =
       get<Boolean>(streamFsm, "show_player_thumbnail") ?: false
+
     val m = m(
       common.state to playerRegionState,
       Stream.title to stream.title,
       Stream.uploader to stream.uploader,
-      Stream.thumbnail to activeStream.thumbnail,
+      Stream.thumbnail to preLoadedStreamData.thumbnail,
       Stream.quality_list to qualityList,
       Stream.current_quality to when (currentQuality) {
         null -> ""
@@ -330,8 +334,8 @@ fun RegWatchSubs() {
       },
       Stream.aspect_ratio to ratio,
       Stream.views to views,
-      Stream.date to shortenTime(activeStream.uploaded),
-      Stream.channel_name to activeStream.uploaderName,
+      Stream.date to shortenTime(preLoadedStreamData.uploaded),
+      Stream.channel_name to preLoadedStreamData.uploaderName,
       Stream.avatar to (stream.uploaderAvatar ?: ""),
       Stream.sub_count to formatSubCount(stream.uploaderSubscriberCount),
       Stream.likes_count to formatViews(stream.likes),
@@ -345,23 +349,18 @@ fun RegWatchSubs() {
       ),
       common.is_loading to false,
       "show_player_thumbnail" to showThumbnail,
-      "height" to height(stream)
+      "stream_height" to streamHeight,
     )
 
     UIState(
       data = if (stream.videoStreams.isNotEmpty()) {
-        when {
-          stream.livestream && stream.dash != null -> {
-            m.assoc(Stream.video_uri, stream.dash!!.toUri())
+        m.assoc(
+          Stream.video_uri,
+          when {
+            stream.livestream && stream.dash != null -> stream.dash!!.toUri()
+            else -> createDashSource(stream, context as Context)
           }
-
-          else -> {
-            m.assoc(
-              Stream.video_uri,
-              createDashSource(stream, context as Context)
-            )
-          }
-        }.assoc(Stream.mime_type, MimeTypes.APPLICATION_MPD)
+        ).assoc(Stream.mime_type, MimeTypes.APPLICATION_MPD)
       } else {
         m.assoc(Stream.video_uri, stream.hls!!.toUri())
           .assoc(Stream.mime_type, MimeTypes.APPLICATION_M3U8)
@@ -375,7 +374,12 @@ fun RegWatchSubs() {
   regSub<UIState?, Any?>(
     queryId = "description_state",
     initialValue = null,
-    inputSignal = v(":now_playing_stream", context)
+    inputSignal = v(
+      ":now_playing_stream",
+      context,
+      LocalConfiguration.current,
+      LocalDensity.current
+    )
   ) { input, _, _ ->
     if (input == null) return@regSub null
 
@@ -437,13 +441,22 @@ fun RegWatchSubs() {
     initialValue = initSheetState,
     v("description_sheet_fsm_state"),
     v(":stream_fsm")
-  ) { (descSheetState, streamFsm), _, (_, cfg, density) ->
+  ) { (descSheetState, streamFsm), prev, (_, cfg, density) ->
     val (w, h) = with(density as Density) {
       (cfg as Configuration).screenWidthDp.dp.toPx() to
         cfg.screenHeightDp.dp.toPx()
     }
     if (descSheetState == SheetValue.Hidden) {
-      return@regSub initSheetState
+      return@regSub UIState(
+        m(
+          ":sheet_peak_height" to get(
+            prev.data,
+            ":sheet_peak_height",
+            defaultSheetPeekHeight
+          ),
+          ":sheet_content_height" to 0.dp
+        )
+      )
     }
 
     val stream = get<StreamData>(streamFsm, "stream_data")!!
@@ -502,9 +515,20 @@ fun RegWatchSubs() {
     initialValue = initSheetState,
     v("comments_sheet_fsm_state"),
     v(":stream_fsm")
-  ) { (sheetState, streamFsm), _, (_, cfg, density) ->
+  ) { (sheetState, streamFsm), prev, (_, cfg, density) ->
     if (sheetState == null) return@regSub initSheetState
-    if (sheetState == SheetValue.Hidden) return@regSub initSheetState
+    if (sheetState == SheetValue.Hidden) {
+      return@regSub UIState(
+        m(
+          ":sheet_peak_height" to get(
+            prev.data,
+            ":sheet_peak_height",
+            defaultSheetPeekHeight
+          ),
+          ":sheet_content_height" to 0.dp
+        )
+      )
+    }
 
     val sheetPeekHeight = with(density as Density) {
       val w = (cfg as Configuration).screenWidthDp.dp.toPx()
@@ -622,16 +646,3 @@ private fun defaultSheetPeekHeight(): Dp {
     }
   }
 }
-
-@Immutable
-data class Description(
-  val title: String,
-  val likesCount: String,
-  val views_full: String,
-  val month_day: String,
-  val year: String,
-  val description: Spanned,
-  val avatar: String,
-  val sub_count: String,
-  val channel_name: String
-)

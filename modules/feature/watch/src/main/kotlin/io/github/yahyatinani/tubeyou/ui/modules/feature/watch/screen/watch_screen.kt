@@ -359,7 +359,8 @@ fun NowPlayingBottomSheet(
           val streamHalfHeight =
             remember(streamMaxHeightPx) { streamMaxHeightPx / 2 }
 
-          val bottomBar = remember { with(density) { BOTTOM_BAR_HEIGHT.toPx() } }
+          val bottomBar =
+            remember { with(density) { BOTTOM_BAR_HEIGHT.toPx() } }
           val shrinkPoint = remember(screenHeightPx, streamHalfHeight) {
             screenHeightPx - (bottomBar + streamHalfHeight)
           }
@@ -374,12 +375,15 @@ fun NowPlayingBottomSheet(
                 max = streamMaxHeightDp
               ),
             content = {
+              val isSheetMoving by remember {
+                derivedStateOf { sheetOffset() > 0f }
+              }
               VideoPlayer(
                 modifier = Modifier
                   .testTag("watch:video_player")
                   .background(color = Color.Black),
                 streamState = nowPlayingStream,
-                useController = !isPlayerSheetMinimized
+                useController = !isPlayerSheetMinimized && !isSheetMoving
               )
 
               Column(

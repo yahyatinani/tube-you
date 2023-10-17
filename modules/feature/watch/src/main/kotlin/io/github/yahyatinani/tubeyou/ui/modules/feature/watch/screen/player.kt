@@ -94,7 +94,9 @@ fun VideoPlayer(
   useController: Boolean = true,
   orientation: Int = LocalConfiguration.current.orientation
 ) {
-  var showQualityControl: Boolean by remember { mutableStateOf(false) }
+  var showQualityControl: Boolean by remember(!useController) {
+    mutableStateOf(false)
+  }
   var showQualitiesSheet: Boolean by remember { mutableStateOf(false) }
 
   val controllerVisibilityListener = remember(useController) {
@@ -109,7 +111,10 @@ fun VideoPlayer(
   val showThumbnail = get<Boolean>(streamData, "show_player_thumbnail") ?: false
   val thumbnail = get<String>(streamData, Stream.thumbnail)
 
-  Surface(modifier = modifier, color = Color.Black) {
+  Surface(
+    modifier = modifier,
+    color = Color.Black
+  ) {
     Box {
       val playerState = streamData[common.state]
       LaunchedEffect(streamData) {
@@ -156,6 +161,8 @@ fun VideoPlayer(
           }
 
           it.useController = useController && showThumbnail != true
+
+//          showQualityControl = it.isControllerFullyVisible
         }
       )
 
@@ -167,6 +174,7 @@ fun VideoPlayer(
       }
 
       if (
+        playerState == null ||
         playerState == StreamState.LOADING ||
         playerState == StreamState.BUFFERING
       ) {
@@ -178,7 +186,8 @@ fun VideoPlayer(
         )
       }
 
-      if (showQualityControl &&
+      if (
+        showQualityControl &&
         playerState != StreamState.LOADING &&
         playerState != null
       ) {

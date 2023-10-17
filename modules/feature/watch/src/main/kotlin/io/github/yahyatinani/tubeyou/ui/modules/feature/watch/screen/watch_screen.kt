@@ -334,13 +334,13 @@ fun NowPlayingBottomSheet(
             with(density) { screenWidthDp.toPx() }
           }
           val miniPlayerHeightPx = remember(density) {
-            with(density) { 56.dp.toPx() }
+            with(density) { MINI_PLAYER_HEIGHT.toPx() }
           }
           val streamMaxHeightDp = get<Dp>(streamData, "stream_height")!!
           val sheetOffsetPx by remember { derivedStateOf { sheetOffset() } }
 
-          val bottomBar = remember(density) {
-            with(density) { 48.dp.toPx() + miniPlayerHeightPx }
+          val bottomBarMiniPlayer = remember(density) {
+            with(density) { 104.dp.toPx() }
           }
 
           dispatch(
@@ -348,25 +348,25 @@ fun NowPlayingBottomSheet(
               "set_volume",
               sheetOffsetPx,
               screenHeightPx,
-              bottomBar,
+              bottomBarMiniPlayer,
               miniPlayerHeightPx
             )
           )
 
-          val widthShrinkingY =
-            remember(screenHeightPx) { screenHeightPx / 4 }
-          val minVideoWidthPx = remember {
-            with(density) { MINI_PLAYER_WIDTH.toPx() }
+          val streamMaxHeightPx = remember(streamMaxHeightDp) {
+            with(density) { streamMaxHeightDp.toPx() }
           }
-          val breakingPoint =
-            remember(widthShrinkingY) { screenHeightPx - widthShrinkingY }
+          val streamHalfHeight =
+            remember(streamMaxHeightPx) { streamMaxHeightPx / 2 }
+
+          val bottomBar = remember { with(density) { BOTTOM_BAR_HEIGHT.toPx() } }
+          val shrinkPoint = remember(screenHeightPx, streamHalfHeight) {
+            screenHeightPx - (bottomBar + streamHalfHeight)
+          }
+          val minPlayerWidthPx =
+            remember { with(density) { MINI_PLAYER_WIDTH.toPx() } }
 
           val streamTitle = get<String>(streamData, Stream.title)!!
-
-          val t = remember(screenHeightPx, breakingPoint) {
-            val navBarMinPlayerHeight = with(density) { (56 + 48).dp.toPx() }
-            screenHeightPx - breakingPoint - navBarMinPlayerHeight
-          }
           Layout(
             modifier = modifier
               .heightIn(
@@ -427,11 +427,12 @@ fun NowPlayingBottomSheet(
                   .fillMaxSize()
                   .drawWithContent {
                     drawContent()
+                    val x = (MINI_PLAYER_HEIGHT + BOTTOM_BAR_HEIGHT).toPx()
                     drawRect(
                       color = Color.Black,
                       alpha = lerp(
-                        sheetYOffset = sheetOffsetPx - breakingPoint,
-                        traverse = t,
+                        sheetYOffset = sheetOffsetPx - shrinkPoint,
+                        traverse = screenHeightPx - (shrinkPoint + x),
                         start = 1f,
                         end = 0f
                       )
@@ -440,36 +441,46 @@ fun NowPlayingBottomSheet(
               )
             }
           ) { measurables, constraints ->
-            val videoWidth = when {
-              sheetOffsetPx < breakingPoint -> screenWidthPx
-              else -> lerp(
-                sheetYOffset = sheetOffsetPx - breakingPoint,
-                traverse = widthShrinkingY - bottomBar,
-                start = screenWidthPx,
-                end = minVideoWidthPx
-              )
-            }
-            val videoWidthInt = videoWidth.roundToInt()
-            val streamMaxHeightPx = streamMaxHeightDp.toPx()
-            val videoHeight = (videoWidth * streamMaxHeightPx) / screenWidthPx
+            val (videoWidth, layoutH) = when {
+              sheetOffsetPx < shrinkPoint -> {
+                screenWidthPx to lerp(
+                  sheetYOffset = sheetOffsetPx,
+                  traverse = screenHeightPx - (streamHalfHeight + bottomBar),
+                  start = streamMaxHeightPx,
+                  end = streamHalfHeight
+                )
+              }
 
-            val height = lerp(
-              sheetYOffset = sheetOffsetPx,
-              traverse = screenHeightPx - bottomBar,
-              start = streamMaxHeightPx,
-              end = miniPlayerHeightPx
-            ).roundToInt()
+              else -> {
+                lerp(
+                  sheetYOffset = sheetOffsetPx - shrinkPoint,
+                  traverse = streamHalfHeight - miniPlayerHeightPx,
+                  start = screenWidthPx,
+                  end = minPlayerWidthPx
+                ) to lerp(
+                  sheetYOffset = sheetOffsetPx - shrinkPoint,
+                  traverse = streamHalfHeight - miniPlayerHeightPx,
+                  start = streamHalfHeight,
+                  end = miniPlayerHeightPx
+                )
+              }
+            }
+
+            val layoutHeight = layoutH.roundToInt()
+            val videoWidthInt = videoWidth.roundToInt()
+
+            val videoHeight = (videoWidth * streamMaxHeightPx) / screenWidthPx
 
             val videoPlaceable = measurables[0].measure(
               constraints.copy(
                 maxWidth = videoWidthInt,
-                minHeight = height,
+                minHeight = layoutHeight,
                 maxHeight = videoHeight.roundToInt()
               )
             )
 
-            layout(width = screenWidthPx.roundToInt(), height = height) {
-              val y = (height - videoPlaceable.height) / 2
+            layout(width = screenWidthPx.roundToInt(), height = layoutHeight) {
+              val y = (layoutHeight - videoPlaceable.height) / 2
 
               videoPlaceable.placeRelative(x = 0, y = y)
 
@@ -486,16 +497,16 @@ fun NowPlayingBottomSheet(
               val ctrlButtonsFinalX =
                 (screenWidthPx - ctrlButtons.width).roundToInt()
               val ctrlButtonsX = videoWidthInt.coerceAtLeast(ctrlButtonsFinalX)
-              ctrlButtons.placeRelative(x = ctrlButtonsX, y = 0)
 
               val title = measurables[1].measure(
                 constraints.copy(
                   maxWidth = (ctrlButtonsX - videoWidth).roundToInt()
                 )
               )
-              title.placeRelative(x = videoWidthInt, y = 0)
-
               val mask = measurables[3].measure(constraints)
+
+              ctrlButtons.placeRelative(x = ctrlButtonsX, y = 0)
+              title.placeRelative(x = videoWidthInt, y = 0)
               mask.placeRelative(x = videoWidthInt, y = 0)
             }
           }
@@ -688,7 +699,8 @@ fun NowPlayingBottomSheet(
                   return@item
                 }
 
-                val commentsSection = watch<Any>(query = v(":comments_section"))
+                val commentsSection =
+                  watch<Any>(query = v(":comments_section"))
 
                 CommentsSection(
                   modifier = Modifier

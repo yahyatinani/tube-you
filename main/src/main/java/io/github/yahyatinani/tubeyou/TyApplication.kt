@@ -19,7 +19,7 @@ class TyApplication : Application() {
 
     httpFxClient = tyHttpClient
 
-    TyPlayer.initInstance(this)
+    TyPlayer.initInstance(applicationContext)
 
     // FIXME: remove this for release
 //    System.setProperty("kotlinx.coroutines.debug", "on")

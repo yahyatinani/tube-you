@@ -74,24 +74,25 @@ class MainActivity : ComponentActivity() {
       RegTySubs()
       val windowSizeClass = calculateWindowSizeClass(this)
       TyTheme(isCompact = isCompact(windowSizeClass)) {
-        TyApp(
-          windowSizeClass = windowSizeClass,
-          // I pass applicationContext so subs don't leak MainActivity, for now.
-          appContext = applicationContext
-        )
+        TyApp(windowSizeClass = windowSizeClass)
       }
     }
   }
 
   override fun onStart() {
     super.onStart()
-    val sessionToken =
-      SessionToken(this, ComponentName(this, PlaybackService::class.java))
 
-    val controllerFuture =
-      MediaController.Builder(this, sessionToken).buildAsync()
-    controllerFuture.addListener(
+    val sessionToken =
+      SessionToken(
+        applicationContext,
+        ComponentName(applicationContext, PlaybackService::class.java)
+      )
+
+    val mediaControllerFuture =
+      MediaController.Builder(applicationContext, sessionToken).buildAsync()
+    mediaControllerFuture.addListener(
       {
+        mediaControllerFuture.get()
         // MediaController is available here with controllerFuture.get()
       },
       MoreExecutors.directExecutor()
@@ -109,6 +110,6 @@ class MainActivity : ComponentActivity() {
     super.onStop()
     orientationEventListener?.disable()
     orientationEventListener = null
-//    finish()
+    finish()
   }
 }

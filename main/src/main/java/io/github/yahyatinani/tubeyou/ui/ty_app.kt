@@ -1,7 +1,6 @@
 package io.github.yahyatinani.tubeyou.ui
 
 import android.app.Activity
-import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -51,6 +50,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
@@ -353,7 +353,6 @@ fun StatusBarColorEffect(screenHeightPx: Float, sheetOffset: () -> Float) {
 )
 fun TyMain(
   navController: NavHostController,
-  appContext: Context,
   windowSizeClass: WindowSizeClass
 ) {
   RegWatchEvents()
@@ -363,7 +362,9 @@ fun TyMain(
   val density = LocalDensity.current
   val cfg = LocalConfiguration.current
   val nowPlayingStream =
-    watch<UIState?>(v(":now_playing_stream", appContext, cfg, density))
+    watch<UIState?>(
+      v(":now_playing_stream", LocalContext.current.resources, cfg, density)
+    )
 
   // WARNING: this must be called before landscape video player
   val bottomSheetState = rememberStandardBottomSheetState(
@@ -522,8 +523,7 @@ fun TyMain(
 fun TyApp(
   topLevelNavCtrl: NavHostController = rememberSaveableNavController(),
   mainNavController: NavHostController = rememberSaveableNavController(),
-  windowSizeClass: WindowSizeClass,
-  appContext: Context
+  windowSizeClass: WindowSizeClass
 ) {
   val s = rememberCoroutineScope()
   RegFx("nav_to_about") {
@@ -550,7 +550,7 @@ fun TyApp(
     enterTransition = { slideInVertically { it / 10 } + fadeIn() },
     exitTransition = { slideOutVertically { it / 10 } + fadeOut() }
   ) {
-    mainScreen(mainNavController, appContext, windowSizeClass)
+    mainScreen(mainNavController, windowSizeClass)
 
     settingsScreen()
 

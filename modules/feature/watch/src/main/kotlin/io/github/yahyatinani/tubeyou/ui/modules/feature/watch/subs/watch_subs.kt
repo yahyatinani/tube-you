@@ -1,7 +1,7 @@
 package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs
 
-import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.text.SpannedString
 import android.text.TextPaint
 import android.text.style.URLSpan
@@ -38,7 +38,6 @@ import io.github.yahyatinani.tubeyou.modules.core.network.Video
 import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamComment
 import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamComments
 import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamData
-import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.dash.createDashSource
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.COMMENTS_ROUTE
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.ListState
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.StreamState
@@ -270,7 +269,7 @@ fun RegWatchSubs() {
     queryId = ":now_playing_stream",
     initialValue = null,
     v(":stream_fsm")
-  ) { streamFsm, _, (_, context, configuration, density) -> // (_, context, cfg, density)
+  ) { streamFsm, _, (_, resources, configuration, density) ->
     val playerRegionState = get<StreamState>(streamFsm, ":player_state")
       ?: return@regSub null
 
@@ -314,7 +313,7 @@ fun RegWatchSubs() {
 
     val relatedStreams = stream.relatedStreams.map { item ->
       when (item) {
-        is Video -> formatVideo(item, (context as Context).resources)
+        is Video -> formatVideo(item, resources as Resources)
         is Channel -> formatChannel(item)
         is Playlist -> formatPlayList(item)
       }
@@ -358,7 +357,7 @@ fun RegWatchSubs() {
           Stream.video_uri,
           when {
             stream.livestream && stream.dash != null -> stream.dash!!.toUri()
-            else -> createDashSource(stream, context as Context)
+            else -> stream
           }
         ).assoc(Stream.mime_type, MimeTypes.APPLICATION_MPD)
       } else {
@@ -370,13 +369,12 @@ fun RegWatchSubs() {
 
   // description sheet:
 
-  val context = LocalContext.current
   regSub<UIState?, Any?>(
     queryId = "description_state",
     initialValue = null,
     inputSignal = v(
       ":now_playing_stream",
-      context,
+      LocalContext.current.resources,
       LocalConfiguration.current,
       LocalDensity.current
     )

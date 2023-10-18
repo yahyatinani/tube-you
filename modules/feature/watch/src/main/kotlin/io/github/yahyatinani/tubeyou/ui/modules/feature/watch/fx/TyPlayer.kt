@@ -2,6 +2,7 @@ package io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fx
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.annotation.UiThread
 import androidx.core.net.toUri
@@ -21,6 +22,8 @@ import androidx.media3.session.MediaSession.ControllerInfo
 import androidx.media3.session.MediaSessionService
 import com.google.net.cronet.okhttptransport.CronetCallFactory
 import io.github.yahyatinani.recompose.dispatch
+import io.github.yahyatinani.tubeyou.modules.core.network.watch.StreamData
+import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.dash.createDashSource
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs.Stream
 import io.github.yahyatinani.y.core.collections.IPersistentMap
 import io.github.yahyatinani.y.core.get
@@ -124,9 +127,14 @@ object TyPlayer {
       .build()
 
   @UiThread
-  fun playNewVideo(streamData: IPersistentMap<Any, Any>) {
+  fun playNewVideo(streamData: IPersistentMap<Any, Any>, context: Context) {
+    // TODO: maybe build uri only when new streamData?
+    val uri = when (val uri = get<Any>(streamData, Stream.video_uri)) {
+      is Uri -> uri
+      else -> createDashSource(uri as StreamData, context)
+    }
     val mediaItem = MediaItem.Builder()
-      .setUri(get<Uri>(streamData, Stream.video_uri))
+      .setUri(uri)
       .setMimeType(get<String>(streamData, Stream.mime_type)!!)
 //      .setMimeType(MimeTypes.VIDEO_VP9)
 //    .setSubtitleConfigurations(subtitles)
@@ -221,10 +229,12 @@ class PlaybackService : MediaSessionService() {
   // Remember to release the player and media session in onDestroy
   override fun onDestroy() {
     mediaSession?.run {
-      player.release()
       release()
       mediaSession = null
+      player.release()
     }
     super.onDestroy()
+
+    Log.i("PlaybackService", "onDestroy has been called.")
   }
 }

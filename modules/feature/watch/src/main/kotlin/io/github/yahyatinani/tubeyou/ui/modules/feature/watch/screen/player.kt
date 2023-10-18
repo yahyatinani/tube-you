@@ -117,11 +117,11 @@ fun VideoPlayer(
   ) {
     Box {
       val playerState = streamData[common.state]
-      LaunchedEffect(streamData) {
-        if (playerState != null && playerState != StreamState.LOADING) {
-          TyPlayer.playNewVideo(streamData)
-        }
-      }
+      /*      LaunchedEffect(streamData) {
+              if (playerState != null && playerState != StreamState.LOADING) {
+                TyPlayer.playNewVideo(streamData)
+              }
+            }*/
 
       LaunchedEffect(orientation) {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -154,6 +154,9 @@ fun VideoPlayer(
           it.player = null
         },
         update = {
+          if (playerState != null && playerState != StreamState.LOADING) {
+            TyPlayer.playNewVideo(streamData, it.context)
+          }
           it.setControllerVisibilityListener(controllerVisibilityListener)
 
           if (it.videoSurfaceView != null) {

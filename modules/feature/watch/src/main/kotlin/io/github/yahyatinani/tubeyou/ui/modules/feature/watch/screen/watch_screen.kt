@@ -830,6 +830,7 @@ fun NowPlayingScaffold(
     },
     sheetDragHandle = null,
     sheetShape = RoundedCornerShape,
+    sheetMaxWidth = Dp.Unspecified,
     content = content
   )
 }

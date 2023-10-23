@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.util.UnstableApi
@@ -234,6 +235,7 @@ fun VideoPlayer(
         .fillMaxWidth()
         .wrapContentHeight(),
       dragHandle = null,
+      sheetMaxWidth = Dp.Unspecified,
       shape = RoundedCornerShape(10.dp),
       containerColor = TyTheme.colors.popupContainer,
       onDismissRequest = { showQualitiesSheet = false },

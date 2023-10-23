@@ -110,6 +110,6 @@ class MainActivity : ComponentActivity() {
     super.onStop()
     orientationEventListener?.disable()
     orientationEventListener = null
-    finish()
+//    finish()
   }
 }

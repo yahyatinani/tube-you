@@ -18,13 +18,15 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -41,6 +43,9 @@ import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs.Stream
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.v
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @Composable
@@ -232,16 +237,21 @@ fun DescriptionBottomSheetScaffold(
   content: @Composable (PaddingValues) -> Unit
 ) {
   val descBottomSheetState = rememberStandardBottomSheetState(
-    initialValue = SheetValue.Hidden,
+    initialValue = Hidden,
     skipHiddenState = false
   )
   val descScaffoldState = rememberBottomSheetScaffoldState(descBottomSheetState)
-  SheetHiddenStateSyncEffect(
-    sheetState = descBottomSheetState,
-    onHiddenState = {
-      dispatch(v("stream_panel_fsm", "close_desc_sheet"))
-    }
-  )
+
+  LaunchedEffect(descBottomSheetState) {
+    snapshotFlow { descBottomSheetState.currentValue }
+      .map { it == Hidden }
+      .distinctUntilChanged()
+      .filter { it }
+      .collect {
+        dispatch(v("stream_panel_fsm", "close_desc_sheet"))
+      }
+  }
+
   val coroutineScope = rememberCoroutineScope()
   val descSheetData = sheetUiState.data
   BottomSheetScaffold(

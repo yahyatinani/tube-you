@@ -43,12 +43,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltipBox
-import androidx.compose.material3.PlainTooltipState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberPlainTooltipState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -105,6 +105,8 @@ import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.m
 import io.github.yahyatinani.y.core.v
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @Composable
@@ -419,7 +421,7 @@ fun Comment(
         if (hearted) {
           Spacer(modifier = Modifier.width(20.dp))
 
-          val tooltipState = remember { PlainTooltipState() }
+          val tooltipState = rememberPlainTooltipState() // FIXME:
           val uploader: String = get(comment, "uploader")!!
 
           PlainTooltipBox(
@@ -430,7 +432,7 @@ fun Comment(
                 style = typography.bodyMedium
               )
             },
-            tooltipState = tooltipState,
+            tooltipState = rememberPlainTooltipState(),
             containerColor = onSurface
           ) {
             val scope = rememberCoroutineScope()
@@ -799,17 +801,32 @@ fun CommentsBottomSheetScaffold(
   )
   LaunchedEffect(Unit) {
     snapshotFlow { commentsSheetState.currentValue }
+      .map { it == SheetValue.Hidden }
       .distinctUntilChanged()
+      .filter { it }
       .collect {
-        dispatch(v("stream_panel_fsm", v("comments_sheet", it)))
+        dispatch(v("stream_panel_fsm", "close_comments_sheet"))
       }
+    /*    snapshotFlow { commentsSheetState.currentValue }
+          .distinctUntilChanged()
+          .collect {
+            dispatch(v("stream_panel_fsm", v("comments_sheet", it)))
+          }*/
   }
   val coroutineScope = rememberCoroutineScope()
   val sheetData = sheetUiState.data
+
   BottomSheetScaffold(
     sheetContent = {
       RegFx("half_expand_comments_sheet", coroutineScope, sheetUiState) {
-        coroutineScope.launch { commentsSheetState.partialExpand() }
+        coroutineScope.launch {
+          commentsSheetState.partialExpand()
+          // FIXME: this event is a workaround to inform the FSM that the sheet
+          //  partially expanded until material3 fixes the bug of bottom sheet
+          //  state changing from Hidden to PartiallyExpanded when passed to
+          //  the scaffold.
+          dispatch(v("stream_panel_fsm", "half_expand_comments_sheet"))
+        }
       }
       RegFx("expand_comments_sheet", coroutineScope, sheetUiState) {
         coroutineScope.launch { commentsSheetState.expand() }

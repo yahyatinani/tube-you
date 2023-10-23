@@ -427,9 +427,14 @@ fun RegWatchSubs() {
   }
 
   val defaultSheetPeekHeight = defaultSheetPeekHeight()
+
+  // FIXME: SheetState changes from Hidden to PartiallyExpanded after it's
+  //  created due to some bug in material3. To prevent the sheet from opening
+  //  initially we set :sheet_peak_height to 0.dp when the sheet is supposedly
+  //  Hidden.
   val initSheetState = UIState(
     m(
-      ":sheet_peak_height" to defaultSheetPeekHeight,
+      ":sheet_peak_height" to 0.dp,
       ":sheet_content_height" to 0.dp
     )
   )
@@ -440,10 +445,6 @@ fun RegWatchSubs() {
     v("description_sheet_fsm_state"),
     v(":stream_fsm")
   ) { (descSheetState, streamFsm), prev, (_, cfg, density) ->
-    val (w, h) = with(density as Density) {
-      (cfg as Configuration).screenWidthDp.dp.toPx() to
-        cfg.screenHeightDp.dp.toPx()
-    }
     if (descSheetState == SheetValue.Hidden) {
       return@regSub UIState(
         m(
@@ -457,6 +458,10 @@ fun RegWatchSubs() {
       )
     }
 
+    val (w, h) = with(density as Density) {
+      (cfg as Configuration).screenWidthDp.dp.toPx() to
+        cfg.screenHeightDp.dp.toPx()
+    }
     val stream = get<StreamData>(streamFsm, "stream_data")!!
     val sheetPeekHeight = with(density) { (h - (w / ratio(stream))).toDp() }
     UIState(
@@ -494,6 +499,7 @@ fun RegWatchSubs() {
   ) { (streamData), currentValue, _ ->
     val commentsListState =
       get<ListState>(streamData, ":comments_list_fsm_state")
+
     when (commentsListState as ListState) {
       ListState.LOADING -> ListState.LOADING
       ListState.REFRESHING, ListState.APPENDING -> currentValue

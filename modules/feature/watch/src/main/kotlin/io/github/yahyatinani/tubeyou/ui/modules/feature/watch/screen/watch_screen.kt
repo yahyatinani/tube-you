@@ -31,8 +31,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -77,14 +74,12 @@ import io.github.yahyatinani.tubeyou.core.viewmodels.PlaylistVm
 import io.github.yahyatinani.tubeyou.core.viewmodels.UIState
 import io.github.yahyatinani.tubeyou.core.viewmodels.VideoVm
 import io.github.yahyatinani.tubeyou.modules.feature.watch.R
+import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.ListState
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fsm.StreamState
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.fx.RegPlayerSheetEffects
 import io.github.yahyatinani.tubeyou.ui.modules.feature.watch.subs.Stream
 import io.github.yahyatinani.y.core.get
 import io.github.yahyatinani.y.core.v
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -269,23 +264,6 @@ fun lerp(
   return d.coerceIn(minOf(start, end), maxOf(start, end))
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SheetHiddenStateSyncEffect(
-  sheetState: SheetState,
-  onHiddenState: () -> Unit
-) {
-  LaunchedEffect(sheetState) {
-    snapshotFlow { sheetState.currentValue }
-      .map { it == Hidden }
-      .distinctUntilChanged()
-      .filter { it }
-      .collect {
-        onHiddenState()
-      }
-  }
-}
-
 @Composable
 fun NowPlayingBottomSheet(
   modifier: Modifier = Modifier,
@@ -309,10 +287,8 @@ fun NowPlayingBottomSheet(
         dispatch(v("stream_panel_fsm", "toggle_desc_expansion"))
       }
     ) {
-      val commentsPanelState = watch<UIState?>(query = v("comments_panel"))
-
       CommentsBottomSheetScaffold(
-        commentsListState = commentsPanelState,
+        commentsListState = watch(query = v("comments_panel")),
         sheetUiState = watch(
           v("comments_sheet_state", LocalConfiguration.current, density)
         ),
@@ -685,10 +661,9 @@ fun NowPlayingBottomSheet(
               item { Spacer(modifier = Modifier.height(16.dp)) }
 
               item {
-                if (
-                  commentsPanelState != null &&
-                  get(commentsPanelState.data, "is_loading", false)!!
-                ) {
+                val commentsSection = watch<Any>(query = v(":comments_section"))
+
+                if (commentsSection == ListState.LOADING) {
                   Surface(
                     modifier = Modifier
                       .testTag("watch:comments_section_loader")
@@ -702,9 +677,6 @@ fun NowPlayingBottomSheet(
 
                   return@item
                 }
-
-                val commentsSection =
-                  watch<Any>(query = v(":comments_section"))
 
                 CommentsSection(
                   modifier = Modifier

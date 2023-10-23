@@ -50,6 +50,12 @@ val commentsSheetMachine = m(
       actions to ::partExpandCommentsSheet
     )
   ),
+  "Expanding" to m(
+    "half_expand_comments_sheet" to m(
+      target to SheetValue.PartiallyExpanded,
+      actions to ::partExpandCommentsSheet
+    )
+  ),
   SheetValue.PartiallyExpanded to m(
     "toggle_comments_expansion" to m(
       target to SheetValue.Expanded,
@@ -63,9 +69,6 @@ val commentsSheetMachine = m(
     )
   ),
   fsm.ALL to m(
-    v("comments_sheet", SheetValue.PartiallyExpanded) to m(
-      target to SheetValue.PartiallyExpanded
-    ),
     "close_comments_sheet" to m(
       target to SheetValue.Hidden,
       actions to ::closeCommentsSheet

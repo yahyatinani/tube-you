@@ -9,6 +9,7 @@ on:
       - '*.yml'
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:

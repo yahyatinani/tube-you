@@ -1,6 +1,6 @@
 # TubeYou
 
-[![Build](https://github.com/yahyatinani/tube-you/actions/workflows/main.yml/badge.svg)](https://github.com/yahyatinani/tube-you/actions/workflows/main.yml)
+<!-- [![Build](https://github.com/yahyatinani/tube-you/actions/workflows/main.yml/badge.svg)](https://github.com/yahyatinani/tube-you/actions/workflows/main.yml) -->
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.10-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack%20Compose-BOM%202023.09-green.svg?logo=android)](https://developer.android.com/jetpack/compose)
 [![Media3](https://img.shields.io/badge/AndroidX%20Media3-1.1.1-red.svg)](https://developer.android.com/media/media3)
